@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>業務ボード｜BUYMO（本部／加盟店）</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">業務ボード</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <span class="portal-role" id="roleLabel">本部</span>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <img class="page-mascot" src="assets/img/buymo/31_スケジュール管理ポーズ.png" alt="" aria-hidden="true">
+    <h1>案件ボード（看板）</h1>
+    <p class="portal-sub">査定の申し込みは自動で「新規受付」に入ります。カードをドラッグしてステージを移動できます（GAS接続時はSlackにもステージ変更を通知）。</p>
+
+    <!-- 営業サマリー -->
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">案件総数</div><div class="kpi-num" id="sumTotal">0件</div></div>
+      <div class="kpi"><div class="kpi-label">商談成立（契約以降）</div><div class="kpi-num" id="sumWon">0件</div></div>
+      <div class="kpi accent"><div class="kpi-label">想定売上（契約以降）</div><div class="kpi-num" id="sumAmount">¥0</div></div>
+      <div class="kpi"><div class="kpi-label">完了</div><div class="kpi-num" id="sumDone">0件</div></div>
+    </div>
+
+    <!-- 新規案件 -->
+    <div class="add-bar">
+      <form id="addForm">
+        <input class="ac-name" id="acName" type="text" placeholder="お名前（必須）" />
+        <input id="acTel" type="text" placeholder="連絡先" />
+        <input id="acGenre" type="text" placeholder="ジャンル（例：廃車）" />
+        <input id="acAssignee" type="text" placeholder="担当（加盟店）" />
+        <button type="submit" class="btn btn-primary">案件を追加</button>
+      </form>
+    </div>
+
+    <!-- カンバン -->
+    <div class="kanban" id="board" aria-label="案件カンバン"></div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script>HQ.nav('board');</script>
+<script src="assets/js/notices.js"></script>
+<script src="assets/js/board.js" defer></script>
+</body>
+</html>

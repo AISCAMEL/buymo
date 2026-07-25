@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>アカデミー管理｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<style>
+.hqa-section{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:22px 24px;margin-bottom:20px;}
+.hqa-section h2{font-size:16px;font-weight:900;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.hqa-course{border:1px solid #e8ecf2;border-radius:12px;margin-bottom:14px;overflow:hidden;}
+.hqa-course-head{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f6f8fc;cursor:pointer;user-select:none;}
+.hqa-course-ico{font-size:22px;}
+.hqa-course-title{font-weight:900;font-size:15px;flex:1;}
+.hqa-course-meta{font-size:12px;color:#888;}
+.hqa-course-toggle{font-size:18px;color:#aaa;transition:transform .2s;}
+.hqa-course.open .hqa-course-toggle{transform:rotate(180deg);}
+.hqa-course-body{display:none;padding:14px 16px;border-top:1px solid #eef1f6;}
+.hqa-course.open .hqa-course-body{display:block;}
+.hqa-lesson{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f2f6;}
+.hqa-lesson:last-child{border-bottom:none;}
+.hqa-lesson-num{background:#eef1f6;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#555;flex:0 0 auto;}
+.hqa-lesson-info{min-width:0;}
+.hqa-lesson-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.hqa-video-row{display:flex;gap:8px;align-items:center;}
+.hqa-video-row input{flex:1;height:36px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;}
+.hqa-video-row input:focus{outline:none;border-color:var(--orange);}
+.hqa-video-row input.has-url{border-color:#22a34a;background:#f0faf4;}
+.hqa-btn-save{height:36px;padding:0 14px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;}
+.hqa-btn-save:hover{filter:brightness(1.1);}
+.hqa-btn-save.saved{background:#22a34a;}
+.hqa-add-lesson{margin-top:12px;padding-top:12px;border-top:1px dashed #ddd;}
+.hqa-add-lesson input{height:38px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;margin-right:8px;margin-bottom:6px;}
+.hqa-add-lesson input:focus{outline:none;border-color:var(--orange);}
+.hqa-btn-add{height:38px;padding:0 16px;border:none;border-radius:8px;background:var(--orange);color:#fff;font-weight:700;font-size:13px;cursor:pointer;}
+.hqa-custom-badge{background:#FFF1E6;color:var(--orange);font-size:11px;font-weight:900;border-radius:30px;padding:2px 9px;}
+.hqa-btn-del{height:28px;padding:0 10px;border:1px solid #eee;border-radius:6px;background:#fff;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;}
+.hqa-btn-del:hover{background:#FDECEC;}
+.hqa-new-course{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.hqa-new-course input,.hqa-new-course textarea{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;font-family:inherit;}
+.hqa-new-course textarea{height:70px;padding:10px 12px;resize:vertical;}
+.hqa-new-course .full{grid-column:1/-1;}
+.hqa-save-bar{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:14px 20px;display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.hqa-save-bar p{flex:1;font-size:14px;color:#666;}
+.hqa-stats{display:flex;gap:20px;margin-bottom:20px;}
+.hqa-stat{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:14px 20px;flex:1;text-align:center;}
+.hqa-stat .num{font-size:26px;font-weight:900;color:var(--navy);}
+.hqa-stat .lbl{font-size:12px;color:#888;margin-top:2px;}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>アカデミー管理</h1>
+      <img class="page-mascot" src="assets/img/buymo/35_指差し募集ポーズ.png" alt="" aria-hidden="true">
+    </div>
+    <p class="portal-sub">動画URLの設定、レッスン・コースの追加が本部ダッシュボードからできます。設定はリアルタイムで加盟店のアカデミーに反映されます。</p>
+
+    <div class="hqa-stats" id="hqaStats"></div>
+
+    <!-- 動画・レッスン管理 -->
+    <div class="hqa-section">
+      <h2>📹 動画URLとレッスン管理</h2>
+      <p style="font-size:13px;color:#888;margin-bottom:16px;">YouTubeの埋め込みURL（<code>https://www.youtube.com/embed/XXXXXXXXX</code>）を入力して保存すると、加盟店の受講画面に動画が表示されます。</p>
+      <div id="courseList"></div>
+    </div>
+
+    <!-- コース追加 -->
+    <div class="hqa-section">
+      <h2>➕ 新しいコースを追加</h2>
+      <div class="hqa-new-course" id="newCourseForm">
+        <input id="ncIcon" type="text" placeholder="アイコン（例：📖）" maxlength="4" />
+        <input id="ncId" type="text" placeholder="コースID（英数字、例：ops2）" />
+        <input id="ncTitle" type="text" class="full" placeholder="コースタイトル（例：〇〇業務マニュアル）" />
+        <textarea id="ncDesc" class="full" placeholder="説明文"></textarea>
+        <div class="full" style="display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-primary hqa-btn-add" id="btnAddCourse">コースを追加</button>
+          <span style="font-size:13px;color:#888;">追加後にレッスンを編集できます</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/academy.js"></script>
+<script src="assets/js/hq-common.js"></script>
+<script src="assets/js/hq-academy.js" defer></script>
+</body>
+</html>

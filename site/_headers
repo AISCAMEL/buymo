@@ -1,0 +1,24 @@
+# Netlify / Cloudflare Pages 共通ヘッダー設定（publish ディレクトリ＝この site/ の直下）
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+# 静的アセットは1日キャッシュ（ファイル名にハッシュを付けないため長すぎない値に）
+/assets/*
+  Cache-Control: public, max-age=86400
+
+# 業務系（本部・加盟店・会員）は検索除外・キャッシュ無効化
+/hq*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+/partner-*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+/member.html
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+/portal-login.html
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store

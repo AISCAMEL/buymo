@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>コラム投稿｜BUYMO本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<style>
+/* ---- hq-column styles ---- */
+.col-editor-wrap{max-width:900px;margin:0 auto;padding:32px 0 80px;}
+
+.col-tabs{display:flex;gap:4px;margin-bottom:28px;border-bottom:2px solid var(--border);}
+.col-tab{
+  padding:10px 24px;font-size:14px;font-weight:700;
+  background:none;border:none;cursor:pointer;color:var(--text-sub);
+  font-family:var(--f-body);border-bottom:2px solid transparent;margin-bottom:-2px;
+  transition:color .15s,border-color .15s;
+}
+.col-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.col-panel{display:none;}
+.col-panel.active{display:block;}
+
+/* form */
+.cf-field{margin-bottom:20px;}
+.cf-label{
+  display:block;font-size:13px;font-weight:700;margin-bottom:6px;
+  color:var(--text);
+}
+.cf-label .req{color:#e53e3e;margin-left:4px;}
+.cf-input,.cf-select,.cf-textarea{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  font-size:15px;font-family:var(--f-body);color:var(--text);
+  background:var(--white);transition:border-color .18s;
+  outline:none;
+}
+.cf-input:focus,.cf-select:focus,.cf-textarea:focus{border-color:var(--green);}
+.cf-textarea{min-height:320px;resize:vertical;line-height:1.75;}
+
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.cf-row{grid-template-columns:1fr;}}
+
+/* dup warning */
+.dup-box{
+  display:none;
+  background:#fffbe6;border:1.5px solid #f6c000;border-radius:var(--radius-sm);
+  padding:14px 18px;margin-top:10px;
+}
+.dup-box.show{display:block;}
+.dup-title{font-weight:800;font-size:14px;margin-bottom:8px;color:#7d5a00;}
+.dup-item{font-size:13px;margin:4px 0;color:#555;}
+.dup-force{
+  margin-top:10px;display:flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--text-sub);
+}
+.dup-force label{cursor:pointer;user-select:none;}
+
+/* submit area */
+.col-submit-row{display:flex;align-items:center;gap:16px;margin-top:32px;}
+.col-submit-row .btn{min-width:160px;}
+.col-result{
+  display:none;padding:12px 18px;border-radius:var(--radius-sm);font-weight:700;font-size:14px;
+}
+.col-result.ok{background:#d1fae5;color:var(--green-dark);display:block;}
+.col-result.err{background:#fee2e2;color:#9b1c1c;display:block;}
+
+/* preview */
+.preview-wrap{
+  background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);
+  padding:36px;min-height:400px;
+}
+.preview-meta{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.preview-cat{background:var(--green-pale);color:var(--green-dark);font-size:11px;font-weight:800;padding:3px 12px;border-radius:100px;}
+.preview-date{font-size:12px;color:var(--text-sub);}
+.preview-title{font-size:clamp(20px,3vw,30px);font-weight:900;line-height:1.45;margin-bottom:16px;letter-spacing:-.02em;}
+.preview-body{font-size:15px;line-height:1.9;color:var(--text);}
+.preview-body h2{font-size:20px;font-weight:800;margin:28px 0 12px;padding-left:12px;border-left:4px solid var(--green);}
+.preview-body h3{font-size:17px;font-weight:700;margin:22px 0 8px;color:var(--green-dark);}
+.preview-body p{margin:0 0 16px;}
+.preview-body ul,.preview-body ol{list-style:initial;padding-left:22px;margin:0 0 16px;}
+.preview-body li{margin-bottom:6px;}
+
+/* recent list */
+.rcol-list{list-style:none;padding:0;}
+.rcol-item{
+  display:flex;align-items:center;gap:12px;padding:14px 0;
+  border-bottom:1px solid var(--border);
+}
+.rcol-cat{background:var(--green-pale);color:var(--green-dark);font-size:11px;font-weight:800;padding:3px 10px;border-radius:100px;white-space:nowrap;}
+.rcol-title{flex:1;font-weight:700;font-size:14px;}
+.rcol-date{font-size:12px;color:var(--text-sub);white-space:nowrap;}
+.rcol-link{font-size:12px;color:var(--green);font-weight:700;}
+
+.rcol-loading{color:var(--text-sub);font-size:14px;padding:20px 0;}
+
+/* char count */
+.cf-hint{font-size:12px;color:var(--text-sub);margin-top:4px;}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">コラム管理</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <span class="portal-role" id="roleLabel">本部</span>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="col-editor-wrap">
+      <img class="page-mascot" src="assets/img/buymo/39_書類確認メモポーズ.png" alt="" aria-hidden="true">
+      <h1 style="margin-bottom:8px;">コラム投稿・管理</h1>
+      <p style="color:var(--text-sub);font-size:14px;margin-bottom:32px;">同タイトルの重複は自動検出。公開すると <a href="column/" target="_blank" style="color:var(--green);">column/</a> に即時反映されます。</p>
+
+      <!-- タブ -->
+      <div class="col-tabs" role="tablist">
+        <button class="col-tab active" role="tab" aria-selected="true"  aria-controls="panelWrite"   id="tabWrite">✏️ 新規投稿</button>
+        <button class="col-tab"        role="tab" aria-selected="false" aria-controls="panelPreview" id="tabPreview">👁 プレビュー</button>
+        <button class="col-tab"        role="tab" aria-selected="false" aria-controls="panelList"    id="tabList">📋 投稿一覧</button>
+      </div>
+
+      <!-- ─── 新規投稿パネル ─── -->
+      <div id="panelWrite" class="col-panel active" role="tabpanel" aria-labelledby="tabWrite">
+        <form id="colForm" novalidate>
+          <!-- タイトル -->
+          <div class="cf-field">
+            <label class="cf-label" for="cfTitle">タイトル<span class="req">*</span></label>
+            <input class="cf-input" id="cfTitle" type="text" placeholder="例：プリウスを高く売る5つのコツ" autocomplete="off" required />
+            <p class="cf-hint" id="titleHint" aria-live="polite"></p>
+            <!-- 重複警告 -->
+            <div class="dup-box" id="dupBox" role="alert" aria-live="assertive">
+              <div class="dup-title">⚠️ 類似タイトルが存在します</div>
+              <ul id="dupList"></ul>
+              <div class="dup-force">
+                <input type="checkbox" id="forceSave" />
+                <label for="forceSave">重複を認識の上、強制的に投稿する</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="cf-row">
+            <!-- カテゴリ -->
+            <div class="cf-field">
+              <label class="cf-label" for="cfCat">カテゴリ</label>
+              <select class="cf-select" id="cfCat">
+                <option value="売り方">売り方</option>
+                <option value="査定">査定</option>
+                <option value="廃車">廃車</option>
+                <option value="手続き">手続き</option>
+                <option value="ジャンル">ジャンル</option>
+                <option value="相場">相場</option>
+                <option value="お役立ち" selected>お役立ち</option>
+                <option value="未分類">未分類</option>
+              </select>
+            </div>
+            <!-- 投稿者 -->
+            <div class="cf-field">
+              <label class="cf-label" for="cfAuthor">投稿者</label>
+              <input class="cf-input" id="cfAuthor" type="text" placeholder="例：BUYMO編集部" value="BUYMO編集部" />
+            </div>
+          </div>
+
+          <!-- タグ -->
+          <div class="cf-field">
+            <label class="cf-label" for="cfTags">タグ（カンマ区切り）</label>
+            <input class="cf-input" id="cfTags" type="text" placeholder="例：プリウス,高額査定,売り方" />
+          </div>
+
+          <!-- 本文 -->
+          <div class="cf-field">
+            <label class="cf-label" for="cfBody">本文<span class="req">*</span></label>
+            <p class="cf-hint" style="margin-bottom:6px;">HTML または 平文で入力。<code>&lt;h2&gt;</code>見出し、<code>&lt;p&gt;</code>段落、<code>&lt;ul&gt;&lt;li&gt;</code>箇条書き が使えます。</p>
+            <textarea class="cf-textarea" id="cfBody" placeholder="ここに本文を入力してください…" required></textarea>
+            <p class="cf-hint" id="bodyCount">0 文字</p>
+          </div>
+
+          <!-- 公開ステータス -->
+          <div class="cf-field">
+            <label class="cf-label">公開設定</label>
+            <div style="display:flex;gap:16px;">
+              <label style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px;">
+                <input type="radio" name="cfStatus" value="公開" checked /> 公開
+              </label>
+              <label style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px;">
+                <input type="radio" name="cfStatus" value="下書き" /> 下書き
+              </label>
+            </div>
+          </div>
+
+          <!-- 送信 -->
+          <div class="col-submit-row">
+            <button type="submit" class="btn btn-primary" id="submitBtn">投稿する</button>
+            <button type="button" class="btn btn-light" id="previewBtn">プレビュー確認</button>
+          </div>
+          <div class="col-result" id="colResult" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+
+      <!-- ─── プレビューパネル ─── -->
+      <div id="panelPreview" class="col-panel" role="tabpanel" aria-labelledby="tabPreview">
+        <div class="preview-wrap" id="previewWrap">
+          <p style="color:var(--text-sub);font-size:14px;">「プレビュー確認」ボタンを押すか、プレビュータブをクリックすると表示されます。</p>
+        </div>
+      </div>
+
+      <!-- ─── 投稿一覧パネル ─── -->
+      <div id="panelList" class="col-panel" role="tabpanel" aria-labelledby="tabList">
+        <p class="rcol-loading" id="listLoading">読み込み中…</p>
+        <ul class="rcol-list" id="rcolList"></ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script>HQ.nav('column');</script>
+
+<script>
+(function () {
+  'use strict';
+  var GAS = 'https://script.google.com/macros/s/AKfycbw0Ao9-I-GUizO--TIU2AeJCIEGoW8Ot9DZXErD2oJk8fg_1sNj8FRNYkoAvtm6CwMc/exec';
+  var dupTimer = null;
+  var isDup    = false;
+
+  // ── Tabs ──
+  var tabs   = document.querySelectorAll('.col-tab');
+  var panels = document.querySelectorAll('.col-panel');
+  function showTab(idx) {
+    tabs.forEach(function (t, i) {
+      t.classList.toggle('active', i === idx);
+      t.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+    });
+    panels.forEach(function (p, i) { p.classList.toggle('active', i === idx); });
+    if (idx === 2) loadList();
+  }
+  tabs.forEach(function (t, i) { t.addEventListener('click', function () { showTab(i); }); });
+
+  document.getElementById('previewBtn').addEventListener('click', function () {
+    buildPreview(); showTab(1);
+  });
+
+  // ── Title dup check ──
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  document.getElementById('cfTitle').addEventListener('input', function () {
+    clearTimeout(dupTimer);
+    var title = this.value.trim();
+    var hint  = document.getElementById('titleHint');
+    if (!title) { hideDup(); hint.textContent = ''; return; }
+    hint.textContent = '確認中…';
+    dupTimer = setTimeout(function () { checkDup(title, hint); }, 600);
+  });
+
+  function hideDup() {
+    var box = document.getElementById('dupBox');
+    box.classList.remove('show');
+    isDup = false;
+  }
+
+  function checkDup(title, hint) {
+    fetch(GAS + '?action=check&title=' + encodeURIComponent(title))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        hint.textContent = '';
+        var box  = document.getElementById('dupBox');
+        var list = document.getElementById('dupList');
+        if (d.isDuplicate && d.similar && d.similar.length > 0) {
+          isDup = true;
+          list.innerHTML = d.similar.map(function (s) {
+            return '<li class="dup-item">「' + esc(s.title) + '」（類似度 ' + s.similarity + '%、投稿日：' + esc(s.date) + '）' +
+              ' <a href="column/detail.html?id=' + encodeURIComponent(s.id) + '" target="_blank" style="color:var(--green);font-size:12px;">確認 →</a></li>';
+          }).join('');
+          box.classList.add('show');
+        } else {
+          isDup = false;
+          box.classList.remove('show');
+          hint.textContent = '✅ このタイトルは重複していません';
+          hint.style.color = 'var(--green)';
+          setTimeout(function () { hint.textContent = ''; hint.style.color = ''; }, 3000);
+        }
+      })
+      .catch(function () { hint.textContent = ''; });
+  }
+
+  // ── Body char count ──
+  document.getElementById('cfBody').addEventListener('input', function () {
+    var plain = this.value.replace(/<[^>]+>/g, '').length;
+    document.getElementById('bodyCount').textContent = this.value.length + ' 文字';
+  });
+
+  // ── Preview ──
+  function buildPreview() {
+    var title  = document.getElementById('cfTitle').value.trim() || '（タイトル未入力）';
+    var cat    = document.getElementById('cfCat').value;
+    var author = document.getElementById('cfAuthor').value.trim();
+    var body   = document.getElementById('cfBody').value;
+    var today  = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'2-digit', day:'2-digit' }).replace(/\//g, '/');
+
+    document.getElementById('previewWrap').innerHTML =
+      '<div class="preview-meta">' +
+        '<span class="preview-cat">' + esc(cat) + '</span>' +
+        '<span class="preview-date">' + today + '</span>' +
+        (author ? '<span style="font-size:12px;color:var(--text-sub);">by ' + esc(author) + '</span>' : '') +
+      '</div>' +
+      '<h2 class="preview-title">' + esc(title) + '</h2>' +
+      '<hr style="border:none;border-top:2px solid var(--green-pale);margin-bottom:28px;" />' +
+      '<div class="preview-body">' + body + '</div>';
+  }
+
+  // ── Submit ──
+  document.getElementById('colForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title  = document.getElementById('cfTitle').value.trim();
+    var body   = document.getElementById('cfBody').value.trim();
+    var status = document.querySelector('input[name="cfStatus"]:checked').value;
+    var force  = document.getElementById('forceSave').checked;
+    var result = document.getElementById('colResult');
+
+    if (!title) { alert('タイトルを入力してください'); return; }
+    if (!body)  { alert('本文を入力してください'); return; }
+    if (isDup && !force) {
+      alert('類似タイトルが存在します。「強制的に投稿する」にチェックを入れてから送信してください。');
+      return;
+    }
+
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '投稿中…';
+    result.className = 'col-result';
+    result.style.display = 'none';
+
+    var tags = document.getElementById('cfTags').value
+      .split(',').map(function(t){ return t.trim(); }).filter(Boolean);
+
+    var payload = {
+      type:      'column',
+      title:     title,
+      category:  document.getElementById('cfCat').value,
+      author:    document.getElementById('cfAuthor').value.trim() || 'スタッフ',
+      tags:      tags,
+      body:      body,
+      status:    status,
+      forceSave: force
+    };
+
+    fetch(GAS, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body:    JSON.stringify(payload)
+    })
+    .then(function () {
+      btn.disabled = false;
+      btn.textContent = '投稿する';
+      result.textContent = '✅ 投稿が完了しました！ しばらくすると公開ページに反映されます。';
+      result.className = 'col-result ok';
+      document.getElementById('colForm').reset();
+      document.getElementById('forceSave').checked = false;
+      document.getElementById('dupBox').classList.remove('show');
+      isDup = false;
+      document.getElementById('bodyCount').textContent = '0 文字';
+    })
+    .catch(function (err) {
+      btn.disabled = false;
+      btn.textContent = '投稿する';
+      result.textContent = '❌ 投稿に失敗しました: ' + err.message;
+      result.className = 'col-result err';
+    });
+  });
+
+  // ── List ──
+  var listLoaded = false;
+  function loadList() {
+    if (listLoaded) return;
+    listLoaded = true;
+    fetch(GAS + '?action=list&limit=50&page=1')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        document.getElementById('listLoading').style.display = 'none';
+        var list = document.getElementById('rcolList');
+        var items = d.items || [];
+        if (!items.length) {
+          list.innerHTML = '<li style="color:var(--text-sub);font-size:14px;padding:20px 0;">まだ投稿がありません。</li>';
+          return;
+        }
+        list.innerHTML = items.map(function (c) {
+          return '<li class="rcol-item">' +
+            '<span class="rcol-cat">' + esc(c.category || '未分類') + '</span>' +
+            '<span class="rcol-title">' + esc(c.title) + '</span>' +
+            '<span class="rcol-date">' + esc(c.date) + '</span>' +
+            '<a class="rcol-link" href="column/detail.html?id=' + encodeURIComponent(c.slug || c.id) + '" target="_blank">公開ページ →</a>' +
+            '</li>';
+        }).join('');
+      })
+      .catch(function () {
+        document.getElementById('listLoading').textContent = '一覧の取得に失敗しました。';
+      });
+  }
+})();
+</script>
+</body>
+</html>

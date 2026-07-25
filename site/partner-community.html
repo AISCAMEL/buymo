@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>加盟店コミュニティ｜BUYMO</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="partner-academy.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">加盟店</span>
+    <nav class="portal-nav">
+      <a href="hq.html?role=partner">案件ボード</a>
+      <a href="partner-academy.html">アカデミー</a>
+      <a href="partner-scripts.html">スクリプト</a>
+      <a href="partner-community.html" aria-current="page">コミュニティ</a>
+    </nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<style>
+  .cm-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .cm-filter button{background:#fff;border:1px solid #ddd;border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;color:#555;transition:all .15s;}
+  .cm-filter button.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .cm-post{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:20px;margin-bottom:24px;}
+  .cm-post input{width:100%;height:44px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:15px;font-family:inherit;margin-bottom:10px;}
+  .cm-post input:focus,.cm-post textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,.15);}
+  .cm-post textarea{width:100%;border:1px solid #ddd;border-radius:8px;padding:10px 12px;font-size:15px;font-family:inherit;resize:vertical;margin-bottom:10px;}
+  .cm-post-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .cm-post-meta label{font-size:13px;font-weight:700;color:#555;}
+  .cm-post-meta select{height:36px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;}
+  .cm-list{display:flex;flex-direction:column;gap:14px;}
+  .cm-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:18px 20px;}
+  .cm-card.cm-hq{border-left:4px solid var(--navy);}
+  .cm-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .cm-who{font-weight:700;font-size:14px;color:var(--navy);}
+  .cm-time{font-size:12px;color:#aaa;margin-left:auto;}
+  .cm-tag{font-size:11px;font-weight:900;border-radius:10px;padding:2px 8px;}
+  .cm-tag-査定{background:#FFF1E6;color:var(--orange);}
+  .cm-tag-営業{background:#EEF3FF;color:#1E3A8A;}
+  .cm-tag-手続き{background:#E6FFF0;color:#2e9e44;}
+  .cm-tag-集客{background:#F5E6FF;color:#7c3aed;}
+  .cm-tag-本部{background:var(--navy);color:#fff;}
+  .cm-tag-その他{background:#f0f0f0;color:#666;}
+  .cm-card h3{font-size:16px;font-weight:900;margin-bottom:6px;}
+  .cm-card p{font-size:14px;color:#555;line-height:1.7;}
+  .cm-like{background:none;border:1px solid #eee;border-radius:20px;padding:5px 14px;font-size:13px;cursor:pointer;margin-top:12px;transition:all .15s;}
+  .cm-like:hover{background:#FFF1E6;border-color:var(--orange);}
+  .cm-empty{text-align:center;color:#aaa;padding:40px 0;font-size:14px;}
+</style>
+
+<main class="portal-main">
+  <div class="partner-banner" aria-hidden="true" style="width:100%;overflow:hidden;line-height:0;margin-top:-24px;margin-bottom:24px;">
+    <svg viewBox="0 0 1200 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;max-height:160px;">
+      <defs>
+        <linearGradient id="cm-bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0e1b33"/>
+          <stop offset="55%" stop-color="#1a2840"/>
+          <stop offset="100%" stop-color="#a03510"/>
+        </linearGradient>
+        <radialGradient id="cm-glow" cx="25%" cy="60%" r="38%">
+          <stop offset="0%" stop-color="#f2591f" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#0e1b33" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="1200" height="160" fill="url(#cm-bg)"/>
+      <rect width="1200" height="160" fill="url(#cm-glow)"/>
+      <!-- diagonal lines -->
+      <line x1="1200" y1="160" x2="980" y2="0" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="1120" y1="160" x2="900" y2="0" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+      <!-- network nodes -->
+      <circle cx="600" cy="80" r="14" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="2"/>
+      <circle cx="600" cy="80" r="5" fill="rgba(255,255,255,0.22)"/>
+      <circle cx="480" cy="44" r="10" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1.5"/>
+      <circle cx="480" cy="44" r="4" fill="rgba(255,255,255,0.18)"/>
+      <circle cx="720" cy="48" r="10" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1.5"/>
+      <circle cx="720" cy="48" r="4" fill="rgba(255,255,255,0.18)"/>
+      <circle cx="440" cy="116" r="9" fill="none" stroke="rgba(255,200,150,0.14)" stroke-width="1.5"/>
+      <circle cx="440" cy="116" r="3.5" fill="rgba(255,200,150,0.22)"/>
+      <circle cx="760" cy="118" r="9" fill="none" stroke="rgba(255,200,150,0.14)" stroke-width="1.5"/>
+      <circle cx="760" cy="118" r="3.5" fill="rgba(255,200,150,0.22)"/>
+      <circle cx="560" cy="136" r="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <circle cx="640" cy="130" r="8" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <!-- network edges -->
+      <line x1="600" y1="80" x2="480" y2="44" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <line x1="600" y1="80" x2="720" y2="48" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+      <line x1="600" y1="80" x2="440" y2="116" stroke="rgba(255,200,150,0.08)" stroke-width="1.5"/>
+      <line x1="600" y1="80" x2="760" y2="118" stroke="rgba(255,200,150,0.08)" stroke-width="1.5"/>
+      <line x1="480" y1="44" x2="440" y2="116" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="720" y1="48" x2="760" y2="118" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="600" y1="80" x2="560" y2="136" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <line x1="600" y1="80" x2="640" y2="130" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+      <!-- small person icons (left) -->
+      <circle cx="100" cy="55" r="12" fill="rgba(255,255,255,0.07)"/>
+      <rect x="85" y="72" width="30" height="22" rx="8" fill="rgba(255,255,255,0.07)"/>
+      <circle cx="155" cy="65" r="10" fill="rgba(255,200,150,0.10)"/>
+      <rect x="142" y="80" width="26" height="20" rx="7" fill="rgba(255,200,150,0.10)"/>
+      <!-- dot grid (right) -->
+      <g fill="rgba(255,255,255,0.09)">
+        <circle cx="1060" cy="36" r="2"/> <circle cx="1090" cy="36" r="2"/> <circle cx="1120" cy="36" r="2"/> <circle cx="1150" cy="36" r="2"/>
+        <circle cx="1060" cy="62" r="2"/> <circle cx="1090" cy="62" r="2"/> <circle cx="1120" cy="62" r="2"/> <circle cx="1150" cy="62" r="2"/>
+        <circle cx="1060" cy="88" r="2"/> <circle cx="1090" cy="88" r="2"/> <circle cx="1120" cy="88" r="2"/> <circle cx="1150" cy="88" r="2"/>
+      </g>
+      <!-- wave bottom -->
+      <path d="M 0 140 Q 300 125 600 140 Q 900 155 1200 140 L 1200 160 L 0 160 Z" fill="rgba(255,255,255,0.035)"/>
+    </svg>
+  </div>
+  <div class="container">
+    <img class="page-mascot" src="assets/img/buymo/23_カジュアル寄りかかりポーズ.png" alt="" aria-hidden="true">
+    <h1>加盟店コミュニティ</h1>
+    <p class="portal-sub">加盟店どうしのQ&amp;A・情報共有の場です。成功事例や困りごとを気軽に投稿してください。</p>
+
+    <div class="cm-post">
+      <input id="cmTitle" placeholder="タイトル（例：事故車の出品で気をつける点）" />
+      <div class="cm-post-meta">
+        <label for="cmTag">カテゴリ：</label>
+        <select id="cmTag">
+          <option value="査定">査定</option>
+          <option value="営業">営業</option>
+          <option value="手続き">手続き</option>
+          <option value="集客">集客</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <textarea id="cmBody" rows="3" placeholder="本文を入力…"></textarea>
+      <button class="btn btn-primary" id="cmPost">投稿する</button>
+    </div>
+
+    <div class="cm-filter">
+      <button class="active" data-tag="">すべて</button>
+      <button data-tag="本部">📢 本部</button>
+      <button data-tag="査定">査定</button>
+      <button data-tag="営業">営業</button>
+      <button data-tag="手続き">手続き</button>
+      <button data-tag="集客">集客</button>
+      <button data-tag="その他">その他</button>
+    </div>
+
+    <div id="cmList" class="cm-list"></div>
+  </div>
+</main>
+
+<script src="assets/js/auth.js"></script>
+<script>
+  var CKEY='buymo_community_v2';
+  function load(){ try{return JSON.parse(localStorage.getItem(CKEY))||seed();}catch(e){return seed();} }
+  function save(a){ try{localStorage.setItem(CKEY,JSON.stringify(a));}catch(e){} }
+  function who(){ var s=(window.AUTH&&AUTH.get())?AUTH.get():null; return s?(s.name||'加盟店'):'加盟店'; }
+  function nowStr(){ var d=new Date(); function p(n){return('0'+n).slice(-2);} return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); }
+  function seed(){ return [
+    {who:'BUYMO本部',tag:'本部',t:'コミュニティへようこそ！',b:'加盟店の皆さん、コミュニティをご利用いただきありがとうございます。\n成功事例・困りごと・査定のコツなど、なんでも気軽に投稿してください。本部からもノウハウを随時シェアしていきます。質問は直接メッセージでも受け付けています（担当：吉田）。',time:'2026/06/01 09:00',likes:12},
+    {who:'BUYMO本部',tag:'本部',t:'【7月】買取強化月間のお知らせ',b:'7月は「廃車・不動車キャンペーン」を実施します。廃車・不動車の買取金額を最大5,000円アップ。チラシPDFを資料室に掲載しましたのでご活用ください。問い合わせが増える見込みです。積極的なご対応をお願いします！',time:'2026/06/28 11:30',likes:8},
+    {who:'いわき店',tag:'その他',t:'はじめまして',b:'本部のサポートで先月開業しました。事故車・廃車の問い合わせが多く、研修の内容がとても役立っています。\nまだまだ勉強中ですが、ここでもよろしくお願いします！',time:'2026/06/20 10:12',likes:7},
+    {who:'郡山店',tag:'査定',t:'過走行車の相場感',b:'10万km超でも輸出需要で値がつくケースが増えています。特にトヨタ車は25万kmでも買い手がつくことがあります。\n皆さんの感触はどうですか？最近の問い合わせで傾向があれば教えてください。',time:'2026/06/22 15:40',likes:11},
+    {who:'横浜南店',tag:'営業',t:'電話対応で成約率が上がった工夫',b:'「今日中に返答できます」と伝えるだけで印象がガラッと変わりました。当日中の速さをアピールするトークを試してみてください。\n他にも、査定前に「どんな理由で売ろうと思ったか」を必ず聞くようにしたら、お客様の本音が分かってクロージングに使えています。',time:'2026/06/24 09:15',likes:15},
+    {who:'名古屋熱田店',tag:'査定',t:'旧車・希少車はこう見る',b:'旧車は相場サイトより現物の状態が全て。特にフロアパン（床裏）の錆と、シリアルナンバーの有無が重要です。\n希少モデルはオーナーズクラブのフォーラムで「同型の直近売買事例」を調べると根拠のある金額が出せます。試してみてください。',time:'2026/06/25 13:00',likes:9},
+    {who:'さいたま中央店',tag:'手続き',t:'廃車手続きの流れまとめ',b:'廃車（永久抹消）の必要書類：車検証・自動車税申告書・印鑑（認印）・ナンバープレート。\n陸運局への書類提出は当社が無料で代行します。お客様には「ナンバーを外して渡すだけ」と伝えると安心されます。',time:'2026/06/26 16:20',likes:6},
+    {who:'福岡天神店',tag:'集客',t:'SNS（Instagram）で問い合わせ増加',b:'「廃車0円でも引取ります」という投稿がバズり、1週間で問い合わせが12件来ました。\nリールで「廃車の流れ30秒動画」を作ったのが効果的でした。本部にテンプレ動画をお願いしたいです！',time:'2026/06/27 12:00',likes:18},
+    {who:'仙台西店',tag:'手続き',t:'ローン残債ありの車の取り扱い方',b:'お客様がローン完済していない場合は、買取代金でローンを精算する「ローン完済サービス」が使えます。\nただし残債が買取額を上回る場合は自己負担が発生するのでその説明が重要。トークスクリプトの「ローン残債あり」ページを参考にしてください。',time:'2026/06/28 08:50',likes:10}
+  ]; }
+  function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  var posts=load();
+  var activeTag='';
+
+  function render(){
+    var list=activeTag ? posts.filter(function(p){return p.tag===activeTag;}) : posts;
+    var el=document.getElementById('cmList');
+    if(!list.length){el.innerHTML='<p class="cm-empty">この カテゴリの投稿はまだありません。</p>';return;}
+    el.innerHTML = list.map(function(p,i){
+      var globalIdx=posts.indexOf(p);
+      var isHq=p.who==='BUYMO本部';
+      var tagCls='cm-tag cm-tag-'+(p.tag||'その他');
+      return '<article class="cm-card'+(isHq?' cm-hq':'')+'">'+
+        '<div class="cm-card-head">'+
+          '<span class="cm-who">'+(isHq?'📢 ':'🏪 ')+esc(p.who)+'</span>'+
+          (p.tag?'<span class="'+tagCls+'">'+esc(p.tag)+'</span>':'')+
+          '<span class="cm-time">'+esc(p.time)+'</span>'+
+        '</div>'+
+        '<h3>'+esc(p.t)+'</h3>'+
+        '<p>'+esc(p.b).replace(/\n/g,'<br>')+'</p>'+
+        '<button class="cm-like" data-i="'+globalIdx+'">👍 役に立った <b>'+(p.likes||0)+'</b></button>'+
+        '</article>';
+    }).join('');
+  }
+
+  document.getElementById('cmPost').addEventListener('click', function(){
+    var t=document.getElementById('cmTitle').value.trim();
+    var b=document.getElementById('cmBody').value.trim();
+    var tag=document.getElementById('cmTag').value;
+    if(!t||!b)return;
+    posts.unshift({who:who(),tag:tag,t:t,b:b,time:nowStr(),likes:0});
+    save(posts); render();
+    document.getElementById('cmTitle').value=''; document.getElementById('cmBody').value='';
+  });
+
+  document.getElementById('cmList').addEventListener('click', function(e){
+    var b=e.target.closest('.cm-like'); if(!b)return;
+    var i=Number(b.getAttribute('data-i'));
+    posts[i].likes=(posts[i].likes||0)+1; save(posts); render();
+  });
+
+  document.querySelector('.cm-filter').addEventListener('click', function(e){
+    var btn=e.target.closest('button[data-tag]'); if(!btn)return;
+    activeTag=btn.getAttribute('data-tag');
+    document.querySelectorAll('.cm-filter button').forEach(function(b){b.classList.toggle('active',b===btn);});
+    render();
+  });
+
+  render();
+</script>
+<script src="assets/js/hq-common.js"></script>
+<script src="assets/js/notices.js"></script>
+<script>window.BUYMO_BOT_MODE='partner';</script>
+<script src="assets/js/chatbot.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>書類発行・ダウンロード｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<style>
+.doc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px;}
+.doc-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:10px;}
+.doc-card-head{display:flex;align-items:center;gap:10px;}
+.doc-icon{font-size:28px;}
+.doc-title{font-weight:900;font-size:15px;color:var(--navy);}
+.doc-desc{font-size:13px;color:#666;line-height:1.6;flex:1;}
+.doc-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.doc-btn{height:36px;padding:0 16px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;}
+.doc-btn:hover{filter:brightness(1.1);}
+.doc-btn.outline{background:#fff;border:1px solid var(--navy);color:var(--navy);}
+.doc-btn.outline:hover{background:#f0f3fa;}
+
+.ref-section{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:22px 24px;margin-bottom:20px;}
+.ref-section h2{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ref-table{width:100%;border-collapse:collapse;font-size:13px;}
+.ref-table th,.ref-table td{padding:9px 12px;border-bottom:1px solid #eef1f6;text-align:left;}
+.ref-table thead th{background:#f4f6fa;color:#555;font-weight:700;}
+.ref-table a{color:var(--orange);font-weight:700;}
+
+/* フォーム（案件から自動入力） */
+.fill-bar{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:16px 20px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+.fill-bar label{font-size:12px;font-weight:700;color:#555;display:flex;flex-direction:column;gap:4px;}
+.fill-bar input,.fill-bar select{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:13px;font-family:inherit;}
+.fill-bar .fi-note{font-size:12px;color:#888;align-self:center;}
+
+@media (max-width:991px){.doc-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:767px){.doc-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>書類発行・ダウンロード</h1>
+      <img class="page-mascot" src="assets/img/buymo/57_印鑑捺印ポーズ.png" alt="" aria-hidden="true">
+    </div>
+    <p class="portal-sub">案件情報から各種書類をA4サイズで自動印字できます。外部機関の様式リンクも掲載しています。</p>
+
+    <!-- 案件情報バー -->
+    <div class="fill-bar">
+      <label>案件IDで自動入力
+        <select id="docCaseId">
+          <option value="">— 案件を選択 —</option>
+        </select>
+      </label>
+      <label>お名前（手動入力可）<input id="docName" placeholder="山田 太郎 様" /></label>
+      <label>住所<input id="docAddress" placeholder="〒000-0000 ○○県○○市…" /></label>
+      <label>車台番号<input id="docVin" placeholder="ABC-1234567" /></label>
+      <label>登録番号（ナンバー）<input id="docPlate" placeholder="福島 300 あ 1234" /></label>
+      <span class="fi-note">※入力内容は各書類に自動反映されます</span>
+    </div>
+
+    <!-- 発行書類 -->
+    <div class="doc-grid">
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">📝</span><span class="doc-title">売買契約書（買取用）</span></div>
+        <p class="doc-desc">車両の買取に関する売買契約書。A4×2枚（甲乙各1通）。事業者情報・車両情報・金額・特約条項を含む標準書式。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="printDoc('contract')">A4で発行・印刷</button>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">✍️</span><span class="doc-title">委任状</span></div>
+        <p class="doc-desc">移転登録・廃車手続等を代理で行うための委任状。移転登録用・抹消登録用の2種。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="printDoc('power-of-attorney-transfer')">移転登録用</button>
+          <button class="doc-btn outline" onclick="printDoc('power-of-attorney-cancel')">抹消登録用</button>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">📋</span><span class="doc-title">譲渡証明書</span></div>
+        <p class="doc-desc">車両を譲渡したことを証明する書面。国土交通省様式に準拠した内容で発行します。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="printDoc('transfer-cert')">A4で発行・印刷</button>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">💴</span><span class="doc-title">清算書（オークション/直販）</span></div>
+        <p class="doc-desc">本部への手数料計算を含む加盟店向け清算書。案件の売却情報から自動計算します。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="printDoc('settlement')">発行・印刷</button>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">🔓</span><span class="doc-title">所有権解除依頼書</span></div>
+        <p class="doc-desc">ローン残債が残っている場合にディーラー・金融機関へ提出する所有権解除依頼書。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="printDoc('ownership-release')">A4で発行・印刷</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 過誤納還付金：都道府県別 -->
+    <div class="ref-section">
+      <h2>💰 過誤納還付金（自動車税）— 都道府県窓口一覧</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">廃車・移転後の月割還付。申請先は<strong>旧住所地の都道府県税事務所</strong>です。各都道府県の様式・申請方法リンクを掲載しています。</p>
+      <div class="hq-table-wrap">
+        <table class="ref-table" id="refundTable">
+          <thead><tr><th>都道府県</th><th>担当窓口</th><th>電話</th><th>公式様式・案内</th></tr></thead>
+          <tbody id="refundBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 自賠責保険 -->
+    <div class="ref-section">
+      <h2>🚗 自賠責保険 — 全国問い合わせ先</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">廃車時の自賠責保険料還付（未経過分）は加入保険会社へ直接申請します。代表的な窓口を掲載しています。</p>
+      <div class="hq-table-wrap">
+        <table class="ref-table">
+          <thead><tr><th>保険会社</th><th>電話</th><th>受付時間</th><th>備考</th></tr></thead>
+          <tbody id="jibaiBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script src="assets/js/hq-documents.js" defer></script>
+</body>
+</html>

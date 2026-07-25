@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320">
+  <defs>
+    <!-- Main diagonal gradient: navy → green -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0e1b33"/>
+      <stop offset="52%" stop-color="#0d3a28"/>
+      <stop offset="100%" stop-color="#0A6B3C"/>
+    </linearGradient>
+    <!-- Radial glow at bottom-right -->
+    <radialGradient id="glowGrad" cx="88%" cy="92%" r="36%">
+      <stop offset="0%" stop-color="#1db954" stop-opacity="0.28"/>
+      <stop offset="65%" stop-color="#0A6B3C" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#0e1b33" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Pin gradient -->
+    <linearGradient id="pinGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3de687"/>
+      <stop offset="100%" stop-color="#1aab5c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background fill -->
+  <rect width="1200" height="320" fill="url(#bgGrad)"/>
+  <!-- Radial glow overlay -->
+  <rect width="1200" height="320" fill="url(#glowGrad)"/>
+
+  <!-- Subtle diagonal lines (left-side decoration) -->
+  <line x1="0" y1="320" x2="370" y2="0" stroke="rgba(255,255,255,0.035)" stroke-width="1"/>
+  <line x1="90" y1="320" x2="460" y2="0" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+  <line x1="180" y1="320" x2="550" y2="0" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+
+  <!-- =============================================
+       Abstract Japan map outlines
+  ============================================== -->
+
+  <!-- Honshu (main island): abstract elongated curved shape -->
+  <path d="M 390 256 Q 420 242 460 224 Q 505 205 548 186 Q 592 167 638 150
+           Q 680 135 722 120 Q 762 108 800 96 Q 840 86 872 80 Q 904 76 924 83
+           Q 946 92 938 110 Q 928 126 904 136 Q 872 148 836 161
+           Q 798 174 758 190 Q 716 207 672 223 Q 630 238 590 250
+           Q 552 260 516 264 Q 480 267 450 262 Q 418 256 390 256 Z"
+        fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Hokkaido (upper-right) -->
+  <path d="M 916 28 Q 950 14 990 20 Q 1028 28 1050 52 Q 1068 72 1058 96
+           Q 1046 116 1018 124 Q 988 130 958 118 Q 928 106 914 84
+           Q 900 62 916 28 Z"
+        fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <!-- Kyushu (lower-center) -->
+  <path d="M 542 258 Q 562 250 582 258 Q 598 268 596 284
+           Q 590 300 572 306 Q 552 308 540 296 Q 528 282 542 258 Z"
+        fill="none" stroke="rgba(255,255,255,0.055)" stroke-width="1.5"/>
+
+  <!-- Shikoku (between Honshu and Kyushu) -->
+  <path d="M 628 252 Q 654 242 678 252 Q 694 262 688 278
+           Q 678 292 654 294 Q 630 292 622 278 Q 616 264 628 252 Z"
+        fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1.5"/>
+
+  <!-- =============================================
+       Map pins (📍-style SVG shapes)
+  ============================================== -->
+
+  <!-- Pin 1 – Tohoku / Fukushima area -->
+  <g transform="translate(258, 152)">
+    <path d="M 0 0 C -6 -6 -16 -14 -16 -30 A 16 16 0 1 1 16 -30 C 16 -14 6 -6 0 0 Z"
+          fill="url(#pinGrad)" opacity="0.62"/>
+    <circle cx="0" cy="-30" r="7" fill="white" opacity="0.82"/>
+    <circle cx="0" cy="-30" r="24" fill="none" stroke="rgba(61,230,135,0.22)" stroke-width="2"/>
+  </g>
+
+  <!-- Pin 2 – Kanto / Tokyo area -->
+  <g transform="translate(555, 196)">
+    <path d="M 0 0 C -6 -6 -16 -14 -16 -30 A 16 16 0 1 1 16 -30 C 16 -14 6 -6 0 0 Z"
+          fill="url(#pinGrad)" opacity="0.68"/>
+    <circle cx="0" cy="-30" r="7" fill="white" opacity="0.88"/>
+    <circle cx="0" cy="-30" r="26" fill="none" stroke="rgba(61,230,135,0.26)" stroke-width="2"/>
+  </g>
+
+  <!-- Pin 3 – Kansai / Osaka area -->
+  <g transform="translate(730, 204)">
+    <path d="M 0 0 C -5 -5 -13 -11 -13 -22 A 13 13 0 1 1 13 -22 C 13 -11 5 -5 0 0 Z"
+          fill="url(#pinGrad)" opacity="0.50"/>
+    <circle cx="0" cy="-22" r="6" fill="white" opacity="0.72"/>
+  </g>
+
+  <!-- Pin 4 – Hokkaido area -->
+  <g transform="translate(990, 72)">
+    <path d="M 0 0 C -5 -5 -13 -11 -13 -22 A 13 13 0 1 1 13 -22 C 13 -11 5 -5 0 0 Z"
+          fill="url(#pinGrad)" opacity="0.46"/>
+    <circle cx="0" cy="-22" r="6" fill="white" opacity="0.68"/>
+  </g>
+
+  <!-- =============================================
+       Dot grid – left side
+  ============================================== -->
+  <g fill="rgba(255,255,255,0.12)">
+    <circle cx="46" cy="60" r="2.2"/>  <circle cx="78" cy="60" r="2.2"/>  <circle cx="110" cy="60" r="2.2"/>
+    <circle cx="46" cy="92" r="2.2"/>  <circle cx="78" cy="92" r="2.2"/>  <circle cx="110" cy="92" r="2.2"/>
+    <circle cx="46" cy="124" r="2.2"/> <circle cx="78" cy="124" r="2.2"/> <circle cx="110" cy="124" r="2.2"/>
+    <circle cx="46" cy="156" r="2.2"/> <circle cx="78" cy="156" r="2.2"/> <circle cx="110" cy="156" r="2.2"/>
+    <circle cx="46" cy="188" r="2.2"/> <circle cx="78" cy="188" r="2.2"/> <circle cx="110" cy="188" r="2.2"/>
+    <circle cx="46" cy="220" r="2.2"/> <circle cx="78" cy="220" r="2.2"/> <circle cx="110" cy="220" r="2.2"/>
+  </g>
+
+  <!-- =============================================
+       Cow silhouette – right side (opacity 0.06)
+  ============================================== -->
+  <g opacity="0.06" transform="translate(998, 22)">
+    <!-- Body -->
+    <ellipse cx="82" cy="152" rx="72" ry="52" fill="white"/>
+    <!-- Neck -->
+    <path d="M 134 118 Q 154 104 158 88 Q 160 74 154 66"
+          stroke="white" stroke-width="24" fill="none" stroke-linecap="round"/>
+    <!-- Head -->
+    <ellipse cx="156" cy="54" rx="33" ry="26" fill="white"/>
+    <!-- Ear left -->
+    <ellipse cx="132" cy="38" rx="11" ry="17" fill="white" transform="rotate(-28,132,38)"/>
+    <!-- Ear right -->
+    <ellipse cx="180" cy="38" rx="11" ry="17" fill="white" transform="rotate(28,180,38)"/>
+    <!-- Horn left -->
+    <path d="M 135 30 Q 122 12 108 16" stroke="white" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <!-- Horn right -->
+    <path d="M 178 30 Q 190 12 204 16" stroke="white" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <!-- Muzzle -->
+    <ellipse cx="166" cy="70" rx="17" ry="13" fill="white"/>
+    <!-- Nostrils -->
+    <circle cx="159" cy="72" r="3.5" fill="rgba(0,0,0,0.25)"/>
+    <circle cx="173" cy="72" r="3.5" fill="rgba(0,0,0,0.25)"/>
+    <!-- Legs -->
+    <rect x="26" y="196" width="17" height="54" rx="7" fill="white"/>
+    <rect x="55" y="196" width="17" height="54" rx="7" fill="white"/>
+    <rect x="102" y="196" width="17" height="54" rx="7" fill="white"/>
+    <rect x="131" y="196" width="17" height="54" rx="7" fill="white"/>
+    <!-- Tail -->
+    <path d="M 12 136 Q -10 124 -12 148 Q -14 166 -6 174"
+          stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+    <!-- Spots -->
+    <ellipse cx="52" cy="135" rx="17" ry="13" fill="rgba(0,30,15,0.45)"/>
+    <ellipse cx="98" cy="162" rx="13" ry="10" fill="rgba(0,30,15,0.45)"/>
+    <ellipse cx="122" cy="122" rx="9" ry="7" fill="rgba(0,30,15,0.45)"/>
+    <!-- Udder -->
+    <ellipse cx="72" cy="200" rx="24" ry="13" fill="white" opacity="0.55"/>
+  </g>
+</svg>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>受講｜BUYMO 加盟店アカデミー</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="partner-academy.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">アカデミー</span>
+    <nav class="portal-nav">
+      <a href="partner-academy.html">← コース一覧</a>
+      <a href="partner-scripts.html">スクリプト</a>
+      <a href="partner-community.html">コミュニティ</a>
+    </nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container" id="courseRoot">
+    <img class="page-mascot" src="assets/img/buymo/35_指差し募集ポーズ.png" alt="" aria-hidden="true">
+    <h1 id="cvTitle">コース</h1>
+    <div class="cv-layout">
+      <aside class="cv-side">
+        <p class="cv-prog-label">進捗：<span id="cvProg">0/0</span></p>
+        <ol class="cv-list" id="cvList"></ol>
+      </aside>
+      <section class="cv-main">
+        <h2 id="cvLessonTitle"></h2>
+        <div id="cvBody"></div>
+        <button class="cv-complete" id="cvComplete">このレッスンを完了にする</button>
+        <div class="cv-quiz" id="cvQuiz" hidden></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/academy.js"></script>
+<script>Academy.renderCourse();</script>
+<script>window.BUYMO_BOT_MODE='partner';</script>
+<script src="assets/js/chatbot.js" defer></script>
+</body>
+</html>

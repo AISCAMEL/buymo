@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>本部ダッシュボード｜BUYMO</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <img class="page-mascot" src="assets/img/buymo/20_デスクワーク査定ポーズ.png" alt="" aria-hidden="true">
+    <h1>ダッシュボード</h1>
+    <p class="portal-sub">全体の状況をひと目で。アラートは対応が必要な案件です。</p>
+
+    <div class="kpi-row kpi-row-5">
+      <div class="kpi"><div class="kpi-label">案件総数</div><div class="kpi-num" id="kTotal">-</div></div>
+      <div class="kpi"><div class="kpi-label">新規未対応</div><div class="kpi-num" id="kNew">-</div></div>
+      <div class="kpi"><div class="kpi-label">商談中</div><div class="kpi-num" id="kNego">-</div></div>
+      <div class="kpi"><div class="kpi-label">入金待ち</div><div class="kpi-num" id="kPay">-</div></div>
+      <div class="kpi accent"><div class="kpi-label">確定売上（完了）</div><div class="kpi-num" id="kSales">-</div></div>
+    </div>
+
+    <div class="hq-2col">
+      <section class="rep-card">
+        <h2>対応アラート</h2>
+        <div id="alerts" class="alert-list"></div>
+      </section>
+      <section class="rep-card">
+        <h2>クイックリンク</h2>
+        <div class="quick-links">
+          <a href="hq-leads.html">📋 リード一覧・割り当て</a>
+          <a href="hq.html?role=hq">🗂️ 案件ボード（看板）</a>
+          <a href="hq-stores.html">🏪 加盟店管理</a>
+          <a href="report.html">📊 営業レポート</a>
+        </div>
+      </section>
+    </div>
+
+    <section class="rep-card" style="margin-top:18px">
+      <h2>最近の案件</h2>
+      <div class="hq-table-wrap">
+        <table class="hq-table">
+          <thead><tr><th>案件ID</th><th>受付日</th><th>お名前</th><th>ジャンル</th><th>担当</th><th>ステージ</th><th>金額</th></tr></thead>
+          <tbody id="recentRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script>
+  HQ.nav('dashboard');
+  HQ.loadCases(function (list) {
+    var cnt = function (st) { return list.filter(function (c) { return c.stage === st; }).length; };
+    var sales = list.filter(function (c) { return c.stage === '完了'; }).reduce(function (s, c) { return s + (Number(c.amount) || 0); }, 0);
+    document.getElementById('kTotal').textContent = list.length + '件';
+    document.getElementById('kNew').textContent = cnt('新規受付') + '件';
+    document.getElementById('kNego').textContent = cnt('商談中') + '件';
+    document.getElementById('kPay').textContent = cnt('入金待ち') + '件';
+    document.getElementById('kSales').textContent = HQ.yen(sales);
+
+    // アラート
+    var al = [];
+    var nw = cnt('新規受付'); if (nw) al.push({ lv: 'warn', t: '新規未対応が ' + nw + ' 件あります。担当の割り当てを。', href: 'hq-leads.html?stage=' + encodeURIComponent('新規受付') });
+    var pay = cnt('入金待ち'); if (pay) al.push({ lv: 'info', t: '入金待ちが ' + pay + ' 件。入金確認をお願いします。', href: 'hq-leads.html?stage=' + encodeURIComponent('入金待ち') });
+    var unassigned = list.filter(function (c) { return !c.assignee; }).length;
+    if (unassigned) al.push({ lv: 'warn', t: '担当未割り当てが ' + unassigned + ' 件あります。', href: 'hq-leads.html' });
+    // 滞留：受付から5日以上たっても未完了（初期〜商談ステージ）
+    var STALE_DAYS = 5;
+    function daysSince(d) { if (!d) return 0; var t = new Date(String(d).replace(/\//g, '-') + 'T00:00:00'); if (isNaN(t)) return 0; return Math.floor((new Date() - t) / 86400000); }
+    var earlyStages = ['新規受付', '査定中', '商談中'];
+    var stale = list.filter(function (c) { return earlyStages.indexOf(c.stage) >= 0 && daysSince(c.date) >= STALE_DAYS; });
+    if (stale.length) {
+      var oldest = stale.reduce(function (a, b) { return daysSince(a.date) >= daysSince(b.date) ? a : b; });
+      al.push({ lv: 'warn', t: '対応が滞っている案件が ' + stale.length + ' 件（受付から' + STALE_DAYS + '日以上・未完了。最長 ' + daysSince(oldest.date) + '日：' + oldest.id + '）。', href: 'hq-leads.html' });
+    }
+    var ae = document.getElementById('alerts');
+    ae.innerHTML = al.length ? al.map(function (a) {
+      return '<a class="alert ' + a.lv + '" href="' + a.href + '"><span class="alert-ico">' + (a.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' + HQ.esc(a.t) + '</a>';
+    }).join('') : '<p class="alert-none">対応が必要なアラートはありません。</p>';
+
+    // 最近の案件（受付日の新しい順で先頭8件）
+    var recent = list.slice().sort(function (a, b) {
+      var da = a.date || '', db = b.date || '';
+      return da > db ? -1 : da < db ? 1 : 0;
+    }).slice(0, 8);
+    document.getElementById('recentRows').innerHTML = recent.map(function (c) {
+      return '<tr><td>' + HQ.esc(c.id) + '</td><td class="td-sub">' + HQ.esc(c.date || '—') + '</td><td>' + HQ.esc(c.name) + '</td><td>' + HQ.esc(c.genre) + '</td><td>' + HQ.esc(c.assignee || '—') +
+        '</td><td><span class="stage-pill s' + HQ.stageIdx(c.stage) + '">' + HQ.esc(c.stage) + '</span></td><td>' + (c.amount ? HQ.yen(c.amount) : '—') + '</td></tr>';
+    }).join('');
+  });
+</script>
+</body>
+</html>

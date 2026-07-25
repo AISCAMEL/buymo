@@ -1,0 +1,70 @@
+<!-- =====================================================================
+  AUC-AGENT LP ／ LPtools ブロックマークアップ（インポート用・試作）
+
+  ■ 使い方
+   1. WordPressで固定ページを新規作成（テンプレート＝LPtools のLP）
+   2. 編集画面の「⋮（オプション）」→「コードエディター」に切り替え
+   3. このファイルの中身を丸ごと貼り付け
+   4. 「ビジュアルエディター」に戻すと各ブロックとして展開されます
+
+  ■ 注意（試作のため）
+   ・実際のマークアップは同梱テンプレートの構造を再現していますが、
+     プラグインのバージョン差で「ブロックのリカバリー」表示が出る場合は
+     各ブロックで「ブロックのリカバリーを試行」を押せば直ります。
+   ・ボタンのリンク先（申込URL/LINE）は、貼り付け後に各CTAブロックの
+     設定で指定してください（マークアップにURLは含まれません）。
+   ・お客様の声(voice)・流れ(numbering)・ヒーロー(firstview)は画像設定が
+     絡むため、ビジュアル編集で追加する方が確実です（原稿は別ファイル参照）。
+   ・カラーはネイビー #0e1b33／ゴールド #c9a14a に設定済み。
+===================================================================== -->
+
+<!-- ===== ① セクション見出し：選ばれる理由 ===== -->
+<!-- wp:ctwlpt-block/subhead-h2 {"mb":" ctwlpt-mb-25p"} --><div class="wp-block-ctwlpt-block-subhead-h2 ctwlpt-block-subhead-h2-wrap ctwlpt-block-subhead-h2-01 ctwlpt-mb-25p ctwlpt-gothic-bold ctwlpt-block-textalign-c" style="color:;background-color:;border-radius:0;transform:rotate(0deg);animation-duration:0.5s;line-height:;letter-spacing:"><div class="ctwlpt-block-subhead-h2-inner" style="color:">「代行」だから、おトク・安心・かんたん。</div></div><!-- /wp:ctwlpt-block/subhead-h2 -->
+
+<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center">店頭価格には仕入れ・整備・展示・人件費などのマージンが上乗せされています。代行ならオークション相場で直接ねらえます。</p><!-- /wp:paragraph -->
+
+<!-- wp:paragraph --><p><strong>💰 相場価格で手に入る</strong><br>店頭購入では落札価格に15〜25%の中間コストが乗りがち。代行手数料だけで済むので、同じ車でも総額を大きく抑えられます。</p><!-- /wp:paragraph -->
+<!-- wp:paragraph --><p><strong>🔍 プロが車両を見極め</strong><br>検査票（出品票）と評価点を熟知したバイヤーが、修復歴・状態を確認。粗悪車をしっかり回避して入札します。</p><!-- /wp:paragraph -->
+<!-- wp:paragraph --><p><strong>🚚 陸送・名義変更も一括</strong><br>落札後の陸送・名義変更・車庫証明・納車までワンストップ。面倒な手続きはすべておまかせいただけます。</p><!-- /wp:paragraph -->
+
+
+<!-- ===== ② 料金シミュレーション（カスタムHTML） ===== -->
+<!-- wp:ctwlpt-block/subhead-h2 {"mb":" ctwlpt-mb-25p"} --><div class="wp-block-ctwlpt-block-subhead-h2 ctwlpt-block-subhead-h2-wrap ctwlpt-block-subhead-h2-01 ctwlpt-mb-25p ctwlpt-gothic-bold ctwlpt-block-textalign-c" style="color:;background-color:;border-radius:0;transform:rotate(0deg);animation-duration:0.5s;line-height:;letter-spacing:"><div class="ctwlpt-block-subhead-h2-inner" style="color:">サイト上で「乗り出し総額」をその場で計算</div></div><!-- /wp:ctwlpt-block/subhead-h2 -->
+
+<!-- wp:html -->
+<!-- ↓↓↓ ここに simulator-embed.html の中身を丸ごと貼り付けてください ↓↓↓ -->
+<div style="text-align:center;padding:30px;border:2px dashed #c9a14a;border-radius:12px;color:#5a6675">
+  ここに <strong>simulator-embed.html</strong> の中身を貼り付け（料金シミュレーター）
+</div>
+<!-- ↑↑↑ ここまで ↑↑↑ -->
+<!-- /wp:html -->
+
+
+<!-- ===== ③ 料金（価格帯別テーブル） ===== -->
+<!-- wp:ctwlpt-block/subhead-h2 {"mb":" ctwlpt-mb-25p"} --><div class="wp-block-ctwlpt-block-subhead-h2 ctwlpt-block-subhead-h2-wrap ctwlpt-block-subhead-h2-01 ctwlpt-mb-25p ctwlpt-gothic-bold ctwlpt-block-textalign-c" style="color:;background-color:;border-radius:0;transform:rotate(0deg);animation-duration:0.5s;line-height:;letter-spacing:"><div class="ctwlpt-block-subhead-h2-inner" style="color:">代行手数料は「落札価格帯別の定額」</div></div><!-- /wp:ctwlpt-block/subhead-h2 -->
+
+<!-- wp:ctwlpt-block/table-01 {"tableFcrowHead":true,"tableFccolHead":false,"fs":" ctwlpt-fs-125p","className":"is-style-ctwlpt-block-table-head-bg-yellow"} --><div class="ctwlpt-block-table-01     ctwlpt-block-table-fcrow-head         ctwlpt-fs-125p       is-style-ctwlpt-block-table-head-bg-yellow" style="color:;background-color:;border-radius:0;transform:rotate(0deg);animation-duration:0.5s"><div class="ctwlpt-block-table-wrap"><div class="ctwlpt-block-table-content"><div class="ctwlpt-block-table-fixed-attention"></div><table><tbody><tr><td>落札価格帯</td><td>代行手数料（税込）</td></tr><tr><td>〜50万円</td><td>¥39,800</td></tr><tr><td>50万円〜100万円</td><td>¥49,800</td></tr><tr><td>100万円〜150万円</td><td>¥59,800</td></tr><tr><td>150万円〜200万円</td><td>¥69,800</td></tr><tr><td>200万円〜300万円</td><td>¥79,800</td></tr><tr><td>300万円〜</td><td>落札価格の 3%</td></tr></tbody></table></div></div></div><!-- /wp:ctwlpt-block/table-01 -->
+
+<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center">※ SUV・大型は +¥5,000、輸入車は +¥20,000 の割増。落札不成立の場合、代行手数料はいただきません。<br>別途実費：オークション落札料 ¥11,000／リサイクル料等 ¥12,000〜／陸送費 ¥20,000〜</p><!-- /wp:paragraph -->
+
+
+<!-- ===== ④ よくある質問（FAQ） ===== -->
+<!-- wp:ctwlpt-block/subhead-h2 {"mb":" ctwlpt-mb-25p"} --><div class="wp-block-ctwlpt-block-subhead-h2 ctwlpt-block-subhead-h2-wrap ctwlpt-block-subhead-h2-01 ctwlpt-mb-25p ctwlpt-gothic-bold ctwlpt-block-textalign-c" style="color:;background-color:;border-radius:0;transform:rotate(0deg);animation-duration:0.5s;line-height:;letter-spacing:"><div class="ctwlpt-block-subhead-h2-inner" style="color:">よくあるご質問</div></div><!-- /wp:ctwlpt-block/subhead-h2 -->
+
+<!-- wp:ctwlpt-block/faq {"faqFInner":"本当に店頭で買うより安くなりますか？","faqDd":"<p>店頭価格にはオークション落札価格に対して概ね15〜25%の中間コストが上乗せされています。代行では代行手数料と実費（陸送・諸費用）のみのため、多くの場合で総額を抑えられます。</p>","innerKeyColor1":"#0e1b33","innerKeyColor2":"#FFFFFF","questionBgColor":"#0e1b33","questionIconColor":"#FFFFFF","questionTextColor":"#0e1b33","bgColor":"#FFF"} --><div class="ctwlpt-block-faq-dl" style="border-color:#0e1b33;border-radius:0;transform:rotate(0deg)"><div class="ctwlpt-block-faq-dt" style="background-color:#0e1b33;border-color:#0e1b33"><span class="ctwlpt-block-faq-f" style="background-color:#0e1b33;color:#FFFFFF">Q</span><div class="ctwlpt-block-faq-f-inner" style="color:#0e1b33">本当に店頭で買うより安くなりますか？</div></div><div class="ctwlpt-block-faq-dd" style="color:"><p>店頭価格にはオークション落札価格に対して概ね15〜25%の中間コストが上乗せされています。代行では代行手数料と実費（陸送・諸費用）のみのため、多くの場合で総額を抑えられます。</p></div></div><!-- /wp:ctwlpt-block/faq -->
+
+<!-- wp:ctwlpt-block/faq {"faqFInner":"代行手数料はどう決まりますか？","faqDd":"<p>落札価格帯別の定額制です（〜50万 ¥39,800／100〜150万 ¥59,800 など）。300万円超は落札価格の3%。SUV・大型+¥5,000、輸入車+¥20,000。落札前に総額が確定します。</p>","innerKeyColor1":"#0e1b33","innerKeyColor2":"#FFFFFF","questionBgColor":"#0e1b33","questionIconColor":"#FFFFFF","questionTextColor":"#0e1b33","bgColor":"#FFF"} --><div class="ctwlpt-block-faq-dl" style="border-color:#0e1b33;border-radius:0;transform:rotate(0deg)"><div class="ctwlpt-block-faq-dt" style="background-color:#0e1b33;border-color:#0e1b33"><span class="ctwlpt-block-faq-f" style="background-color:#0e1b33;color:#FFFFFF">Q</span><div class="ctwlpt-block-faq-f-inner" style="color:#0e1b33">代行手数料はどう決まりますか？</div></div><div class="ctwlpt-block-faq-dd" style="color:"><p>落札価格帯別の定額制です（〜50万 ¥39,800／100〜150万 ¥59,800 など）。300万円超は落札価格の3%。SUV・大型+¥5,000、輸入車+¥20,000。落札前に総額が確定します。</p></div></div><!-- /wp:ctwlpt-block/faq -->
+
+<!-- wp:ctwlpt-block/faq {"faqFInner":"希望の車が落札できなかった場合は？","faqDd":"<p>落札できなかった場合、代行手数料は原則いただきません（実費が発生する場合を除く）。上限価格内で落札を目指し、未成立なら次の候補をご提案します。</p>","innerKeyColor1":"#0e1b33","innerKeyColor2":"#FFFFFF","questionBgColor":"#0e1b33","questionIconColor":"#FFFFFF","questionTextColor":"#0e1b33","bgColor":"#FFF"} --><div class="ctwlpt-block-faq-dl" style="border-color:#0e1b33;border-radius:0;transform:rotate(0deg)"><div class="ctwlpt-block-faq-dt" style="background-color:#0e1b33;border-color:#0e1b33"><span class="ctwlpt-block-faq-f" style="background-color:#0e1b33;color:#FFFFFF">Q</span><div class="ctwlpt-block-faq-f-inner" style="color:#0e1b33">希望の車が落札できなかった場合は？</div></div><div class="ctwlpt-block-faq-dd" style="color:"><p>落札できなかった場合、代行手数料は原則いただきません（実費が発生する場合を除く）。上限価格内で落札を目指し、未成立なら次の候補をご提案します。</p></div></div><!-- /wp:ctwlpt-block/faq -->
+
+<!-- wp:ctwlpt-block/faq {"faqFInner":"車の状態が心配です。ハズレ車を引きませんか？","faqDd":"<p>第三者検査機関の評価点・検査票を、経験豊富なバイヤーが確認。修復歴・外装内装・機関をチェックし、リスクのある車両は入札を見送ります。</p>","innerKeyColor1":"#0e1b33","innerKeyColor2":"#FFFFFF","questionBgColor":"#0e1b33","questionIconColor":"#FFFFFF","questionTextColor":"#0e1b33","bgColor":"#FFF"} --><div class="ctwlpt-block-faq-dl" style="border-color:#0e1b33;border-radius:0;transform:rotate(0deg)"><div class="ctwlpt-block-faq-dt" style="background-color:#0e1b33;border-color:#0e1b33"><span class="ctwlpt-block-faq-f" style="background-color:#0e1b33;color:#FFFFFF">Q</span><div class="ctwlpt-block-faq-f-inner" style="color:#0e1b33">車の状態が心配です。ハズレ車を引きませんか？</div></div><div class="ctwlpt-block-faq-dd" style="color:"><p>第三者検査機関の評価点・検査票を、経験豊富なバイヤーが確認。修復歴・外装内装・機関をチェックし、リスクのある車両は入札を見送ります。</p></div></div><!-- /wp:ctwlpt-block/faq -->
+
+<!-- wp:ctwlpt-block/faq {"faqFInner":"支払い方法は？ローンは使えますか？","faqDd":"<p>銀行振込・オンライン決済に対応。提携信販会社のオートローンもご利用いただけます。会員登録後、マイページからお申し込みいただけます。</p>","innerKeyColor1":"#0e1b33","innerKeyColor2":"#FFFFFF","questionBgColor":"#0e1b33","questionIconColor":"#FFFFFF","questionTextColor":"#0e1b33","bgColor":"#FFF"} --><div class="ctwlpt-block-faq-dl" style="border-color:#0e1b33;border-radius:0;transform:rotate(0deg)"><div class="ctwlpt-block-faq-dt" style="background-color:#0e1b33;border-color:#0e1b33"><span class="ctwlpt-block-faq-f" style="background-color:#0e1b33;color:#FFFFFF">Q</span><div class="ctwlpt-block-faq-f-inner" style="color:#0e1b33">支払い方法は？ローンは使えますか？</div></div><div class="ctwlpt-block-faq-dd" style="color:"><p>銀行振込・オンライン決済に対応。提携信販会社のオートローンもご利用いただけます。会員登録後、マイページからお申し込みいただけます。</p></div></div><!-- /wp:ctwlpt-block/faq -->
+
+
+<!-- ===== ⑤ 申込CTA ===== -->
+<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><strong>まずは無料で、いくらで買えるか確かめよう。</strong><br>会員登録は1分。条件を登録すれば、プロから車両提案が届きます。</p><!-- /wp:paragraph -->
+
+<!-- wp:ctwlpt-block/cta-button-01 {"ctaButtonText":"<strong>無料会員登録してオーダーする</strong>","ctaButtonStyle":" ctwlpt-block-cta-button-type-02","ctaButtonAnimation":" ctwlpt-block-cta-button-animation-03","buttonIcon":"icon-angle-circled-right","buttonIconPosition":false,"mt":" ctwlpt-mt-25p","mb":" ctwlpt-mb-default","fontColor":"#0e1b33","bgColor":"#e0bd6a","roundCorner":999} --><div class="ctwlpt-block-cta-button-wrap ctwlpt-mt-25p ctwlpt-mb-default" style="animation-duration:0.5s"><button class="ctwlpt-block-cta-button ctwlpt-block-cta-button-type-02 ctwlpt-block-cta-button-animation-03" style="color:#0e1b33;background-color:#e0bd6a;border-radius:999px;transform:rotate(0deg)"><i class="icon-angle-circled-right"></i><span><strong>無料会員登録してオーダーする</strong></span></button></div><!-- /wp:ctwlpt-block/cta-button-01 -->
+
+<!-- wp:ctwlpt-block/cta-mc-02 {"ctaText02":"登録・シミュレーション・車両提案まで無料です。"} --><div class="ctwlpt-block-cta-text-02" style="color:;background:;border-radius:0;transform:rotate(0deg);animation-duration:0.5s">登録・シミュレーション・車両提案まで無料です。</div><!-- /wp:ctwlpt-block/cta-mc-02 -->

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>修了テスト｜BUYMO 加盟店アカデミー</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="partner-academy.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">アカデミー</span>
+    <nav class="portal-nav">
+      <a href="partner-academy.html">← コース一覧</a>
+      <a href="partner-scripts.html">スクリプト</a>
+      <a href="partner-community.html">コミュニティ</a>
+    </nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+<main class="portal-main">
+  <div class="container" id="quizRoot"></div>
+</main>
+<script src="assets/js/academy.js"></script>
+<script>Academy.renderQuiz();</script>
+</body>
+</html>

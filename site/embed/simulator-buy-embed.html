@@ -1,0 +1,72 @@
+<!--
+============================================================
+ BUYMO かんたん査定シミュレーター 埋め込み（LPtools / WordPress カスタムHTML用）
+ - このブロックを「カスタムHTML」に丸ごと貼り付け。
+ - 係数（CLASS_BASE / CONDITION 等）は下のスクリプト内で編集可。
+ - CTA（無料査定へ）のリンク先 data-cta を自社フォームURLに変更してください。
+ - すべて #buymo-sim 配下にスコープしてあり、テーマと干渉しません。
+============================================================
+-->
+<div id="buymo-sim" data-cta="/buymo-contact.html">
+  <style>
+    #buymo-sim{max-width:760px;margin:0 auto;font-family:'Noto Sans JP','Yu Gothic',sans-serif;color:#333;}
+    #buymo-sim .bs-card{background:#fff;border-radius:20px;box-shadow:0 12px 28px rgba(0,0,0,.12);padding:28px;}
+    #buymo-sim h3{text-align:center;font-size:22px;font-weight:900;margin:0 0 6px;}
+    #buymo-sim .bs-lead{text-align:center;color:#666;font-size:14px;margin:0 0 20px;}
+    #buymo-sim .bs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+    #buymo-sim label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px;}
+    #buymo-sim select{height:48px;border:1px solid #ddd;border-radius:10px;padding:0 12px;font-size:16px;background:#fff;}
+    #buymo-sim select:focus{outline:none;border-color:#FF6B35;box-shadow:0 0 0 3px rgba(255,107,53,.15);}
+    #buymo-sim .bs-btn{width:100%;height:54px;margin-top:16px;border:none;border-radius:30px;cursor:pointer;font-weight:900;font-size:18px;color:#fff;background:linear-gradient(135deg,#FF8552,#F2591F);}
+    #buymo-sim .bs-res{margin-top:22px;text-align:center;background:#1E3A8A;color:#fff;border-radius:16px;padding:24px;}
+    #buymo-sim .bs-range{font-size:32px;font-weight:900;color:#FFD700;margin:6px 0 10px;}
+    #buymo-sim .bs-note{font-size:12px;color:#b9c2dd;margin-bottom:14px;}
+    #buymo-sim .bs-cta{display:inline-block;background:#FF6B35;color:#fff;font-weight:900;border-radius:30px;padding:13px 26px;text-decoration:none;}
+    @media(max-width:767px){#buymo-sim .bs-grid{grid-template-columns:1fr;}#buymo-sim .bs-range{font-size:24px;}}
+  </style>
+  <div class="bs-card">
+    <h3>かんたん査定シミュレーション</h3>
+    <p class="bs-lead">車種クラス・年式・走行距離・状態を選ぶだけ。おおよその買取額がすぐ分かります。</p>
+    <div class="bs-grid">
+      <label>車種クラス<select id="bsCls"></select></label>
+      <label>年式<select id="bsYear"></select></label>
+      <label>走行距離<select id="bsMile"></select></label>
+      <label>状態<select id="bsCond"></select></label>
+    </div>
+    <button type="button" class="bs-btn" id="bsCalc">概算をみる</button>
+    <div class="bs-res" id="bsRes" hidden>
+      <p style="font-weight:700;font-size:14px;color:#cdd6ee;margin:0;">概算の買取目安</p>
+      <p class="bs-range"><span id="bsMin"></span> 〜 <span id="bsMax"></span></p>
+      <p class="bs-note">※ AIによる概算の目安です。実際の金額は車両状態により異なります。正確な金額は無料査定で。</p>
+      <a class="bs-cta" id="bsCta" href="#">この内容で無料査定を依頼 ›</a>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var root=document.getElementById('buymo-sim');
+    var CLASS_BASE={'軽自動車':900000,'コンパクト':1000000,'セダン':1300000,'ミニバン':1600000,'SUV':1800000,'輸入車・高級車':3000000,'トラック・商用車':1500000};
+    var MILEAGE=[['〜1万km',5000],['1〜3万km',20000],['3〜5万km',40000],['5〜8万km',65000],['8〜10万km',90000],['10〜15万km',125000],['15万km〜',170000]];
+    var COND={'良好（目立つ傷なし）':1.0,'普通（小傷・経年相応）':0.85,'修復歴・事故車':0.55,'不動車・廃車予定':0.22};
+    var now=new Date().getFullYear();
+    function opt(v,l){return '<option value="'+v+'">'+(l||v)+'</option>';}
+    var cls='';for(var c in CLASS_BASE)cls+=opt(c);root.querySelector('#bsCls').innerHTML=cls;
+    var ys='';for(var y=now;y>=now-30;y--)ys+=opt(y,y+'年');root.querySelector('#bsYear').innerHTML=ys;
+    root.querySelector('#bsMile').innerHTML=MILEAGE.map(function(m,i){return opt(i,m[0]);}).join('');
+    var cd='';for(var k in COND)cd+=opt(k);root.querySelector('#bsCond').innerHTML=cd;
+    function round(n){return n>=100000?Math.round(n/10000)*10000:Math.max(5000,Math.round(n/1000)*1000);}
+    function yen(n){return '¥'+(n||0).toLocaleString('en-US');}
+    root.querySelector('#bsCalc').addEventListener('click',function(){
+      var base=CLASS_BASE[root.querySelector('#bsCls').value]||1000000;
+      var age=Math.max(0,now-Number(root.querySelector('#bsYear').value));
+      var km=MILEAGE[Number(root.querySelector('#bsMile').value)][1];
+      var cf=COND[root.querySelector('#bsCond').value]||1;
+      var point=base*Math.max(0.06,Math.pow(0.88,age))*Math.max(0.2,1-(km/10000)*0.05)*cf;
+      var mn=Math.max(5000,round(point*0.88)),mx=Math.max(10000,round(point*1.12));
+      root.querySelector('#bsMin').textContent=yen(mn);root.querySelector('#bsMax').textContent=yen(mx);
+      var cta=root.getAttribute('data-cta')||'#';
+      root.querySelector('#bsCta').href=cta+(cta.indexOf('?')<0?'?':'&')+'genre='+encodeURIComponent(root.querySelector('#bsCls').value)+'&est='+encodeURIComponent(yen(mn)+'〜'+yen(mx));
+      root.querySelector('#bsRes').hidden=false;
+    });
+  })();
+  </script>
+</div>

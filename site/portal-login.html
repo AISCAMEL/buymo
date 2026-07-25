@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ログイン｜BUYMO（会員／加盟店／本部）</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<style>
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(800px 300px at 80% -10%,#FFD9C2,transparent 60%),linear-gradient(180deg,#fff,#FFF1E6);}
+  .login-card{background:#fff;border-radius:20px;box-shadow:var(--shadow-hover);padding:38px 32px;max-width:430px;width:92%;}
+  .login-card .logo{justify-content:center;font-size:28px;margin-bottom:8px;}
+  .login-card h1{font-size:20px;font-weight:900;margin-bottom:18px;text-align:center;}
+  .lf{margin-bottom:14px;}
+  .lf label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .lf input{width:100%;height:48px;border:1px solid #ddd;border-radius:10px;padding:0 14px;font-size:16px;font-family:inherit;}
+  .lf input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,.15);}
+  .l-err{color:#e53935;font-size:13px;min-height:18px;text-align:center;}
+  .l-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+  .l-btn{height:50px;border:none;border-radius:10px;font-weight:900;font-size:15px;cursor:pointer;color:#fff;}
+  .l-btn.hq{background:linear-gradient(135deg,#FF8552,#F2591F);}
+  .l-btn.partner{background:var(--navy);}
+  .l-divider{display:flex;align-items:center;gap:10px;color:#aaa;font-size:12px;margin:20px 0 14px;}
+  .l-divider::before,.l-divider::after{content:"";flex:1;height:1px;background:#eee;}
+  .l-member{display:block;text-align:center;background:var(--cream);border:1px solid #f0e2cf;border-radius:10px;padding:12px;font-weight:700;color:#333;}
+  .l-member:hover{color:var(--orange);}
+  .login-note{margin-top:18px;font-size:12px;color:#999;text-align:center;}
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <a href="index.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <img class="page-mascot" src="assets/img/buymo/19_お辞儀ポーズ.png" alt="" aria-hidden="true" style="float:none;display:block;margin:0 auto 12px;">
+    <h1>業務ログイン</h1>
+    <div class="lf"><label for="liEmail">メールアドレス</label><input type="email" id="liEmail" placeholder="you@example.com" autocomplete="username" /></div>
+    <div class="lf"><label for="liPass">パスワード</label><input type="password" id="liPass" placeholder="••••••••" autocomplete="current-password" /></div>
+    <p class="l-err" id="liErr"></p>
+    <div class="l-btns">
+      <button class="l-btn hq" data-role="hq" type="button">本部でログイン</button>
+      <button class="l-btn partner" data-role="partner" type="button">加盟店でログイン</button>
+    </div>
+
+    <div class="l-divider">お客様はこちら</div>
+    <a class="l-member" href="member.html">👤 会員マイページ（査定状況の確認）</a>
+
+    <p class="login-note">デモ環境ではメール＋任意のパスワードでログインできます。本番ではGAS側で発行したアカウント（docs/BUYMO_認証設計.md）でのログインになります。</p>
+  </div>
+</div>
+<script src="assets/js/auth.js"></script>
+<script>
+  var err = document.getElementById('liErr');
+  function go() {
+    var s = AUTH.get(); var next = new URLSearchParams(location.search).get('next');
+    location.replace(next || AUTH.home(s ? s.role : 'hq'));
+  }
+  // 既ログインなら素通し
+  if (AUTH.get()) { /* stay; user can re-login */ }
+  document.querySelectorAll('.l-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      err.textContent = '';
+      AUTH.login(document.getElementById('liEmail').value, document.getElementById('liPass').value, b.getAttribute('data-role'), function (ok, msg) {
+        if (ok) go(); else err.textContent = msg || 'ログインに失敗しました';
+      });
+    });
+  });
+</script>
+</body>
+</html>

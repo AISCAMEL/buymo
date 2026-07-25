@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title id="pageTitle">コラム｜車買取のBUYMO</title>
+<meta name="description" id="pageDesc" content="車買取BUYMOのコラム記事。" />
+<meta name="theme-color" content="#1C3030" />
+<link rel="icon" type="image/svg+xml" href="../assets/img/buymo-favicon.svg" />
+<link rel="apple-touch-icon" href="../assets/img/buymo-favicon-180.png" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="BUYMO｜車買取" />
+<meta property="og:title" id="ogTitle" content="コラム｜BUYMO" />
+<meta property="og:description" id="ogDesc" content="車買取BUYMOのコラム記事。" />
+<meta property="og:image" content="../assets/img/buymo-ogp.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="../assets/css/buymo.css" />
+<link rel="stylesheet" href="../assets/css/buymo-area.css" />
+<style>
+/* ---- Column detail ---- */
+.article-wrap{max-width:760px;margin:0 auto;padding:60px 0 80px;}
+.article-meta{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.article-cat{
+  background:var(--green-pale);color:var(--green-dark);
+  font-size:12px;font-weight:800;padding:4px 14px;border-radius:100px;
+}
+.article-date{font-size:13px;color:var(--text-sub);}
+.article-author{font-size:13px;color:var(--text-sub);}
+.article-title{font-size:clamp(22px,4vw,34px);font-weight:900;line-height:1.45;margin-bottom:24px;letter-spacing:-.02em;}
+.article-divider{border:none;border-top:2px solid var(--green-pale);margin-bottom:36px;}
+.article-body{font-size:16px;line-height:1.9;color:var(--text);}
+.article-body h2{font-size:22px;font-weight:800;margin:36px 0 14px;padding-left:14px;border-left:4px solid var(--green);}
+.article-body h3{font-size:18px;font-weight:700;margin:28px 0 10px;color:var(--green-dark);}
+.article-body p{margin:0 0 20px;}
+.article-body ul,.article-body ol{list-style:initial;padding-left:24px;margin:0 0 20px;}
+.article-body li{margin-bottom:8px;}
+.article-body strong{font-weight:700;}
+.article-body a{color:var(--green);text-decoration:underline;}
+.article-body blockquote{
+  margin:0 0 20px;padding:16px 20px;background:var(--green-bg);
+  border-left:4px solid var(--green);border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+}
+.article-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:36px;}
+.article-tag{
+  background:var(--gray);border-radius:100px;padding:4px 14px;
+  font-size:12px;font-weight:700;color:var(--text-sub);
+}
+
+.article-nav{display:flex;justify-content:space-between;margin-top:48px;gap:12px;}
+.article-nav a{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:14px;font-weight:700;color:var(--green);
+  background:var(--green-bg);border-radius:100px;padding:10px 22px;
+  transition:background .18s;
+}
+.article-nav a:hover{background:var(--green-pale);}
+
+/* loading / error */
+.article-loading{display:flex;justify-content:center;padding:120px 0;}
+.article-spinner{
+  width:40px;height:40px;border:3px solid var(--green-pale);
+  border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.article-error{text-align:center;padding:80px 0;color:var(--text-sub);}
+</style>
+</head>
+<body>
+
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a href="../index.html#top" class="logo" aria-label="BUYMO ホーム">
+      <span class="logo-mark" aria-hidden="true">🐮</span>
+      <span class="logo-text">BUYMO</span>
+    </a>
+    <nav class="gnav" id="gnav" aria-label="メインナビゲーション">
+      <ul>
+        <li><a href="../index.html#top">ホーム</a></li>
+        <li><a href="../index.html#features">サービス内容</a></li>
+        <li><a href="../genre/">買取ジャンル</a></li>
+        <li><a href="../area/">エリア一覧</a></li>
+        <li><a href="index.html" aria-current="page">コラム</a></li>
+        <li><a href="../buymo-contact.html">お問い合わせ</a></li>
+      </ul>
+    </nav>
+    <a href="mailto:info@aisjaltd.com" class="header-tel" aria-label="メールでお問い合わせ">
+      <span class="tel-ico" aria-hidden="true">✉️</span>メールで査定
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false" aria-controls="gnav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="パンくずリスト" style="padding-top:28px;">
+      <a href="../index.html#top">ホーム</a>
+      <span aria-hidden="true">›</span>
+      <a href="index.html">コラム</a>
+      <span aria-hidden="true">›</span>
+      <span id="bcTitle">記事</span>
+    </nav>
+
+    <div id="articleWrap">
+      <div class="article-loading"><div class="article-spinner" role="status" aria-label="読み込み中"></div></div>
+    </div>
+  </div>
+
+  <section class="form-section" id="ctaSection" style="display:none;" aria-labelledby="cta-title">
+    <div class="container area-bottom-cta">
+      <h2 id="cta-title">無料査定のお申し込みはこちら</h2>
+      <p>出張査定・手続き完全無料。最短即日でご連絡します。</p>
+      <div class="area-cta">
+        <a href="../buymo-contact.html" class="btn btn-primary btn-lg">無料査定を依頼する</a>
+        <a href="mailto:info@aisjaltd.com" class="btn btn-tel">✉️ メールで査定</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-genres" aria-label="ジャンル別の買取">
+    <div class="container">
+      <h3>ジャンル別の買取</h3>
+      <ul id="genre-nav" class="genre-list"></ul>
+    </div>
+  </nav>
+  <div class="container grid grid-3 footer-grid">
+    <div class="footer-col">
+      <a href="../index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
+      <p class="footer-company">合同会社アイズ</p>
+      <p>〒971-8138<br>福島県いわき市若葉台1丁目31番</p>
+      
+      <p>✉️ info@aisjaltd.com</p>
+    </div>
+    <nav class="footer-col" aria-label="サイトマップ">
+      <h3>サイトマップ</h3>
+      <ul class="footer-links">
+        <li><a href="../index.html#company">会社概要</a></li>
+        <li><a href="../privacy.html">プライバシーポリシー</a></li>
+        <li><a href="../tokushoho.html">特定商取引法・古物商表記</a></li>
+        <li><a href="../index.html#faq">よくある質問</a></li>
+        <li><a href="index.html">コラム</a></li>
+        <li><a href="../buymo-contact.html">お問い合わせ</a></li>
+      </ul>
+    </nav>
+    <div class="footer-col">
+      <h3>SNS</h3>
+      <ul class="sns-list">
+        <li><a href="#" class="sns fb" aria-label="Facebook">f</a></li>
+        <li><a href="#" class="sns tw" aria-label="Twitter">𝕏</a></li>
+        <li><a href="#" class="sns ig" aria-label="Instagram">📷</a></li>
+        <li><a href="#" class="sns line" aria-label="LINE">L</a></li>
+      </ul>
+      <p class="footer-hours">営業時間 平日 8:00〜17:00</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>Copyright © 2026 合同会社アイズ（BUYMO） All Rights Reserved.</p>
+  </div>
+</footer>
+
+<button class="to-top" id="toTop" aria-label="トップに戻る" hidden>▲</button>
+
+<script src="../assets/js/analytics.js" defer></script>
+<script src="../assets/js/genres.js" defer></script>
+<script src="../assets/js/buymo.js" defer></script>
+
+<script>
+(function () {
+  'use strict';
+  var GAS = 'https://script.google.com/macros/s/AKfycbw0Ao9-I-GUizO--TIU2AeJCIEGoW8Ot9DZXErD2oJk8fg_1sNj8FRNYkoAvtm6CwMc/exec';
+
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  var id = new URLSearchParams(window.location.search).get('id');
+  if (!id) {
+    document.getElementById('articleWrap').innerHTML =
+      '<div class="article-error"><p>記事が見つかりません。</p><a href="index.html">← コラム一覧へ</a></div>';
+  } else {
+    fetch(GAS + '?action=get&id=' + encodeURIComponent(id))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.error) {
+          document.getElementById('articleWrap').innerHTML =
+            '<div class="article-error"><p>記事が見つかりませんでした。</p><a href="index.html">← コラム一覧へ</a></div>';
+          return;
+        }
+
+        // update meta
+        document.getElementById('pageTitle').textContent = d.title + '｜BUYMO';
+        document.getElementById('pageDesc').content = d.body ? d.body.replace(/<[^>]+>/g,'').slice(0,120) : '';
+        document.getElementById('ogTitle').content = d.title + '｜BUYMO';
+        document.getElementById('ogDesc').content = d.body ? d.body.replace(/<[^>]+>/g,'').slice(0,120) : '';
+        document.getElementById('bcTitle').textContent = d.title;
+
+        var tags = (d.tags || []).filter(Boolean);
+
+        document.getElementById('articleWrap').innerHTML =
+          '<article class="article-wrap">' +
+            '<div class="article-meta">' +
+              '<span class="article-cat">' + esc(d.category || '未分類') + '</span>' +
+              '<time class="article-date" datetime="' + esc(d.date) + '">' + esc(d.date) + '</time>' +
+              (d.author ? '<span class="article-author">by ' + esc(d.author) + '</span>' : '') +
+            '</div>' +
+            '<h1 class="article-title">' + esc(d.title) + '</h1>' +
+            '<hr class="article-divider" />' +
+            '<div class="article-body">' + (d.body || '') + '</div>' +
+            (tags.length ? '<div class="article-tags">' + tags.map(function(t){ return '<span class="article-tag">#' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+            '<nav class="article-nav" aria-label="記事ナビゲーション">' +
+              '<a href="index.html">← コラム一覧へ</a>' +
+              '<a href="../buymo-contact.html">無料査定を申し込む →</a>' +
+            '</nav>' +
+          '</article>';
+
+        document.getElementById('ctaSection').style.display = '';
+      })
+      .catch(function () {
+        document.getElementById('articleWrap').innerHTML =
+          '<div class="article-error"><p>記事の読み込みに失敗しました。</p><a href="index.html">← コラム一覧へ</a></div>';
+      });
+  }
+})();
+</script>
+</body>
+</html>

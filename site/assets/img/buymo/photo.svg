@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320" role="img" aria-label="写真（差し替え用プレースホルダー）">
+  <rect width="480" height="320" rx="12" fill="#F1EDE6"/>
+  <rect x="1" y="1" width="478" height="318" rx="11" fill="none" stroke="#E2D8C8" stroke-width="2"/>
+  <g fill="#C9BCA8">
+    <rect x="196" y="120" width="88" height="64" rx="8"/>
+    <circle cx="240" cy="152" r="18" fill="#F1EDE6"/>
+    <circle cx="240" cy="152" r="11" fill="#C9BCA8"/>
+    <rect x="262" y="112" width="20" height="12" rx="3"/>
+  </g>
+  <text x="240" y="214" text-anchor="middle" font-family="'Noto Sans JP',sans-serif" font-size="14" fill="#B0A38E">写真 差し替え用</text>
+</svg>

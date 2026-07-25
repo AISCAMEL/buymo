@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="1040" viewBox="0 0 1180 1040" font-family="'Noto Sans CJK JP','IPAGothic',sans-serif">
+  <defs>
+    <style>
+      .bg{fill:#f4f6fa}
+      .frame{fill:#ffffff;stroke:#c7cfdb;stroke-width:2}
+      .box{fill:#eef1f6;stroke:#c0c8d6;stroke-width:1.5}
+      .ph{fill:#9aa6b8}
+      .ph2{fill:#b8c1d0}
+      .secnumtxt{fill:#ffffff;font-weight:700;font-size:12px}
+      .lab{fill:#33415c;font-size:13px}
+      .btng{fill:#d9bd72}
+      .btngtxt{fill:#0e1b33;font-size:11px;font-weight:700}
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1180" height="1040"/>
+  <text x="40" y="40" fill="#0e1b33" font-size="22" font-weight="800">AUC-AGENT ／ 会員サイト ワイヤーフレーム</text>
+  <text x="40" y="62" fill="#8a93a4" font-size="13">マイページ（注文状況＋かんたんオーダー）＋ ログイン</text>
+
+  <!-- ===== Mypage frame ===== -->
+  <rect class="frame" x="40" y="84" width="760" height="916" rx="10"/>
+  <!-- header -->
+  <rect x="40" y="84" width="760" height="40" rx="10" fill="#cdd5e2"/>
+  <circle cx="68" cy="104" r="9" fill="#0e1b33"/>
+  <rect class="ph" x="84" y="99" width="80" height="10" rx="3"/>
+  <rect x="710" y="93" width="74" height="22" rx="11" fill="none" stroke="#9aa6b8" stroke-width="1.5"/>
+  <!-- page head (navy) -->
+  <rect x="40" y="124" width="760" height="70" fill="#1d2c49"/>
+  <rect x="64" y="142" width="220" height="16" rx="4" fill="#54618a"/>
+  <rect x="64" y="168" width="300" height="9" rx="3" fill="#445b86"/>
+
+  <!-- sidebar -->
+  <rect class="box" x="64" y="218" width="190" height="300" rx="10"/>
+  <circle cx="92" cy="252" r="16" fill="#d9bd72"/>
+  <rect x="116" y="242" width="90" height="10" rx="3" class="ph"/>
+  <rect x="116" y="258" width="70" height="8" rx="3" class="ph2"/>
+  <line x1="80" y1="284" x2="238" y2="284" stroke="#c0c8d6"/>
+  <rect x="80" y="298" width="158" height="24" rx="6" fill="#dfe5ee"/>
+  <rect x="80" y="330" width="158" height="22" rx="6" fill="#eef1f6"/>
+  <rect x="80" y="360" width="158" height="22" rx="6" fill="#eef1f6"/>
+  <rect x="80" y="390" width="158" height="22" rx="6" fill="#eef1f6"/>
+  <rect x="80" y="420" width="158" height="22" rx="6" fill="#eef1f6"/>
+
+  <!-- main: stats -->
+  <rect class="box" x="272" y="218" width="160" height="70" rx="10"/>
+  <rect class="box" x="442" y="218" width="160" height="70" rx="10"/>
+  <rect class="box" x="612" y="218" width="164" height="70" rx="10"/>
+  <rect x="288" y="236" width="80" height="8" rx="3" class="ph2"/>
+  <rect x="288" y="254" width="50" height="18" rx="4" class="ph"/>
+  <rect x="458" y="236" width="80" height="8" rx="3" class="ph2"/>
+  <rect x="458" y="254" width="50" height="18" rx="4" class="ph"/>
+  <rect x="628" y="236" width="90" height="8" rx="3" class="ph2"/>
+  <rect x="628" y="254" width="80" height="18" rx="4" class="ph"/>
+
+  <!-- main: orders panel -->
+  <rect class="frame" x="272" y="304" width="504" height="214" rx="10"/>
+  <rect x="288" y="318" width="120" height="12" rx="3" class="ph"/>
+  <rect class="btng" x="668" y="312" width="92" height="24" rx="12"/>
+  <text x="714" y="328" text-anchor="middle" class="btngtxt">＋ 新規オーダー</text>
+  <line x1="272" y1="348" x2="776" y2="348" stroke="#e4e8ef"/>
+  <!-- order row 1 -->
+  <rect x="288" y="362" width="180" height="11" rx="3" class="ph"/>
+  <rect x="288" y="380" width="220" height="8" rx="3" class="ph2"/>
+  <rect x="288" y="396" width="360" height="8" rx="4" fill="#e4e8ef"/>
+  <rect x="288" y="396" width="220" height="8" rx="4" fill="#d9bd72"/>
+  <rect x="676" y="360" width="84" height="20" rx="10" fill="#e6f0ff"/>
+  <text x="718" y="374" text-anchor="middle" fill="#2a64c4" font-size="10" font-weight="700">陸送・手続き中</text>
+  <rect x="700" y="388" width="60" height="10" rx="3" class="ph"/>
+  <line x1="272" y1="426" x2="776" y2="426" stroke="#e4e8ef"/>
+  <!-- order row 2 -->
+  <rect x="288" y="440" width="180" height="11" rx="3" class="ph"/>
+  <rect x="288" y="458" width="220" height="8" rx="3" class="ph2"/>
+  <rect x="288" y="474" width="360" height="8" rx="4" fill="#e4e8ef"/>
+  <rect x="288" y="474" width="360" height="8" rx="4" fill="#cdd5e2"/>
+  <rect x="676" y="438" width="84" height="20" rx="10" fill="#eef0f4"/>
+  <text x="718" y="452" text-anchor="middle" fill="#5a6675" font-size="10" font-weight="700">納車完了</text>
+  <rect x="700" y="466" width="60" height="10" rx="3" class="ph"/>
+
+  <!-- main: order form panel -->
+  <rect class="frame" x="272" y="534" width="504" height="450" rx="10"/>
+  <rect x="288" y="550" width="160" height="12" rx="3" class="ph"/>
+  <rect x="288" y="576" width="488" height="28" rx="6" fill="#e6f0ff" stroke="#c8dcff"/>
+  <text x="300" y="594" fill="#2a64c4" font-size="11">条件を入力すると、その場で総額の目安を計算します</text>
+  <!-- car field -->
+  <rect x="288" y="616" width="120" height="9" rx="3" class="ph2"/>
+  <rect class="box" x="288" y="630" width="472" height="32" rx="6"/>
+  <!-- 2col fields -->
+  <rect x="288" y="676" width="120" height="9" rx="3" class="ph2"/>
+  <rect class="box" x="288" y="690" width="228" height="32" rx="6"/>
+  <rect x="532" y="676" width="120" height="9" rx="3" class="ph2"/>
+  <rect class="box" x="532" y="690" width="228" height="32" rx="6"/>
+  <rect x="288" y="734" width="120" height="9" rx="3" class="ph2"/>
+  <rect class="box" x="288" y="748" width="228" height="32" rx="6"/>
+  <rect x="532" y="734" width="120" height="9" rx="3" class="ph2"/>
+  <rect x="532" y="752" width="14" height="14" rx="3" fill="#d9bd72"/><rect x="552" y="754" width="160" height="9" rx="3" class="ph2"/>
+  <rect x="532" y="772" width="14" height="14" rx="3" fill="#cdd5e2"/><rect x="552" y="774" width="160" height="9" rx="3" class="ph2"/>
+  <!-- live quote box -->
+  <rect x="288" y="794" width="472" height="120" rx="8" fill="#fbfcfe" stroke="#e4e8ef"/>
+  <rect x="304" y="810" width="120" height="9" rx="3" class="ph2"/><rect x="690" y="810" width="60" height="9" rx="3" class="ph"/>
+  <rect x="304" y="832" width="180" height="9" rx="3" class="ph2"/><rect x="690" y="832" width="60" height="9" rx="3" class="ph"/>
+  <rect x="304" y="858" width="440" height="40" rx="8" fill="#0e1b33"/>
+  <rect x="320" y="872" width="120" height="11" rx="3" fill="#3a4a6e"/>
+  <rect x="650" y="868" width="80" height="20" rx="4" fill="#e8d39a"/>
+  <!-- submit -->
+  <rect class="btng" x="288" y="930" width="472" height="38" rx="19"/>
+  <text x="524" y="954" text-anchor="middle" class="btngtxt">この内容でオーダーを依頼する</text>
+
+  <!-- ===== Login frame ===== -->
+  <rect class="frame" x="840" y="84" width="300" height="430" rx="10"/>
+  <text x="990" y="74" text-anchor="middle" class="lab">ログイン / 会員登録</text>
+  <rect x="864" y="112" width="252" height="36" rx="18" fill="#eef1f6"/>
+  <rect x="868" y="116" width="124" height="28" rx="14" fill="#ffffff" stroke="#c7cfdb"/>
+  <text x="930" y="135" text-anchor="middle" fill="#0e1b33" font-size="11" font-weight="700">ログイン</text>
+  <text x="1054" y="135" text-anchor="middle" fill="#8a93a4" font-size="11">会員登録</text>
+  <rect x="864" y="172" width="160" height="12" rx="3" class="ph"/>
+  <rect x="864" y="196" width="220" height="8" rx="3" class="ph2"/>
+  <rect x="864" y="224" width="90" height="9" rx="3" class="ph2"/>
+  <rect class="box" x="864" y="238" width="252" height="34" rx="6"/>
+  <rect x="864" y="288" width="90" height="9" rx="3" class="ph2"/>
+  <rect class="box" x="864" y="302" width="252" height="34" rx="6"/>
+  <rect class="btng" x="864" y="356" width="252" height="40" rx="20"/>
+  <text x="990" y="381" text-anchor="middle" class="btngtxt">ログイン</text>
+  <rect x="900" y="418" width="180" height="9" rx="3" class="ph2"/>
+
+  <!-- labels for mypage -->
+  <g class="lab">
+    <text x="840" y="566" font-weight="700" fill="#0e1b33">マイページの構成</text>
+    <circle cx="850" cy="592" r="4" fill="#d9bd72"/><text x="864" y="597">左：プロフィール＋ナビ</text>
+    <circle cx="850" cy="616" r="4" fill="#d9bd72"/><text x="864" y="621">上段：進行中/成約/おトク額の統計</text>
+    <circle cx="850" cy="640" r="4" fill="#d9bd72"/><text x="864" y="645">中段：注文状況（進捗バー＋状態）</text>
+    <circle cx="850" cy="664" r="4" fill="#d9bd72"/><text x="864" y="669">下段：かんたんオーダー</text>
+    <circle cx="850" cy="688" r="4" fill="#d9bd72"/><text x="864" y="693">　　 → 入力で即時見積り</text>
+    <circle cx="850" cy="712" r="4" fill="#d9bd72"/><text x="864" y="717">送信→注文一覧へ反映＋自動通知</text>
+  </g>
+</svg>

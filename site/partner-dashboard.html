@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>加盟店ダッシュボード｜BUYMO</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<style>
+.partner-welcome{margin-bottom:28px;}
+.partner-welcome h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+.partner-welcome p{font-size:14px;color:var(--text-sub);}
+
+.partner-kpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:32px;}
+.p-kpi{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;}
+.p-kpi-label{font-size:12px;font-weight:700;color:var(--text-sub);margin-bottom:6px;}
+.p-kpi-num{font-size:28px;font-weight:900;color:var(--text);}
+.p-kpi.accent .p-kpi-num{color:var(--green);}
+
+.p-section-title{font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* case table */
+.p-table-wrap{overflow-x:auto;margin-bottom:32px;}
+.p-table{width:100%;border-collapse:collapse;font-size:14px;}
+.p-table th{background:var(--green-bg);color:var(--green-dark);font-weight:700;padding:10px 12px;text-align:left;white-space:nowrap;border-bottom:2px solid var(--green-pale);}
+.p-table td{padding:12px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.p-table tr:hover td{background:var(--green-bg);}
+.p-stage-select{
+  padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;
+  font-size:12px;font-weight:700;font-family:var(--f-body);cursor:pointer;
+  background:var(--white);color:var(--text);
+}
+.p-stage-select:focus{outline:none;border-color:var(--green);}
+.p-saved{color:var(--green);font-size:12px;font-weight:700;display:none;}
+.p-saved.show{display:inline;}
+
+/* quick links */
+.p-quick{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:40px;}
+.p-quick a{
+  display:flex;align-items:center;gap:10px;
+  background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:16px 20px;font-weight:700;font-size:14px;
+  transition:box-shadow .18s,transform .18s;
+}
+.p-quick a:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px);}
+.p-quick-ico{font-size:24px;}
+
+/* notice */
+.p-notice{background:var(--green-bg);border:1.5px solid var(--green-pale);border-radius:var(--radius);padding:16px 20px;margin-bottom:32px;}
+.p-notice-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--green-pale);}
+.p-notice-item:last-child{border-bottom:none;padding-bottom:0;}
+.p-notice-lv{font-size:18px;flex-shrink:0;}
+.p-notice-body{flex:1;}
+.p-notice-t{font-weight:700;font-size:14px;}
+.p-notice-d{font-size:12px;color:var(--text-sub);}
+
+/* empty state */
+.p-empty{text-align:center;padding:40px;color:var(--text-sub);font-size:14px;}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="partner-dashboard.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title" id="storeLabel">加盟店</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <span class="portal-role">加盟店</span>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+
+    <div class="partner-welcome">
+      <img class="page-mascot" src="assets/img/buymo/32_ダブル親指立てポーズ.png" alt="" aria-hidden="true">
+      <h1 id="welcomeMsg">ダッシュボード</h1>
+      <p id="todayDate"></p>
+    </div>
+
+    <!-- KPI -->
+    <div class="partner-kpi">
+      <div class="p-kpi"><div class="p-kpi-label">担当案件</div><div class="p-kpi-num" id="pkTotal">-</div></div>
+      <div class="p-kpi"><div class="p-kpi-label">新規受付</div><div class="p-kpi-num" id="pkNew">-</div></div>
+      <div class="p-kpi"><div class="p-kpi-label">商談中</div><div class="p-kpi-num" id="pkNego">-</div></div>
+      <div class="p-kpi accent"><div class="p-kpi-label">確定売上（完了）</div><div class="p-kpi-num" id="pkSales">-</div></div>
+    </div>
+
+    <!-- お知らせ -->
+    <div class="p-section-title">📢 本部からのお知らせ</div>
+    <div class="p-notice" id="noticeList"><p class="p-empty">読み込み中…</p></div>
+
+    <!-- 担当案件一覧 -->
+    <div class="p-section-title">📋 担当案件一覧</div>
+    <div class="p-table-wrap">
+      <table class="p-table">
+        <thead>
+          <tr>
+            <th>案件ID</th>
+            <th>受付日</th>
+            <th>氏名</th>
+            <th>ジャンル</th>
+            <th>ステージ</th>
+            <th>金額（円）</th>
+            <th>メモ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="caseBody"><tr><td colspan="8" class="p-empty">読み込み中…</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- クイックリンク -->
+    <div class="p-section-title">🔗 クイックリンク</div>
+    <div class="p-quick">
+      <a href="partner-academy.html"><span class="p-quick-ico">🎓</span>アカデミー</a>
+      <a href="partner-scripts.html"><span class="p-quick-ico">📖</span>トークスクリプト</a>
+      <a href="partner-community.html"><span class="p-quick-ico">💬</span>コミュニティ</a>
+      <a href="hq.html?role=partner"><span class="p-quick-ico">🗂️</span>案件ボード</a>
+    </div>
+
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script>
+(function () {
+  'use strict';
+  var STAGES = ['新規受付','査定中','商談中','契約','入金待ち','完了'];
+
+  // ウェルカムメッセージ
+  var sess = (window.AUTH && AUTH.session) ? AUTH.session() : null;
+  var storeName = sess ? (sess.name || sess.email || '加盟店') : '加盟店';
+  document.getElementById('welcomeMsg').textContent = storeName + ' ダッシュボード';
+  document.getElementById('storeLabel').textContent = storeName;
+  var d = new Date();
+  document.getElementById('todayDate').textContent =
+    d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日（' + ['日','月','火','水','木','金','土'][d.getDay()] + '）';
+
+  HQ.nav('dashboard');
+
+  // お知らせ
+  (function () {
+    var notices = HQ.getNotices().slice(0, 3);
+    var el = document.getElementById('noticeList');
+    if (!notices.length) { el.innerHTML = '<p class="p-empty">現在お知らせはありません。</p>'; return; }
+    el.innerHTML = notices.map(function (n) {
+      return '<div class="p-notice-item">' +
+        '<span class="p-notice-lv">' + (n.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' +
+        '<div class="p-notice-body"><div class="p-notice-t">' + HQ.esc(n.t) + '</div>' +
+        '<div class="p-notice-d">' + HQ.esc(n.date || '') + '</div></div>' +
+        '</div>';
+    }).join('');
+  })();
+
+  // 案件
+  HQ.loadCases(function (all) {
+    // パートナーは自分の担当案件のみ
+    var role = sess ? sess.role : 'partner';
+    var list = (role === 'hq')
+      ? all
+      : all.filter(function (c) {
+          return !c.assignee || c.assignee === storeName ||
+                 (storeName && c.assignee && c.assignee.indexOf(storeName) >= 0);
+        });
+
+    // KPI
+    var won = ['契約','入金待ち','完了'];
+    document.getElementById('pkTotal').textContent = list.length + '件';
+    document.getElementById('pkNew').textContent   = list.filter(function(c){return c.stage==='新規受付';}).length + '件';
+    document.getElementById('pkNego').textContent  = list.filter(function(c){return c.stage==='商談中';}).length + '件';
+    var sales = list.filter(function(c){return c.stage==='完了';}).reduce(function(s,c){return s+(Number(c.amount)||0);},0);
+    document.getElementById('pkSales').textContent = HQ.yen(sales);
+
+    // テーブル
+    var tbody = document.getElementById('caseBody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="p-empty">担当案件はまだありません。</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.slice(0, 30).map(function (c) {
+      var opts = STAGES.map(function (s) {
+        return '<option value="' + s + '"' + (c.stage === s ? ' selected' : '') + '>' + s + '</option>';
+      }).join('');
+      return '<tr id="row-' + HQ.esc(c.id) + '">' +
+        '<td style="white-space:nowrap">' + HQ.esc(c.id) + '</td>' +
+        '<td class="td-sub">' + HQ.esc(c.date||'—') + '</td>' +
+        '<td>' + HQ.esc(c.name) + '</td>' +
+        '<td>' + HQ.esc(c.genre||'—') + '</td>' +
+        '<td><select class="p-stage-select" data-id="' + HQ.esc(c.id) + '" data-prev="' + HQ.esc(c.stage) + '">' + opts + '</select>' +
+        '<span class="p-saved" id="saved-' + HQ.esc(c.id) + '">保存</span></td>' +
+        '<td>' + (c.amount ? (Number(c.amount)||0).toLocaleString() : '—') + '</td>' +
+        '<td style="max-width:180px;font-size:12px;color:var(--text-sub)">' + HQ.esc((c.memo||'').slice(0,60)) + '</td>' +
+        '<td><a href="hq-leads.html" style="font-size:12px;color:var(--green);font-weight:700;">詳細</a></td>' +
+        '</tr>';
+    }).join('');
+
+    // ステージ変更
+    tbody.addEventListener('change', function (e) {
+      var sel = e.target.closest('.p-stage-select');
+      if (!sel) return;
+      var id   = sel.dataset.id;
+      var prev = sel.dataset.prev;
+      var next = sel.value;
+      if (next === prev) return;
+      sel.dataset.prev = next;
+      HQ.upsertCase({ id: id, stage: next });
+      var saved = document.getElementById('saved-' + id);
+      if (saved) { saved.classList.add('show'); setTimeout(function(){ saved.classList.remove('show'); }, 2000); }
+    });
+  });
+})();
+</script>
+<script>window.BUYMO_BOT_MODE='partner';</script>
+<script src="assets/js/chatbot.js" defer></script>
+</body>
+</html>

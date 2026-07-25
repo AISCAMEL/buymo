@@ -1,0 +1,81 @@
+<!--
+============================================================
+ BUYMO 共通ヘッダー / フッター 埋め込みスニペット（LPtools・WordPress用）
+============================================================
+ 目的：外部ツール（LPtools等）で作るジャンルLPでも、本体サイトと
+       同じヘッダー・フッター・「ジャンル別の買取」一覧を表示し、
+       genres.js で常に同期させる。
+
+ 使い方：
+ 1) 下の【BASE】を本体サイトの公開URLに一括置換（末尾スラッシュ無し）
+      例）https://buymo.example.jp
+ 2) このファイルの中身を、LPtoolsの「カスタムHTML」ブロックに
+      ページ最上部（ヘッダー）と最下部（フッター）に分けて貼り付け。
+      ※ <link>/<script> はどちらか一方に1回だけでOK。
+ 3) ジャンルを増減したいときは本体の assets/js/genres.js を編集すれば、
+      このスニペットを貼った全LPのフッター一覧も自動で更新されます。
+============================================================
+-->
+
+<!-- ▼ <head> 相当（1回だけ） ───────────────────────── -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="【BASE】/assets/css/buymo.css" />
+
+<!-- ▼ ヘッダー（ページ最上部に貼り付け） ───────────── -->
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a href="【BASE】/buymo.html#top" class="logo" aria-label="BUYMO ホーム"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
+    <nav class="gnav" id="gnav" aria-label="メインナビゲーション"><ul>
+      <li><a href="【BASE】/buymo.html#top">ホーム</a></li>
+      <li><a href="【BASE】/genre/">買取ジャンル</a></li>
+      <li><a href="【BASE】/area/">エリア一覧</a></li>
+      <li><a href="【BASE】/buymo.html#faq">よくある質問</a></li>
+      <li><a href="【BASE】/buymo-contact.html">お問い合わせ</a></li>
+    </ul></nav>
+    <a href="mailto:info@aisjaltd.com" class="header-tel" aria-label="メールでお問い合わせ"><span class="tel-ico" aria-hidden="true">✉️</span>メールで査定</a>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false" aria-controls="gnav"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- ────────────────────────────────────────────────
+     ここに LPtools で作る本文（ヒーロー〜FAQ〜CTA）が入ります
+─────────────────────────────────────────────── -->
+
+<!-- ▼ フッター（ページ最下部に貼り付け） ───────────── -->
+<footer class="site-footer">
+  <nav class="footer-genres" aria-label="ジャンル別の買取">
+    <div class="container">
+      <h3>ジャンル別の買取</h3>
+      <ul id="genre-nav" class="genre-list"></ul>
+    </div>
+  </nav>
+  <div class="container grid grid-3 footer-grid">
+    <div class="footer-col">
+      <a href="【BASE】/buymo.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
+      <p class="footer-company">合同会社アイズ</p>
+      <p>〒971-8138<br>福島県いわき市若葉台1丁目31番</p>
+      <p>✉️ info@aisjaltd.com</p>
+    </div>
+    <nav class="footer-col" aria-label="サイトマップ"><h3>サイトマップ</h3><ul class="footer-links">
+      <li><a href="【BASE】/buymo.html#company">会社概要</a></li>
+      <li><a href="【BASE】/privacy.html">プライバシーポリシー</a></li>
+      <li><a href="【BASE】/genre/">買取ジャンル一覧</a></li>
+      <li><a href="【BASE】/area/">対応エリア一覧</a></li>
+      <li><a href="【BASE】/buymo-partner.html">パートナー募集</a></li>
+      <li><a href="【BASE】/buymo-contact.html">お問い合わせ</a></li>
+    </ul></nav>
+    <div class="footer-col"><h3>SNS</h3><ul class="sns-list">
+      <li><a href="#" class="sns fb" aria-label="Facebook">f</a></li>
+      <li><a href="#" class="sns tw" aria-label="Twitter">𝕏</a></li>
+      <li><a href="#" class="sns ig" aria-label="Instagram">📷</a></li>
+      <li><a href="#" class="sns line" aria-label="LINE">L</a></li>
+    </ul><p class="footer-hours">営業時間 平日 8:00〜17:00</p></div>
+  </div>
+  <div class="footer-bottom"><p>Copyright © 2026 合同会社アイズ（BUYMO） All Rights Reserved.</p></div>
+</footer>
+
+<!-- ▼ スクリプト（1回だけ・ページ最下部推奨） ───────── -->
+<!-- genres.js：フッターの「ジャンル別の買取」一覧を本体と同期 -->
+<script src="【BASE】/assets/js/genres.js" defer></script>
+<!-- buymo.js：ハンバーガーメニュー・スムーズスクロール等（任意） -->
+<script src="【BASE】/assets/js/buymo.js" defer></script>

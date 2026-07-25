@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>リード一覧｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <img class="page-mascot" src="assets/img/buymo/09_営業プロフェッショナルスタイル.png" alt="" aria-hidden="true">
+    <h1>リード一覧</h1>
+    <p class="portal-sub">査定申込（リード）の一覧。担当の割り当て・ステージ変更がその場でできます（GAS接続時はSlack通知＆ボードに反映）。</p>
+
+    <div class="filter-bar">
+      <input type="search" id="fSearch" placeholder="🔍 名前・ID・電話で検索" />
+      <select id="fStage"><option value="">ステージ：すべて</option></select>
+      <select id="fStore"><option value="">担当：すべて</option></select>
+      <select id="fSort">
+        <option value="date_desc">並び替え：新着順</option>
+        <option value="date_asc">受付日が古い順</option>
+        <option value="amount_desc">金額が高い順</option>
+        <option value="amount_asc">金額が低い順</option>
+      </select>
+      <span class="filter-count" id="fCount"></span>
+      <button id="btnCsv" class="btn btn-primary btn-csv" type="button">⬇ CSV出力</button>
+    </div>
+
+    <div class="hq-table-wrap">
+      <table class="hq-table">
+        <thead><tr><th>案件ID</th><th>受付日</th><th>お名前</th><th>連絡先</th><th>ジャンル</th><th>担当（加盟店）</th><th>ステージ</th><th>金額</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script src="assets/js/hq-leads.js" defer></script>
+</body>
+</html>

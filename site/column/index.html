@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>コラム・買取お役立ち情報｜車買取のBUYMO</title>
+<meta name="description" content="車の売り方・査定のコツ・手続きの流れなど、車買取にまつわるお役立ちコラムをBUYMOがお届けします。" />
+<meta name="theme-color" content="#1C3030" />
+<link rel="canonical" href="https://buymo.me/column/" />
+<link rel="icon" type="image/svg+xml" href="../assets/img/buymo-favicon.svg" />
+<link rel="apple-touch-icon" href="../assets/img/buymo-favicon-180.png" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="BUYMO｜車買取" />
+<meta property="og:title" content="コラム・買取お役立ち情報｜BUYMO" />
+<meta property="og:description" content="車の売り方・査定のコツ・手続きの流れなど、買取にまつわるお役立ちコラム。" />
+<meta property="og:image" content="../assets/img/buymo-ogp.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="../assets/css/buymo.css" />
+<link rel="stylesheet" href="../assets/css/buymo-area.css" />
+<style>
+/* ---- Column listing ---- */
+.col-filter{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:40px;}
+.col-filter-btn{
+  background:var(--gray);border:none;border-radius:100px;padding:6px 18px;
+  font-size:13px;font-weight:700;cursor:pointer;color:var(--text-sub);
+  font-family:var(--f-body);transition:all .18s;
+}
+.col-filter-btn:hover,.col-filter-btn.active{background:var(--green);color:#fff;}
+.col-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:28px;
+  margin-bottom:60px;
+}
+.col-card{
+  background:var(--white);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:box-shadow .2s,transform .2s;
+}
+.col-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px);}
+.col-card-img{
+  height:160px;background:var(--green-bg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:48px;color:var(--green);overflow:hidden;
+}
+.col-card-img img{width:100%;height:100%;object-fit:cover;}
+.col-card-body{padding:20px;flex:1;display:flex;flex-direction:column;}
+.col-card-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.col-cat{
+  background:var(--green-pale);color:var(--green-dark);
+  font-size:11px;font-weight:800;padding:3px 12px;border-radius:100px;
+}
+.col-date{font-size:12px;color:var(--text-sub);}
+.col-card-title{
+  font-size:16px;font-weight:700;line-height:1.5;
+  margin-bottom:10px;color:var(--text);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.col-excerpt{
+  font-size:13px;color:var(--text-sub);line-height:1.7;flex:1;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.col-card-footer{padding:14px 20px 20px;border-top:1px solid var(--border);}
+.col-read-more{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:700;color:var(--green);
+}
+.col-read-more::after{content:"→";}
+
+/* pagination */
+.col-pager{display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:60px;}
+.col-pager button{
+  background:var(--white);border:1.5px solid var(--border);border-radius:100px;
+  padding:8px 22px;font-size:14px;font-weight:700;cursor:pointer;
+  font-family:var(--f-body);color:var(--text-sub);transition:all .18s;
+}
+.col-pager button:hover:not(:disabled){background:var(--green);color:#fff;border-color:var(--green);}
+.col-pager button:disabled{opacity:.35;cursor:default;}
+.col-pager-info{font-size:13px;color:var(--text-sub);}
+
+/* empty / loading */
+.col-empty{text-align:center;padding:80px 0;color:var(--text-sub);}
+.col-loading{display:flex;justify-content:center;padding:80px 0;}
+.col-spinner{
+  width:36px;height:36px;border:3px solid var(--green-pale);
+  border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a href="../index.html#top" class="logo" aria-label="BUYMO ホーム">
+      <span class="logo-mark" aria-hidden="true">🐮</span>
+      <span class="logo-text">BUYMO</span>
+    </a>
+    <nav class="gnav" id="gnav" aria-label="メインナビゲーション">
+      <ul>
+        <li><a href="../index.html#top">ホーム</a></li>
+        <li><a href="../index.html#features">サービス内容</a></li>
+        <li><a href="../genre/">買取ジャンル</a></li>
+        <li><a href="../area/">エリア一覧</a></li>
+        <li><a href="index.html" aria-current="page">コラム</a></li>
+        <li><a href="../buymo-contact.html">お問い合わせ</a></li>
+      </ul>
+    </nav>
+    <a href="mailto:info@aisjaltd.com" class="header-tel" aria-label="メールでお問い合わせ">
+      <span class="tel-ico" aria-hidden="true">✉️</span>メールで査定
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false" aria-controls="gnav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero area-hero" aria-labelledby="page-title">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="パンくずリスト">
+        <a href="../index.html#top">ホーム</a>
+        <span aria-hidden="true">›</span>
+        <span>コラム</span>
+      </nav>
+      <p class="hero-lead">📝 車買取のお役立ち情報</p>
+      <h1 id="page-title">BUYMOコラム</h1>
+      <p class="page-lead">売り方・査定のコツ・手続きの流れなど、車を高く売るための情報をお届けします。</p>
+    </div>
+  </section>
+
+  <section class="area-intro" style="padding-top:60px;" aria-label="コラム一覧">
+    <div class="container">
+
+      <!-- カテゴリフィルター -->
+      <div class="col-filter" id="catFilter" role="group" aria-label="カテゴリで絞り込む">
+        <button class="col-filter-btn active" data-cat="">すべて</button>
+      </div>
+
+      <!-- 記事グリッド -->
+      <div id="colGrid" aria-live="polite" aria-label="記事一覧">
+        <div class="col-loading"><div class="col-spinner" role="status" aria-label="読み込み中"></div></div>
+      </div>
+
+      <!-- ページネーション -->
+      <div class="col-pager" id="colPager" aria-label="ページ切り替え" style="display:none;">
+        <button id="prevBtn" disabled aria-label="前のページ">← 前へ</button>
+        <span class="col-pager-info" id="pagerInfo"></span>
+        <button id="nextBtn" disabled aria-label="次のページ">次へ →</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="form-section" aria-labelledby="cta-title">
+    <div class="container area-bottom-cta">
+      <h2 id="cta-title">無料査定のお申し込みはこちら</h2>
+      <p>出張査定・手続き完全無料。最短即日でご連絡します。</p>
+      <div class="area-cta">
+        <a href="../buymo-contact.html" class="btn btn-primary btn-lg">無料査定を依頼する</a>
+        <a href="mailto:info@aisjaltd.com" class="btn btn-tel">✉️ メールで査定</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <nav class="footer-genres" aria-label="ジャンル別の買取">
+    <div class="container">
+      <h3>ジャンル別の買取</h3>
+      <ul id="genre-nav" class="genre-list"></ul>
+    </div>
+  </nav>
+  <div class="container grid grid-3 footer-grid">
+    <div class="footer-col">
+      <a href="../index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
+      <p class="footer-company">合同会社アイズ</p>
+      <p>〒971-8138<br>福島県いわき市若葉台1丁目31番</p>
+      
+      <p>✉️ info@aisjaltd.com</p>
+    </div>
+    <nav class="footer-col" aria-label="サイトマップ">
+      <h3>サイトマップ</h3>
+      <ul class="footer-links">
+        <li><a href="../index.html#company">会社概要</a></li>
+        <li><a href="../privacy.html">プライバシーポリシー</a></li>
+        <li><a href="../tokushoho.html">特定商取引法・古物商表記</a></li>
+        <li><a href="../index.html#faq">よくある質問</a></li>
+        <li><a href="index.html" aria-current="page">コラム</a></li>
+        <li><a href="../buymo-contact.html">お問い合わせ</a></li>
+      </ul>
+    </nav>
+    <div class="footer-col">
+      <h3>SNS</h3>
+      <ul class="sns-list">
+        <li><a href="#" class="sns fb" aria-label="Facebook">f</a></li>
+        <li><a href="#" class="sns tw" aria-label="Twitter">𝕏</a></li>
+        <li><a href="#" class="sns ig" aria-label="Instagram">📷</a></li>
+        <li><a href="#" class="sns line" aria-label="LINE">L</a></li>
+      </ul>
+      <p class="footer-hours">営業時間 平日 8:00〜17:00</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>Copyright © 2026 合同会社アイズ（BUYMO） All Rights Reserved.</p>
+  </div>
+</footer>
+
+<button class="to-top" id="toTop" aria-label="トップに戻る" hidden>▲</button>
+
+<script src="../assets/js/analytics.js" defer></script>
+<script src="../assets/js/genres.js" defer></script>
+<script src="../assets/js/buymo.js" defer></script>
+
+<script>
+(function () {
+  'use strict';
+  var GAS = 'https://script.google.com/macros/s/AKfycbw0Ao9-I-GUizO--TIU2AeJCIEGoW8Ot9DZXErD2oJk8fg_1sNj8FRNYkoAvtm6CwMc/exec';
+  var currentPage = 1;
+  var currentCat  = '';
+  var totalPages  = 1;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function renderCards(items) {
+    var grid = document.getElementById('colGrid');
+    if (!items || items.length === 0) {
+      grid.innerHTML = '<div class="col-empty"><p style="font-size:40px">📝</p><p>まだ記事がありません</p></div>';
+      return;
+    }
+    grid.innerHTML = '<div class="col-grid">' + items.map(function (c) {
+      return '<article class="col-card">' +
+        '<div class="col-card-img"><span aria-hidden="true">🚗</span></div>' +
+        '<div class="col-card-body">' +
+          '<div class="col-card-meta">' +
+            '<span class="col-cat">' + esc(c.category || '未分類') + '</span>' +
+            '<time class="col-date" datetime="' + esc(c.date) + '">' + esc(c.date) + '</time>' +
+          '</div>' +
+          '<h2 class="col-card-title">' + esc(c.title) + '</h2>' +
+          '<p class="col-excerpt">' + esc(c.excerpt) + '</p>' +
+        '</div>' +
+        '<div class="col-card-footer">' +
+          '<a class="col-read-more" href="detail.html?id=' + encodeURIComponent(c.slug || c.id) + '">続きを読む</a>' +
+        '</div>' +
+        '</article>';
+    }).join('') + '</div>';
+  }
+
+  function renderCats(cats) {
+    var filter = document.getElementById('catFilter');
+    var existing = filter.querySelectorAll('[data-cat]:not([data-cat=""])');
+    existing.forEach(function (el) { el.remove(); });
+    cats.forEach(function (cat) {
+      var btn = document.createElement('button');
+      btn.className = 'col-filter-btn';
+      btn.dataset.cat = cat;
+      btn.textContent = cat;
+      filter.appendChild(btn);
+    });
+  }
+
+  function updatePager(page, pages) {
+    var pager   = document.getElementById('colPager');
+    var info    = document.getElementById('pagerInfo');
+    var prevBtn = document.getElementById('prevBtn');
+    var nextBtn = document.getElementById('nextBtn');
+    if (pages <= 1) { pager.style.display = 'none'; return; }
+    pager.style.display = '';
+    info.textContent = page + ' / ' + pages + ' ページ';
+    prevBtn.disabled = page <= 1;
+    nextBtn.disabled = page >= pages;
+  }
+
+  function load(page, cat) {
+    var grid = document.getElementById('colGrid');
+    grid.innerHTML = '<div class="col-loading"><div class="col-spinner" role="status" aria-label="読み込み中"></div></div>';
+    var url = GAS + '?action=list&limit=12&page=' + page + (cat ? '&cat=' + encodeURIComponent(cat) : '');
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        totalPages = d.pages || 1;
+        renderCards(d.items || []);
+        if (cat === '' && page === 1 && d.categories) renderCats(d.categories);
+        updatePager(d.page || 1, totalPages);
+      })
+      .catch(function () {
+        grid.innerHTML = '<div class="col-empty"><p>記事の読み込みに失敗しました。しばらく後にお試しください。</p></div>';
+      });
+  }
+
+  document.getElementById('catFilter').addEventListener('click', function (e) {
+    var btn = e.target.closest('.col-filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.col-filter-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentCat  = btn.dataset.cat || '';
+    currentPage = 1;
+    load(currentPage, currentCat);
+  });
+
+  document.getElementById('prevBtn').addEventListener('click', function () {
+    if (currentPage > 1) { currentPage--; load(currentPage, currentCat); window.scrollTo(0,0); }
+  });
+  document.getElementById('nextBtn').addEventListener('click', function () {
+    if (currentPage < totalPages) { currentPage++; load(currentPage, currentCat); window.scrollTo(0,0); }
+  });
+
+  load(1, '');
+})();
+</script>
+</body>
+</html>

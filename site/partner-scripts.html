@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>トークスクリプト集｜BUYMO 加盟店</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="partner-academy.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">加盟店</span>
+    <nav class="portal-nav">
+      <a href="hq.html?role=partner">案件ボード</a>
+      <a href="partner-academy.html">アカデミー</a>
+      <a href="partner-scripts.html" aria-current="page">スクリプト</a>
+      <a href="partner-community.html">コミュニティ</a>
+    </nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<style>
+  .sc-search{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .sc-search input{flex:1;min-width:180px;height:44px;border:1px solid #ddd;border-radius:8px;padding:0 14px;font-size:15px;font-family:inherit;}
+  .sc-search input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,.15);}
+  .sc-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+  .sc-cats button{background:#fff;border:1px solid #ddd;border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;cursor:pointer;color:#555;transition:all .15s;}
+  .sc-cats button.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .sc-group{margin-bottom:28px;}
+  .sc-group h2{font-size:17px;font-weight:900;color:var(--navy);margin-bottom:12px;border-left:5px solid var(--orange);padding-left:12px;}
+  .sc-card{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:10px;}
+  .sc-card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .sc-card-head strong{flex:1;font-size:14px;color:var(--navy);}
+  .sc-copy{background:none;border:1px solid var(--orange);color:var(--orange);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;}
+  .sc-copy:hover{background:var(--orange);color:#fff;}
+  .sc-card p{font-size:14px;color:#444;line-height:1.75;background:#FAFAFA;border-radius:8px;padding:12px 14px;border-left:3px solid #f0d9c4;}
+  .sc-empty{text-align:center;color:#aaa;padding:40px;font-size:14px;}
+</style>
+<main class="portal-main">
+  <div class="partner-banner" aria-hidden="true" style="width:100%;overflow:hidden;line-height:0;margin-top:-24px;margin-bottom:24px;">
+    <svg viewBox="0 0 1200 160" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;max-height:160px;">
+      <defs>
+        <linearGradient id="sb-bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0e1b33"/>
+          <stop offset="60%" stop-color="#2a1820"/>
+          <stop offset="100%" stop-color="#c44a10"/>
+        </linearGradient>
+        <radialGradient id="sb-glow" cx="80%" cy="75%" r="40%">
+          <stop offset="0%" stop-color="#f2591f" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#0e1b33" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="1200" height="160" fill="url(#sb-bg)"/>
+      <rect width="1200" height="160" fill="url(#sb-glow)"/>
+      <!-- diagonal lines -->
+      <line x1="0" y1="160" x2="220" y2="0" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="80" y1="160" x2="300" y2="0" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+      <!-- speech bubble 1 (large) -->
+      <rect x="80" y="30" width="200" height="68" rx="16" fill="rgba(255,255,255,0.07)"/>
+      <polygon points="95,98 80,118 122,98" fill="rgba(255,255,255,0.07)"/>
+      <!-- speech bubble 2 (smaller, right) -->
+      <rect x="310" y="50" width="140" height="48" rx="12" fill="rgba(242,89,31,0.18)"/>
+      <polygon points="430,98 444,118 410,98" fill="rgba(242,89,31,0.18)"/>
+      <!-- chat lines (simulated text) -->
+      <rect x="96" y="44" width="112" height="6" rx="3" fill="rgba(255,255,255,0.18)"/>
+      <rect x="96" y="56" width="80" height="6" rx="3" fill="rgba(255,255,255,0.14)"/>
+      <rect x="96" y="68" width="96" height="6" rx="3" fill="rgba(255,255,255,0.12)"/>
+      <rect x="324" y="64" width="68" height="5" rx="2.5" fill="rgba(255,200,150,0.22)"/>
+      <rect x="324" y="74" width="92" height="5" rx="2.5" fill="rgba(255,200,150,0.16)"/>
+      <!-- copy icon (right side) -->
+      <rect x="900" y="38" width="52" height="64" rx="8" fill="rgba(255,255,255,0.06)"/>
+      <rect x="912" y="28" width="52" height="64" rx="8" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+      <rect x="920" y="42" width="30" height="5" rx="2" fill="rgba(255,255,255,0.14)"/>
+      <rect x="920" y="52" width="24" height="5" rx="2" fill="rgba(255,255,255,0.10)"/>
+      <rect x="920" y="62" width="28" height="5" rx="2" fill="rgba(255,255,255,0.10)"/>
+      <!-- dot grid -->
+      <g fill="rgba(255,255,255,0.1)">
+        <circle cx="1080" cy="30" r="2"/> <circle cx="1110" cy="30" r="2"/> <circle cx="1140" cy="30" r="2"/>
+        <circle cx="1080" cy="55" r="2"/> <circle cx="1110" cy="55" r="2"/> <circle cx="1140" cy="55" r="2"/>
+        <circle cx="1080" cy="80" r="2"/> <circle cx="1110" cy="80" r="2"/> <circle cx="1140" cy="80" r="2"/>
+      </g>
+      <!-- wave bottom -->
+      <path d="M 0 140 Q 200 120 400 140 Q 600 160 800 140 Q 1000 120 1200 140 L 1200 160 L 0 160 Z" fill="rgba(255,255,255,0.04)"/>
+    </svg>
+  </div>
+  <div class="container">
+    <img class="page-mascot" src="assets/img/buymo/39_書類確認メモポーズ.png" alt="" aria-hidden="true">
+    <h1>トークスクリプト集</h1>
+    <p class="portal-sub">場面別の話法。ボタンでコピーして、現場でそのまま使えます。</p>
+    <div class="sc-search">
+      <input type="search" id="scSearch" placeholder="キーワードで絞り込み（例：廃車、ローン…）" />
+    </div>
+    <div class="sc-cats" id="scCats"></div>
+    <div id="scriptGroups"></div>
+  </div>
+</main>
+
+<script src="assets/js/auth.js"></script>
+<script>
+  var SCRIPTS = [
+    { cat: '📞 電話アポイント', items: [
+      { t: '初回の受電', s: 'お電話ありがとうございます、BUYMO（店名）です。お車の査定のご相談ですね。差し支えなければ、車種・年式・走行距離をお伺いできますか？ご都合のよい日に無料で出張査定に伺います。' },
+      { t: '出張日程の調整', s: 'ありがとうございます。査定はその場で金額をお出しします。今週ですと◯日と◯日が空いておりますが、ご都合いかがでしょうか？所要時間は30分ほどです。' },
+      { t: '留守電メッセージ', s: 'BUYMO（店名）の◯◯と申します。お車の査定のお問い合わせをいただきありがとうございます。改めてご連絡いたしますが、お急ぎの場合は◯◯（番号）までお気軽にお電話ください。失礼いたします。' }
+    ]},
+    { cat: '📩 メール・LINE返信（フォーム来訪者へ）', items: [
+      { t: 'フォーム受付の初回返信', s: 'この度はBUYMOへ無料査定をお申し込みいただきありがとうございます。担当の◯◯が承りました。出張査定のご希望日時を2〜3候補お知らせいただけますと、すぐに調整いたします。査定・出張・手続きはすべて無料です。' },
+      { t: '概算シミュ後の返信', s: 'サイトの査定シミュレーションをご利用いただきありがとうございます。表示の概算をもとに、実車を拝見して正式金額をご提示します。最短即日で伺えますので、ご希望日時をお知らせください。' },
+      { t: '返信が途絶えた方へのリマインド', s: '先日は査定のお問い合わせをありがとうございました。その後ご検討いかがでしょうか。お車は時期により相場が変動します。ご不明点だけでもお気軽にご返信ください。' }
+    ]},
+    { cat: '🚗 査定・提示', items: [
+      { t: '現車確認の声かけ', s: '本日はお時間ありがとうございます。お車を一通り拝見しますね。気になる箇所や、これまでの修理・装備があれば教えてください。プラス評価につながることもあります。' },
+      { t: '金額提示', s: '拝見しました。状態を踏まえ、買取金額は◯◯円をご提示します。この価格は装備・人気・相場を評価した金額です。ご不明点があればご説明します。' },
+      { t: '書類が揃わない場合', s: 'お手元に書類が揃っていなくても大丈夫です。再発行が必要な書類はこちらで取得をサポートします。まずは進められますのでご安心ください。' },
+      { t: 'ローン残債がある場合', s: 'ローンが残っていても、買取金額でそのまま精算できる場合がございます。まず残債の金額と買取金額を比べてみましょう。買取額が残債を上回れば手元にお金が残ります。下回る場合も差額の対応方法をご一緒に検討します。' },
+      { t: '複数台まとめ査定', s: '複数台まとめてのご相談もお気軽にどうぞ。一度に出張査定できますのでご都合がよく、台数によりさらに良い条件でお出しできることもあります。' }
+    ]},
+    { cat: '🏷️ ジャンル別ひとこと', items: [
+      { t: '廃車・不動車', s: '動かないお車・廃車予定のお車も、部品や素材・輸出で価値が付きます。引取・抹消手続きは無料、自動車税などの還付が受けられる場合もあります。処分される前にぜひご相談を。' },
+      { t: '事故車', s: '修復歴や損傷のあるお車、買取可能です。部品単位で需要がありますので、見た目で諦めず一度査定させてください。' },
+      { t: '人気車種（ハイエース・ランクル等）', s: 'ハイエースやランドクルーザーは国内外で需要が高く、過走行・年式が古くても高値が付きやすいお車です。今が手放すタイミングとしておすすめできます。' },
+      { t: '旧車・絶版車', s: '旧車・絶版車は希少価値で一般のお車と相場が大きく異なります。不動でも専門ルートで評価できますので、価値をきちんとお出しします。' },
+      { t: 'パーツ・ホイール', s: 'お車本体が無くても、アルミホイールやタイヤ、カー用品は単体で買取できます。人気ブランドは特に高評価です。まとめてのご相談も歓迎です。' }
+    ]},
+    { cat: '🛡️ 反論処理', items: [
+      { t: '「他社の方が高い」', s: '他社様のご提示、ありがとうございます。BUYMOは手数料・名義変更・出張すべて無料で、表示金額がそのまま手取りに近くなります。総額でぜひ比較してください。' },
+      { t: '「少し考えたい」', s: 'もちろんです。お車は日々価値が変わりますので、本日の金額は◯日まで有効とさせていただきます。ご不明点があればいつでもご連絡ください。' },
+      { t: '「家族と相談したい」', s: '大切なご判断ですのでぜひご相談ください。ご家族のご質問にもお答えできるよう、金額の根拠をメモにしてお渡しします。有効期限は◯日まででお取り置きします。' },
+      { t: '「ネット一括査定の方が高そう」', s: '一括査定は各社から連絡が集中することがあります。BUYMOは1社対応で煩わしさがなく、手数料無料で総額が手取りに近くなります。実車査定でしっかり金額をお出しします。' }
+    ]},
+    { cat: '🤝 クロージング', items: [
+      { t: '契約のご案内', s: '金額にご納得いただけましたら、ご契約に進みます。必要書類は車検証・自賠責・本人確認書類・印鑑です。名義変更などの手続きはすべて無料で代行します。' },
+      { t: '入金の安心案内', s: '書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。進捗は会員マイページでもご確認いただけます。' }
+    ]},
+    { cat: '🌱 成約後・紹介', items: [
+      { t: 'お礼と紹介依頼', s: 'この度はご利用ありがとうございました。もしご友人やご家族でお車の売却をお考えの方がいらっしゃいましたら、ぜひBUYMOをご紹介ください。丁寧に対応いたします。' },
+      { t: '不成約後のフォロー', s: '本日はありがとうございました。今回はご縁がありませんでしたが、お車のご売却を再度ご検討の際はいつでもご連絡ください。相場が変わればより良い金額をお出しできることもあります。' }
+    ]}
+  ];
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  var activecat='', searchq='';
+
+  // カテゴリフィルターボタン生成
+  var catWrap = document.getElementById('scCats');
+  var allBtn = document.createElement('button');
+  allBtn.textContent = 'すべて'; allBtn.className = 'active';
+  allBtn.addEventListener('click', function(){ activecat=''; allBtn.className='active'; document.querySelectorAll('.sc-cats button[data-cat]').forEach(function(b){b.className='';}); render(); });
+  catWrap.appendChild(allBtn);
+  SCRIPTS.forEach(function(g){
+    var b=document.createElement('button'); b.textContent=g.cat; b.setAttribute('data-cat', g.cat);
+    b.addEventListener('click', function(){
+      activecat = activecat===g.cat ? '' : g.cat;
+      allBtn.className = activecat ? '' : 'active';
+      document.querySelectorAll('.sc-cats button[data-cat]').forEach(function(x){x.className = x.getAttribute('data-cat')===activecat ? 'active' : '';});
+      render();
+    });
+    catWrap.appendChild(b);
+  });
+
+  function render(){
+    var q = searchq.toLowerCase();
+    var groups = SCRIPTS.filter(function(g){ return !activecat || g.cat===activecat; }).map(function(g){
+      var items = g.items.filter(function(it){
+        return !q || it.t.toLowerCase().indexOf(q)>=0 || it.s.toLowerCase().indexOf(q)>=0;
+      });
+      return items.length ? {cat:g.cat, items:items} : null;
+    }).filter(Boolean);
+    if(!groups.length){ document.getElementById('scriptGroups').innerHTML='<p class="sc-empty">一致するスクリプトはありません。</p>'; return; }
+    document.getElementById('scriptGroups').innerHTML = groups.map(function(g){
+      return '<section class="sc-group"><h2>'+esc(g.cat)+'</h2>'+g.items.map(function(it){
+        return '<div class="sc-card"><div class="sc-card-head"><strong>'+esc(it.t)+'</strong><button class="sc-copy" data-s="'+esc(it.s)+'">コピー</button></div><p>'+esc(it.s)+'</p></div>';
+      }).join('')+'</section>';
+    }).join('');
+  }
+  render();
+
+  document.getElementById('scSearch').addEventListener('input', function(){ searchq=this.value.trim(); render(); });
+
+  document.getElementById('scriptGroups').addEventListener('click', function(e){
+    var b=e.target.closest('.sc-copy'); if(!b)return;
+    var txt=b.getAttribute('data-s');
+    function ok(){ var o=b.textContent; b.textContent='コピー済み ✓'; setTimeout(function(){b.textContent=o;},1200); }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok,ok); }
+    else { var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} ta.remove(); ok(); }
+  });
+</script>
+<script src="assets/js/hq-common.js"></script>
+<script src="assets/js/notices.js"></script>
+<script>window.BUYMO_BOT_MODE='partner';</script>
+<script src="assets/js/chatbot.js" defer></script>
+</body>
+</html>

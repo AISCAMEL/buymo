@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" role="img" aria-label="BUYMOサービスのヒーロービジュアル">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1b33"/>
+      <stop offset="55%" stop-color="#0d2035"/>
+      <stop offset="100%" stop-color="#083d24"/>
+    </linearGradient>
+    <linearGradient id="carBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#16c870"/>
+      <stop offset="100%" stop-color="#0a6b3c"/>
+    </linearGradient>
+    <linearGradient id="carCabin" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1ddf80"/>
+      <stop offset="100%" stop-color="#0ea05b"/>
+    </linearGradient>
+    <linearGradient id="window" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b8f2dc" stop-opacity="0.78"/>
+      <stop offset="100%" stop-color="#68d4a8" stop-opacity="0.52"/>
+    </linearGradient>
+    <radialGradient id="circleGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0ea05b" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#0ea05b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="480" fill="url(#bg)"/>
+
+  <!-- Stars scattered in upper area -->
+  <circle cx="500" cy="28" r="1.5" fill="#fff" opacity=".42"/>
+  <circle cx="620" cy="55" r="1"   fill="#fff" opacity=".35"/>
+  <circle cx="750" cy="35" r="2"   fill="#fff" opacity=".28"/>
+  <circle cx="880" cy="18" r="1.5" fill="#fff" opacity=".40"/>
+  <circle cx="980" cy="60" r="1"   fill="#fff" opacity=".33"/>
+  <circle cx="1100" cy="40" r="1.5" fill="#fff" opacity=".28"/>
+  <circle cx="1180" cy="70" r="1"  fill="#fff" opacity=".38"/>
+  <circle cx="550" cy="75" r="1"   fill="#fff" opacity=".30"/>
+  <circle cx="820" cy="80" r="1.5" fill="#fff" opacity=".33"/>
+  <circle cx="440" cy="48" r="1"   fill="#fff" opacity=".28"/>
+  <circle cx="680" cy="22" r="1"   fill="#fff" opacity=".36"/>
+  <circle cx="1050" cy="90" r="1"  fill="#fff" opacity=".30"/>
+  <circle cx="340" cy="65" r="1.5" fill="#fff" opacity=".25"/>
+
+  <!-- Perspective road lines: converging from right toward center-left (VP ≈ 340,340) -->
+  <g stroke="#4ade80" stroke-opacity="0.065" stroke-width="1.5" fill="none">
+    <line x1="340" y1="340" x2="1200" y2="258"/>
+    <line x1="340" y1="340" x2="1200" y2="302"/>
+    <line x1="340" y1="340" x2="1200" y2="350"/>
+    <line x1="340" y1="340" x2="1200" y2="400"/>
+    <line x1="340" y1="340" x2="1200" y2="450"/>
+    <line x1="340" y1="340" x2="1200" y2="480"/>
+    <line x1="340" y1="340" x2="870"  y2="480"/>
+    <line x1="340" y1="340" x2="560"  y2="480"/>
+  </g>
+  <!-- Main road edges slightly brighter -->
+  <line x1="340" y1="340" x2="1200" y2="302" stroke="#4ade80" stroke-opacity="0.14" stroke-width="1.5"/>
+  <line x1="340" y1="340" x2="1200" y2="480" stroke="#4ade80" stroke-opacity="0.14" stroke-width="1.5"/>
+
+  <!-- Road surface (very subtle) -->
+  <polygon points="340,340 1200,302 1200,480 340,480" fill="#0ea05b" fill-opacity="0.045"/>
+
+  <!-- Decorative circles bottom-right -->
+  <circle cx="1128" cy="448" r="215" fill="url(#circleGlow)"/>
+  <circle cx="1128" cy="448" r="138" fill="none" stroke="#0ea05b" stroke-opacity="0.14" stroke-width="1.5"/>
+  <circle cx="1128" cy="448" r="172" fill="none" stroke="#0ea05b" stroke-opacity="0.09" stroke-width="1"/>
+
+  <!-- Cow emoji — large, left-side background, very low opacity -->
+  <text x="18" y="408" font-size="210" opacity="0.12"
+        font-family="'Apple Color Emoji','Segoe UI Emoji','Noto Emoji',serif">🐮</text>
+
+  <!-- Subtle dark backing to keep text legible -->
+  <rect x="52" y="148" width="450" height="148" rx="10" fill="#0e1b33" fill-opacity="0.38"/>
+
+  <!-- ──────── MAIN TEXT ──────── -->
+  <!-- Heading -->
+  <text x="76" y="194"
+        font-family="'Noto Sans JP','Hiragino Sans','Yu Gothic UI','Yu Gothic',sans-serif"
+        font-size="55" font-weight="900" fill="#ffffff" letter-spacing="2">写真を送るだけ</text>
+  <!-- Orange accent underline -->
+  <rect x="76" y="203" width="348" height="5" rx="2.5" fill="#FF6B35"/>
+  <!-- Sub heading -->
+  <text x="76" y="252"
+        font-family="'Noto Sans JP','Hiragino Sans','Yu Gothic UI','Yu Gothic',sans-serif"
+        font-size="27" font-weight="700" fill="#ffffff" fill-opacity="0.90" letter-spacing="1">車を高く売る、新しい方法。</text>
+  <!-- Feature micro-text -->
+  <text x="78" y="286"
+        font-family="'Noto Sans JP','Hiragino Sans','Yu Gothic UI','Yu Gothic',sans-serif"
+        font-size="15" fill="#6ee7b7" letter-spacing="0.4">オンライン完結 ・ 全国対応 ・ しつこい電話なし</text>
+
+  <!-- ──────── CAR SILHOUETTE ──────── -->
+  <!-- Car: x 645–1105, roof y=302, body bottom y=432, wheels cy=432 r=36 -->
+  <!--
+       Cabin trapezoid vertices (approximate):
+         rear-bottom (720,375)  rear-roof (786,308)  front-roof (1040,308)  front-bottom (1094,375)
+       Window inset: top y=314 (308+6), bottom y=369 (375-6)
+         At y=314: left x≈780  right x≈1044
+         At y=369: left x≈726  right x≈1090
+  -->
+
+  <!-- Ground shadow -->
+  <ellipse cx="883" cy="466" rx="248" ry="13" fill="#000" fill-opacity="0.32"/>
+
+  <!-- Car lower body -->
+  <rect x="645" y="375" width="460" height="57" rx="18" fill="url(#carBody)"/>
+
+  <!-- Cabin/roof trapezoid -->
+  <polygon points="720,375 786,308 1040,308 1094,375" fill="url(#carCabin)"/>
+
+  <!-- Windows -->
+  <!-- Rear window (follows C-pillar on left) -->
+  <polygon points="726,369 780,314 876,314 876,369" fill="url(#window)"/>
+  <!-- Middle side window -->
+  <rect x="882" y="314" width="146" height="55" fill="url(#window)"/>
+  <!-- Front windshield (follows A-pillar on right) -->
+  <polygon points="1034,314 1044,314 1089,369 1034,369" fill="url(#window)"/>
+
+  <!-- Window B/C pillar dividers -->
+  <line x1="876" y1="308" x2="876" y2="375" stroke="#0a6b3c" stroke-width="7"/>
+  <line x1="1032" y1="308" x2="1032" y2="375" stroke="#0a6b3c" stroke-width="7"/>
+
+  <!-- Cabin outline (subtle depth) -->
+  <polygon points="720,375 786,308 1040,308 1094,375"
+           fill="none" stroke="#0a6b3c" stroke-width="2" stroke-opacity="0.55"/>
+
+  <!-- Roof line highlight -->
+  <line x1="788" y1="308" x2="1040" y2="308" stroke="#22f090" stroke-width="2" stroke-opacity="0.35"/>
+
+  <!-- Tail light (rear / left side) -->
+  <rect x="643" y="382" width="20" height="16" rx="4" fill="#FF6B35" opacity="0.72"/>
+  <!-- Tail light glow -->
+  <rect x="641" y="380" width="24" height="20" rx="5" fill="#FF6B35" opacity="0.18"/>
+
+  <!-- Headlight (front / right side) -->
+  <rect x="1103" y="382" width="24" height="14" rx="5" fill="#FF6B35" opacity="0.90"/>
+  <!-- Headlight glow -->
+  <rect x="1100" y="379" width="30" height="20" rx="6" fill="#FF6B35" opacity="0.22"/>
+
+  <!-- Side mirror (front A-pillar base, facing right) -->
+  <rect x="1088" y="344" width="28" height="15" rx="4" fill="#0a6b3c"/>
+  <rect x="1090" y="346" width="24" height="11" rx="3" fill="#0d8040" opacity="0.7"/>
+
+  <!-- Door seam -->
+  <line x1="876" y1="375" x2="876" y2="428" stroke="#0ea05b" stroke-width="1.5" stroke-opacity="0.38"/>
+  <line x1="1032" y1="375" x2="1032" y2="428" stroke="#0ea05b" stroke-width="1.5" stroke-opacity="0.38"/>
+
+  <!-- Rear wheel -->
+  <circle cx="758" cy="432" r="38" fill="#0d1620"/>
+  <circle cx="758" cy="432" r="27" fill="#1a2738"/>
+  <circle cx="758" cy="432" r="16" fill="#0ea05b" opacity="0.52"/>
+  <circle cx="758" cy="432" r="6"  fill="#ffffff" opacity="0.28"/>
+  <circle cx="758" cy="414" r="3"  fill="#ffffff" opacity="0.20"/>
+  <circle cx="758" cy="450" r="3"  fill="#ffffff" opacity="0.20"/>
+  <circle cx="740" cy="432" r="3"  fill="#ffffff" opacity="0.20"/>
+  <circle cx="776" cy="432" r="3"  fill="#ffffff" opacity="0.20"/>
+
+  <!-- Front wheel -->
+  <circle cx="1008" cy="432" r="38" fill="#0d1620"/>
+  <circle cx="1008" cy="432" r="27" fill="#1a2738"/>
+  <circle cx="1008" cy="432" r="16" fill="#0ea05b" opacity="0.52"/>
+  <circle cx="1008" cy="432" r="6"  fill="#ffffff" opacity="0.28"/>
+  <circle cx="1008" cy="414" r="3"  fill="#ffffff" opacity="0.20"/>
+  <circle cx="1008" cy="450" r="3"  fill="#ffffff" opacity="0.20"/>
+  <circle cx="990"  cy="432" r="3"  fill="#ffffff" opacity="0.20"/>
+  <circle cx="1026" cy="432" r="3"  fill="#ffffff" opacity="0.20"/>
+</svg>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>加盟店管理｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>加盟店管理</h1>
+      <button id="btnCsv" class="btn btn-primary btn-csv" type="button">⬇ CSV出力</button>
+      <img class="page-mascot" src="assets/img/buymo/24_名刺交換ポーズ.png" alt="" aria-hidden="true">
+    </div>
+    <p class="portal-sub">加盟店の一覧と実績（案件数・確定売上）。状況の切り替え・新規追加ができます。</p>
+
+    <div class="add-bar">
+      <form id="addStore">
+        <input class="ac-name" id="sName" type="text" placeholder="店名（必須）" />
+        <input id="sArea" type="text" placeholder="エリア（例：福島県いわき市）" />
+        <input id="sTel" type="text" placeholder="連絡先電話" />
+        <input id="sEmail" type="email" placeholder="通知メール" />
+        <input id="sSlack" type="url" placeholder="Slack Webhook URL（任意）" style="min-width:260px;" />
+        <button type="submit" class="btn btn-primary">加盟店を追加</button>
+      </form>
+    </div>
+
+    <div class="store-grid" id="storeGrid"></div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script src="assets/js/hq-stores.js" defer></script>
+</body>
+</html>

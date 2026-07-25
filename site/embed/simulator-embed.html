@@ -1,0 +1,131 @@
+<!-- =========================================================
+  AUC-AGENT 料金シミュレーター（LPtools 埋め込み用）
+  使い方：LPtoolsの編集画面で「カスタムHTML」ブロックを追加し、
+  このファイルの中身を丸ごと貼り付けてください。
+  ・CSS/JSはすべて #auc-sim 配下にスコープしてあり、テーマやLPtoolsの
+    既存スタイルと干渉しません。
+  ・料金ロジックは末尾の FEE_TIERS / CLASS / OPTIONS を編集すれば変わります。
+========================================================= -->
+<div id="auc-sim">
+  <style>
+    #auc-sim *{box-sizing:border-box}
+    #auc-sim{--navy:#0e1b33;--gold:#c9a14a;--gold2:#e0bd6a;--line:#e4e8ef;--muted:#5a6675;
+      font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+      color:#1a2233;line-height:1.7;max-width:980px;margin:0 auto}
+    #auc-sim .sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+    #auc-sim .panel{background:linear-gradient(160deg,#0e1b33,#16294a);color:#fff;border-radius:16px;padding:24px}
+    #auc-sim .field{margin-bottom:18px}
+    #auc-sim .field label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:8px;color:#e7ecf6}
+    #auc-sim .field label .v{color:var(--gold2)}
+    #auc-sim input[type=range]{width:100%;accent-color:var(--gold)}
+    #auc-sim select{width:100%;padding:11px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;font-size:15px;font-family:inherit}
+    #auc-sim select option{color:#000}
+    #auc-sim .seg{display:flex;flex-wrap:wrap;gap:8px}
+    #auc-sim .seg label{flex:1 1 auto;position:relative}
+    #auc-sim .seg input{position:absolute;opacity:0}
+    #auc-sim .seg span{display:block;text-align:center;padding:9px 6px;border-radius:9px;font-size:13px;border:1px solid rgba(255,255,255,.22);cursor:pointer;white-space:nowrap}
+    #auc-sim .seg input:checked+span{background:var(--gold);color:var(--navy);border-color:var(--gold);font-weight:800}
+    #auc-sim .checks{display:grid;gap:9px}
+    #auc-sim .checks label{display:flex;align-items:center;gap:9px;font-size:14px;cursor:pointer}
+    #auc-sim .checks input{width:17px;height:17px;accent-color:var(--gold)}
+    #auc-sim .result{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 14px 36px rgba(14,27,51,.12)}
+    #auc-sim .result h3{margin:0 0 4px;font-size:18px}
+    #auc-sim .note{font-size:12px;color:var(--muted);margin:0 0 16px}
+    #auc-sim .line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+    #auc-sim .line .tag{font-size:11px;color:var(--muted)}
+    #auc-sim .grand{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:15px 17px;background:var(--navy);color:#fff;border-radius:12px}
+    #auc-sim .grand .val{font-size:28px;font-weight:900;color:var(--gold2)}
+    #auc-sim .savings{margin-top:12px;background:#eaf7f0;color:#1f9d6b;border:1px solid #c4ead6;border-radius:12px;padding:13px 17px;font-size:14px}
+    #auc-sim .savings b{font-size:19px}
+    #auc-sim .cta{display:block;text-align:center;margin-top:18px;padding:14px;border-radius:999px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:var(--navy);font-weight:800;text-decoration:none}
+    @media(max-width:760px){#auc-sim .sim-grid{grid-template-columns:1fr}}
+  </style>
+
+  <div class="sim-grid">
+    <div class="panel">
+      <div class="field">
+        <label>落札予算（希望上限価格）<span class="v" id="as-bidOut">¥1,400,000</span></label>
+        <input type="range" id="as-bid" min="200000" max="6000000" step="50000" value="1400000" />
+      </div>
+      <div class="field">
+        <label>車両クラス</label>
+        <div class="seg" id="as-cls">
+          <label><input type="radio" name="as-cls" value="kei" /><span>軽</span></label>
+          <label><input type="radio" name="as-cls" value="compact" checked /><span>コンパクト</span></label>
+          <label><input type="radio" name="as-cls" value="sedan" /><span>セダン/ミニバン</span></label>
+          <label><input type="radio" name="as-cls" value="suv" /><span>SUV/大型</span></label>
+          <label><input type="radio" name="as-cls" value="import" /><span>輸入車</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label>陸送エリア（納車先）</label>
+        <select id="as-region">
+          <option value="20000">関東</option>
+          <option value="28000">中部・東海</option>
+          <option value="30000">関西</option>
+          <option value="40000">東北・北陸・中国・四国</option>
+          <option value="60000">北海道・九州</option>
+          <option value="90000">沖縄・離島</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>オプション（任意）</label>
+        <div class="checks">
+          <label><input type="checkbox" id="as-reg" checked> 名義変更・登録代行（+¥25,000）</label>
+          <label><input type="checkbox" id="as-garage"> 車庫証明 取得代行（+¥12,000）</label>
+          <label><input type="checkbox" id="as-inspect"> 12ヶ月点検・整備（+¥35,000）</label>
+          <label><input type="checkbox" id="as-warranty"> 6ヶ月保証パック（+¥28,000）</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="result">
+      <h3>お見積り（概算）</h3>
+      <p class="note">※税込・参考値。実際の費用は車両・落札状況により変動します。</p>
+      <div class="line"><span>落札価格</span><span id="as-rBid">¥1,400,000</span></div>
+      <div class="line"><span>代行手数料 <span class="tag" id="as-feeTag">100〜150万円帯</span></span><span id="as-rFee">¥59,800</span></div>
+      <div class="line"><span>オークション落札料</span><span id="as-rAuc">¥11,000</span></div>
+      <div class="line"><span>リサイクル料・税等（預り）</span><span id="as-rRec">¥18,000</span></div>
+      <div class="line"><span>陸送費</span><span id="as-rShip">¥20,000</span></div>
+      <div class="line"><span>オプション合計</span><span id="as-rOpt">¥25,000</span></div>
+      <div class="grand"><span>乗り出し総額（目安）</span><span class="val" id="as-rTotal">¥1,533,800</span></div>
+      <div class="savings">店頭購入の目安より <b id="as-rSave">約 16万円</b> おトク（相場比較の概算）</div>
+      <!-- ↓ 申込ページ/LINE URLに差し替えてください -->
+      <a class="cta" href="#" id="as-cta">この条件でオーダーする（無料登録）</a>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var R=document.getElementById("auc-sim");
+    // ===== 料金設定（ここを編集すれば料金が変わります）=====
+    var FEE_TIERS=[{max:500000,fee:39800},{max:1000000,fee:49800},{max:1500000,fee:59800},{max:2000000,fee:69800},{max:3000000,fee:79800}];
+    var FEE_RATE_OVER=0.03; // 300万円超は落札価格の3%
+    var CLASS={kei:{surcharge:0,recycle:12000,m:0.18},compact:{surcharge:0,recycle:18000,m:0.20},sedan:{surcharge:0,recycle:22000,m:0.22},suv:{surcharge:5000,recycle:26000,m:0.23},import:{surcharge:20000,recycle:35000,m:0.25}};
+    var AUC=11000, OPT={reg:25000,garage:12000,inspect:35000,warranty:28000};
+    var BOUNDS=[0,50,100,150,200,300];
+    function yen(n){return "¥"+Math.round(n).toLocaleString("ja-JP")}
+    function man(n){var m=n/10000;return "約 "+(m>=100?Math.round(m/10)*10:Math.round(m))+"万円"}
+    function feeByBid(b){for(var i=0;i<FEE_TIERS.length;i++){if(b<FEE_TIERS[i].max)return FEE_TIERS[i].fee}return Math.round(b*FEE_RATE_OVER)}
+    function band(b){for(var i=0;i<FEE_TIERS.length;i++){if(b<FEE_TIERS[i].max)return i===0?"〜50万円帯":BOUNDS[i]+"〜"+BOUNDS[i+1]+"万円帯"}return "300万円〜（3%）"}
+    function $(id){return R.querySelector("#"+id)}
+    function render(){
+      var bid=+$("as-bid").value;
+      var c=CLASS[R.querySelector('input[name=as-cls]:checked').value];
+      var region=+$("as-region").value;
+      var opt=($("as-reg").checked?OPT.reg:0)+($("as-garage").checked?OPT.garage:0)+($("as-inspect").checked?OPT.inspect:0)+($("as-warranty").checked?OPT.warranty:0);
+      var fee=feeByBid(bid)+c.surcharge;
+      var total=bid+fee+AUC+c.recycle+region+opt;
+      var dealer=bid*(1+c.m)+region*0.5;
+      var save=Math.max(0,dealer-total);
+      $("as-bidOut").textContent=yen(bid); $("as-rBid").textContent=yen(bid);
+      $("as-rFee").textContent=yen(fee); $("as-feeTag").textContent=band(bid);
+      $("as-rAuc").textContent=yen(AUC); $("as-rRec").textContent=yen(c.recycle);
+      $("as-rShip").textContent=yen(region); $("as-rOpt").textContent=yen(opt);
+      $("as-rTotal").textContent=yen(total); $("as-rSave").textContent=man(save);
+    }
+    ["input","change"].forEach(function(ev){R.addEventListener(ev,render)});
+    render();
+  })();
+  </script>
+</div>

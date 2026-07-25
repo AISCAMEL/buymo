@@ -1,0 +1,13 @@
+{
+  "name": "buymo-tests",
+  "private": true,
+  "description": "BUYMO テスト（verify.js=jsdom / smoke.js=Playwright実機回帰）。実行: npm install && npx playwright install chromium && node smoke.js",
+  "scripts": {
+    "smoke": "node smoke.js",
+    "verify": "node verify.js"
+  },
+  "dependencies": {
+    "jsdom": "^29.1.1",
+    "playwright": "^1.61.1"
+  }
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>営業レポート｜BUYMO（本部）</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>営業レポート</h1>
+      <button id="btnCsv" class="btn btn-primary btn-csv" type="button">⬇ CSV出力</button>
+      <img class="page-mascot" src="assets/img/buymo/58_電卓円建て計算ポーズ.png" alt="" aria-hidden="true">
+    </div>
+    <p class="portal-sub">案件ボードのデータを集計しています（GAS接続時はリアルタイム反映）。「CSV出力」で案件一覧を表計算ソフト用に書き出せます。</p>
+
+    <div class="kpi-row kpi-row-5">
+      <div class="kpi"><div class="kpi-label">案件総数</div><div class="kpi-num" id="kTotal">0件</div></div>
+      <div class="kpi"><div class="kpi-label">成約数（契約以降）</div><div class="kpi-num" id="kWon">0件</div></div>
+      <div class="kpi accent"><div class="kpi-label">成約率</div><div class="kpi-num" id="kRate">0%</div></div>
+      <div class="kpi"><div class="kpi-label">想定売上</div><div class="kpi-num" id="kPipe">¥0</div></div>
+      <div class="kpi accent"><div class="kpi-label">確定売上（完了）</div><div class="kpi-num" id="kSales">¥0</div></div>
+    </div>
+
+    <div class="rep-grid">
+      <section class="rep-card">
+        <h2>ステージ別ファネル</h2>
+        <div class="bars" id="funnel"></div>
+      </section>
+      <section class="rep-card">
+        <h2>加盟店別 実績</h2>
+        <div class="bars" id="byStore"></div>
+      </section>
+      <section class="rep-card">
+        <h2>ジャンル別 件数</h2>
+        <div class="bars" id="byGenre"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script>HQ.nav('report');</script>
+<script src="assets/js/report.js" defer></script>
+</body>
+</html>

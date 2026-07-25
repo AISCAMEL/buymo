@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="BUYMO">
+  <rect width="64" height="64" rx="14" fill="#FF6B35"/>
+  <!-- 角 -->
+  <path d="M19 22q-7-7 0-12q5 4 6 12z" fill="#F4DCC4"/>
+  <path d="M45 22q7-7 0-12q-5 4-6 12z" fill="#F4DCC4"/>
+  <!-- 耳 -->
+  <ellipse cx="16" cy="30" rx="8" ry="5" fill="#E8B07A" transform="rotate(-18 16 30)"/>
+  <ellipse cx="48" cy="30" rx="8" ry="5" fill="#E8B07A" transform="rotate(18 48 30)"/>
+  <!-- 顔 -->
+  <ellipse cx="32" cy="33" rx="19" ry="17" fill="#F4DCC4"/>
+  <ellipse cx="24" cy="28" rx="5" ry="4" fill="#E0A86A"/>
+  <circle cx="26" cy="31" r="2.6" fill="#3A2A1A"/>
+  <circle cx="38" cy="31" r="2.6" fill="#3A2A1A"/>
+  <!-- 鼻面 -->
+  <ellipse cx="32" cy="42" rx="12" ry="8" fill="#FFFFFF"/>
+  <circle cx="28" cy="42" r="1.8" fill="#C98A4E"/>
+  <circle cx="36" cy="42" r="1.8" fill="#C98A4E"/>
+</svg>

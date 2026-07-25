@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap（SITE_URL 設定で絶対URLに自動更新）
+Sitemap: https://buymo.me/sitemap.xml
