@@ -136,7 +136,7 @@ img{max-width:100%;display:block;}
 .hero{
   position:relative;overflow:hidden;min-height:640px;
   display:flex;align-items:center;
-  background:url('../img/buymo/hero-cars.jpg') center/cover no-repeat, linear-gradient(135deg,#0F766E 0%,#0D9488 100%);
+  background:url('../img/buymo/hero-cars.jpg.png') center/cover no-repeat, linear-gradient(135deg,#0F766E 0%,#0D9488 100%);
 }
 .hero-bg-img{display:none;}
 .hero::after{
