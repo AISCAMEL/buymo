@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>車の査定マニュアル｜BUYMO 加盟店</title>
+<meta name="description" content="BUYMO 加盟店 査定担当者用マニュアル。評価基準・査定額の付け方・実車確認・お客様への伝え方。加盟店限定。" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+<style>
+  /* ===== 査定マニュアル 専用スタイル（buymoトークンに準拠） ===== */
+  .apr-conf{background:var(--navy);color:#cbd5e1;font-size:12.5px;font-weight:700;text-align:center;padding:8px 14px;letter-spacing:.02em;}
+  .apr-head{margin:18px 0 6px;}
+  .apr-head h1{font-size:26px;font-weight:900;color:var(--navy);line-height:1.35;}
+  .apr-head .tag{display:inline-block;font-size:11.5px;font-weight:800;color:var(--green-dark);background:var(--green-pale);border-radius:999px;padding:3px 12px;margin-left:8px;vertical-align:middle;}
+  .apr-head p{color:var(--text-sub);font-size:14px;margin-top:8px;max-width:820px;}
+  .apr-grid{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start;margin:20px 0 40px;}
+  /* side nav */
+  .apr-side{position:sticky;top:80px;}
+  .apr-nav{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow);}
+  .apr-nav a{display:block;padding:8px 12px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:600;color:var(--text-sub);transition:.15s;}
+  .apr-nav a:hover{background:var(--green-bg);color:var(--green-dark);}
+  .apr-nav a.active{background:var(--green);color:#fff;}
+  .apr-nav a.link-out{color:var(--green-dark);font-weight:700;}
+  /* panels */
+  .panel{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;scroll-margin-top:80px;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--cream);}
+  .panel-head h3{font-size:17px;font-weight:900;color:var(--navy);}
+  .panel-body{padding:18px 20px;}
+  .panel-body p{font-size:14.5px;color:var(--text);}
+  .badge-status{font-size:12px;font-weight:800;border-radius:999px;padding:3px 12px;background:var(--green-pale);color:var(--green-dark);}
+  /* tables */
+  .apr-table{width:100%;border-collapse:collapse;margin:2px 0;font-size:14px;}
+  .apr-table th,.apr-table td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top;}
+  .apr-table th{background:var(--gray);color:var(--navy);font-weight:800;white-space:nowrap;width:1%;}
+  .apr-table b{color:var(--navy);}
+  /* lists */
+  .opt-list{display:grid;gap:8px;margin:2px 0;}
+  .opt-list li{display:flex;justify-content:space-between;gap:12px;align-items:baseline;background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-size:14px;}
+  .opt-list li b{color:var(--green-dark);font-size:12.5px;font-weight:800;white-space:nowrap;}
+  /* flow */
+  .flow{display:grid;gap:10px;}
+  .flow .step{background:var(--cream);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 12px;text-align:center;}
+  .flow .step .n{width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-weight:900;display:grid;place-items:center;margin:0 auto 8px;}
+  .flow .step h4{font-size:14px;font-weight:800;color:var(--navy);margin:0 0 4px;}
+  .flow .step p{font-size:12px;color:var(--text-sub);margin:0;}
+  /* alerts */
+  .alert{border-radius:var(--radius-sm);padding:12px 14px;font-size:13.5px;line-height:1.7;}
+  .alert-info{background:var(--green-bg);color:var(--green-dark);border:1px solid var(--green-pale);}
+  .alert-ok{background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;}
+  .alert-warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;}
+  .alert-danger{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
+  /* buttons */
+  .apr-btn{display:inline-block;background:var(--green);color:#fff;font-weight:800;font-size:13.5px;border-radius:999px;padding:9px 20px;}
+  .apr-btn:hover{background:var(--green-dark);}
+  /* video */
+  .vid-frame{position:relative;padding-top:56.25%;background:var(--navy);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md);}
+  .vid-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#cbd5e1;text-align:center;padding:20px;}
+  .vid-now{margin-top:12px;font-weight:800;color:var(--navy);font-size:15px;}
+  @media(max-width:860px){
+    .apr-grid{grid-template-columns:1fr;}
+    .apr-side{position:static;}
+    .apr-nav{display:flex;flex-wrap:wrap;gap:4px;}
+    .apr-nav a{font-size:12.5px;padding:6px 10px;}
+    .flow{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+
+<div class="apr-conf">🔒 加盟店限定｜査定基準・料金ロジックを含みます。無断複製・転載・第三者提供を禁じます。</div>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">加盟店</span>
+    <nav class="portal-nav">
+      <a href="hq.html?role=partner">案件ボード</a>
+      <a href="partner-academy.html" aria-current="page">アカデミー</a>
+      <a href="partner-scripts.html">スクリプト</a>
+      <a href="partner-community.html">コミュニティ</a>
+    </nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="apr-head">
+      <h1>車の査定マニュアル<span class="tag">加盟店 査定担当者用</span></h1>
+      <p>オートオークションでの評価基準と査定額（想定レンジ）の付け方、実車確認・お客様への伝え方までをまとめた社内マニュアルです。査定基準・料金ロジックを含むため取扱注意。</p>
+    </div>
+
+    <div class="apr-grid">
+      <aside class="apr-side">
+        <nav class="apr-nav">
+          <a href="#video" class="active">🎬 動画研修</a>
+          <a href="#flow">🔎 査定の流れ</a>
+          <a href="#need">📑 査定に必要な情報</a>
+          <a href="#grade">⭐ 評価点の見方</a>
+          <a href="#inner">🪑 内装評価の見方</a>
+          <a href="#marks">🩹 キズ表示記号</a>
+          <a href="#repair">🧩 修復歴とは</a>
+          <a href="#factor">📈 査定額を左右する項目</a>
+          <a href="#plusminus">➕➖ 加点・減点</a>
+          <a href="#selfcheck">✅ 実車確認チェック</a>
+          <a href="#tedori">💰 想定手取りの出し方</a>
+          <a href="#talk">🧑‍💼 お客様説明・運用</a>
+          <a href="#faq">❓ 質問と回答例</a>
+          <a href="#note">⚠️ 注意点</a>
+          <a href="partner-academy.html" class="link-out">← アカデミーへ戻る</a>
+        </nav>
+      </aside>
+
+      <div>
+        <section class="panel" id="video">
+          <div class="panel-head"><h3>🎬 動画研修</h3><span class="badge-status" id="vidCount">全6章</span></div>
+          <div class="panel-body">
+            <p style="margin-bottom:14px;">査定の基礎を動画で学べます。各章は数分の短尺。スマホでも視聴できます。まずは第1章からどうぞ。</p>
+            <div class="vid-frame" id="vidFrame">
+              <div class="vid-ph" id="vidPlaceholder">
+                <div style="font-size:44px;line-height:1;margin-bottom:12px;">🎬</div>
+                <div id="vidPhTitle" style="font-size:16px;font-weight:800;color:#fff;">動画は準備中です</div>
+                <div style="font-size:13px;margin-top:6px;opacity:.85;">公開までしばらくお待ちください</div>
+              </div>
+            </div>
+            <div class="vid-now" id="vidNow"></div>
+            <ol id="vidList" style="margin:16px 0 0;"></ol>
+            <div class="alert alert-info" style="margin-top:16px;">動画は順次追加予定です。字幕・多言語対応や視聴の不具合は、本部・お問い合わせよりご連絡ください。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="flow">
+          <div class="panel-head"><h3>🔎 査定の5ステップ</h3></div>
+          <div class="panel-body">
+            <div class="flow" style="grid-template-columns:repeat(5,1fr);">
+              <div class="step"><div class="n">1</div><h4>情報入力</h4><p>年式・走行・装備・状態</p></div>
+              <div class="step"><div class="n">2</div><h4>相場照合</h4><p>AA成約データと照合</p></div>
+              <div class="step"><div class="n">3</div><h4>評価点想定</h4><p>外装・内装を仮判定</p></div>
+              <div class="step"><div class="n">4</div><h4>想定額提示</h4><p>落札想定レンジを提示</p></div>
+              <div class="step"><div class="n">5</div><h4>手取り試算</h4><p>手数料控除後を確認</p></div>
+            </div>
+            <div class="alert alert-info" style="margin-top:18px;">査定額は「確定額」ではなく、直近のオートオークション（AA）成約実績にもとづく<strong>想定レンジ</strong>です。最終的な金額は当日の入札で決まります。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="need">
+          <div class="panel-head"><h3>📑 査定に必要な情報</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">正確な査定には、以下の情報をお客様からヒアリング・実車確認します（出品申込フォームの項目と対応）。</p>
+            <ul class="opt-list">
+              <li><span>メーカー・車名・グレード</span><b>車検証どおり</b></li>
+              <li><span>初度登録年月（年式）</span><b>車検証</b></li>
+              <li><span>走行距離</span><b>直近メーター値</b></li>
+              <li><span>修復歴の有無</span><b>正確に申告</b></li>
+              <li><span>車検残</span><b>満了日</b></li>
+              <li><span>主要装備（ナビ・サンルーフ・レザー・4WD 等）</span><b>もれなく</b></li>
+              <li><span>外装キズ・へこみ・内装の状態</span><b>正直に</b></li>
+              <li><span>純正／社外パーツ・改造の有無</span><b>該当あれば</b></li>
+            </ul>
+            <div class="alert alert-ok" style="margin-top:16px;">車検証・メーター・車体全体の写真があると、査定精度が大きく上がります。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="grade">
+          <div class="panel-head"><h3>⭐ オートオークション 外装評価点の見方</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">オートオークションでは、検査員が車両を1台ずつチェックし「<strong>評価点</strong>」を付けます。点数が高いほど状態が良く、落札額も高くなる傾向があります。会場により多少の差はありますが、一般的な目安は以下のとおりです。</p>
+            <table class="apr-table">
+              <tr><th>評価点</th><td><b>状態の目安</b></td></tr>
+              <tr><th>S / 6点</th><td>新車・未使用車クラス。ほぼ無傷。</td></tr>
+              <tr><th>5点</th><td>年式が新しく、内外装ともに非常に良好。目立つキズなし。</td></tr>
+              <tr><th>4.5点</th><td>走行少なめで状態良好。小キズが数か所程度。</td></tr>
+              <tr><th>4点</th><td>使用感はあるが良好。市場で最も多い一般的なコンディション。</td></tr>
+              <tr><th>3.5点</th><td>キズ・へこみがやや目立つ。内装にも使用感。</td></tr>
+              <tr><th>3点</th><td>キズ・へこみ・内装の劣化が複数。過走行車も多い。</td></tr>
+              <tr><th>2点</th><td>外装・内装ともに難あり。要補修レベル。</td></tr>
+              <tr><th>1点</th><td>不動・全塗装・改造多数など。特殊扱い。</td></tr>
+              <tr><th>R / RA</th><td>修復歴あり（事故歴・骨格部の修正・交換）。減額対象。</td></tr>
+              <tr><th>0点 / ***</th><td>メーター交換・改ざん、水没、その他で通常評価不可。</td></tr>
+            </table>
+            <div class="alert alert-info" style="margin-top:16px;">目安としては、<strong>4点</strong>が「ふつうに使われてきた良好な中古車」の基準点です。4点を境に、上下で査定額が段階的に変わります。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="inner">
+          <div class="panel-head"><h3>🪑 内装評価の見方（A〜D）</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">外装の評価点とは別に、内装（室内）の状態が<strong>アルファベット</strong>で評価されます。喫煙・ペット・汚れ・使用感の影響が大きい項目です。</p>
+            <table class="apr-table">
+              <tr><th>内装評価</th><td><b>状態の目安</b></td></tr>
+              <tr><th>A</th><td>非常にきれい。喫煙なし・汚れなし。</td></tr>
+              <tr><th>B</th><td>良好。目立つ汚れ・へたりはなし。</td></tr>
+              <tr><th>C</th><td>使用感あり。汚れ・スレ・小さな焦げ跡など。</td></tr>
+              <tr><th>D</th><td>汚れ・破れ・強い臭い等が目立つ。要クリーニング。</td></tr>
+            </table>
+            <div class="alert alert-ok" style="margin-top:16px;">出品前の<strong>内外装クリーニング（サイズ別 ¥12,000〜¥30,000）</strong>で内装評価が上がり、落札額の底上げにつながる場合があります。オプションで追加できます（お客様にご案内）。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="marks">
+          <div class="panel-head"><h3>🩹 車両検査票のキズ表示記号（展開図）</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">オークションの車両検査票には、車を上から見た<strong>展開図（車両図）</strong>に、キズやへこみの位置と種類が記号で書き込まれます。落札者はこの記号でコンディションを把握します。代表的な記号は以下のとおりです。</p>
+            <table class="apr-table">
+              <tr><th>記号</th><td><b>意味</b></td></tr>
+              <tr><th>A</th><td>キズ（A1＝小 ／ A2＝中 ／ A3＝大 ／ A4＝特大）</td></tr>
+              <tr><th>U</th><td>へこみ（U1＝小 ／ U2＝中 ／ U3＝大）</td></tr>
+              <tr><th>W</th><td>補修跡・板金塗装跡（W1〜W3で程度）／波打ち</td></tr>
+              <tr><th>S</th><td>サビ（S1＝小 ／ S2＝中 ／ S3＝大）</td></tr>
+              <tr><th>C</th><td>腐食（サビによる穴・進行した劣化）</td></tr>
+              <tr><th>P</th><td>塗装の劣化・色あせ・塗装済み</td></tr>
+              <tr><th>B</th><td>バフ傷（磨きによる細かなキズ）</td></tr>
+              <tr><th>X</th><td>要交換（損傷が大きく交換が望ましい部位）</td></tr>
+              <tr><th>XX</th><td>交換済みパネル</td></tr>
+              <tr><th>G</th><td>ガラスのキズ・飛び石（ヒビは要注意）</td></tr>
+              <tr><th>Y</th><td>亀裂・割れ（バンパー等の樹脂部品）</td></tr>
+            </table>
+            <div class="alert alert-info" style="margin-top:16px;">数字が大きいほど程度が大きいことを示します。記号の付き方は会場・検査員により多少異なります。出品前に気づいたキズは、記号任せにせず<strong>状態申告でも具体的に</strong>お伝えください。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="repair">
+          <div class="panel-head"><h3>🧩 「修復歴あり」とは？</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">査定額に大きく影響するのが<strong>修復歴</strong>です。修復歴とは、事故などで車の<strong>骨格（フレーム）部位</strong>を修正・交換した履歴を指します。単なる外板（ドア・ボンネット等）の交換や板金塗装は、原則<strong>修復歴に含まれません</strong>。</p>
+            <table class="apr-table">
+              <tr><th>修復歴に<br>該当する<br>骨格部位</th><td>フレーム（サイドメンバー）／クロスメンバー／インサイドパネル／ピラー（フロント・センター・リア）／ダッシュパネル／ルーフパネル／フロアパネル（トランクフロア含む）／ラジエーターコアサポート 等の<b>修正・交換</b></td></tr>
+              <tr><th>修復歴に<br>当たらない<br>例</th><td>ドア・ボンネット・フェンダー・バンパー等の<b>外板パネルの交換・板金塗装</b>（キズ・へこみの補修）</td></tr>
+            </table>
+            <div class="alert alert-danger" style="margin-top:16px;">修復歴があると評価点は <b>R / RA</b> となり、同条件の無事故車より査定額が下がります。<strong>「わからない・不明」も正直に申告</strong>してください。申告と異なる修復歴が後から判明すると、減額・返品・違約金の対象になります。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="factor">
+          <div class="panel-head"><h3>📈 査定額を左右する主な項目</h3></div>
+          <div class="panel-body">
+            <ul class="opt-list">
+              <li><span>人気・相場（車種・色・ボディタイプ）</span><b>影響 大</b></li>
+              <li><span>年式（初度登録）</span><b>影響 大</b></li>
+              <li><span>走行距離</span><b>影響 大</b></li>
+              <li><span>評価点・内装評価</span><b>影響 大</b></li>
+              <li><span>修復歴の有無</span><b>影響 大（減額）</b></li>
+              <li><span>グレード・主要装備</span><b>影響 中</b></li>
+              <li><span>車検残・整備記録簿</span><b>影響 中</b></li>
+              <li><span>タイヤ・消耗品の状態</span><b>影響 小〜中</b></li>
+              <li><span>ボディカラー</span><b>影響 小〜中</b></li>
+              <li><span>出品時期・タイミング</span><b>影響 小〜中</b></li>
+            </ul>
+            <p style="margin-top:18px;"><strong>走行距離の目安</strong>：一般に<strong>年間1万km</strong>が基準です。年式に対して走行が多いと「過走行」として評価が下がり、少なすぎる場合もメーター管理の確認対象になります。</p>
+            <table class="apr-table" style="margin-top:10px;">
+              <tr><th>年式に対する走行</th><td><b>評価の傾向</b></td></tr>
+              <tr><td>年1万km未満（少走行）</td><td>プラス評価になりやすい</td></tr>
+              <tr><td>年1〜1.5万km（標準）</td><td>相場どおり</td></tr>
+              <tr><td>年1.5万km超（過走行）</td><td>走行が延びるほど段階的に減額</td></tr>
+              <tr><td>10万km超</td><td>大台を超えると相場が一段下がる傾向</td></tr>
+            </table>
+            <div class="alert alert-info" style="margin-top:16px;">同じ車種でも、<strong>年式・走行・評価点</strong>の3点で数十万円単位の差が出ます。相場は季節や需給（決算期・ボーナス期・降雪期の4WD需要 等）でも動きます。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="plusminus">
+          <div class="panel-head"><h3>➕➖ 加点・減点ポイント</h3></div>
+          <div class="panel-body">
+            <div class="alert alert-ok" style="margin-bottom:10px;"><strong>➕ プラスに働きやすい</strong></div>
+            <ul class="opt-list">
+              <li><span>ワンオーナー・記録簿あり</span><b>加点</b></li>
+              <li><span>禁煙車・内装がきれい</span><b>加点</b></li>
+              <li><span>純正ナビ・純正オプション</span><b>加点</b></li>
+              <li><span>人気色・定番グレード</span><b>加点</b></li>
+              <li><span>車検残が長い</span><b>加点</b></li>
+              <li><span>タイヤ・バッテリー等が新しい</span><b>加点</b></li>
+            </ul>
+            <div class="alert alert-danger" style="margin:18px 0 10px;"><strong>➖ マイナスに働きやすい</strong></div>
+            <ul class="opt-list">
+              <li><span>修復歴あり（骨格の修正・交換）</span><b>減額</b></li>
+              <li><span>過走行（年式に対し走行が多い）</span><b>減額</b></li>
+              <li><span>喫煙・ペット臭・内装の汚れ</span><b>減額</b></li>
+              <li><span>目立つキズ・へこみ・板金塗装</span><b>減額</b></li>
+              <li><span>社外・改造パーツ（車種による）</span><b>減額の場合</b></li>
+              <li><span>警告灯点灯・不具合</span><b>減額</b></li>
+              <li><span>申告漏れ（後から判明）</span><b>減額・返品・違約金</b></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="panel" id="selfcheck">
+          <div class="panel-head"><h3>✅ 実車確認チェックリスト（査定担当用）</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">査定時に実車・書類を確認する項目です。1台につき必ず全項目チェックし、車両状態申告書・検車チェックシートに反映します。</p>
+            <ul class="opt-list">
+              <li><span>車検証で車名・グレード・初度登録を確認</span><b>□</b></li>
+              <li><span>メーターの走行距離を撮影</span><b>□</b></li>
+              <li><span>修復歴の有無を確認（不明なら「不明」と申告）</span><b>□</b></li>
+              <li><span>外装を1周し、キズ・へこみを把握</span><b>□</b></li>
+              <li><span>内装の汚れ・臭い・破れをチェック</span><b>□</b></li>
+              <li><span>メーター内の警告灯の有無</span><b>□</b></li>
+              <li><span>純正・社外パーツ、欠品（取説・スペアキー等）</span><b>□</b></li>
+              <li><span>タイヤの溝・ひび、消耗品の状態</span><b>□</b></li>
+            </ul>
+            <div class="alert alert-info" style="margin-top:16px;">判断に迷う項目は無理に確定させず「不明」と記録し、責任者へ確認。修復歴が疑わしい場合は下回り・骨格を重点確認します。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="tedori">
+          <div class="panel-head"><h3>💰 想定手取りの出し方（お客様提示用）</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">お客様にお伝えする「手取り」は、想定落札額から手数料・オプションを差し引いた金額です。必ず<strong>「想定」</strong>と明示し、確定額として伝えないこと。</p>
+            <table class="apr-table">
+              <tr><th>計算式</th><td><b>手取り ＝ 落札額 −（出品代行手数料 ＋ 出品料 ＋ 選択オプション）</b></td></tr>
+              <tr><th>出品代行手数料</th><td>価格帯別定額（〜50万 ¥39,800 … 300万〜 3%）＋クラス割増</td></tr>
+              <tr><th>出品料</th><td>¥11,000（<b>流札は無料</b>）</td></tr>
+              <tr><th>主なオプション</th><td>名義変更 ¥25,000／内外装クリーニング ¥12,000〜¥30,000／代理搬入 ¥18,000 等</td></tr>
+            </table>
+            <div class="alert alert-info" style="margin-top:16px;"><strong>計算例</strong>：想定落札額 <b>120万円</b>／セダン（クリーニングなし）の場合</div>
+            <table class="apr-table" style="margin-top:10px;">
+              <tr><th>落札額</th><td>¥1,200,000</td></tr>
+              <tr><th>− 出品代行手数料</th><td>−¥59,800（100〜150万円の価格帯）</td></tr>
+              <tr><th>− 出品料</th><td>−¥11,000</td></tr>
+              <tr><th>＝ 想定手取り</th><td><b>¥1,129,200</b></td></tr>
+            </table>
+            <p style="margin-top:12px;font-size:13px;color:var(--text-sub);">※ 名義変更（¥25,000）や内外装クリーニング（¥12,000〜¥30,000）などのオプションを選んだ場合は、その分が差し引かれます。<b>流札（売れなかった場合）の再出品は無料</b>です。</p>
+            <div class="alert alert-ok" style="margin-top:16px;"><strong>手取りシミュレーション</strong>で、想定落札額から手取りの目安を試算できます。</div>
+            <div style="margin-top:16px;">
+              <a class="apr-btn" href="embed/simulator-buy-embed.html" target="_blank" rel="noopener">🧮 査定シミュレーターを開く</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="talk">
+          <div class="panel-head"><h3>🧑‍💼 お客様への説明と査定運用</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:10px;"><strong>想定レンジの伝え方</strong>（景品表示法・トラブル防止のため断定・保証はNG）</p>
+            <table class="apr-table">
+              <tr><th>◎ 推奨</th><td>「直近の成約実績では、およそ◯◯万〜◯◯万円のレンジが想定されます」（<b>レンジ＋"想定"</b>を明示）</td></tr>
+              <tr><th>× NG</th><td>「必ず◯◯万円で売れます」「最低でも◯◯万円は保証します」等の<b>断定・保証</b>表現</td></tr>
+            </table>
+            <p style="margin-top:18px;"><strong>査定額の決め方（手順）</strong></p>
+            <ul class="opt-list">
+              <li><span>① 相場照合</span><b>AA直近成約データで同型・同年式・同走行帯を確認</b></li>
+              <li><span>② 状態補正</span><b>評価点・内装評価・修復歴・過走行で上下に補正</b></li>
+              <li><span>③ レンジ化</span><b>中央値±で想定レンジを設定</b></li>
+              <li><span>④ 手取り換算</span><b>手数料・出品料・オプションを控除して提示</b></li>
+            </ul>
+            <p style="margin-top:18px;"><strong>減点・加点の運用（加盟店内部基準）</strong></p>
+            <table class="apr-table">
+              <tr><th>修復歴あり（R/RA）</th><td>［加盟店基準を記入：例 相場の ◯〜◯% 減］</td></tr>
+              <tr><th>過走行（年1.5万km超）</th><td>［加盟店基準を記入］</td></tr>
+              <tr><th>内装D・強い臭い</th><td>［加盟店基準を記入／クリーニング提案で内装評価UP］</td></tr>
+              <tr><th>禁煙・ワンオーナー・記録簿</th><td>［加盟店基準を記入：加点］</td></tr>
+            </table>
+            <div class="alert alert-warn" style="margin-top:16px;">※ 具体的な減額率・加点額は加盟店運用に合わせて本部が定めます。上表の［　］に自社基準を記入して運用してください（本ページは加盟店限定）。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="faq">
+          <div class="panel-head"><h3>❓ お客様からよく聞かれる質問と回答例</h3></div>
+          <div class="panel-body">
+            <p style="margin:0 0 14px;color:var(--text-sub);font-size:13px;">お客様対応時のトークスクリプトとしてご活用ください。</p>
+            <table class="apr-table">
+              <tr><th>Q. 査定は無料ですか？</th><td>A. 想定額の提示（机上査定）は無料です。実際の出品には出品代行手数料・出品料がかかります。</td></tr>
+              <tr><th>Q. 提示額どおりに<br>売れますか？</th><td>A. 提示額は直近の成約実績にもとづく<b>想定レンジ</b>です。最終額は当日の入札で決まり、上振れ・下振れがあります。</td></tr>
+              <tr><th>Q. 修復歴が<br>あると売れませんか？</th><td>A. 売れます。無事故車より査定は下がりますが、修復歴車を求める需要もあります。正確な申告が前提です。</td></tr>
+              <tr><th>Q. ローンが<br>残っています</th><td>A. 所有者がローン会社等の場合、完済・所有権解除が必要です。残債・所有者情報をご連絡ください。</td></tr>
+              <tr><th>Q. 車検切れ・<br>不動車でも可？</th><td>A. 出品自体は可能です。車検整備（¥79,800・法定費用別）や搬送方法をご相談ください。</td></tr>
+              <tr><th>Q. 高く売る<br>コツは？</th><td>A. 正確な申告＋内外装クリーニングで内装評価を上げる、車検残・記録簿・スペアキー等を揃える、需要期に出品する、が有効です。</td></tr>
+              <tr><th>Q. 売れなかったら<br>費用は？</th><td>A. 流札（不成約）の<b>再出品は無料</b>です。</td></tr>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" id="note">
+          <div class="panel-head"><h3>⚠️ 査定にあたっての注意点</h3></div>
+          <div class="panel-body">
+            <ul class="opt-list">
+              <li><span>提示額は想定レンジ</span><b>確定額ではありません</b></li>
+              <li><span>最終額は当日の入札で決定</span><b>相場変動あり</b></li>
+              <li><span>評価点は会場検査員が判定</span><b>当社の想定と差が出る場合あり</b></li>
+              <li><span>正確な状態申告が最重要</span><b>申告漏れは減額・返品・違約金の対象</b></li>
+            </ul>
+            <div class="alert alert-warn" style="margin-top:16px;">
+              ※ クレーム期間（落札日から2週間）・違約金の詳細は契約書・利用規約に準じます。水没・冠水等の重大な瑕疵は別扱いです。不明点は遠慮なくご相談ください。
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  /* ===== 動画研修 ===== */
+  /* 各章に動画URLを設定すると視聴できます（未設定の章は「準備中」表示）。
+     対応形式：YouTube / Vimeo / 自社MP4（assets/video/xxx.mp4） */
+  var LESSONS = [
+    { title: "第1章 査定の全体フロー", dur: "3分", url: "" },
+    { title: "第2章 AA評価点の見方（S〜R）", dur: "5分", url: "" },
+    { title: "第3章 内装評価とキズ表示記号", dur: "4分", url: "" },
+    { title: "第4章 修復歴の見分け方", dur: "5分", url: "" },
+    { title: "第5章 出品写真の撮り方", dur: "3分", url: "" },
+    { title: "第6章 手取りの計算とシミュレーター", dur: "3分", url: "" }
+  ];
+
+  (function () {
+    var frame = document.getElementById("vidFrame");
+    var ph = document.getElementById("vidPlaceholder");
+    var phTitle = document.getElementById("vidPhTitle");
+    var now = document.getElementById("vidNow");
+    var list = document.getElementById("vidList");
+    var count = document.getElementById("vidCount");
+    if (!frame) return;
+
+    count.textContent = "全" + LESSONS.length + "章";
+
+    function toEmbed(url) {
+      if (!url) return null;
+      var m;
+      if ((m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,})/))) {
+        return { type: "iframe", src: "https://www.youtube-nocookie.com/embed/" + m[1] + "?rel=0" };
+      }
+      if ((m = url.match(/vimeo\.com\/(\d+)/))) {
+        return { type: "iframe", src: "https://player.vimeo.com/video/" + m[1] };
+      }
+      if (/\.(mp4|webm|ogg)(\?|$)/i.test(url)) {
+        return { type: "video", src: url };
+      }
+      return { type: "iframe", src: url };
+    }
+
+    function clearPlayer() {
+      var old = frame.querySelector("iframe,video");
+      if (old) old.remove();
+    }
+
+    function play(i) {
+      var les = LESSONS[i];
+      var emb = toEmbed(les.url);
+      now.textContent = "▶ " + les.title;
+      clearPlayer();
+      Array.prototype.forEach.call(list.children, function (li, idx) {
+        li.style.borderColor = idx === i ? "var(--green)" : "var(--border)";
+        li.style.background = idx === i ? "var(--green-bg)" : "#fff";
+      });
+      if (!emb) {
+        ph.style.display = "flex";
+        phTitle.textContent = les.title + "（準備中）";
+        return;
+      }
+      ph.style.display = "none";
+      var el;
+      if (emb.type === "video") {
+        el = document.createElement("video");
+        el.src = emb.src; el.controls = true; el.playsInline = true;
+      } else {
+        el = document.createElement("iframe");
+        el.src = emb.src; el.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
+        el.setAttribute("allowfullscreen", "");
+        el.setAttribute("title", les.title);
+      }
+      el.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;";
+      frame.appendChild(el);
+    }
+
+    LESSONS.forEach(function (les, i) {
+      var ready = !!toEmbed(les.url);
+      var li = document.createElement("li");
+      li.style.cssText = "display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.15s;";
+      li.innerHTML =
+        '<span style="flex:0 0 30px;height:30px;border-radius:50%;background:var(--navy);color:var(--green-light);display:grid;place-items:center;font-weight:900;font-size:13px;">' + (i + 1) + '</span>' +
+        '<span style="flex:1;font-weight:700;color:var(--navy);font-size:14.5px;">' + les.title + '</span>' +
+        '<span style="flex:0 0 auto;font-size:12px;color:var(--text-sub);">⏱ ' + les.dur + '</span>' +
+        '<span style="flex:0 0 auto;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;' +
+          (ready ? 'background:#ecfdf5;color:#047857;">▶ 視聴' : 'background:var(--gray);color:var(--text-sub);">準備中') + '</span>';
+      li.addEventListener("click", function () { play(i); });
+      list.appendChild(li);
+    });
+
+    var firstReady = LESSONS.findIndex(function (l) { return !!toEmbed(l.url); });
+    play(firstReady >= 0 ? firstReady : 0);
+  })();
+
+  /* サイドナビ：スクロール連動でアクティブ表示 */
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.apr-nav a[href^="#"]'));
+    var map = {};
+    links.forEach(function (a) { var id = a.getAttribute('href').slice(1); if (id) map[id] = a; });
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.remove('active'); });
+          var a = map[e.target.id]; if (a) a.classList.add('active');
+        }
+      });
+    }, { rootMargin: "-80px 0px -70% 0px" });
+    Object.keys(map).forEach(function (id) { var el = document.getElementById(id); if (el) obs.observe(el); });
+  })();
+</script>
+</body>
+</html>
