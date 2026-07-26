@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=8" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=9" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -106,6 +106,10 @@
 
   <!-- ============ ヒーロー ============ -->
   <section class="hero" aria-labelledby="hero-title">
+    <!-- hero-art は .hero 直下に配置してフルブリード背景として機能させる -->
+    <div class="hero-art" aria-hidden="true">
+      <img class="hero-img-main" src="assets/img/buymo/hero.jpg" alt="" />
+    </div>
     <div class="container hero-inner">
       <div class="hero-copy reveal">
         <p class="hero-lead">どこよりも高く、早く、手間なく！</p>
@@ -116,12 +120,6 @@
         <ul class="hero-badges">
           <li>査定無料</li><li>手数料0円</li><li>3営業日以内に入金</li>
         </ul>
-      </div>
-      <div class="hero-art">
-        <span class="hero-burst" aria-hidden="true">査定<br>無料</span>
-        <!-- 画像差し替え：assets/img/buymo/hero.(webp/png) に置き換え可。詳細は docs/BUYMO画像差し替えガイド.md -->
-        <img class="hero-img-main" src="assets/img/buymo/hero.svg" alt="あなたの愛車を高価買取するBUYMOのイメージ" width="600" height="440" />
-        <img class="hero-img-mascot" src="assets/img/buymo/51_試乗運転ポーズ_81fe88cf.png" alt="" aria-hidden="true" width="400" height="480" loading="lazy" />
       </div>
     </div>
   </section>
