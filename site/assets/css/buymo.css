@@ -84,8 +84,10 @@ img{max-width:100%;display:block;}
 .card-ico{
   font-size:28px;line-height:1;margin-bottom:14px;width:56px;height:56px;display:flex;
   align-items:center;justify-content:center;border-radius:12px;
-  background:var(--green-bg);color:var(--green);
+  background:var(--green-bg);color:var(--green);overflow:hidden;
 }
+.card-ico img{width:32px;height:32px;object-fit:contain;display:block;}
+.card-ico:has(img){font-size:0;}
 .feature-card .card-ico,.reason-card .card-ico{margin-left:auto;margin-right:auto;}
 
 /* ---- buttons ---- */
@@ -283,10 +285,12 @@ img{max-width:100%;display:block;}
 .target-card:hover .target-img{background:var(--green-pale);}
 .target-img{
   font-size:48px;border-radius:10px;padding:18px 0;margin-bottom:12px;
-  background:var(--green-bg);transition:background .2s ease;
+  background:var(--green-bg);transition:background .2s ease;overflow:hidden;
 }
 .target-img.accident{background:#f9fafb;}
 .target-img.old{background:#f3f4f6;}
+.target-img img{width:100%;height:140px;object-fit:cover;display:block;border-radius:10px;}
+.target-img:has(img){padding:0;font-size:0;background:transparent;}
 .target-card h3{font-size:17px;font-weight:800;color:var(--text);}
 .target-card p{font-size:13px;color:var(--text-sub);margin-top:4px;}
 
@@ -430,7 +434,9 @@ a.genre-tag:hover{background:var(--green);border-color:var(--green);color:#fff;}
 .timeline-list::before{content:"";position:absolute;left:58px;top:20px;bottom:20px;width:2px;background:var(--border);}
 .timeline-list li{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;position:relative;}
 .tl-day{flex:0 0 52px;font-weight:800;color:var(--green);font-size:13px;padding-top:14px;}
-.tl-ico{flex:0 0 auto;width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;z-index:1;}
+.tl-ico{flex:0 0 auto;width:64px;height:64px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;z-index:1;overflow:hidden;}
+.tl-ico img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
+.tl-ico:has(img){font-size:0;border:none;background:transparent;}
 .timeline-list h3{font-size:16px;font-weight:800;margin-bottom:4px;color:var(--text);}
 .timeline-list p{font-size:13px;color:var(--text-sub);line-height:1.7;}
 .timeline-list>li>div{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;flex:1;}

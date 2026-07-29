@@ -100,13 +100,13 @@ var BUYMO_VOICES = [
 ];
 
 var BUYMO_RESULTS = [
-  { _demo: true, icon: '🔋', name: 'トヨタ プリウス',         year: '2019年式', price: 1680000, area: '東京都'  },
-  { _demo: true, icon: '🚙', name: 'トヨタ ハリアー',         year: '2020年式', price: 2850000, area: '神奈川県' },
-  { _demo: true, icon: '🚗', name: 'ホンダ N-BOX',           year: '2021年式', price: 1280000, area: '大阪府'  },
-  { _demo: true, icon: '🚙', name: 'マツダ CX-5',            year: '2019年式', price: 1920000, area: '愛知県'  },
+  { _demo: true, icon: 'assets/img/buymo/genre-ev.jpg',      name: 'トヨタ プリウス',         year: '2019年式', price: 1680000, area: '東京都'  },
+  { _demo: true, icon: 'assets/img/buymo/car-suv.jpg',       name: 'トヨタ ハリアー',         year: '2020年式', price: 2850000, area: '神奈川県' },
+  { _demo: true, icon: 'assets/img/buymo/car-kei.jpg',       name: 'ホンダ N-BOX',           year: '2021年式', price: 1280000, area: '大阪府'  },
+  { _demo: true, icon: 'assets/img/buymo/genre-alphard.jpg', name: 'トヨタ アルファード',     year: '2018年式', price: 2780000, area: '埼玉県'  },
   { _demo: true, icon: '🚙', name: 'スズキ ジムニー',         year: '2020年式', price: 2250000, area: '福岡県'  },
   { _demo: true, icon: '🏆', name: 'トヨタ ランドクルーザー', year: '2016年式', price: 4200000, area: '北海道'  },
-  { _demo: true, icon: '🚐', name: 'トヨタ アルファード',     year: '2018年式', price: 2780000, area: '埼玉県'  },
+  { _demo: true, icon: '🚙', name: 'マツダ CX-5',            year: '2019年式', price: 1920000, area: '愛知県'  },
   { _demo: true, icon: '🚗', name: 'ホンダ フィット',         year: '2018年式', price:  820000, area: '福島県'  },
   { _demo: true, icon: '🚗', name: '日産 ノート e-POWER',     year: '2020年式', price: 1080000, area: '宮城県'  },
   { _demo: true, icon: '🚗', name: 'スバル レヴォーグ',       year: '2019年式', price: 1750000, area: '千葉県'  },
