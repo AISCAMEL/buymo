@@ -292,12 +292,11 @@ ${header(rel, 'genre')}
       <p class="page-lead">${esc(g.desc)} 手数料0円・無料出張査定・3営業日以内に入金で、あなたの車を1円でも高く買取します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html?genre=${encodeURIComponent(g.name)}" class="btn btn-primary btn-lg">無料査定を依頼</a>
-        <a href="tel:05017842929" class="btn btn-tel">📞 電話で相談</a>
+        <a href="mailto:kaitori@buymo.me" class="btn btn-tel">✉️ メールで査定</a>
       </div>
     </div>
   </section>
 
-  <section class="genre-photo" aria-hidden="true" style="background-image:url('${rel}assets/img/genre/${g.slug}.jpg'),url('${rel}assets/img/genre/${g.slug}.svg');"></section>
 
   <section class="area-intro" aria-labelledby="intro-title">
     <div class="container">
@@ -370,7 +369,7 @@ ${simBlock(g, rel)}
       <p>無料査定はかんたん入力。最短即日でご連絡します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html?genre=${encodeURIComponent(g.name)}" class="btn btn-light btn-lg">無料査定を依頼</a>
-        <a href="tel:05017842929" class="btn btn-tel-light">📞 050-1784-2929</a>
+        <a href="mailto:kaitori@buymo.me" class="btn btn-tel-light">✉️ メールで査定</a>
       </div>
     </div>
   </section>
@@ -448,12 +447,11 @@ ${header(rel, 'genre')}
       <p class="page-lead">${esc(cityText)}をはじめ${esc(p.name)}全域に無料出張査定。${esc(g.desc)} 手数料0円・3営業日以内に入金で、${esc(nm)}を1円でも高く買取します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html?genre=${encodeURIComponent(g.name)}&pref=${encodeURIComponent(p.name)}" class="btn btn-primary btn-lg">無料査定を依頼</a>
-        <a href="tel:05017842929" class="btn btn-tel">📞 電話で相談</a>
+        <a href="mailto:kaitori@buymo.me" class="btn btn-tel">✉️ メールで査定</a>
       </div>
     </div>
   </section>
 
-  <section class="genre-photo" aria-hidden="true" style="background-image:url('${rel}assets/img/genre/${g.slug}.jpg'),url('${rel}assets/img/genre/${g.slug}.svg');"></section>
 
   <section class="area-intro" aria-labelledby="intro-title">
     <div class="container">
@@ -517,7 +515,7 @@ ${simBlock(g, rel, p.name)}
       <p>無料査定はかんたん入力。最短即日でご連絡します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html?genre=${encodeURIComponent(g.name)}&pref=${encodeURIComponent(p.name)}" class="btn btn-light btn-lg">無料査定を依頼</a>
-        <a href="tel:05017842929" class="btn btn-tel-light">📞 050-1784-2929</a>
+        <a href="mailto:kaitori@buymo.me" class="btn btn-tel-light">✉️ メールで査定</a>
       </div>
     </div>
   </section>
@@ -577,7 +575,7 @@ ${header(rel, 'genre')}
       <p>状態を問わず査定無料。最短即日でご連絡します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html" class="btn btn-light btn-lg">無料査定を依頼</a>
-        <a href="tel:05017842929" class="btn btn-tel-light">📞 050-1784-2929</a>
+        <a href="mailto:kaitori@buymo.me" class="btn btn-tel-light">✉️ メールで査定</a>
       </div>
     </div>
   </section>

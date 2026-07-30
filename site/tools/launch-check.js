@@ -67,9 +67,8 @@ lines.push('  ' + mark(svgN === GENRES.length) + ' ブランドSVGバナー ' + 
 lines.push('  ' + mark(jpgN === GENRES.length) + ' 実写真(jpg) ' + jpgN + ' / ' + GENRES.length + '（assets/img/genre/<slug>.jpg を置くとSVGを上書き／任意）');
 
 // 情報：電話番号（表示↔実番号）
-lines.push('— 情報：電話番号 —');
-const disp = read('buymo.html').indexOf('0120-123-456') >= 0;
-lines.push('  ℹ️ 表示番号 0120-123-456 / 実番号 050-1784-2929。統一方針を確定してください' + (disp ? '' : ''));
+lines.push('— 情報：連絡先 —');
+lines.push('  ℹ️ 連絡はメール専用（kaitori@buymo.me）。電話番号は使用しません');
 
 // 情報：生成済みページ数
 lines.push('— 情報：生成済みページ —');

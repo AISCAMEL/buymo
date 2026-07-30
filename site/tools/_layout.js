@@ -18,7 +18,7 @@ function header(rel, active) {
   <div class="container header-inner">
     <a href="${rel}index.html#top" class="logo" aria-label="BUYMO ホーム"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
     <nav class="gnav" id="gnav" aria-label="メインナビゲーション"><ul>${nav}</ul></nav>
-    <a href="tel:05017842929" class="header-tel" aria-label="電話で問い合わせ 050-1784-2929"><span class="tel-ico" aria-hidden="true">📞</span>050-1784-2929</a>
+    <a href="mailto:kaitori@buymo.me" class="header-tel" aria-label="メールでお問い合わせ"><span class="tel-ico" aria-hidden="true">✉️</span>メールで査定</a>
     <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false" aria-controls="gnav"><span></span><span></span><span></span></button>
   </div>
 </header>`;
@@ -37,7 +37,7 @@ function footer(rel) {
       <a href="${rel}index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
       <p class="footer-company">合同会社アイズ</p>
       <p>〒971-8138<br>福島県いわき市若葉台1丁目31-11</p>
-      <p>📞 050-1784-2929</p><p>✉️ kaitori@buymo.me</p>
+      <p>✉️ kaitori@buymo.me</p>
     </div>
     <nav class="footer-col" aria-label="サイトマップ"><h3>サイトマップ</h3><ul class="footer-links">
       <li><a href="${rel}index.html#company">会社概要</a></li>
