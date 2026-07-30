@@ -415,7 +415,7 @@
         if (photoFiles.length > 0) q += (q ? '&' : '?') + 'photos=' + photoFiles.length;
         window.location.href = 'buymo-thanks.html' + q;
       }).catch(function () {
-        note.textContent = '送信に失敗しました。お手数ですが info@aisjaltd.com までメールにてご連絡ください。';
+        note.textContent = '送信に失敗しました。お手数ですが kaitori@buymo.me までメールにてご連絡ください。';
         note.className = 'form-note ng';
       }).then(function () {
         if (submitBtn) { submitBtn.disabled = false; }

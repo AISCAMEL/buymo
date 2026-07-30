@@ -12,7 +12,7 @@ var SHEET_NAME        = '問い合わせ';
 var COL_SHEET_NAME    = 'コラム';
 var CASE_SHEET_NAME   = '案件';
 var JOIN_SHEET_NAME   = '加盟店申込';
-var NOTIFY_EMAIL      = 'info@aisjaltd.com';
+var NOTIFY_EMAIL      = 'kaitori@buymo.me';
 var DRIVE_FOLDER_NAME = 'BUYMO査定写真';
 // Slack Incoming Webhook URL（空欄なら通知しない）
 var SLACK_WEBHOOK_URL = '';

@@ -133,7 +133,7 @@ function prefPage(p, i) {
 <link rel="stylesheet" href="${rel}assets/css/buymo.css" />
 <link rel="stylesheet" href="${rel}assets/css/buymo-area.css" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${esc(p.name)}対応","description":"${esc(p.name)}の車買取・査定。高価買取・無料出張査定・全域対応。","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"info@aisjaltd.com","areaServed":{"@type":"State","name":"${esc(p.name)}"},"address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"若葉台1丁目31-11"},"openingHours":"Mo-Fr 08:00-17:00"}
+{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${esc(p.name)}対応","description":"${esc(p.name)}の車買取・査定。高価買取・無料出張査定・全域対応。","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"kaitori@buymo.me","areaServed":{"@type":"State","name":"${esc(p.name)}"},"address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"若葉台1丁目31-11"},"openingHours":"Mo-Fr 08:00-17:00"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"${bcHome}"},{"@type":"ListItem","position":2,"name":"対応エリア","item":"${bcArea}"},{"@type":"ListItem","position":3,"name":"${esc(p.name)}","item":"${esc(canonical)}"}]}
