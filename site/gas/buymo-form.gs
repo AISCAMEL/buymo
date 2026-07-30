@@ -16,10 +16,19 @@ var NOTIFY_EMAIL      = 'kaitori@buymo.me';
 var DRIVE_FOLDER_NAME = 'BUYMO査定写真';
 // Slack Incoming Webhook URL（空欄なら通知しない）
 var SLACK_WEBHOOK_URL = '';
-// OpenRouter API キー（空欄ならチャットボットAI無効）
-// 取得: openrouter.ai → Keys
+// OpenRouter API キー（空欄ならチャットボットAI無効・ルールベースにフォールバック）
+// 取得手順:
+//   1. https://openrouter.ai/ でアカウント作成
+//   2. Keys ページで API キーを発行
+//   3. 下の '' の中に貼り付け
+// ※ このファイルを公開Gitに含めないこと。GAS Scriptプロパティ使用推奨
 var OPENROUTER_API_KEY = '';
-// 使用モデル（openrouter.ai/models で一覧確認可）
+// 使用モデル（openrouter.ai/models で一覧・料金確認可）
+//   おすすめ:
+//     'anthropic/claude-haiku-4-5'       — 高品質・日本語◎・$1/M（推奨）
+//     'openai/gpt-4o-mini'                — 高速・安価・$0.15/M
+//     'google/gemini-2.5-flash-lite'      — 最安・$0.075/M
+//     'meta-llama/llama-3.3-70b-instruct' — オープンモデル・安価
 var OPENROUTER_MODEL   = 'anthropic/claude-haiku-4-5';
 // ▲ 設定 ――――――――――――――――――――――――――――――――――――――――
 
@@ -41,20 +50,23 @@ function jsonp(cb, obj) {
    ============================================================ */
 var BOT_SYSTEM = {
   user: [
-    'あなたはBUYMO（出張車買取サービス）のAIアシスタント「BUYMOくん」です。',
+    'あなたはBUYMO（オンライン車買取サービス）のAIアシスタント「BUYMOくん」です。',
     '訪問者の車売却に関する質問に親切・丁寧・簡潔に答えてください。',
     '',
     'BUYMOサービス情報:',
     '- 全国47都道府県に対応。出張査定・手続き代行・レッカー引取はすべて無料',
     '- 廃車・事故車・修復歴・不動車・水没車・車検切れも全て買取可能',
-    '- 入金は契約・書類確認後、最短即日〜数営業日で指定口座へ振込',
-    '- 電話: 050-1784-2929（平日8:00〜17:00）',
-    '- 査定フォーム: buymo-contact.html（24時間受付）',
+    '- 写真査定でネット完結。しつこい電話営業は一切なし',
+    '- 入金は契約・書類確認後、3営業日以内に指定口座へ振込',
+    '- お問い合わせ: kaitori@buymo.me（24時間受付、営業時間内に順次返信）',
+    '- 査定フォーム: サイトの #form セクション（24時間受付）',
     '- 人気ジャンル: ハイエース・ランクル・ジムニー・アルファード・EV・廃車・旧車',
     '',
     '回答ルール:',
     '- 日本語で200字以内。箇条書きを使い簡潔に答える',
     '- 具体的な査定金額は提示せず「無料査定でご確認を」と案内する',
+    '- 電話番号は絶対に提示しない（電話対応は行っていない）',
+    '- 連絡手段はメール（kaitori@buymo.me）または査定フォームのみ案内する',
     '- 個人情報の収集は行わない',
     '- BUYMOの車買取と無関係な話題は丁寧にお断りして査定の案内に誘導する'
   ].join('\n'),
@@ -98,8 +110,20 @@ function handleBot(p) {
   return { answer: answer };
 }
 
+// API キーは（優先度順）:
+//   1. GAS Script Properties の 'OPENROUTER_API_KEY'（推奨・安全）
+//   2. 上の OPENROUTER_API_KEY 変数
+function getApiKey() {
+  try {
+    var sp = PropertiesService.getScriptProperties().getProperty('OPENROUTER_API_KEY');
+    if (sp) return sp;
+  } catch (e) {}
+  return OPENROUTER_API_KEY || '';
+}
+
 function callClaude(messages, system) {
-  if (!OPENROUTER_API_KEY) return null;
+  var apiKey = getApiKey();
+  if (!apiKey) return null;
   // OpenRouter は OpenAI 互換フォーマット
   // system はメッセージ配列の先頭に role:"system" として渡す
   var payload = [{ role: 'system', content: system }].concat(messages);
@@ -107,7 +131,7 @@ function callClaude(messages, system) {
     var resp = UrlFetchApp.fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'post',
       headers: {
-        'Authorization':  'Bearer ' + OPENROUTER_API_KEY,
+        'Authorization':  'Bearer ' + apiKey,
         'Content-Type':   'application/json',
         'HTTP-Referer':   'https://buymo.me',
         'X-Title':        'BUYMO Chat'
@@ -115,6 +139,7 @@ function callClaude(messages, system) {
       payload: JSON.stringify({
         model:      OPENROUTER_MODEL,
         max_tokens: 400,
+        temperature: 0.7,
         messages:   payload
       }),
       muteHttpExceptions: true
