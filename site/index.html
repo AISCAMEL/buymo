@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=11" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=12" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -367,81 +367,30 @@
     </div>
   </section>
 
-  <!-- ============ 査定依頼フォーム ============ -->
+  <!-- ============ 査定依頼フォーム（超シンプル版） ============ -->
   <section class="form-section" id="form" aria-labelledby="form-title">
     <div class="container form-inner">
       <form class="quote-form" id="quoteForm" novalidate>
-        <h2 id="form-title">無料査定依頼</h2>
-        <p class="form-lead">下記フォームにご入力ください。<br>査定結果はメールにてご連絡いたします。</p>
-
-        <div class="field-row">
-          <div class="field">
-            <label for="f-maker">車種</label>
-            <select id="f-maker" name="maker" required>
-              <option value="">選択してください</option>
-              <option>トヨタ</option><option>ホンダ</option><option>日産</option>
-              <option>マツダ</option><option>スバル</option><option>スズキ</option>
-              <option>ダイハツ</option><option>三菱</option><option>その他</option>
-            </select>
-            <p class="err" data-for="f-maker"></p>
-          </div>
-          <div class="field">
-            <label for="f-year">年式</label>
-            <select id="f-year" name="year" required>
-              <option value="">選択してください</option>
-            </select>
-            <p class="err" data-for="f-year"></p>
-          </div>
-        </div>
+        <span class="form-badge">かんたん 30秒</span>
+        <h2 id="form-title">無料査定を依頼する</h2>
+        <p class="form-lead">まずはお名前とメールだけでOK。<br>詳細は折り返しメールで丁寧にヒアリングいたします。</p>
 
         <div class="field">
-          <label for="f-mileage">走行距離</label>
-          <div class="input-unit">
-            <input type="number" id="f-mileage" name="mileage" min="0" inputmode="numeric" placeholder="例：50000" required />
-            <span class="unit">km</span>
-          </div>
-          <p class="err" data-for="f-mileage"></p>
-        </div>
-
-        <div class="field">
-          <label for="f-name">お名前</label>
-          <input type="text" id="f-name" name="name" placeholder="例：山田 太郎" required />
+          <label for="f-name">お名前 <span class="req">必須</span></label>
+          <input type="text" id="f-name" name="name" placeholder="例：山田 太郎" required autocomplete="name" />
           <p class="err" data-for="f-name"></p>
         </div>
 
         <div class="field">
-          <label for="f-email">メールアドレス</label>
-          <input type="email" id="f-email" name="email" placeholder="例：example@buymo.jp" required />
+          <label for="f-email">メールアドレス <span class="req">必須</span></label>
+          <input type="email" id="f-email" name="email" placeholder="example@buymo.me" required autocomplete="email" />
           <p class="err" data-for="f-email"></p>
         </div>
 
-        <div class="field-row">
-          <div class="field">
-            <label for="f-pref">都道府県</label>
-            <select id="f-pref" name="pref" required>
-              <option value="">選択してください</option>
-            </select>
-            <p class="err" data-for="f-pref"></p>
-          </div>
-          <div class="field">
-            <label for="f-addr">ご住所</label>
-            <input type="text" id="f-addr" name="addr" placeholder="例：いわき市〇〇町1-2-3" required />
-            <p class="err" data-for="f-addr"></p>
-          </div>
-        </div>
-
-        <!-- 車の写真（任意） -->
-        <div class="field field-photos">
-          <label for="photoDropZone">車の写真（任意・最大5枚）</label>
-          <div class="photo-drop-zone" id="photoDropZone" tabindex="0" role="button"
-               aria-label="写真を選択またはドラッグ＆ドロップ">
-            <span class="photo-drop-ico" aria-hidden="true">📸</span>
-            <span class="photo-drop-text">タップして写真を選ぶ</span>
-            <span class="photo-drop-hint">JPG・PNG・HEIC 対応 ／ 最大 5 枚・各 10MB 以下</span>
-          </div>
-          <input type="file" id="f-photos" accept="image/*" multiple aria-label="写真を選択" />
-          <div class="photo-preview" id="photoPreview" role="list" aria-label="選択中の写真"></div>
-          <p class="photo-count" id="photoCount" aria-live="polite"></p>
+        <div class="field">
+          <label for="f-car">車種・現在のご状況 <span class="opt">任意</span></label>
+          <textarea id="f-car" name="car" rows="3" placeholder="例：トヨタ プリウス 2019年式 / 事故車です / まずは相場を知りたい など、わかる範囲でOK"></textarea>
+          <p class="field-hint">わかる範囲でOK。詳しくは追ってメールでお伺いします。</p>
         </div>
 
         <div class="field field-check">
@@ -449,7 +398,8 @@
           <p class="err" data-for="f-agree"></p>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg">査定を依頼</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">無料査定を依頼<span aria-hidden="true">›</span></button>
+        <p class="form-benefit">✓ しつこい電話なし　✓ 完全無料　✓ 全国対応</p>
         <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
       </form>
 
@@ -609,7 +559,7 @@
 <script src="assets/js/simulator-buy.js" defer></script>
 <script>document.addEventListener('DOMContentLoaded',function(){if(window.BuymoSim)BuymoSim.init('buymoSim');});</script>
 <script src="assets/js/buymo-data.js" defer></script>
-<script src="assets/js/buymo.js" defer></script>
+<script src="assets/js/buymo.js?v=3" defer></script>
 <link rel="stylesheet" href="assets/css/academy.css?v=3" />
 <script>window.BUYMO_BOT_MODE='user';</script>
 <script src="assets/js/chatbot.js?v=4" defer></script>

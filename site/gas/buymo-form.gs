@@ -568,6 +568,10 @@ function handleContact(data) {
   sheet.appendRow([ts, data.name || '', data.email || '', data.phone || '', data.genre || '',
                    data.source || '', photoUrls.length, photoUrls.join('\n'), data.message || '']);
 
+  // リードシートに登録（ドリップ配信管理用）
+  saveLead(data, ts);
+
+  // 管理者宛通知
   var subject = '【BUYMO】新しいお問い合わせ：' + (data.name || '（氏名未入力）');
   var photoSection = photoUrls.length > 0
     ? '写真：' + photoUrls.length + '枚\n' + photoUrls.map(function (u, i) { return '  写真' + (i + 1) + ': ' + u; }).join('\n')
@@ -576,7 +580,7 @@ function handleContact(data) {
   var body = [
     '■ BUYMOに新しいお問い合わせが届きました', '',
     '受信日時　：' + ts, '氏名　　　：' + (data.name || '—'),
-    'メール　　：' + (data.email || '—'), '電話番号　：' + (data.phone || '—'),
+    'メール　　：' + (data.email || '—'),
     'ジャンル　：' + (data.genre || '—'), '流入元　　：' + (data.source || '—'),
     photoSection, '', '─── メッセージ ───', data.message || '（内容なし）', '',
     'スプレッドシート：', SpreadsheetApp.getActiveSpreadsheet().getUrl()
@@ -584,10 +588,15 @@ function handleContact(data) {
 
   MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: subject, body: body });
 
+  // ユーザーへ自動返信（詳細ヒアリング）
+  if (data.email) {
+    sendAutoReply(data);
+  }
+
   // 案件シートに自動登録
   var caseResult = handleCase({
     name:     data.name  || '',
-    tel:      data.phone || '',
+    tel:      '',
     email:    data.email || '',
     genre:    data.genre || '',
     source:   data.source || '',
@@ -600,6 +609,244 @@ function handleContact(data) {
   slackNewLead(data, caseResult.id, photoUrls.length);
 
   return { status: 'ok', photos: photoUrls.length, caseId: caseResult.id };
+}
+
+/* ============================================================
+   自動返信メール（申込直後）
+   ============================================================ */
+function sendAutoReply(data) {
+  var name = (data.name || 'お客').replace(/[<>]/g, '');
+  var subject = '【BUYMO】お申し込みありがとうございます｜査定に必要な情報のご案内';
+  var body =
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+'  BUYMO 車買取サービス\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+name + ' 様\n\n' +
+'この度は BUYMO（買取事業部）へ査定のお申し込みをいただき、\n' +
+'誠にありがとうございます。\n\n' +
+'查定を正確に進めるため、以下の情報をご返信いただけますと幸いです。\n' +
+'（このメールへの返信でOKです）\n\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+'  📋 お伺いしたい内容\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'① メーカー・車種名（例：トヨタ プリウス）\n' +
+'② 年式（例：2019年式 / 令和元年）\n' +
+'③ 走行距離（例：約50,000km）\n' +
+'④ 車の状態（例：無事故 / 事故歴あり / 動かない など）\n' +
+'⑤ 車の写真（3〜5枚 / 外観・内装・メーター）\n' +
+'⑥ お住まいの都道府県\n\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+'  📸 写真のオススメ撮影ポイント\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'・外観（正面・後ろ・左右の斜め）\n' +
+'・内装（運転席・後部座席）\n' +
+'・メーター（走行距離が見える状態）\n' +
+'・傷や凹みがあればその部分\n\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+'  ⏱ 査定の流れ\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'  Step 1  情報ご返信（お客様）\n' +
+'    ↓\n' +
+'  Step 2  査定額をご提示（当社より24時間以内）\n' +
+'    ↓\n' +
+'  Step 3  ご契約・書類郵送\n' +
+'    ↓\n' +
+'  Step 4  ご自宅まで無料引き取り\n' +
+'    ↓\n' +
+'  Step 5  3営業日以内にお振込み完了\n\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'✓ しつこいお電話は一切いたしません\n' +
+'✓ ご相談・査定・キャンセルすべて無料\n' +
+'✓ 全国47都道府県対応\n' +
+'✓ ネット完結・書類は郵送でOK\n\n' +
+'ご不明な点はこのメールに直接ご返信ください。\n' +
+'すぐにお答えいたします。\n\n' +
+'それではご返信をお待ちしております。\n\n' +
+'───────────────────\n' +
+'合同会社アイズ 買取事業部\n' +
+'BUYMO ｜ https://buymo.me/\n' +
+'✉  kaitori@buymo.me\n' +
+'〒979-0204 福島県いわき市四倉町細谷字大町1番\n' +
+'───────────────────\n';
+
+  try {
+    MailApp.sendEmail({
+      to:      data.email,
+      subject: subject,
+      body:    body,
+      name:    'BUYMO 買取事業部',
+      replyTo: 'kaitori@buymo.me'
+    });
+  } catch (e) {
+    Logger.log('sendAutoReply error: ' + e.message);
+  }
+}
+
+/* ============================================================
+   リード管理（ドリップ配信用）
+   シート列: [受付日時, 氏名, メール, ジャンル, 車種メモ, ステータス, 詳細返信日, 最終配信日, 配信ステップ]
+   ステータス: 新規 / 詳細受領 / 停止
+   配信ステップ: 0=自動返信済, 1=Day3リマインド送信済, 2=Day7価値提供送信済, 3=Day14最終送信済
+   ============================================================ */
+var LEAD_SHEET_NAME = 'リード';
+
+function getLeadSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(LEAD_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(LEAD_SHEET_NAME);
+    sheet.appendRow(['受付日時', '氏名', 'メール', 'ジャンル', '車種メモ', 'ステータス', '詳細返信日', '最終配信日', '配信ステップ']);
+    sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#0A6B3C').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function saveLead(data, ts) {
+  try {
+    var sheet = getLeadSheet();
+    sheet.appendRow([
+      ts,
+      data.name  || '',
+      data.email || '',
+      data.genre || '',
+      data.car   || '',
+      '新規',
+      '',
+      ts,   // 最終配信日（自動返信の時刻）
+      0     // 配信ステップ（0=自動返信済）
+    ]);
+  } catch (e) { Logger.log('saveLead: ' + e.message); }
+}
+
+/* ============================================================
+   ドリップ配信ランナー
+   GAS で毎日1回（例: 朝9時）に実行するトリガーを設定
+     トリガー → 関数: runDripCampaign / イベント: 時間主導型 / 日タイマー 8-9時
+   ============================================================ */
+function runDripCampaign() {
+  var sheet = getLeadSheet();
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) return;
+  var now = new Date();
+  var sent = 0;
+
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var ts       = row[0];
+    var name     = row[1];
+    var email    = row[2];
+    var status   = row[5];
+    var step     = Number(row[8]) || 0;
+
+    if (!email || status === '詳細受領' || status === '停止') continue;
+    if (step >= 3) continue;
+
+    var recv = new Date(ts);
+    var days = Math.floor((now - recv) / (1000 * 60 * 60 * 24));
+
+    var nextStep = null, sub = '', body = '';
+
+    // Day 3 → 詳細催促リマインド
+    if (step === 0 && days >= 3) {
+      nextStep = 1;
+      sub = '【BUYMO】査定準備はお進みですか？';
+      body = dripBodyReminder(name);
+    }
+    // Day 7 → 価値提供
+    else if (step === 1 && days >= 7) {
+      nextStep = 2;
+      sub = '【BUYMO】高く売るコツと、写真1枚での査定について';
+      body = dripBodyValue(name);
+    }
+    // Day 14 → 最終
+    else if (step === 2 && days >= 14) {
+      nextStep = 3;
+      sub = '【BUYMO】お手続きが必要な場合はご返信ください';
+      body = dripBodyFinal(name);
+    }
+
+    if (nextStep !== null) {
+      try {
+        MailApp.sendEmail({
+          to:      email,
+          subject: sub,
+          body:    body,
+          name:    'BUYMO 買取事業部',
+          replyTo: 'kaitori@buymo.me'
+        });
+        sheet.getRange(i + 1, 8).setValue(Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss'));
+        sheet.getRange(i + 1, 9).setValue(nextStep);
+        sent++;
+      } catch (e) { Logger.log('drip send error: ' + e.message); }
+    }
+  }
+
+  Logger.log('runDripCampaign: sent ' + sent + ' emails');
+}
+
+function dripBodyReminder(name) {
+  return (name || 'お客') + ' 様\n\n' +
+    'BUYMO 買取事業部です。\n' +
+    '先日は査定のお申し込みをいただき、ありがとうございました。\n\n' +
+    '査定を進めるための情報をまだお受け取りしておりませんが、\n' +
+    'お手すきの際に以下の情報をご返信いただけますと幸いです。\n\n' +
+    '━━━━━━━━━━━━━━\n' +
+    '① 車種（例：トヨタ プリウス）\n' +
+    '② 年式\n' +
+    '③ 走行距離\n' +
+    '④ 車の状態\n' +
+    '⑤ 写真（3〜5枚）\n' +
+    '━━━━━━━━━━━━━━\n\n' +
+    'このメールへの返信で送信いただけます。\n' +
+    '追加のご質問だけでも大歓迎です。\n\n' +
+    '合同会社アイズ 買取事業部\n' +
+    'BUYMO ｜ https://buymo.me/\n' +
+    '✉ kaitori@buymo.me\n';
+}
+
+function dripBodyValue(name) {
+  return (name || 'お客') + ' 様\n\n' +
+    'BUYMO 買取事業部です。いつもありがとうございます。\n\n' +
+    '査定にご活用いただけるトピックを2つお届けします。\n\n' +
+    '━━━━━━━━━━━━━━\n' +
+    '  💰 高く売る4つのポイント\n' +
+    '━━━━━━━━━━━━━━\n' +
+    '  ① タイミング（3月・9月前が需要期）\n' +
+    '  ② 車検が残っているうちに売る\n' +
+    '  ③ 洗車・車内清掃を済ませておく\n' +
+    '  ④ 純正パーツ・記録簿を揃える\n\n' +
+    '━━━━━━━━━━━━━━\n' +
+    '  📸 写真1枚でも査定OK\n' +
+    '━━━━━━━━━━━━━━\n' +
+    '  BUYMO では写真の枚数に関わらず査定が可能です。\n' +
+    '  「概算だけ知りたい」というご要望も歓迎です。\n\n' +
+    'ご返信お待ちしております。\n\n' +
+    '合同会社アイズ 買取事業部\n' +
+    'BUYMO ｜ https://buymo.me/\n' +
+    '✉ kaitori@buymo.me\n';
+}
+
+function dripBodyFinal(name) {
+  return (name || 'お客') + ' 様\n\n' +
+    'BUYMO 買取事業部です。\n\n' +
+    'これまで数回ご案内メールをお送りしましたが、\n' +
+    '査定はご不要でしょうか？\n\n' +
+    'もしご希望が変わったり、他の車で売りたいものがあれば、\n' +
+    'いつでもこのメールにご返信ください。\n\n' +
+    '━━━━━━━━━━━━━━\n' +
+    '  📌 サービス内容の再掲\n' +
+    '━━━━━━━━━━━━━━\n' +
+    '  ・全国47都道府県対応\n' +
+    '  ・査定料・出張費・レッカー費すべて無料\n' +
+    '  ・電話営業は一切なし\n' +
+    '  ・3営業日以内に確実にお振込み\n\n' +
+    'これで自動配信は終了とさせていただきます。\n' +
+    '今後ともよろしくお願いいたします。\n\n' +
+    '合同会社アイズ 買取事業部\n' +
+    'BUYMO ｜ https://buymo.me/\n' +
+    '✉ kaitori@buymo.me\n\n' +
+    '※ 配信を止めたい場合は「配信停止」とだけ返信いただければ即時停止します。\n';
 }
 
 /* ============================================================

@@ -346,32 +346,26 @@
       });
     }
 
-    // フォーム内容→GASペイロード（type:"contact"・詳細は message に整形）
+    // フォーム内容→GASペイロード（超シンプル版）
     function buildPayload() {
       var get = function (id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
-      var labels = {
-        type: '種別', maker: '車種', year: '年式', mileage: '走行距離(km)',
-        pref: '都道府県', addr: 'ご住所', company: '会社名・屋号', message: 'お問い合わせ内容'
-      };
-      var lines = [];
-      Object.keys(labels).forEach(function (id) {
-        var v = get('f-' + id);
-        if (v) lines.push(labels[id] + '：' + v);
-      });
       var params = {};
       try { new URLSearchParams(window.location.search).forEach(function (v, k) { params[k] = v; }); } catch (e) {}
       var source = 'BUYMO ' + (document.title || '') + ' [' + window.location.pathname + ']';
+      var lines = [];
+      var car = get('f-car');
+      if (car) lines.push('車種・状況：\n' + car);
       if (params.genre) lines.push('ジャンル：' + params.genre);
       if (params.est) lines.push('シミュレーター概算：' + params.est);
       return {
-        type: 'buymo',
+        type: 'buymo_lead',
         source: source,
         genre: params.genre || '',
         name: get('f-name'),
         email: get('f-email'),
-        phone: get('f-tel'),
-        message: lines.join('\n') + '\n— ' + source,
-        photos: photoFiles.map(function (p) { return { name: p.name, data: p.data, type: p.type }; })
+        car: car,
+        message: lines.join('\n') + (lines.length ? '\n' : '') + '— ' + source,
+        photos: (photoFiles || []).map(function (p) { return { name: p.name, data: p.data, type: p.type }; })
       };
     }
 
