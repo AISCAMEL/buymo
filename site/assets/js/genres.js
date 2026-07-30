@@ -68,7 +68,7 @@
   function soonOf(g) { return g.status === 'coming' || !g.url || g.url === '#'; }
   function chip(g) {
     var soon = soonOf(g);
-    var label = g.icon + ' ' + g.name + (soon ? '<span class="soon">準備中</span>' : '');
+    var label = g.name + (soon ? '<span class="soon">準備中</span>' : '');
     return soon
       ? '<span class="genre-link disabled" aria-disabled="true">' + label + '</span>'
       : '<a class="genre-link" href="' + g.url + '">' + label + '</a>';
@@ -77,7 +77,7 @@
     var el = document.getElementById('genre-nav');
     if (!el) return;
     el.innerHTML = GROUPS.map(function (g) {
-      return '<li class="genre-group"><span class="genre-cat">' + g.icon + ' ' + g.cat + '</span>' +
+      return '<li class="genre-group"><span class="genre-cat">' + g.cat + '</span>' +
         g.items.map(chip).join('') + '</li>';
     }).join('');
   }
