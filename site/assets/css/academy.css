@@ -131,44 +131,97 @@
 @media (max-width:991px){.ac-grid{grid-template-columns:repeat(2,1fr);}.cv-layout{grid-template-columns:1fr;}}
 @media (max-width:767px){.ac-grid,.ac-links{grid-template-columns:1fr;}}
 
-/* ============ チャットボット v2（AI対応） ============ */
-/* --bot-accent: ポータルは --orange、一般サイトは --green にフォールバック */
+/* ============ チャットボット v3（強化版） ============ */
 :root{--bot-accent:var(--orange,var(--green,#0EA05B));--bot-head:var(--navy,var(--green-dark,#0A6B3C));}
 
 .cbot{position:fixed;right:24px;bottom:24px;z-index:140;}
 .cbot-launch{
-  position:relative;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;
-  font-size:26px;color:#fff;
+  position:relative;width:68px;height:68px;border-radius:50%;border:none;cursor:pointer;
+  color:#fff;padding:0;overflow:visible;
   background:linear-gradient(135deg,var(--bot-accent),var(--bot-head));
-  box-shadow:0 8px 22px rgba(0,0,0,.3);
+  box-shadow:0 10px 28px rgba(10,107,60,.4);
   transition:transform .2s,box-shadow .2s;
 }
-.cbot-launch:hover{transform:scale(1.08);box-shadow:0 12px 28px rgba(0,0,0,.35);}
+.cbot-launch:hover{transform:scale(1.08);box-shadow:0 14px 34px rgba(10,107,60,.5);}
+.cbot-launch-img{width:60%;height:60%;object-fit:contain;display:block;margin:auto;}
+.cbot-launch-ico{font-size:28px;}
 .cbot-launch-badge{
-  position:absolute;top:-4px;right:-4px;
-  background:#fff;color:var(--bot-head);
-  font-size:9px;font-weight:900;border-radius:30px;padding:2px 5px;
-  box-shadow:0 2px 6px rgba(0,0,0,.2);letter-spacing:.04em;
+  position:absolute;top:-2px;right:-2px;
+  background:#ff5252;color:#fff;
+  font-size:10px;font-weight:900;border-radius:30px;padding:3px 7px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);letter-spacing:.06em;
+  border:2px solid #fff;
 }
+.cbot-launch-pulse{
+  position:absolute;inset:-4px;border-radius:50%;
+  background:var(--bot-accent);opacity:.35;
+  animation:cbot-pulse 2.2s ease-out infinite;z-index:-1;
+}
+@keyframes cbot-pulse{
+  0%{transform:scale(1);opacity:.35;}
+  100%{transform:scale(1.45);opacity:0;}
+}
+
 .cbot-panel{
-  position:absolute;right:0;bottom:0;width:340px;max-width:90vw;height:500px;max-height:80vh;
-  background:#fff;border-radius:16px;
-  box-shadow:0 16px 48px rgba(0,0,0,.22);
+  position:absolute;right:0;bottom:0;width:380px;max-width:92vw;height:560px;max-height:82vh;
+  background:#fff;border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.28);
   display:flex;flex-direction:column;overflow:hidden;
+  animation:cbot-slidein .28s ease-out;
+}
+@keyframes cbot-slidein{
+  from{opacity:0;transform:translateY(20px) scale(.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
 }
 .cbot-panel[hidden]{display:none;}
-.cbot-head{background:var(--bot-head);color:#fff;padding:12px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.cbot-title{font-weight:700;font-size:15px;flex:1;}
+
+.cbot-head{
+  background:linear-gradient(135deg,var(--bot-head),color-mix(in srgb,var(--bot-head) 82%,var(--bot-accent)));
+  color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.cbot-avatar{width:38px;height:38px;border-radius:50%;object-fit:contain;background:#fff;padding:4px;flex-shrink:0;}
+.cbot-head-text{display:flex;flex-direction:column;flex:1;min-width:0;gap:2px;}
+.cbot-title{font-weight:800;font-size:15px;line-height:1.2;letter-spacing:.01em;}
+.cbot-status{font-size:11px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px;font-weight:600;}
+.cbot-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.3);animation:cbot-dot 1.6s ease-in-out infinite;}
+@keyframes cbot-dot{0%,100%{opacity:1;}50%{opacity:.5;}}
+
 .cbot-mode{display:flex;background:rgba(255,255,255,.15);border-radius:30px;padding:2px;gap:2px;}
-.cbot-mode button{border:none;background:none;color:rgba(255,255,255,.75);font-size:11px;font-weight:700;padding:4px 9px;border-radius:30px;cursor:pointer;font-family:inherit;}
+.cbot-mode button{border:none;background:none;color:rgba(255,255,255,.75);font-size:11px;font-weight:700;padding:5px 10px;border-radius:30px;cursor:pointer;font-family:inherit;transition:all .15s;}
 .cbot-mode button.on{background:#fff;color:var(--bot-head);}
-.cbot-x{border:none;background:none;color:rgba(255,255,255,.8);font-size:22px;cursor:pointer;padding:0 4px;line-height:1;}
-.cbot-log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#f7f8fb;}
-.cbot-msg{max-width:85%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.65;word-break:break-word;}
-.cbot-msg.bot{background:#fff;border:1px solid #e8ecf0;align-self:flex-start;border-bottom-left-radius:4px;}
-.cbot-msg.user{background:var(--bot-accent);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
-/* タイピングインジケーター */
-.cbot-typing{display:flex;align-items:center;gap:5px;padding:12px 16px;}
+.cbot-x{border:none;background:rgba(255,255,255,.12);color:#fff;font-size:20px;cursor:pointer;padding:0;line-height:1;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.cbot-x:hover{background:rgba(255,255,255,.25);}
+
+.cbot-log{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px;background:#f7f9fb;scroll-behavior:smooth;}
+.cbot-log::-webkit-scrollbar{width:5px;}
+.cbot-log::-webkit-scrollbar-track{background:transparent;}
+.cbot-log::-webkit-scrollbar-thumb{background:#d0d7dd;border-radius:3px;}
+
+.cbot-msg-wrap{display:flex;gap:8px;align-items:flex-end;max-width:100%;}
+.cbot-msg-wrap.bot{justify-content:flex-start;}
+.cbot-msg-wrap.user{justify-content:flex-end;}
+.cbot-msg-avatar{width:28px;height:28px;border-radius:50%;object-fit:contain;background:#fff;border:1px solid #e8ecf0;padding:3px;flex-shrink:0;}
+
+.cbot-msg{max-width:78%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.65;word-break:break-word;}
+.cbot-msg.bot{background:#fff;border:1px solid #e8ecf0;border-bottom-left-radius:4px;color:#1a2b26;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+.cbot-msg.user{background:linear-gradient(135deg,var(--bot-accent),color-mix(in srgb,var(--bot-accent) 82%,var(--bot-head)));color:#fff;border-bottom-right-radius:4px;box-shadow:0 2px 6px rgba(14,160,91,.2);}
+.cbot-msg strong{font-weight:800;color:var(--bot-head);}
+.cbot-msg.user strong{color:#fff;}
+
+/* リッチCTAボタン群 */
+.cbot-msg-cta{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+.cbot-cta-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#fff;border:1.5px solid var(--bot-accent);color:var(--bot-accent);
+  border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;
+  transition:all .15s;text-decoration:none;line-height:1.3;
+}
+.cbot-cta-btn:hover{background:var(--bot-accent);color:#fff;transform:translateY(-1px);}
+.cbot-cta-btn.primary{background:var(--bot-accent);color:#fff;box-shadow:0 3px 10px rgba(14,160,91,.25);}
+.cbot-cta-btn.primary:hover{background:var(--bot-head);border-color:var(--bot-head);}
+
+/* タイピング */
+.cbot-typing{display:flex;align-items:center;gap:5px;padding:14px 18px !important;}
 .cbot-typing span{
   width:7px;height:7px;border-radius:50%;background:var(--bot-accent);opacity:.4;
   animation:cbot-bounce .9s ease-in-out infinite;
@@ -176,23 +229,52 @@
 .cbot-typing span:nth-child(2){animation-delay:.15s;}
 .cbot-typing span:nth-child(3){animation-delay:.30s;}
 @keyframes cbot-bounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-5px);opacity:1;}}
-.cbot-chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px 4px;background:#f7f8fb;flex-shrink:0;}
+
+/* チップス */
+.cbot-chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px 6px;background:#f7f9fb;flex-shrink:0;border-top:1px solid #eef1f4;}
 .cbot-chip{
   border:1.5px solid #dde1e7;background:#fff;border-radius:30px;
-  padding:5px 12px;font-size:12px;font-weight:700;color:#555;cursor:pointer;
-  font-family:inherit;transition:border-color .15s,color .15s;
+  padding:6px 12px;font-size:12px;font-weight:700;color:#4a5b58;cursor:pointer;
+  font-family:inherit;transition:all .15s;
 }
-.cbot-chip:hover{border-color:var(--bot-accent);color:var(--bot-accent);}
-.cbot-input{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eee;flex-shrink:0;}
+.cbot-chip:hover{border-color:var(--bot-accent);color:var(--bot-accent);background:color-mix(in srgb,var(--bot-accent) 8%,#fff);}
+
+/* クイックアクション */
+.cbot-quick{display:flex;gap:6px;padding:6px 14px 8px;background:#f7f9fb;flex-shrink:0;}
+.cbot-quick-btn{
+  flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  background:#fff;border:1.5px solid #dde1e7;border-radius:10px;
+  padding:8px 10px;font-size:12px;font-weight:700;color:#4a5b58;
+  transition:all .15s;text-decoration:none;
+}
+.cbot-quick-btn:hover{border-color:var(--bot-accent);color:var(--bot-accent);}
+.cbot-quick-btn.primary{background:var(--bot-accent);border-color:var(--bot-accent);color:#fff;}
+.cbot-quick-btn.primary:hover{background:var(--bot-head);border-color:var(--bot-head);color:#fff;}
+
+/* 入力欄 */
+.cbot-input{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eee;background:#fff;flex-shrink:0;}
 .cbot-input input{
   flex:1;border:1.5px solid #dde1e7;border-radius:30px;
-  padding:9px 14px;font-size:14px;font-family:inherit;
+  padding:10px 16px;font-size:14px;font-family:inherit;
   transition:border-color .2s;
 }
 .cbot-input input:focus{outline:none;border-color:var(--bot-accent);}
 .cbot-input button{
-  border:none;background:var(--bot-accent);color:#fff;border-radius:30px;
-  padding:0 18px;font-weight:900;font-size:16px;cursor:pointer;font-family:inherit;
-  transition:filter .2s;
+  border:none;background:var(--bot-accent);color:#fff;border-radius:50%;
+  width:42px;height:42px;font-weight:900;font-size:18px;cursor:pointer;font-family:inherit;
+  transition:filter .2s,transform .1s;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
 }
 .cbot-input button:hover{filter:brightness(1.1);}
+.cbot-input button:active{transform:scale(.94);}
+
+/* モバイル全画面モード */
+@media (max-width:520px){
+  .cbot-panel{
+    position:fixed;right:12px;left:12px;bottom:12px;top:12px;
+    width:auto;max-width:none;height:auto;max-height:none;
+    border-radius:16px;
+  }
+  .cbot-msg{max-width:82%;}
+  .cbot-launch{width:60px;height:60px;}
+}
