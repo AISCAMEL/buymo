@@ -435,5 +435,23 @@
     }
   });
 
+  /* ---------- 外部トリガー：href="#chat" のリンクでチャット起動 ---------- */
+  function openChat() {
+    panel.hidden = false;
+    root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'true');
+    if (!log.children.length) setMode(MODE);
+    setTimeout(function(){ input.focus(); }, 100);
+  }
+  window.BUYMO_OPEN_CHAT = openChat;
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a');
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    if (href === '#chat' || href.endsWith('#chat')) {
+      e.preventDefault();
+      openChat();
+    }
+  });
+
   setMode(MODE);
 })();

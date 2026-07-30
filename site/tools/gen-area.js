@@ -150,7 +150,7 @@ ${header(rel, 'area')}
       <p class="page-lead">${esc(cityText)}をはじめ${esc(p.name)}全域に無料出張査定。事故車・不動車・古い車もOK。手数料0円・3営業日以内に入金で、あなたの愛車を1円でも高く買取します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html?pref=${encodeURIComponent(p.name)}" class="btn btn-primary btn-lg">無料査定を依頼</a>
-        <a href="mailto:kaitori@buymo.me" class="btn btn-tel">✉️ メールで査定</a>
+        <a href="#chat" class="btn btn-tel">💬 チャットで査定</a>
       </div>
     </div>
   </section>
@@ -230,7 +230,7 @@ ${header(rel, 'area')}
       <p>無料査定はかんたん入力。最短即日でご連絡します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html?pref=${encodeURIComponent(p.name)}" class="btn btn-light btn-lg">無料査定を依頼</a>
-        <a href="mailto:kaitori@buymo.me" class="btn btn-tel-light">✉️ メールで査定</a>
+        <a href="#chat" class="btn btn-tel-light">💬 チャットで査定</a>
       </div>
     </div>
   </section>
