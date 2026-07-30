@@ -515,7 +515,9 @@ a.genre-tag:hover{background:var(--green);border-color:var(--green);color:#fff;}
 /* ============ 会社情報 ============ */
 .company{background:var(--white);padding:80px 0;}
 .company-grid{align-items:center;}
-.company-photo{font-size:100px;text-align:center;background:var(--green-bg);border-radius:var(--radius);padding:36px;border:1px solid var(--border);}
+.company-photo{font-size:100px;text-align:center;background:var(--green-bg);border-radius:var(--radius);padding:36px;border:1px solid var(--border);overflow:hidden;}
+.company-photo img{width:100%;height:auto;max-height:340px;object-fit:cover;border-radius:calc(var(--radius) - 4px);display:block;}
+.company-photo:has(img){padding:0;font-size:0;background:transparent;border:none;}
 .company-dl{display:grid;grid-template-columns:120px 1fr;gap:0;}
 .company-dl dt{font-weight:700;padding:12px 0;border-bottom:1px solid var(--border);color:var(--text-sub);}
 .company-dl dd{padding:12px 0;border-bottom:1px solid var(--border);color:var(--text);}
