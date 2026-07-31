@@ -578,6 +578,89 @@ a.genre-tag:hover{background:var(--green);border-color:var(--green);color:#fff;}
   .exit-modal h2{font-size:18px;}
 }
 
+/* ========== 査定フロー説明（3ステップ） ========== */
+.flow-explain{background:var(--gray);padding:72px 0;}
+.flow-lead{text-align:center;color:var(--text-sub);font-size:16px;line-height:1.9;margin:12px 0 40px;}
+.flow-lead strong{color:var(--green-dark);font-weight:900;}
+.flow-steps-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;list-style:none;padding:0;margin:0 0 32px;position:relative;counter-reset:step;}
+.flow-step-3{
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  padding:32px 24px 24px;text-align:center;position:relative;
+  transition:transform .2s,box-shadow .2s;
+}
+.flow-step-3:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(10,107,60,.1);}
+.fs-num{
+  position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+  width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;
+  box-shadow:0 4px 12px rgba(10,107,60,.35);
+}
+.fs-ico{font-size:44px;margin:6px 0 12px;line-height:1;}
+.flow-step-3 h3{font-size:18px;font-weight:900;margin-bottom:8px;color:var(--text);}
+.fs-time{color:var(--green);font-size:13px;font-weight:700;margin-bottom:10px;}
+.fs-time strong{color:var(--green-dark);font-size:15px;}
+.fs-desc{font-size:13px;color:var(--text-sub);line-height:1.75;}
+@media (max-width:767px){
+  .flow-steps-3{grid-template-columns:1fr;gap:24px;}
+}
+
+/* 3つのお約束 */
+.promise-box{
+  background:linear-gradient(135deg,var(--green-dark),var(--green));
+  color:#fff;border-radius:16px;padding:28px 32px;
+  display:flex;gap:24px;align-items:flex-start;max-width:900px;margin:0 auto;
+  box-shadow:0 12px 32px rgba(10,107,60,.2);
+}
+.promise-icon{font-size:56px;line-height:1;flex-shrink:0;}
+.promise-text h3{font-size:18px;font-weight:900;margin-bottom:10px;}
+.promise-text ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
+.promise-text li{padding-left:22px;position:relative;font-size:14px;line-height:1.7;}
+.promise-text li::before{content:'✓';position:absolute;left:0;color:var(--green-pale);font-weight:900;font-size:16px;}
+.promise-text strong{font-weight:900;}
+@media (max-width:640px){
+  .promise-box{flex-direction:column;padding:24px;gap:12px;align-items:center;text-align:center;}
+  .promise-text ul{text-align:left;}
+}
+
+/* ========== 写真の撮り方ガイド ========== */
+.photo-guide{background:#fff;padding:72px 0;}
+.pg-lead{text-align:center;color:var(--text-sub);font-size:15px;line-height:1.9;margin:12px 0 32px;}
+.pg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+.pg-card{
+  background:var(--green-bg);border:1px solid var(--border);border-radius:14px;
+  padding:22px 12px 20px;text-align:center;position:relative;
+  transition:transform .2s;
+}
+.pg-card:hover{transform:translateY(-3px);}
+.pg-num{
+  position:absolute;top:-12px;left:12px;
+  width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;
+  box-shadow:0 3px 8px rgba(10,107,60,.3);
+}
+.pg-ico{font-size:36px;margin:8px 0 10px;line-height:1;}
+.pg-card h3{font-size:14px;font-weight:900;margin-bottom:6px;color:var(--text);}
+.pg-card p{font-size:12px;color:var(--text-sub);line-height:1.6;}
+.pg-note{text-align:center;color:var(--text-mute,#888);font-size:13px;margin-top:8px;}
+@media (max-width:900px){
+  .pg-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media (max-width:520px){
+  .pg-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ========== 超軽量フォーム（quote-form-lite） ========== */
+.quote-form-lite input[type="text"]{
+  width:100%;border:1.5px solid var(--border);border-radius:10px;
+  padding:12px 14px;font-size:15px;font-family:inherit;transition:border-color .15s;
+}
+.quote-form-lite input[type="text"]:focus{outline:none;border-color:var(--green);}
+.lite-promise{
+  background:var(--green-bg);border-radius:10px;padding:14px 18px;margin:16px 0 8px;
+}
+.lite-promise p{font-size:13px;color:var(--text);line-height:1.9;margin:0;}
+.lite-promise p strong{color:var(--green-dark);}
+
 /* 2ステップウィザードフォーム */
 .wizard-form{}
 .wizard-progress{
