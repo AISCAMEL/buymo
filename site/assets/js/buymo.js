@@ -448,4 +448,62 @@
     window.addEventListener('scroll', updateSticky, { passive: true });
     updateSticky();
   }
+
+  /* ---- 9. 離脱防止モーダル（PCのみ・カーソルが画面上端に抜けた瞬間） ---- */
+  var exitModal = document.getElementById('exitModal');
+  if (exitModal && window.matchMedia && window.matchMedia('(min-width: 900px)').matches) {
+    var SHOWN_KEY = 'buymo_exit_modal_shown';
+    var alreadyShown = false;
+    try { alreadyShown = localStorage.getItem(SHOWN_KEY) === '1'; } catch(e){}
+
+    function showExitModal() {
+      if (alreadyShown) return;
+      alreadyShown = true;
+      try { localStorage.setItem(SHOWN_KEY, '1'); } catch(e){}
+      exitModal.hidden = false;
+      exitModal.setAttribute('aria-hidden', 'false');
+      if (window.BuymoGA) window.BuymoGA.track('exit_modal_shown');
+    }
+    function closeExitModal() {
+      exitModal.hidden = true;
+      exitModal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.addEventListener('mouseout', function(e) {
+      if (alreadyShown) return;
+      if (!e.toElement && !e.relatedTarget && e.clientY < 10) {
+        showExitModal();
+      }
+    });
+    exitModal.addEventListener('click', function(e) {
+      if (e.target.hasAttribute('data-close') || e.target.closest('[data-close]')) {
+        closeExitModal();
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !exitModal.hidden) closeExitModal();
+    });
+  }
+
+  /* ---- 10. チャット30秒プロンプト（滞在ユーザーへ声かけ） ---- */
+  var CHAT_PROMPT_KEY = 'buymo_chat_prompt_shown';
+  var promptShown = false;
+  try { promptShown = sessionStorage.getItem(CHAT_PROMPT_KEY) === '1'; } catch(e){}
+  if (!promptShown) {
+    setTimeout(function() {
+      if (promptShown) return;
+      var launcher = document.querySelector('.cbot-launch');
+      var panel = document.querySelector('.cbot-panel');
+      if (!launcher || (panel && !panel.hidden)) return;
+      // 吹き出し風のプロンプトを launcher に追加
+      var bubble = document.createElement('div');
+      bubble.className = 'cbot-hint-bubble';
+      bubble.innerHTML = '💬 何か気になる点はありますか？<br>AIがすぐお答えします';
+      launcher.appendChild(bubble);
+      promptShown = true;
+      try { sessionStorage.setItem(CHAT_PROMPT_KEY, '1'); } catch(e){}
+      setTimeout(function(){ if (bubble.parentNode) bubble.remove(); }, 12000);
+      if (window.BuymoGA) window.BuymoGA.track('chat_hint_shown');
+    }, 30000);
+  }
 })();
