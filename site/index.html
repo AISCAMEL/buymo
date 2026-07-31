@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=13" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=14" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -447,73 +447,66 @@
         <div class="sp-item"><span class="sp-num">47<small>都道府県</small></span><span class="sp-label">対応</span></div>
       </div>
 
-      <!-- チャネル選択 -->
       <div class="channel-picker">
         <div class="eyebrow-wrap"><span class="eyebrow">CONTACT</span></div>
-        <h2 id="form-title" class="section-title">お好きな方法で査定依頼</h2>
-        <p class="channel-lead">あなたに合った方法を選んでください。どの方法でも、しつこい電話は一切ありません。</p>
-
-        <div class="channel-grid">
-          <a href="#chat" class="channel-card ch-chat">
-            <span class="ch-badge">おすすめ</span>
-            <img src="assets/img/buymo/ui-chat.png" alt="" class="ch-icon" />
-            <h3>AIチャットで即回答</h3>
-            <p class="ch-desc">24時間対応・秒で回答<br>気軽な質問もOK</p>
-            <span class="ch-time">⚡ 秒で回答</span>
-          </a>
-
-          <a href="#quoteForm" class="channel-card ch-form">
-            <img src="assets/img/buymo/ui-form.png" alt="" class="ch-icon" onerror="this.style.display='none'" />
-            <h3>フォームで送信</h3>
-            <p class="ch-desc">メールとお名前だけで<br>正式な査定依頼</p>
-            <span class="ch-time">🕐 30秒で完了</span>
-          </a>
-
-          <a href="mailto:kaitori@buymo.me?subject=%E6%9F%BB%E5%AE%9A%E4%BE%9D%E9%A0%BC&body=%E6%9F%BB%E5%AE%9A%E4%BE%9D%E9%A0%BC%E3%82%92%E3%81%8A%E9%A1%98%E3%81%84%E3%81%97%E3%81%BE%E3%81%99%E3%80%82%0A%0A%E2%97%8B%E6%98%AF%E9%9D%9E%E6%95%99%E3%81%88%E3%81%A6%E3%81%84%E3%81%9F%E3%81%A0%E3%81%8D%E3%81%9F%E3%81%84%E5%86%85%E5%AE%B9%0A%E3%83%BB%E3%81%8A%E5%90%8D%E5%89%8D%EF%BC%9A%0A%E3%83%BB%E8%BB%8A%E7%A8%AE%EF%BC%9A%0A%E3%83%BB%E5%B9%B4%E5%BC%8F%EF%BC%9A%0A%E3%83%BB%E8%B5%B0%E8%A1%8C%E8%B7%9D%E9%9B%A2%EF%BC%9A%0A%E3%83%BB%E7%8A%B6%E6%85%8B%EF%BC%9A" class="channel-card ch-email">
-            <img src="assets/img/buymo/ui-mail.png" alt="" class="ch-icon" />
-            <h3>メールで送信</h3>
-            <p class="ch-desc">メーラーから直接<br>kaitori@buymo.me</p>
-            <span class="ch-time">✉ 24時間受付</span>
-          </a>
-        </div>
+        <h2 id="form-title" class="section-title">無料査定を依頼する</h2>
+        <p class="channel-lead">2ステップで完了。しつこい電話は一切ありません。</p>
       </div>
 
-      <!-- フォーム本体 -->
+      <!-- 2ステップフォーム -->
       <div class="form-inner" id="quoteForm-wrap">
-        <form class="quote-form" id="quoteForm" novalidate>
-          <span class="form-badge">かんたん 30秒</span>
-          <h3 class="form-title">📝 フォームで査定依頼</h3>
-          <p class="form-lead">まずはメールとお名前だけでOK。<br>詳細は折り返しメールで丁寧にヒアリングします。</p>
-
-          <div class="field">
-            <label for="f-email">メールアドレス <span class="req">必須</span></label>
-            <input type="email" id="f-email" name="email" placeholder="example@buymo.me" required autocomplete="email" inputmode="email" />
-            <p class="err" data-for="f-email"></p>
+        <form class="quote-form wizard-form" id="quoteForm" novalidate data-step="1">
+          <!-- 進捗インジケーター -->
+          <div class="wizard-progress" role="progressbar" aria-valuemin="1" aria-valuemax="2" aria-valuenow="1">
+            <div class="wp-step active" data-goto="1"><span class="wp-num">1</span><span class="wp-label">車の情報</span></div>
+            <div class="wp-line"><span class="wp-line-fill" id="wpLineFill"></span></div>
+            <div class="wp-step" data-goto="2"><span class="wp-num">2</span><span class="wp-label">お客様情報</span></div>
           </div>
 
-          <div class="field">
-            <label for="f-name">お名前 <span class="req">必須</span></label>
-            <input type="text" id="f-name" name="name" placeholder="例：山田 太郎" required autocomplete="name" />
-            <p class="err" data-for="f-name"></p>
-          </div>
+          <!-- Step 1: 車の情報 -->
+          <div class="wizard-step" data-step="1">
+            <h3 class="form-title">🚗 車の情報を教えてください</h3>
+            <p class="form-lead">わかる範囲でOK。詳細は返信メールでもお伺いします。</p>
 
-          <details class="form-more">
-            <summary>▼ 車の情報も送る（任意・査定が早くなります）</summary>
-            <div class="field" style="margin-top:12px;">
-              <label for="f-car">車種・現在のご状況 <span class="opt">任意</span></label>
-              <textarea id="f-car" name="car" rows="3" placeholder="例：トヨタ プリウス 2019年式 / 事故車です / まずは相場を知りたい など、わかる範囲でOK"></textarea>
-              <p class="field-hint">わかる範囲でOK。写真送付は返信メールから可能です。</p>
+            <div class="field">
+              <label for="f-car">車種・年式・状況など</label>
+              <textarea id="f-car" name="car" rows="4" placeholder="例：トヨタ プリウス 2019年式 / 走行距離 50,000km / 無事故 / 車検2年残り"></textarea>
+              <p class="field-hint">お車の状況を自由にご記入ください。事故車・不動車・車検切れもOK。</p>
             </div>
-          </details>
 
-          <div class="field field-check">
-            <label><input type="checkbox" id="f-agree" name="agree" required /> <a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します</label>
-            <p class="err" data-for="f-agree"></p>
+            <button type="button" class="btn btn-primary btn-block btn-lg" data-next>次へ<span aria-hidden="true">›</span></button>
+            <p class="wizard-skip"><button type="button" class="link-skip" data-next>車の情報がわからない方はこちら</button></p>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-block btn-lg">無料査定を依頼<span aria-hidden="true">›</span></button>
-          <p class="form-benefit">✓ しつこい電話なし　✓ 完全無料　✓ 全国対応　✓ 24時間以内に回答</p>
-          <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
+          <!-- Step 2: お客様情報 -->
+          <div class="wizard-step" data-step="2" hidden>
+            <h3 class="form-title">✉️ ご連絡先を教えてください</h3>
+            <p class="form-lead">査定結果はメールでお届けします。</p>
+
+            <div class="field">
+              <label for="f-name">お名前 <span class="req">必須</span></label>
+              <input type="text" id="f-name" name="name" placeholder="例：山田 太郎" required autocomplete="name" />
+              <p class="err" data-for="f-name"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-email">メールアドレス <span class="req">必須</span></label>
+              <input type="email" id="f-email" name="email" placeholder="example@buymo.me" required autocomplete="email" inputmode="email" />
+              <p class="err" data-for="f-email"></p>
+            </div>
+
+            <div class="field field-check">
+              <label><input type="checkbox" id="f-agree" name="agree" required /> <a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します</label>
+              <p class="err" data-for="f-agree"></p>
+            </div>
+
+            <div class="wizard-actions">
+              <button type="button" class="btn btn-outline" data-prev><span aria-hidden="true">‹</span>戻る</button>
+              <button type="submit" class="btn btn-primary btn-lg">無料査定を依頼<span aria-hidden="true">›</span></button>
+            </div>
+            <p class="form-benefit">✓ しつこい電話なし　✓ 完全無料　✓ 全国対応　✓ 24時間以内に回答</p>
+            <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
+          </div>
         </form>
 
         <div class="form-mascot" aria-hidden="true">🐮</div>
@@ -689,7 +682,7 @@
 <script src="assets/js/simulator-buy.js" defer></script>
 <script>document.addEventListener('DOMContentLoaded',function(){if(window.BuymoSim)BuymoSim.init('buymoSim');});</script>
 <script src="assets/js/buymo-data.js" defer></script>
-<script src="assets/js/buymo.js?v=4" defer></script>
+<script src="assets/js/buymo.js?v=5" defer></script>
 <link rel="stylesheet" href="assets/css/academy.css?v=4" />
 <script>window.BUYMO_BOT_MODE='user';</script>
 <script src="assets/js/chatbot.js?v=4" defer></script>

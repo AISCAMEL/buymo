@@ -578,6 +578,43 @@ a.genre-tag:hover{background:var(--green);border-color:var(--green);color:#fff;}
   .exit-modal h2{font-size:18px;}
 }
 
+/* 2ステップウィザードフォーム */
+.wizard-form{}
+.wizard-progress{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:0 auto 28px;max-width:400px;
+}
+.wp-step{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:default;transition:opacity .2s;
+}
+.wp-num{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#e5e7eb;color:#6b7280;font-weight:900;font-size:15px;
+  transition:all .3s;border:2px solid transparent;
+}
+.wp-step.active .wp-num,
+.wp-step.done .wp-num{background:var(--green);color:#fff;border-color:var(--green);}
+.wp-step.done .wp-num::after{content:'✓';font-size:16px;}
+.wp-step.done .wp-num{font-size:0;}
+.wp-label{font-size:12px;font-weight:700;color:#9ca3af;letter-spacing:.03em;white-space:nowrap;}
+.wp-step.active .wp-label,
+.wp-step.done .wp-label{color:var(--text);}
+.wp-line{flex:1;max-width:80px;height:3px;background:#e5e7eb;border-radius:2px;overflow:hidden;position:relative;top:-10px;}
+.wp-line-fill{display:block;width:0;height:100%;background:var(--green);transition:width .4s;}
+.wp-line.filled .wp-line-fill{width:100%;}
+
+.wizard-step{animation:wsFade .3s ease-out;}
+@keyframes wsFade{from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:none;}}
+.wizard-step[hidden]{display:none;}
+.wizard-actions{display:flex;gap:10px;margin-top:8px;}
+.wizard-actions .btn-outline{flex:0 0 100px;padding:0 14px;height:52px;}
+.wizard-actions .btn-primary{flex:1;}
+.wizard-skip{text-align:center;margin-top:12px;}
+.link-skip{background:none;border:none;color:var(--text-sub);font-size:13px;text-decoration:underline;cursor:pointer;font-family:inherit;padding:6px;}
+.link-skip:hover{color:var(--green);}
+
 /* 超シンプルフォーム v3 */
 .form-badge{display:inline-block;background:var(--green-pale);color:var(--green-dark);font-size:12px;font-weight:900;padding:5px 12px;border-radius:100px;letter-spacing:.06em;margin-bottom:12px;}
 .req{display:inline-block;background:#ef4444;color:#fff;font-size:10px;font-weight:900;padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle;letter-spacing:.04em;}

@@ -234,6 +234,42 @@
   if (form) {
     var note = document.getElementById('formNote');
 
+    // 2ステップウィザード制御
+    if (form.classList.contains('wizard-form')) {
+      var currentStep = 1;
+      var totalSteps = 2;
+      function showStep(n) {
+        currentStep = n;
+        form.setAttribute('data-step', String(n));
+        form.querySelectorAll('.wizard-step').forEach(function(el){
+          var s = parseInt(el.getAttribute('data-step'), 10);
+          el.hidden = s !== n;
+        });
+        // 進捗
+        form.querySelectorAll('.wp-step').forEach(function(el, i){
+          var s = i + 1;
+          el.classList.toggle('active', s === n);
+          el.classList.toggle('done', s < n);
+        });
+        var line = form.querySelector('.wp-line');
+        if (line) line.classList.toggle('filled', n > 1);
+        // GAイベント
+        if (window.BuymoGA) window.BuymoGA.track('form_step_view', { step: n });
+        // スクロールで冒頭見せる
+        var section = document.getElementById('form');
+        if (section && n > 1) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+      form.addEventListener('click', function(e){
+        var next = e.target.closest && e.target.closest('[data-next]');
+        var prev = e.target.closest && e.target.closest('[data-prev]');
+        if (next) { e.preventDefault(); if (currentStep < totalSteps) showStep(currentStep + 1); }
+        else if (prev) { e.preventDefault(); if (currentStep > 1) showStep(currentStep - 1); }
+      });
+      showStep(1);
+    }
+
     function setErr(field, msg) {
       var el = field;
       var box = form.querySelector('.err[data-for="' + el.id + '"]');
