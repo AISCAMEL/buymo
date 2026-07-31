@@ -234,7 +234,150 @@
   if (form) {
     var note = document.getElementById('formNote');
 
-    // 2ステップウィザード制御
+    /* ---- 写真ウィザード（15枚必須撮影型） ---- */
+    if (form.classList.contains('photo-wizard-form')) {
+      var SHOTS = [
+        // 外観 8枚
+        { id:'front',    grp:'exterior', label:'フロント正面',    req:true,  ico:'🚗', hint:'車の正面全体が入るように' },
+        { id:'front-r',  grp:'exterior', label:'フロント右斜め',  req:true,  ico:'↗️', hint:'右前方45度から全体を' },
+        { id:'front-l',  grp:'exterior', label:'フロント左斜め',  req:true,  ico:'↖️', hint:'左前方45度から全体を' },
+        { id:'rear',     grp:'exterior', label:'リア正面',        req:true,  ico:'🚙', hint:'後方全体・ナンバー含めて' },
+        { id:'rear-r',   grp:'exterior', label:'リア右斜め',      req:true,  ico:'↘️', hint:'右後方45度から' },
+        { id:'side-l',   grp:'exterior', label:'運転席サイド',    req:true,  ico:'⬅️', hint:'車の左側面全体（運転席側）' },
+        { id:'side-r',   grp:'exterior', label:'助手席サイド',    req:true,  ico:'➡️', hint:'車の右側面全体（助手席側）' },
+        { id:'wheel',    grp:'exterior', label:'ホイール・タイヤ',req:true,  ico:'⚙️', hint:'前輪のホイールとタイヤを1枚' },
+        // 内装 4枚
+        { id:'driver',   grp:'interior', label:'運転席',          req:true,  ico:'🪑', hint:'シート・ハンドル周り' },
+        { id:'rear-seat',grp:'interior', label:'後部座席',        req:true,  ico:'💺', hint:'後部座席全体' },
+        { id:'dashboard',grp:'interior', label:'ダッシュボード',  req:true,  ico:'📊', hint:'オーディオ・エアコン周り' },
+        { id:'trunk',    grp:'interior', label:'トランク・荷室',  req:true,  ico:'📦', hint:'トランクを開けて中を' },
+        // 情報 1枚
+        { id:'meter',    grp:'info',     label:'走行距離メーター',req:true,  ico:'🔢', hint:'走行距離がハッキリ見えるように' },
+        // 傷・任意 2枚
+        { id:'damage-1', grp:'optional', label:'傷・凹み①',      req:false, ico:'🔍', hint:'気になる傷・凹みがあれば' },
+        { id:'damage-2', grp:'optional', label:'傷・凹み②',      req:false, ico:'🔍', hint:'追加で気になる箇所があれば' }
+      ];
+      var REQUIRED_COUNT = SHOTS.filter(function(s){ return s.req; }).length;
+      var shotData = {}; // id → { name, data, type, thumb }
+
+      function compressImage(file){
+        return new Promise(function(resolve){
+          var reader = new FileReader();
+          reader.onload = function(e){
+            var img = new Image();
+            img.onload = function(){
+              var MAX = 1280, w = img.width, h = img.height;
+              if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+              if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+              var canvas = document.createElement('canvas');
+              canvas.width = w; canvas.height = h;
+              canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+              resolve({ name: file.name.replace(/\.[^.]+$/, '.jpg'), data: dataUrl.split(',')[1], type:'image/jpeg', thumb: dataUrl });
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function updateProgress(){
+        var reqDone = 0, optDone = 0;
+        SHOTS.forEach(function(s){
+          if (shotData[s.id]) {
+            if (s.req) reqDone++; else optDone++;
+          }
+        });
+        var fill = document.getElementById('pwFill');
+        var cur = document.getElementById('pwCurrent');
+        var stat = document.getElementById('pwStatus');
+        var rem = document.getElementById('pwRemaining');
+        if (cur) cur.textContent = reqDone;
+        if (fill) fill.style.width = (reqDone / REQUIRED_COUNT * 100) + '%';
+        if (rem) rem.textContent = REQUIRED_COUNT - reqDone;
+        if (stat) {
+          if (reqDone === 0) stat.textContent = '撮影を始めてください';
+          else if (reqDone < REQUIRED_COUNT) stat.textContent = 'あと ' + (REQUIRED_COUNT - reqDone) + ' 枚';
+          else stat.textContent = '✅ 撮影完了！';
+        }
+        // 送信ゾーン切替
+        var locked = document.getElementById('pwSubmitLocked');
+        var unlocked = document.getElementById('pwSubmitUnlocked');
+        if (reqDone >= REQUIRED_COUNT) {
+          if (locked) locked.hidden = true;
+          if (unlocked) unlocked.hidden = false;
+        } else {
+          if (locked) locked.hidden = false;
+          if (unlocked) unlocked.hidden = true;
+        }
+      }
+
+      function renderShot(shot, idx){
+        var slot = document.createElement('label');
+        slot.className = 'pw-shot';
+        slot.setAttribute('data-shot-id', shot.id);
+        slot.innerHTML =
+          '<span class="pw-num">' + (idx + 1) + '</span>' +
+          '<div class="pw-shot-thumb">' +
+            '<span class="pw-shot-ico">' + shot.ico + '</span>' +
+            '<button type="button" class="pw-shot-retake" data-retake>撮り直し</button>' +
+          '</div>' +
+          '<div class="pw-shot-label">' + shot.label + '</div>' +
+          '<div class="pw-shot-hint">' + shot.hint + '</div>' +
+          '<input type="file" accept="image/*" capture="environment" hidden>';
+        var input = slot.querySelector('input[type=file]');
+        input.addEventListener('change', function(){
+          var f = this.files && this.files[0];
+          if (!f) return;
+          compressImage(f).then(function(res){
+            shotData[shot.id] = res;
+            var thumb = slot.querySelector('.pw-shot-thumb');
+            var ico = thumb.querySelector('.pw-shot-ico');
+            if (ico) ico.remove();
+            var oldImg = thumb.querySelector('img');
+            if (oldImg) oldImg.remove();
+            var img = document.createElement('img');
+            img.src = res.thumb; img.alt = shot.label;
+            thumb.insertBefore(img, thumb.firstChild);
+            slot.classList.add('done');
+            updateProgress();
+            if (window.BuymoGA) window.BuymoGA.track('photo_shot_taken', { shot_id: shot.id, index: idx + 1 });
+          });
+        });
+        // 撮り直しボタン
+        var retakeBtn = slot.querySelector('[data-retake]');
+        retakeBtn.addEventListener('click', function(e){
+          e.preventDefault(); e.stopPropagation();
+          input.value = '';
+          input.click();
+        });
+        return slot;
+      }
+
+      // 各グループにショットを配置
+      var groupIndexOffset = 0;
+      ['exterior','interior','info','optional'].forEach(function(grpName){
+        var container = document.getElementById('pwShots-' + grpName);
+        if (!container) return;
+        SHOTS.forEach(function(s, i){
+          if (s.grp === grpName) {
+            container.appendChild(renderShot(s, i));
+          }
+        });
+      });
+
+      updateProgress();
+
+      // 写真配列を提供
+      window.__pwGetPhotos = function(){
+        return SHOTS.filter(function(s){ return shotData[s.id]; }).map(function(s){
+          var p = shotData[s.id];
+          return { name: s.id + '_' + s.label + '.jpg', data: p.data, type: p.type, label: s.label };
+        });
+      };
+    }
+
+    // 2ステップウィザード制御（従来）
     if (form.classList.contains('wizard-form')) {
       var currentStep = 1;
       var totalSteps = 2;
@@ -382,7 +525,7 @@
       });
     }
 
-    // フォーム内容→GASペイロード（超シンプル版）
+    // フォーム内容→GASペイロード（写真ウィザード対応）
     function buildPayload() {
       var get = function (id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
       var params = {};
@@ -393,6 +536,16 @@
       if (car) lines.push('車種・状況：\n' + car);
       if (params.genre) lines.push('ジャンル：' + params.genre);
       if (params.est) lines.push('シミュレーター概算：' + params.est);
+
+      // 写真: ウィザード優先、なければ従来
+      var photos = [];
+      if (typeof window.__pwGetPhotos === 'function') {
+        photos = window.__pwGetPhotos();
+        lines.push('写真枚数：' + photos.length + ' 枚');
+      } else if (typeof photoFiles !== 'undefined' && photoFiles) {
+        photos = photoFiles.map(function(p){ return { name:p.name, data:p.data, type:p.type }; });
+      }
+
       return {
         type: 'buymo_lead',
         source: source,
@@ -401,7 +554,7 @@
         email: get('f-email'),
         car: car,
         message: lines.join('\n') + (lines.length ? '\n' : '') + '— ' + source,
-        photos: (photoFiles || []).map(function (p) { return { name: p.name, data: p.data, type: p.type }; })
+        photos: photos
       };
     }
 
@@ -419,9 +572,24 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+
+      // 写真ウィザードなら必須撮影チェック
+      if (form.classList.contains('photo-wizard-form') && typeof window.__pwGetPhotos === 'function') {
+        var uploaded = window.__pwGetPhotos();
+        // SHOTS 情報からRequired IDs を再構築
+        var reqIds = ['front','front-r','front-l','rear','rear-r','side-l','side-r','wheel','driver','rear-seat','dashboard','trunk','meter'];
+        var missing = reqIds.filter(function(id){ return !uploaded.some(function(p){ return p.name.indexOf(id + '_') === 0; }); });
+        if (missing.length > 0) {
+          note.textContent = '必須写真があと ' + missing.length + ' 枚未撮影です。すべて撮影してください。';
+          note.className = 'form-note ng';
+          document.querySelector('.pw-progress-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
+          return;
+        }
+      }
+
       var ok = true, first = null;
       fields.forEach(function (el) {
-        if (!validateField(el)) { ok = false; if (!first) first = el; }
+        if (el.hasAttribute('required') && !validateField(el)) { ok = false; if (!first) first = el; }
       });
       if (!ok) {
         note.textContent = '未入力・誤りの項目があります。ご確認ください。';

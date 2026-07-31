@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=15" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=16" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -440,29 +440,29 @@
     <div class="container">
       <div class="eyebrow-wrap"><span class="eyebrow">HOW IT WORKS</span></div>
       <h2 id="flow-title-3" class="section-title">BUYMOの査定は<span class="hl">3ステップ</span>で完結</h2>
-      <p class="flow-lead">やり取りはメールとチャットだけ。<br>お電話は<strong>最終ご確認時のみ・こちらからおかけ</strong>いたします。</p>
+      <p class="flow-lead">お電話は<strong>売却ご決断後の最終確認時のみ・こちらからおかけ</strong>いたします。</p>
 
       <ol class="flow-steps-3">
         <li class="flow-step-3">
           <div class="fs-num">1</div>
-          <div class="fs-ico" aria-hidden="true">📩</div>
-          <h3>メールを送るだけ</h3>
-          <p class="fs-time">所要 <strong>約10秒</strong></p>
-          <p class="fs-desc">メールアドレスと車の一言だけでOK。個人情報は最小限。</p>
+          <div class="fs-ico" aria-hidden="true">📸</div>
+          <h3>ガイドに沿って15枚撮影</h3>
+          <p class="fs-time">所要 <strong>約5〜10分</strong></p>
+          <p class="fs-desc">画面のカードを1枚ずつタップして撮影。カメラアプリのように順番にすすめるだけ。</p>
         </li>
         <li class="flow-step-3">
           <div class="fs-num">2</div>
-          <div class="fs-ico" aria-hidden="true">📸</div>
-          <h3>写真を返信</h3>
-          <p class="fs-time">所要 <strong>約5分</strong></p>
-          <p class="fs-desc">当社からの返信メールに、スマホで撮った写真を返信するだけ。撮り方も一緒にご案内します。</p>
+          <div class="fs-ico" aria-hidden="true">📩</div>
+          <h3>メール1つで送信</h3>
+          <p class="fs-time">所要 <strong>約10秒</strong></p>
+          <p class="fs-desc">写真がすべて揃ったら、メールアドレスとご同意で送信。個人情報は最小限。</p>
         </li>
         <li class="flow-step-3">
           <div class="fs-num">3</div>
           <div class="fs-ico" aria-hidden="true">💰</div>
           <h3>査定額を受け取る</h3>
           <p class="fs-time">最短 <strong>24時間以内</strong></p>
-          <p class="fs-desc">AIと専任査定士が価格を提示。売却をご決断される場合のみ、こちらからお電話でご確認します。</p>
+          <p class="fs-desc">AIと専任査定士が価格を提示。売却をご決断される場合のみ、こちらから最終確認のお電話を1回だけ。</p>
         </li>
       </ol>
 
@@ -480,52 +480,8 @@
     </div>
   </section>
 
-  <!-- ============ 写真の撮り方ガイド ============ -->
-  <section class="photo-guide" aria-labelledby="photo-guide-title">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">PHOTO GUIDE</span></div>
-      <h2 id="photo-guide-title" class="section-title">スマホで撮る<span class="hl">たった5枚</span></h2>
-      <p class="pg-lead">お申し込み後に届く自動返信メールでも、詳しくご案内します。<br>迷ったら、そのまま返信で送っていただければOKです。</p>
-
-      <div class="pg-grid">
-        <div class="pg-card">
-          <div class="pg-num">1</div>
-          <div class="pg-ico" aria-hidden="true">🚗</div>
-          <h3>フロント（正面斜め）</h3>
-          <p>車の全体が入るように、少し斜めから</p>
-        </div>
-        <div class="pg-card">
-          <div class="pg-num">2</div>
-          <div class="pg-ico" aria-hidden="true">🚙</div>
-          <h3>リア（後ろ斜め）</h3>
-          <p>ナンバー含めて全体を、後ろから</p>
-        </div>
-        <div class="pg-card">
-          <div class="pg-num">3</div>
-          <div class="pg-ico" aria-hidden="true">🪞</div>
-          <h3>サイド（横）</h3>
-          <p>ドア・ホイールが見える横からの1枚</p>
-        </div>
-        <div class="pg-card">
-          <div class="pg-num">4</div>
-          <div class="pg-ico" aria-hidden="true">🪑</div>
-          <h3>内装</h3>
-          <p>運転席・後部座席の状態がわかる写真</p>
-        </div>
-        <div class="pg-card">
-          <div class="pg-num">5</div>
-          <div class="pg-ico" aria-hidden="true">🔢</div>
-          <h3>メーター</h3>
-          <p>走行距離がハッキリ見える1枚</p>
-        </div>
-      </div>
-
-      <p class="pg-note">※ 傷や凹みがあれば、その部分も1〜2枚追加していただけると助かります。</p>
-    </div>
-  </section>
-
-  <!-- ============ お問い合わせ（超軽量エントリー） ============ -->
-  <section class="form-section" id="form" aria-labelledby="form-title">
+  <!-- ============ 写真ウィザード査定（メイン導線） ============ -->
+  <section class="photo-wizard-section" id="form" aria-labelledby="form-title">
     <div class="container">
 
       <!-- 社会的証明バー -->
@@ -536,44 +492,90 @@
         <div class="sp-item"><span class="sp-num">0<small>回</small></span><span class="sp-label">営業電話</span></div>
       </div>
 
-      <div class="form-inner" id="quoteForm-wrap">
-        <form class="quote-form quote-form-lite" id="quoteForm" novalidate>
-          <span class="form-badge">📧 まずはメール1つでOK</span>
-          <h2 id="form-title" class="form-title">10秒で無料査定を依頼</h2>
-          <p class="form-lead">メールアドレスだけでOK。<br>詳しい撮り方や進め方は、折り返しメールでご案内します。</p>
+      <div class="eyebrow-wrap"><span class="eyebrow">PHOTO ASSESSMENT</span></div>
+      <h2 id="form-title" class="section-title">写真で無料査定を依頼</h2>
+      <p class="wizard-lead">下のカードを<strong>1枚ずつタップ</strong>して、スマホで撮影またはライブラリから選択。<br>13枚の必須写真をすべて撮影すると、査定依頼が送信できるようになります。</p>
 
-          <div class="field">
-            <label for="f-email">メールアドレス <span class="req">必須</span></label>
-            <input type="email" id="f-email" name="email" placeholder="example@buymo.me" required autocomplete="email" inputmode="email" />
-            <p class="err" data-for="f-email"></p>
+      <!-- 進捗バー（sticky） -->
+      <div class="pw-progress-wrap">
+        <div class="pw-progress">
+          <div class="pw-count-wrap">
+            <span class="pw-count"><span id="pwCurrent">0</span> / 13</span>
+            <span class="pw-count-label">必須写真</span>
           </div>
-
-          <div class="field">
-            <label for="f-car">お車について一言 <span class="opt">任意</span></label>
-            <input type="text" id="f-car" name="car" placeholder="例：プリウス 2019年式 / 事故車 / まず相場を知りたい など" />
-            <p class="field-hint">わかる範囲でOK。空欄でも問題ありません。</p>
-          </div>
-
-          <div class="field field-check">
-            <label><input type="checkbox" id="f-agree" name="agree" required /> <a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します</label>
-            <p class="err" data-for="f-agree"></p>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block btn-lg">10秒で送信<span aria-hidden="true">›</span></button>
-
-          <div class="lite-promise">
-            <p><strong>✓ 電話は最終ご確認時のみ</strong>（当社からお掛けします）</p>
-            <p><strong>✓ お名前・ご住所は査定額ご確認後</strong>にお伺いします</p>
-            <p><strong>✓ 完全無料・全国47都道府県対応</strong></p>
-          </div>
-
-          <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
-        </form>
-
-        <div class="form-mascot" aria-hidden="true">🐮</div>
+          <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
+          <div class="pw-status" id="pwStatus">撮影を始めてください</div>
+        </div>
       </div>
+
+      <form class="photo-wizard-form" id="quoteForm" novalidate>
+        <!-- 外観セクション -->
+        <div class="pw-group">
+          <h3 class="pw-group-title"><span class="pw-group-num">1</span>外観 <span class="pw-group-hint">8枚必須</span></h3>
+          <div class="pw-shots" id="pwShots-exterior"></div>
+        </div>
+
+        <!-- 内装セクション -->
+        <div class="pw-group">
+          <h3 class="pw-group-title"><span class="pw-group-num">2</span>内装 <span class="pw-group-hint">4枚必須</span></h3>
+          <div class="pw-shots" id="pwShots-interior"></div>
+        </div>
+
+        <!-- 情報セクション -->
+        <div class="pw-group">
+          <h3 class="pw-group-title"><span class="pw-group-num">3</span>情報 <span class="pw-group-hint">1枚必須</span></h3>
+          <div class="pw-shots" id="pwShots-info"></div>
+        </div>
+
+        <!-- 傷・任意セクション -->
+        <div class="pw-group">
+          <h3 class="pw-group-title"><span class="pw-group-num">+</span>傷・詳細 <span class="pw-group-hint">任意 最大2枚</span></h3>
+          <div class="pw-shots" id="pwShots-optional"></div>
+        </div>
+
+        <!-- 撮影完了後：メール送信ゾーン -->
+        <div class="pw-submit-zone" id="pwSubmitZone">
+          <div class="pw-submit-locked" id="pwSubmitLocked">
+            <div class="pw-lock-ico">🔒</div>
+            <h3>あと <span id="pwRemaining">13</span> 枚の必須写真を撮影してください</h3>
+            <p>13枚すべての必須写真が揃うと、査定依頼が送信できるようになります。</p>
+          </div>
+
+          <div class="pw-submit-unlocked" id="pwSubmitUnlocked" hidden>
+            <div class="pw-unlock-badge">✅ 写真すべて撮影完了！</div>
+            <h3>あと10秒。メールアドレスをご入力ください</h3>
+
+            <div class="field">
+              <label for="f-email">メールアドレス <span class="req">必須</span></label>
+              <input type="email" id="f-email" name="email" placeholder="example@buymo.me" required autocomplete="email" inputmode="email" />
+              <p class="err" data-for="f-email"></p>
+            </div>
+
+            <div class="field">
+              <label for="f-car">お車について一言 <span class="opt">任意</span></label>
+              <input type="text" id="f-car" name="car" placeholder="例：プリウス 2019年式 / 事故車 など" />
+            </div>
+
+            <div class="field field-check">
+              <label><input type="checkbox" id="f-agree" name="agree" required /> <a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意します</label>
+              <p class="err" data-for="f-agree"></p>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" id="pwSubmitBtn">写真を送信して査定を依頼<span aria-hidden="true">›</span></button>
+
+            <div class="lite-promise">
+              <p><strong>✓ 電話は最終ご確認時のみ</strong>（当社からお掛けします）</p>
+              <p><strong>✓ お名前・ご住所は査定額ご確認後</strong>にお伺いします</p>
+              <p><strong>✓ 完全無料・全国47都道府県対応</strong></p>
+            </div>
+
+            <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </form>
     </div>
   </section>
+
 
   <!-- 離脱防止モーダル -->
   <div class="exit-modal" id="exitModal" hidden aria-hidden="true" role="dialog" aria-labelledby="exitModalTitle">
@@ -743,7 +745,7 @@
 <script src="assets/js/simulator-buy.js" defer></script>
 <script>document.addEventListener('DOMContentLoaded',function(){if(window.BuymoSim)BuymoSim.init('buymoSim');});</script>
 <script src="assets/js/buymo-data.js" defer></script>
-<script src="assets/js/buymo.js?v=5" defer></script>
+<script src="assets/js/buymo.js?v=6" defer></script>
 <link rel="stylesheet" href="assets/css/academy.css?v=4" />
 <script>window.BUYMO_BOT_MODE='user';</script>
 <script src="assets/js/chatbot.js?v=4" defer></script>
