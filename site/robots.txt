@@ -1,5 +1,37 @@
+# BUYMO – 車買取サービス
+# https://buymo.me/
+
 User-agent: *
 Allow: /
+Disallow: /tools/
+Disallow: /gas/
+Disallow: /embed/
 
-# Sitemap（SITE_URL 設定で絶対URLに自動更新）
+# 主要検索エンジン向け明示許可
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
+Allow: /assets/img/
+
+User-agent: bingbot
+Allow: /
+
+# 悪質・過剰クローラ除外
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
 Sitemap: https://buymo.me/sitemap.xml
