@@ -58,7 +58,7 @@ function footer(rel) {
   <div class="footer-bottom"><p>Copyright © 2026 合同会社アイズ（BUYMO） All Rights Reserved.</p></div>
 </footer>
 <button class="to-top" id="toTop" aria-label="トップに戻る" hidden>▲</button>
-<script src="${rel}assets/js/analytics.js" defer></script>
+<script src="${rel}assets/js/analytics.js?v=2" defer></script>
 <script src="${rel}assets/js/genres.js" defer></script>
 <script src="${rel}assets/js/buymo.js" defer></script>
 <script src="${rel}assets/js/simulator-buy.js" defer></script>`;
