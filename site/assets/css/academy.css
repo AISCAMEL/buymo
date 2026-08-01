@@ -298,3 +298,27 @@
 @media (max-width:520px){
   .cbot-hint-bubble{right:66px;font-size:12px;padding:8px 12px;white-space:normal;max-width:200px;}
 }
+
+/* ============ モバイル・ヒーロー画像修正（v6-hotfix） ============ */
+/* トップページのヒーローがスマホで暗すぎる/表示されない問題を修正 */
+@media (max-width:767px){
+  .hero{min-height:520px !important;}
+  .hero::after{background:linear-gradient(180deg,rgba(10,30,28,.50) 0%,rgba(10,30,28,.72) 100%) !important;}
+  .hero-img-main{
+    object-position:center center !important;
+    display:block !important;
+    width:100% !important;
+    height:100% !important;
+  }
+  .hero-art{display:block !important;position:absolute !important;inset:0 !important;z-index:0 !important;}
+  /* エリア/ジャンルページのヒーロー */
+  .page-hero{min-height:200px;}
+  .page-hero::after{background:linear-gradient(180deg,rgba(10,30,28,.50) 0%,rgba(10,30,28,.80) 100%) !important;}
+  /* 画像の遅延読込を早める */
+  img[loading="lazy"]{opacity:1 !important;}
+}
+
+/* PCとスマホで確実に同じ画像が反映されるように */
+@media (min-width:768px){
+  .hero-img-main{object-position:center right;}
+}
