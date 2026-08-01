@@ -486,3 +486,95 @@
   text-align:center;letter-spacing:.02em;
 }
 
+/* ============================================================
+   Monthly Buy Ticker (バースクロール)
+   ============================================================ */
+.buy-ticker-section{
+  background:linear-gradient(180deg,#F0FDFA 0%,#F8FAFC 100%);
+  padding:28px 0;
+}
+.buy-ticker{
+  background:#fff;border:1px solid var(--border);border-radius:14px;
+  box-shadow:0 4px 20px rgba(15,118,110,.08);
+  overflow:hidden;
+}
+.buy-ticker-head{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 20px;background:var(--green-dark);color:#fff;
+  font-size:13px;font-weight:800;letter-spacing:.04em;
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+.buy-ticker-pulse{
+  width:9px;height:9px;border-radius:50%;background:#22d3ee;
+  box-shadow:0 0 0 rgba(34,211,238,.7);
+  animation:btPulse 1.6s ease-out infinite;flex-shrink:0;
+}
+@keyframes btPulse{
+  0%   { box-shadow:0 0 0 0 rgba(34,211,238,.7); }
+  70%  { box-shadow:0 0 0 10px rgba(34,211,238,0); }
+  100% { box-shadow:0 0 0 0 rgba(34,211,238,0); }
+}
+.buy-ticker-heading{font-size:13px;letter-spacing:.06em;}
+.buy-ticker-label{
+  margin-left:auto;font-size:11px;font-weight:700;
+  color:rgba(255,255,255,.75);letter-spacing:.04em;
+  padding:4px 10px;background:rgba(255,255,255,.10);border-radius:100px;
+}
+@media (max-width:520px){
+  .buy-ticker-heading{font-size:12px;}
+  .buy-ticker-label{font-size:10px;padding:3px 8px;}
+  .buy-ticker-head{padding:10px 14px;gap:8px;}
+}
+
+.buy-ticker-viewport{
+  position:relative;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent 100%);
+}
+.buy-ticker-track{
+  display:inline-flex;align-items:center;gap:0;
+  white-space:nowrap;padding:14px 0;
+  animation:btScroll 60s linear infinite;
+  will-change:transform;
+}
+.buy-ticker:hover .buy-ticker-track,
+.buy-ticker:focus-within .buy-ticker-track{animation-play-state:paused;}
+
+@keyframes btScroll{
+  from{transform:translateX(0);}
+  to  {transform:translateX(-50%);}
+}
+@media (prefers-reduced-motion:reduce){
+  .buy-ticker-track{animation:none;transform:translateX(0);}
+}
+
+/* 1件のスロット */
+.buy-tick{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:0 22px;font-size:14px;font-weight:700;color:var(--text);
+  border-right:1px solid var(--border);flex-shrink:0;
+}
+.bt-check{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--green);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;flex-shrink:0;
+}
+.bt-car{color:var(--text);font-weight:800;letter-spacing:.01em;}
+.bt-tag{
+  display:inline-block;background:var(--green-bg);color:var(--green-dark);
+  font-size:11px;font-weight:900;padding:3px 8px;border-radius:100px;
+  letter-spacing:.03em;
+}
+.bt-price{
+  color:var(--green-dark);font-weight:900;font-size:15px;
+  font-family:var(--f-body);letter-spacing:-.01em;
+}
+.bt-area{color:var(--text-sub);font-size:12px;font-weight:700;}
+@media (max-width:640px){
+  .buy-tick{gap:8px;padding:0 16px;font-size:13px;}
+  .bt-price{font-size:14px;}
+  .bt-tag{display:none;}
+}
+
+
