@@ -234,10 +234,6 @@
           '<span class="cbot-title"></span>' +
           '<span class="cbot-status"><span class="cbot-dot"></span>オンライン・AI応答</span>' +
         '</div>' +
-        '<div class="cbot-mode">' +
-          '<button data-mode="user">お客様</button>' +
-          '<button data-mode="partner">加盟店</button>' +
-        '</div>' +
         '<button class="cbot-x" aria-label="閉じる">×</button>' +
       '</div>' +
       '<div class="cbot-log" id="cbotLog" role="log" aria-live="polite"></div>' +
