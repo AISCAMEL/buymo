@@ -83,7 +83,11 @@
 
 /* エリアページ ヒーローバナー */
 .area-hero {
-  background-image: url('../img/buymo/hero-photo.jpg');
+  background-image: url('../img/buymo/hero-photo.png');
   background-size: cover;
   background-position: center;
+}
+/* モバイルはさらに読みやすく */
+@media (max-width:767px){
+  .page-hero::after{background:linear-gradient(180deg,rgba(10,30,28,.55) 0%,rgba(10,30,28,.85) 100%);}
 }
