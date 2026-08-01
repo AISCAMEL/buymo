@@ -658,4 +658,39 @@
   .bt-tag{display:none;}
 }
 
+/* ============================================================
+   Service Area — Japan Map (inline SVG)
+   ============================================================ */
+.jp-map-wrap{
+  max-width:520px;margin:0 auto 24px;
+  background:var(--green-bg);border:1px solid var(--border);
+  border-radius:16px;padding:24px 20px 16px;
+  text-align:center;box-shadow:0 6px 20px rgba(15,118,110,.06);
+}
+.jp-map{
+  display:block;width:100%;max-width:420px;height:auto;
+  margin:0 auto;filter:drop-shadow(0 2px 6px rgba(15,118,110,.15));
+}
+.jp-map-caption{
+  margin-top:14px;font-size:13.5px;color:var(--text-sub);
+  letter-spacing:.02em;line-height:1.7;
+}
+.jp-map-caption strong{
+  color:var(--green-dark);font-weight:900;font-size:15px;
+  margin-right:4px;
+}
+
+/* 旧 .area-map / .map-emoji / .map-pins は使わなくなったが、
+   他ページで参照されている可能性を考慮して既存のまま残す */
+
+/* ============================================================
+   Company section — 上部空白（縦センターずれ）を修正
+   ============================================================ */
+.company-grid{align-items:start !important;}
+.company-photo{align-self:start;}
+.company-photo img{max-height:none;height:auto;}
+@media (max-width:767px){
+  .company-photo{margin-bottom:20px;}
+}
+
 

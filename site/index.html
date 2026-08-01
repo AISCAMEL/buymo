@@ -721,11 +721,36 @@
   <section class="area" aria-labelledby="area-title">
     <div class="container">
       <h2 id="area-title" class="section-title">サービスエリア</h2>
-      <div class="area-map">
-        <div class="map-emoji big" aria-hidden="true">🗾</div>
-        <ul class="map-pins" aria-hidden="true">
-          <li>📍</li><li>📍</li><li>📍</li><li>📍</li><li>📍</li>
-        </ul>
+      <div class="jp-map-wrap">
+        <svg class="jp-map" viewBox="0 0 480 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="jp-map-title">
+          <title id="jp-map-title">BUYMO 全国47都道府県対応マップ</title>
+          <!-- Hokkaido -->
+          <path d="M340,50 Q378,45 410,70 Q428,105 418,150 Q400,175 368,178 Q332,170 315,140 Q305,105 320,72 Z" fill="#0F766E" opacity="0.9"/>
+          <!-- Honshu (main body) -->
+          <path d="M120,240 Q160,215 210,205 Q265,195 315,205 Q355,215 358,240 Q345,262 305,272 Q265,282 225,290 Q188,300 155,315 Q125,325 108,315 Q95,295 100,270 Q108,250 120,240 Z" fill="#0F766E" opacity="0.9"/>
+          <!-- Shikoku -->
+          <path d="M195,325 Q220,318 240,330 Q248,347 235,358 Q210,362 190,352 Q182,338 195,325 Z" fill="#0F766E" opacity="0.9"/>
+          <!-- Kyushu -->
+          <path d="M110,340 Q135,330 155,340 Q168,360 162,385 Q150,405 125,408 Q100,402 92,380 Q90,358 110,340 Z" fill="#0F766E" opacity="0.9"/>
+          <!-- Okinawa inset -->
+          <rect x="20" y="378" width="80" height="66" fill="none" stroke="#0F766E" stroke-width="1" stroke-dasharray="3 3" opacity="0.4" rx="4"/>
+          <ellipse cx="52" cy="405" rx="16" ry="6" fill="#0F766E" opacity="0.9"/>
+          <ellipse cx="78" cy="418" rx="6" ry="3" fill="#0F766E" opacity="0.9"/>
+          <text x="60" y="440" text-anchor="middle" font-size="10" fill="#64748B" font-weight="700" font-family="'Noto Sans JP',sans-serif">沖縄</text>
+
+          <!-- Service pins (major cities) -->
+          <circle cx="378" cy="110" r="8" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
+          <circle cx="378" cy="110" r="14" fill="#2DD4BF" opacity="0.3"><animate attributeName="r" values="8;20;8" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="2.4s" repeatCount="indefinite"/></circle>
+          <circle cx="310" cy="222" r="7" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
+          <circle cx="288" cy="255" r="9" fill="#0F766E" stroke="#fff" stroke-width="2.5"/>
+          <circle cx="288" cy="255" r="16" fill="#0F766E" opacity="0.25"><animate attributeName="r" values="9;22;9" dur="2.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="2.6s" repeatCount="indefinite"/></circle>
+          <circle cx="240" cy="270" r="7" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
+          <circle cx="205" cy="278" r="8" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
+          <circle cx="165" cy="290" r="6" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
+          <circle cx="130" cy="358" r="7" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
+          <circle cx="52" cy="405" r="5" fill="#2DD4BF" stroke="#fff" stroke-width="1.5"/>
+        </svg>
+        <div class="jp-map-caption"><strong>全国 47 都道府県</strong>すべて無料出張査定に対応</div>
       </div>
       <ul class="area-legend">
         <li><span class="legend-dot on"></span>対応エリア</li>
@@ -871,7 +896,7 @@
 <script src="assets/js/buymo-data.js" defer></script>
 <script src="assets/js/buymo.js?v=6" defer></script>
 <script src="assets/js/monthly-buys.js?v=1" defer></script>
-<link rel="stylesheet" href="assets/css/academy.css?v=10" />
+<link rel="stylesheet" href="assets/css/academy.css?v=11" />
 <script>window.BUYMO_BOT_MODE='user';</script>
 <script src="assets/js/chatbot.js?v=4" defer></script>
 </body>
