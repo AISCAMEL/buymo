@@ -211,6 +211,22 @@
     </div>
   </section>
 
+  <!-- ============ 今月の買取実績ティッカー ============ -->
+  <section class="buy-ticker-section" aria-labelledby="buy-ticker-heading">
+    <div class="container">
+      <div class="buy-ticker" id="buyTicker" aria-live="polite">
+        <div class="buy-ticker-head">
+          <span class="buy-ticker-pulse" aria-hidden="true"></span>
+          <span class="buy-ticker-heading" id="buy-ticker-heading">📈 今月の買取実績</span>
+          <span class="buy-ticker-label">2026年8月の買取実績</span>
+        </div>
+        <div class="buy-ticker-viewport">
+          <div class="buy-ticker-track"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 4大特長 ============ -->
   <section class="features" id="features" aria-labelledby="features-title">
     <div class="container">
@@ -810,7 +826,8 @@
 <script>document.addEventListener('DOMContentLoaded',function(){if(window.BuymoSim)BuymoSim.init('buymoSim');});</script>
 <script src="assets/js/buymo-data.js" defer></script>
 <script src="assets/js/buymo.js?v=6" defer></script>
-<link rel="stylesheet" href="assets/css/academy.css?v=8" />
+<script src="assets/js/monthly-buys.js?v=1" defer></script>
+<link rel="stylesheet" href="assets/css/academy.css?v=9" />
 <script>window.BUYMO_BOT_MODE='user';</script>
 <script src="assets/js/chatbot.js?v=4" defer></script>
 </body>
