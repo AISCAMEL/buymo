@@ -445,17 +445,17 @@
       <ol class="flow-steps-3">
         <li class="flow-step-3">
           <div class="fs-num">1</div>
-          <div class="fs-ico" aria-hidden="true">📸</div>
-          <h3>ガイドに沿って15枚撮影</h3>
-          <p class="fs-time">所要 <strong>約5〜10分</strong></p>
-          <p class="fs-desc">画面のカードを1枚ずつタップして撮影。カメラアプリのように順番にすすめるだけ。</p>
+          <div class="fs-ico" aria-hidden="true">✍️</div>
+          <h3>30秒でかんたん入力・送信</h3>
+          <p class="fs-time">所要 <strong>約30秒</strong></p>
+          <p class="fs-desc">お名前・メール・お車の情報だけ。写真はまだ不要です。まずはお気軽にお申込みください。</p>
         </li>
         <li class="flow-step-3">
           <div class="fs-num">2</div>
           <div class="fs-ico" aria-hidden="true">📩</div>
-          <h3>メール1つで送信</h3>
-          <p class="fs-time">所要 <strong>約10秒</strong></p>
-          <p class="fs-desc">写真がすべて揃ったら、メールアドレスとご同意で送信。個人情報は最小限。</p>
+          <h3>メールの案内で写真を撮影・返信</h3>
+          <p class="fs-time">所要 <strong>約5〜10分</strong></p>
+          <p class="fs-desc">送信直後にご案内メールをお届け。ガイドに沿って撮影 → 返信で送るだけ。撮り方は図解つきなので迷いません。</p>
         </li>
         <li class="flow-step-3">
           <div class="fs-num">3</div>
@@ -480,8 +480,8 @@
     </div>
   </section>
 
-  <!-- ============ 写真ウィザード査定（メイン導線） ============ -->
-  <section class="photo-wizard-section" id="form" aria-labelledby="form-title">
+  <!-- ============ 無料査定申込フォーム（メイン導線） ============ -->
+  <section class="lead-form-section" id="form" aria-labelledby="form-title">
     <div class="container">
 
       <!-- 社会的証明バー -->
@@ -492,68 +492,56 @@
         <div class="sp-item"><span class="sp-num">0<small>回</small></span><span class="sp-label">営業電話</span></div>
       </div>
 
-      <div class="eyebrow-wrap"><span class="eyebrow">PHOTO ASSESSMENT</span></div>
-      <h2 id="form-title" class="section-title">写真で無料査定を依頼</h2>
-      <p class="wizard-lead">下のカードを<strong>1枚ずつタップ</strong>して、スマホで撮影またはライブラリから選択。<br>13枚の必須写真をすべて撮影すると、査定依頼が送信できるようになります。</p>
+      <div class="eyebrow-wrap"><span class="eyebrow">FREE ASSESSMENT</span></div>
+      <h2 id="form-title" class="section-title">まずは30秒。<span class="hl">無料査定</span>をお申込み</h2>
+      <p class="lf-lead"><strong>写真は後日メールで順番にご案内</strong>します。まずはお車の情報だけを送ってください。</p>
 
-      <!-- 進捗バー（sticky） -->
-      <div class="pw-progress-wrap">
-        <div class="pw-progress">
-          <div class="pw-count-wrap">
-            <span class="pw-count"><span id="pwCurrent">0</span> / 13</span>
-            <span class="pw-count-label">必須写真</span>
-          </div>
-          <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
-          <div class="pw-status" id="pwStatus">撮影を始めてください</div>
-        </div>
-      </div>
+      <div class="lead-form-grid">
 
-      <form class="photo-wizard-form" id="quoteForm" novalidate>
-        <!-- 外観セクション -->
-        <div class="pw-group">
-          <h3 class="pw-group-title"><span class="pw-group-num">1</span>外観 <span class="pw-group-hint">8枚必須</span></h3>
-          <div class="pw-shots" id="pwShots-exterior"></div>
-        </div>
+        <!-- 左：軽量フォーム -->
+        <div class="lead-form-card">
+          <div class="lf-step-badge">STEP 1 / 3<span class="lf-step-time">所要 約30秒</span></div>
+          <h3 class="lf-card-title">お車の情報を入力</h3>
 
-        <!-- 内装セクション -->
-        <div class="pw-group">
-          <h3 class="pw-group-title"><span class="pw-group-num">2</span>内装 <span class="pw-group-hint">4枚必須</span></h3>
-          <div class="pw-shots" id="pwShots-interior"></div>
-        </div>
-
-        <!-- 情報セクション -->
-        <div class="pw-group">
-          <h3 class="pw-group-title"><span class="pw-group-num">3</span>情報 <span class="pw-group-hint">1枚必須</span></h3>
-          <div class="pw-shots" id="pwShots-info"></div>
-        </div>
-
-        <!-- 傷・任意セクション -->
-        <div class="pw-group">
-          <h3 class="pw-group-title"><span class="pw-group-num">+</span>傷・詳細 <span class="pw-group-hint">任意 最大2枚</span></h3>
-          <div class="pw-shots" id="pwShots-optional"></div>
-        </div>
-
-        <!-- 撮影完了後：メール送信ゾーン -->
-        <div class="pw-submit-zone" id="pwSubmitZone">
-          <div class="pw-submit-locked" id="pwSubmitLocked">
-            <div class="pw-lock-ico">🔒</div>
-            <h3>あと <span id="pwRemaining">13</span> 枚の必須写真を撮影してください</h3>
-            <p>13枚すべての必須写真が揃うと、査定依頼が送信できるようになります。</p>
-          </div>
-
-          <div class="pw-submit-unlocked" id="pwSubmitUnlocked" hidden>
-            <div class="pw-unlock-badge">✅ 写真すべて撮影完了！</div>
-            <h3>あと10秒。メールアドレスをご入力ください</h3>
+          <form id="quoteForm" class="lead-form" novalidate>
+            <div class="field">
+              <label for="f-name">お名前 <span class="opt">任意</span></label>
+              <input type="text" id="f-name" name="name" placeholder="例：山田 太郎" autocomplete="name" />
+            </div>
 
             <div class="field">
               <label for="f-email">メールアドレス <span class="req">必須</span></label>
               <input type="email" id="f-email" name="email" placeholder="example@buymo.me" required autocomplete="email" inputmode="email" />
               <p class="err" data-for="f-email"></p>
+              <p class="field-hint">↑このアドレス宛てに、次のステップ（写真撮影ガイド）を自動でお届けします。</p>
+            </div>
+
+            <div class="field field-2col">
+              <div>
+                <label for="f-pref">お住まいの都道府県 <span class="opt">任意</span></label>
+                <select id="f-pref" name="pref">
+                  <option value="">選択してください</option>
+                  <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option><option>山形県</option><option>福島県</option>
+                  <option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option>
+                  <option>新潟県</option><option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option>
+                  <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option>
+                  <option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option>
+                  <option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option>
+                  <option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option>
+                  <option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
+                </select>
+              </div>
+              <div>
+                <label for="f-tel">お電話番号 <span class="opt">任意</span></label>
+                <input type="tel" id="f-tel" name="tel" placeholder="例：090-0000-0000" autocomplete="tel" inputmode="tel" />
+                <p class="err" data-for="f-tel"></p>
+              </div>
             </div>
 
             <div class="field">
-              <label for="f-car">お車について一言 <span class="opt">任意</span></label>
-              <input type="text" id="f-car" name="car" placeholder="例：プリウス 2019年式 / 事故車 など" />
+              <label for="f-car">お車について <span class="opt">任意</span></label>
+              <input type="text" id="f-car" name="car" placeholder="例：プリウス 2019年式 / 事故車 / 走行10万km など" />
+              <p class="field-hint">車種・年式・状態など、わかる範囲でOK。空欄でも送信できます。</p>
             </div>
 
             <div class="field field-check">
@@ -561,18 +549,96 @@
               <p class="err" data-for="f-agree"></p>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block btn-lg" id="pwSubmitBtn">写真を送信して査定を依頼<span aria-hidden="true">›</span></button>
-
-            <div class="lite-promise">
-              <p><strong>✓ 電話は最終ご確認時のみ</strong>（当社からお掛けします）</p>
-              <p><strong>✓ お名前・ご住所は査定額ご確認後</strong>にお伺いします</p>
-              <p><strong>✓ 完全無料・全国47都道府県対応</strong></p>
-            </div>
-
+            <button type="submit" class="btn btn-primary btn-block btn-lg" id="pwSubmitBtn">
+              送信して無料査定を依頼<span aria-hidden="true">›</span>
+            </button>
             <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
-          </div>
+
+            <ul class="lite-promise">
+              <li><strong>✓ 電話は最終ご確認時のみ</strong>（当社からお掛けします）</li>
+              <li><strong>✓ お名前・ご住所は査定額ご確認後</strong>にお伺い</li>
+              <li><strong>✓ 完全無料・全国47都道府県対応</strong></li>
+            </ul>
+          </form>
         </div>
-      </form>
+
+        <!-- 右：写真プレビュー（案内のみ・非活性） -->
+        <aside class="photo-preview-panel" aria-labelledby="photo-preview-title">
+          <div class="pp-step-badge">STEP 2 / 3<span class="lf-step-time">送信後にメール到着</span></div>
+          <h3 id="photo-preview-title" class="pp-title">この後、<span class="hl">15カットの写真</span>をお願いします</h3>
+          <p class="pp-lead">上のフォームを送信すると、届くメールから撮影ガイドにアクセスできます。<br><strong>今この場での撮影は不要</strong>。撮り方も1枚ずつ図解でご案内します。</p>
+
+          <!-- 車の俯瞰図（外観8カットの位置） -->
+          <div class="pp-diagram" aria-label="外観8カットの撮影位置">
+            <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg" role="img">
+              <title>外観8カットの撮影位置</title>
+              <!-- car top view -->
+              <rect x="110" y="45" width="100" height="130" rx="20" fill="#e8f2ec" stroke="#0a6b3c" stroke-width="1.6"/>
+              <!-- windshield -->
+              <path d="M118,70 L202,70 L192,92 L128,92 Z" fill="#c9e0d3" opacity=".8"/>
+              <!-- rear window -->
+              <path d="M128,150 L192,150 L202,172 L118,172 Z" fill="#c9e0d3" opacity=".8"/>
+              <!-- roof outline -->
+              <rect x="128" y="94" width="64" height="54" rx="4" fill="none" stroke="#0a6b3c" stroke-width="0.8" opacity=".4"/>
+              <!-- wheels -->
+              <rect x="102" y="66" width="10" height="22" rx="2" fill="#333"/>
+              <rect x="208" y="66" width="10" height="22" rx="2" fill="#333"/>
+              <rect x="102" y="140" width="10" height="22" rx="2" fill="#333"/>
+              <rect x="208" y="140" width="10" height="22" rx="2" fill="#333"/>
+              <!-- camera position markers with numbers -->
+              <!-- 1 front -->
+              <circle cx="160" cy="20" r="14" fill="#0a6b3c"/><text x="160" y="25" text-anchor="middle" fill="#fff" font-weight="900" font-size="14">1</text>
+              <line x1="160" y1="34" x2="160" y2="42" stroke="#0a6b3c" stroke-width="2" stroke-dasharray="3 3"/>
+              <!-- 2 front-R -->
+              <circle cx="240" cy="30" r="14" fill="#0a6b3c"/><text x="240" y="35" text-anchor="middle" fill="#fff" font-weight="900" font-size="14">2</text>
+              <line x1="230" y1="42" x2="215" y2="52" stroke="#0a6b3c" stroke-width="2" stroke-dasharray="3 3"/>
+              <!-- 3 front-L -->
+              <circle cx="80" cy="30" r="14" fill="#0a6b3c"/><text x="80" y="35" text-anchor="middle" fill="#fff" font-weight="900" font-size="14">3</text>
+              <line x1="90" y1="42" x2="105" y2="52" stroke="#0a6b3c" stroke-width="2" stroke-dasharray="3 3"/>
+              <!-- 4 rear -->
+              <circle cx="160" cy="200" r="14" fill="#0a6b3c"/><text x="160" y="205" text-anchor="middle" fill="#fff" font-weight="900" font-size="14">4</text>
+              <line x1="160" y1="186" x2="160" y2="178" stroke="#0a6b3c" stroke-width="2" stroke-dasharray="3 3"/>
+              <!-- 5 rear-R -->
+              <circle cx="240" cy="190" r="14" fill="#0a6b3c"/><text x="240" y="195" text-anchor="middle" fill="#fff" font-weight="900" font-size="14">5</text>
+              <line x1="230" y1="180" x2="215" y2="170" stroke="#0a6b3c" stroke-width="2" stroke-dasharray="3 3"/>
+              <!-- 6 side-L (drivers side) -->
+              <circle cx="40" cy="110" r="14" fill="#0a6b3c"/><text x="40" y="115" text-anchor="middle" fill="#fff" font-weight="900" font-size="14">6</text>
+              <line x1="54" y1="110" x2="100" y2="110" stroke="#0a6b3c" stroke-width="2" stroke-dasharray="3 3"/>
+              <!-- 7 side-R (passenger side) -->
+              <circle cx="280" cy="110" r="14" fill="#0a6b3c"/><text x="280" y="115" text-anchor="middle" fill="#fff" font-weight="900" font-size="14">7</text>
+              <line x1="266" y1="110" x2="220" y2="110" stroke="#0a6b3c" stroke-width="2" stroke-dasharray="3 3"/>
+              <!-- 8 wheel (close-up) -->
+              <circle cx="107" cy="77" r="9" fill="none" stroke="#0a6b3c" stroke-width="2"/>
+              <circle cx="107" cy="77" r="16" fill="none" stroke="#0a6b3c" stroke-width="1" stroke-dasharray="2 2"/>
+              <text x="128" y="55" fill="#0a6b3c" font-weight="900" font-size="12">8 ホイール</text>
+            </svg>
+            <p class="pp-diagram-caption">外観8カットは、車の周囲8方向から撮影。図の番号順に進めます。</p>
+          </div>
+
+          <!-- 15カットのプレビュー一覧（非活性） -->
+          <ol class="pp-shots" aria-label="撮影する写真の一覧（案内のみ）">
+            <li class="pp-shot"><span class="pp-num">1</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="14" y="10" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="20" y1="4" x2="20" y2="10" stroke="currentColor" stroke-width="2"/><polyline points="15,7 20,4 25,7" fill="none" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">フロント正面</div><div class="pp-hint">車の正面全体が入るように</div></div></li>
+            <li class="pp-shot"><span class="pp-num">2</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="14" y="10" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="30" y1="6" x2="24" y2="12" stroke="currentColor" stroke-width="2"/><polyline points="27,4 30,6 28,10" fill="none" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">フロント右斜め</div><div class="pp-hint">右前方45度から全体を</div></div></li>
+            <li class="pp-shot"><span class="pp-num">3</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="14" y="10" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="10" y1="6" x2="16" y2="12" stroke="currentColor" stroke-width="2"/><polyline points="13,4 10,6 12,10" fill="none" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">フロント左斜め</div><div class="pp-hint">左前方45度から全体を</div></div></li>
+            <li class="pp-shot"><span class="pp-num">4</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="14" y="10" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="20" y1="30" x2="20" y2="36" stroke="currentColor" stroke-width="2"/><polyline points="15,33 20,36 25,33" fill="none" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">リア正面</div><div class="pp-hint">後方全体・ナンバーを含めて</div></div></li>
+            <li class="pp-shot"><span class="pp-num">5</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="14" y="10" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="30" y1="34" x2="24" y2="28" stroke="currentColor" stroke-width="2"/><polyline points="27,36 30,34 28,30" fill="none" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">リア右斜め</div><div class="pp-hint">右後方45度から</div></div></li>
+            <li class="pp-shot"><span class="pp-num">6</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="14" y="10" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="4" y1="20" x2="12" y2="20" stroke="currentColor" stroke-width="2"/><polyline points="8,16 4,20 8,24" fill="none" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">運転席サイド</div><div class="pp-hint">車の左側面全体（運転席側）</div></div></li>
+            <li class="pp-shot"><span class="pp-num">7</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="14" y="10" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="28" y1="20" x2="36" y2="20" stroke="currentColor" stroke-width="2"/><polyline points="32,16 36,20 32,24" fill="none" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">助手席サイド</div><div class="pp-hint">車の右側面全体（助手席側）</div></div></li>
+            <li class="pp-shot"><span class="pp-num">8</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="3" fill="currentColor"/><line x1="20" y1="10" x2="20" y2="14" stroke="currentColor" stroke-width="2"/><line x1="20" y1="26" x2="20" y2="30" stroke="currentColor" stroke-width="2"/><line x1="10" y1="20" x2="14" y2="20" stroke="currentColor" stroke-width="2"/><line x1="26" y1="20" x2="30" y2="20" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">ホイール・タイヤ</div><div class="pp-hint">前輪のホイールを1枚アップで</div></div></li>
+            <li class="pp-shot pp-shot-alt"><span class="pp-num">9</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="14" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10,32 Q10,22 20,22 Q30,22 30,32 Z" fill="none" stroke="currentColor" stroke-width="2"/><line x1="14" y1="18" x2="17" y2="14" stroke="currentColor" stroke-width="1.5"/></svg></div><div class="pp-info"><div class="pp-label">運転席</div><div class="pp-hint">シート・ハンドル周りを1枚</div></div></li>
+            <li class="pp-shot pp-shot-alt"><span class="pp-num">10</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="8" y="16" width="24" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" y1="24" x2="32" y2="24" stroke="currentColor" stroke-width="1.5"/><line x1="20" y1="16" x2="20" y2="32" stroke="currentColor" stroke-width="1.5"/></svg></div><div class="pp-info"><div class="pp-label">後部座席</div><div class="pp-hint">後部座席全体が入るように</div></div></li>
+            <li class="pp-shot pp-shot-alt"><span class="pp-num">11</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><rect x="6" y="14" width="28" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="10" y="18" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="18" y="18" width="12" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div><div class="pp-info"><div class="pp-label">ダッシュボード</div><div class="pp-hint">オーディオ・エアコン周り</div></div></li>
+            <li class="pp-shot pp-shot-alt"><span class="pp-num">12</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M6,26 L6,16 Q6,14 8,14 L32,14 Q34,14 34,16 L34,26" fill="none" stroke="currentColor" stroke-width="2"/><line x1="4" y1="26" x2="36" y2="26" stroke="currentColor" stroke-width="2"/><line x1="16" y1="14" x2="16" y2="10" stroke="currentColor" stroke-width="1.5"/><line x1="24" y1="14" x2="24" y2="10" stroke="currentColor" stroke-width="1.5"/></svg></div><div class="pp-info"><div class="pp-label">トランク・荷室</div><div class="pp-hint">トランクを開けて中を1枚</div></div></li>
+            <li class="pp-shot pp-shot-num"><span class="pp-num">13</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="12" fill="none" stroke="currentColor" stroke-width="2"/><text x="20" y="24" text-anchor="middle" font-weight="900" font-size="10" fill="currentColor">km</text><line x1="20" y1="10" x2="20" y2="13" stroke="currentColor" stroke-width="1.5"/><line x1="26" y1="14" x2="24" y2="16" stroke="currentColor" stroke-width="1.5"/></svg></div><div class="pp-info"><div class="pp-label">走行距離メーター</div><div class="pp-hint">数字がハッキリ読めるように</div></div></li>
+            <li class="pp-shot pp-shot-opt"><span class="pp-num">14</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="16" cy="16" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="30" y2="30" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">傷・凹み①</div><div class="pp-hint">気になる箇所（任意）</div></div></li>
+            <li class="pp-shot pp-shot-opt"><span class="pp-num">15</span><div class="pp-ico" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="16" cy="16" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="30" y2="30" stroke="currentColor" stroke-width="2"/></svg></div><div class="pp-info"><div class="pp-label">傷・凹み②</div><div class="pp-hint">追加の箇所（任意）</div></div></li>
+          </ol>
+
+          <div class="pp-footer">
+            <span class="pp-badge">📩 メール返信で1枚ずつ順番にご案内</span>
+          </div>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -746,7 +812,7 @@
 <script>document.addEventListener('DOMContentLoaded',function(){if(window.BuymoSim)BuymoSim.init('buymoSim');});</script>
 <script src="assets/js/buymo-data.js" defer></script>
 <script src="assets/js/buymo.js?v=6" defer></script>
-<link rel="stylesheet" href="assets/css/academy.css?v=4" />
+<link rel="stylesheet" href="assets/css/academy.css?v=7" />
 <script>window.BUYMO_BOT_MODE='user';</script>
 <script src="assets/js/chatbot.js?v=4" defer></script>
 </body>
