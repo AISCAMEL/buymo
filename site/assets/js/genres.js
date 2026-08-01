@@ -12,15 +12,16 @@
   'use strict';
 
   // メイン(大分類) → サブ(小分類)
+  // catIco: フッター等のカテゴリ見出し用PNGアイコン（絵文字fallback: icon）
   var GROUPS = [
-    { cat: '状態・お悩みで買取', icon: '♻️', items: [
+    { cat: '状態・お悩みで買取', icon: '♻️', catIco: 'cat-condition.png', items: [
       { name: '廃車買取',        slug: 'haisha',   icon: '♻️', desc: '動かない・価値が無いと思われた車も0円以上。引取・抹消も無料。' },
       { name: '事故車買取',      slug: 'jiko',     icon: '🚧', desc: '修復歴・損傷車も専門ルートで高価買取。事故後そのままでOK。' },
       { name: '不動車買取',      slug: 'fudou',    icon: '🔧', desc: 'エンジン不動・故障車もレッカー手配で対応。動かなくてもOK。' },
       { name: '過走行車買取',    slug: 'kasoukou', icon: '🛣️', desc: '10万km超の多走行車も独自ルートで需要あり。' },
       { name: 'ローン中の車買取', slug: 'loan',     icon: '💳', desc: 'ローン残債ありでも買取可能。残債精算もサポート。' }
     ]},
-    { cat: '人気車種で買取', icon: '⭐', items: [
+    { cat: '人気車種で買取', icon: '⭐', catIco: 'cat-popular.png', items: [
       { name: 'ハイエース買取',     slug: 'hiace',       icon: '🚐', desc: '商用・キャンパーで需要大。ハイエースは高値が付きやすい。' },
       { name: 'ランドクルーザー買取', slug: 'landcruiser', icon: '🚙', desc: 'ランクルは国内外で人気。年式不問で高価買取。' },
       { name: 'アルファード買取',   slug: 'alphard',     icon: '🚐', desc: '高級ミニバンの代表格。グレード・装備を高評価。' },
@@ -28,7 +29,7 @@
       { name: 'ジムニー買取',       slug: 'jimny',       icon: '🚙', desc: '高い人気で値落ちしにくい。旧型ジムニーも歓迎。' },
       { name: '軽トラ買取',         slug: 'keitora',     icon: '🛻', desc: '軽トラック・農用車も需要安定。過走行でもOK。' }
     ]},
-    { cat: 'タイプ・区分で買取', icon: '🚗', items: [
+    { cat: 'タイプ・区分で買取', icon: '🚗', catIco: 'cat-type.png', items: [
       { name: '軽自動車買取',        slug: 'kei',    icon: '🚐', desc: '人気の軽自動車を高価買取。ターボ・スライドドアも。' },
       { name: 'SUV買取',            slug: 'suv',    icon: '🚙', desc: '需要の高いSUVを好条件で。' },
       { name: 'ミニバン買取',        slug: 'minivan',icon: '🚐', desc: 'ファミリー需要のミニバンを高評価。' },
@@ -38,11 +39,11 @@
       { name: '高級車買取',          slug: 'luxury', icon: '🏎️', desc: 'ブランド価値を正しく評価。高級車・スポーツカーも。' },
       { name: 'EV・ハイブリッド買取', slug: 'ev',     icon: '🔋', desc: 'バッテリー状態も加味して適正査定。' }
     ]},
-    { cat: '旧車・希少車で買取', icon: '🏁', items: [
+    { cat: '旧車・希少車で買取', icon: '🏁', catIco: 'cat-classic.png', items: [
       { name: '旧車買取',           slug: 'kyusha', icon: '🏁', desc: '旧車・クラシックカーは希少価値で高評価。不動でもOK。' },
       { name: '絶版・ネオクラ買取', slug: 'zeppan', icon: '📻', desc: '絶版車・ネオクラシックも専門ルートで買取。' }
     ]},
-    { cat: 'パーツ・用品買取', icon: '🔩', items: [
+    { cat: 'パーツ・用品買取', icon: '🔩', catIco: 'cat-parts.png', items: [
       { name: 'アルミホイール買取', slug: 'wheel',  icon: '🛞', desc: '社外・純正アルミホイールを単体でも買取。タイヤ付きも。' },
       { name: 'タイヤ買取',         slug: 'tire',   icon: '🛞', desc: '夏・スタッドレス、ホイールセットも査定。' },
       { name: 'カー用品・パーツ買取', slug: 'parts', icon: '📟', desc: 'カーナビ・エアロ・マフラー等のパーツも買取。' }
