@@ -1008,8 +1008,9 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
   .header-tel{order:2;}
 
   .section-title{font-size:24px;margin-bottom:28px;}
-  .hero{min-height:520px;}
-  .hero::after{background:rgba(10,30,28,.72);}
+  .hero{min-height:560px;}
+  .hero::after{background:linear-gradient(180deg,rgba(10,30,28,.55) 0%,rgba(10,30,28,.75) 100%);}
+  .hero-img-main{object-position:center center;}
   .hero-inner{text-align:center;padding:64px 0;}
   .hero-copy{max-width:100%;}
   .hero h1{font-size:34px;}
