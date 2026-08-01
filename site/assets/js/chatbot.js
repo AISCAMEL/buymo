@@ -217,6 +217,10 @@
   var chatIconSrc = prefix + 'assets/img/buymo/chatbot-avatar.png';
 
   root.innerHTML =
+    '<div class="cbot-hint" id="cbotHint" hidden aria-hidden="true">' +
+      '<button class="cbot-hint-x" aria-label="閉じる">×</button>' +
+      '<span class="cbot-hint-text">何かご用はありますか？</span>' +
+    '</div>' +
     '<button class="cbot-launch" aria-label="AIチャットを開く" aria-expanded="false">' +
       '<img class="cbot-launch-img" src="' + chatIconSrc + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">' +
       '<span class="cbot-launch-ico" style="display:none">💬</span>' +
@@ -410,12 +414,43 @@
     renderChips();
   }
 
+  /* ---------- Hint bubble ("何かご用はありますか？") ---------- */
+  var hint = root.querySelector('#cbotHint');
+  var HINT_KEY = 'buymo_hint_dismissed';
+  function showHint() {
+    if (!hint) return;
+    if (!panel.hidden) return; // パネル開いていたら出さない
+    try { if (sessionStorage.getItem(HINT_KEY) === '1') return; } catch(e){}
+    hint.hidden = false;
+    hint.setAttribute('aria-hidden', 'false');
+    // 12秒後に自動で閉じる
+    setTimeout(hideHint, 12000);
+  }
+  function hideHint() {
+    if (!hint) return;
+    hint.hidden = true;
+    hint.setAttribute('aria-hidden', 'true');
+    try { sessionStorage.setItem(HINT_KEY, '1'); } catch(e){}
+  }
+  if (hint) {
+    hint.querySelector('.cbot-hint-x').addEventListener('click', function(e){
+      e.stopPropagation(); hideHint();
+    });
+    hint.querySelector('.cbot-hint-text').addEventListener('click', function(){
+      hideHint();
+      root.querySelector('.cbot-launch').click();
+    });
+    // 6秒後にヒント表示
+    setTimeout(showHint, 6000);
+  }
+
   /* ---------- Events ---------- */
   root.querySelector('.cbot-launch').addEventListener('click', function () {
     panel.hidden = false;
     this.setAttribute('aria-expanded', 'true');
     if (!log.children.length) setMode(MODE);
     setTimeout(function(){ input.focus(); }, 100);
+    hideHint();
   });
   root.querySelector('.cbot-x').addEventListener('click', function () {
     panel.hidden = true;
