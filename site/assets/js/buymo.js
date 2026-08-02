@@ -603,6 +603,18 @@
       note.className = 'form-note';
 
       var payload = buildPayload();
+      // 会員マイページで自動入力するためのプリフィル保存
+      try {
+        var pf = {
+          name:  payload.name  || '',
+          email: payload.email || '',
+          tel:   (document.getElementById('f-tel') || {}).value || '',
+          pref:  (document.getElementById('f-pref') || {}).value || '',
+          car:   payload.car   || '',
+          ts:    Date.now()
+        };
+        localStorage.setItem('buymo_form_prefill', JSON.stringify(pf));
+      } catch (e) {}
       if (window.BuymoGA) BuymoGA.track('generate_lead', { genre: payload.genre || '', source: payload.source || '' });
       sendLead(payload).then(function () {
         note.textContent = '送信しました。ありがとうございます。ページを移動します…';

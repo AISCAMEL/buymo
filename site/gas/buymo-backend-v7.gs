@@ -769,21 +769,66 @@ function handleMemberCaseNew(data) {
   var name = String(data.name || '').replace(/[<>]/g, '');
   var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
 
+  // 写真をGoogle Driveへ保存（あれば）
+  var photoUrls = [];
+  try {
+    if (data.photos && data.photos.length) {
+      var folderLabel = (name || 'noname').replace(/[\/\\:\*\?\"\<\>\|]/g, '_') + '_' + (kase.id || '');
+      photoUrls = savePhotosToDrive(data.photos, folderLabel);
+    }
+  } catch (e) { Logger.log('handleMemberCaseNew photos: ' + e.message); }
+  var photoUrlText = photoUrls.length ? photoUrls.join('\n') : '';
+
   try {
     var ss = getSS();
     var sheet = ss.getSheetByName(MEMBER_CASE_SHEET);
+    var HEADERS = ['受付日時','案件ID','氏名','メール','メーカー','車種','年式','走行距離(km)','状態','所在(都道府県)','電話番号',
+                   '修復歴','水没歴','メーター改ざん','購入経路','何社目','希望売却時期',
+                   '写真枚数','写真URL','メモ','ステージ','査定額','担当メモ'];
     if (!sheet) {
       sheet = ss.insertSheet(MEMBER_CASE_SHEET);
-      sheet.appendRow(['受付日時','案件ID','氏名','メール','メーカー','車種','年式','走行距離(km)','状態','所在(都道府県)','電話番号','メモ','ステージ','査定額','担当メモ']);
-      sheet.getRange(1, 1, 1, 15).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+      sheet.appendRow(HEADERS);
+      sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
       sheet.setFrozenRows(1);
+    } else {
+      // 既存シートに新列が無ければ末尾に追加してマイグレーション
+      var curCols = sheet.getLastColumn();
+      var curHead = sheet.getRange(1, 1, 1, curCols).getValues()[0];
+      var missing = HEADERS.filter(function (h) { return curHead.indexOf(h) < 0; });
+      if (missing.length) {
+        sheet.getRange(1, curCols + 1, 1, missing.length).setValues([missing])
+          .setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+      }
     }
-    sheet.appendRow([
-      ts, kase.id || '', name, email,
-      car.maker || '', car.model || '', car.year || '', car.mileage || '',
-      car.condition || '', car.pref || '', car.tel || '', car.memo || '',
-      kase.stage || '新規受付', '', ''
-    ]);
+    // ヘッダに従って値をマップして列ズレに強くする
+    var head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var vals = {
+      '受付日時':          ts,
+      '案件ID':            kase.id || '',
+      '氏名':              name,
+      'メール':            email,
+      'メーカー':          car.maker || '',
+      '車種':              car.model || '',
+      '年式':              car.year || '',
+      '走行距離(km)':      car.mileage || '',
+      '状態':              car.condition || '',
+      '所在(都道府県)':    car.pref || '',
+      '電話番号':          car.tel || '',
+      '修復歴':            car.repair || '',
+      '水没歴':            car.flood || '',
+      'メーター改ざん':    car.meter || '',
+      '購入経路':          car.buypath || '',
+      '何社目':            car.shopcnt || '',
+      '希望売却時期':      car.sellwhen || '',
+      '写真枚数':          photoUrls.length || 0,
+      '写真URL':           photoUrlText,
+      'メモ':              car.memo || '',
+      'ステージ':          kase.stage || '新規受付',
+      '査定額':            '',
+      '担当メモ':          ''
+    };
+    var row = head.map(function (h) { return vals[h] != null ? vals[h] : ''; });
+    sheet.appendRow(row);
   } catch (e) { Logger.log('handleMemberCaseNew sheet: ' + e.message); }
 
   try {
@@ -794,7 +839,17 @@ function handleMemberCaseNew(data) {
       '【車種】' + (car.maker || '') + ' ' + (car.model || '') + '\n' +
       '【年式】' + (car.year || '') + '\n【走行距離】' + (car.mileage || '') + ' km\n' +
       '【状態】' + (car.condition || '') + '\n【所在】' + (car.pref || '') + '\n' +
-      '【電話】' + (car.tel || '') + '\n【メモ】\n' + (car.memo || '(なし)') + '\n\n受付日時: ' + ts;
+      '【電話】' + (car.tel || '') + '\n' +
+      '\n─ 告知 ─\n' +
+      '【修復歴】' + (car.repair || '未告知') + '\n' +
+      '【水没歴】' + (car.flood || '未告知') + '\n' +
+      '【メーター改ざん】' + (car.meter || '未告知') + '\n' +
+      '\n─ 商談情報 ─\n' +
+      '【購入経路】' + (car.buypath || '未記入') + '\n' +
+      '【何社目】' + (car.shopcnt || '未記入') + '\n' +
+      '【希望売却時期】' + (car.sellwhen || '未記入') + '\n' +
+      '\n【写真】' + (photoUrls.length ? (photoUrls.length + '枚\n' + photoUrls.join('\n')) : '(なし)') + '\n' +
+      '【メモ】\n' + (car.memo || '(なし)') + '\n\n受付日時: ' + ts;
     MailApp.sendEmail({
       to: NOTIFY_EMAIL,
       subject: '【BUYMO】マイページから新規案件: ' + (car.maker || '') + ' ' + (car.model || '') + ' (' + email + ')',

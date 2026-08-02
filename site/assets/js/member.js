@@ -10,6 +10,18 @@
   var STAGES = ['新規受付', '査定中', '商談中', '契約', '入金待ち', '完了'];
   var EKEY = 'buymo_member_email', NKEY = 'buymo_member_name';
   var CKEY = 'buymo_member_cases'; // ローカル保存の新規案件 { email: [ ...cases ] }
+  var PKEY = 'buymo_form_prefill'; // トップフォームから引き継ぎ
+
+  function readPrefill() {
+    try {
+      var raw = localStorage.getItem(PKEY);
+      if (!raw) return null;
+      var pf = JSON.parse(raw);
+      // 24時間で失効（古いデータを引き継がない）
+      if (!pf || !pf.ts || (Date.now() - pf.ts) > 24 * 3600 * 1000) return null;
+      return pf;
+    } catch (e) { return null; }
+  }
 
   var loginView = document.getElementById('memberLogin');
   var dashView = document.getElementById('memberDash');
@@ -103,6 +115,20 @@
   var pe = qp().get('email');
   if (pe) { try { localStorage.setItem(EKEY, pe); } catch (e) {} saved = pe; }
 
+  // ログイン画面：トップで入力済みなら name/email をプリフィル
+  (function prefillLogin() {
+    var pf = readPrefill();
+    if (!pf) return;
+    var mn = document.getElementById('mName');
+    var me = document.getElementById('mEmail');
+    if (mn && !mn.value && pf.name)  mn.value = pf.name;
+    if (me && !me.value && pf.email) me.value = pf.email;
+    // 名前がわかっているならNKEYにも入れておく（表示用）
+    try {
+      if (pf.name && !localStorage.getItem(NKEY)) localStorage.setItem(NKEY, pf.name);
+    } catch (e) {}
+  })();
+
   if (saved) { show(saved); }
 
   // ログイン/登録フォーム
@@ -130,6 +156,137 @@
   var ncThanks  = document.getElementById('newcaseThanks');
   var ncErr     = document.getElementById('ncErr');
   var ncMailEl  = ncForm ? ncForm.querySelector('.mp-nc-mail') : null;
+  var ncSubmit  = document.getElementById('newcaseSubmit');
+
+  /* ---- 写真アップロードウィザード（16枚必須） ---- */
+  var MP_SHOTS = [
+    // 外観 8枚
+    { id:'front',    grp:'exterior', label:'フロント正面',    req:true, ico:'🚗', hint:'車の正面全体が入るように' },
+    { id:'front-r',  grp:'exterior', label:'フロント右斜め',  req:true, ico:'↗️', hint:'右前方45度から' },
+    { id:'front-l',  grp:'exterior', label:'フロント左斜め',  req:true, ico:'↖️', hint:'左前方45度から' },
+    { id:'rear',     grp:'exterior', label:'リア正面',        req:true, ico:'🚙', hint:'後方全体・ナンバー含めて' },
+    { id:'rear-r',   grp:'exterior', label:'リア右斜め',      req:true, ico:'↘️', hint:'右後方45度から' },
+    { id:'side-l',   grp:'exterior', label:'運転席サイド',    req:true, ico:'⬅️', hint:'左側面全体' },
+    { id:'side-r',   grp:'exterior', label:'助手席サイド',    req:true, ico:'➡️', hint:'右側面全体' },
+    { id:'wheel',    grp:'exterior', label:'ホイール',        req:true, ico:'⚙️', hint:'前輪のホイールを1枚' },
+    // 内装 4枚
+    { id:'driver',   grp:'interior', label:'運転席',          req:true, ico:'🪑', hint:'シート・ハンドル周り' },
+    { id:'rear-seat',grp:'interior', label:'後部座席',        req:true, ico:'💺', hint:'後部座席全体' },
+    { id:'dashboard',grp:'interior', label:'ダッシュボード',  req:true, ico:'📊', hint:'オーディオ・エアコン周り' },
+    { id:'trunk',    grp:'interior', label:'トランク',        req:true, ico:'📦', hint:'開けて中を撮影' },
+    // 情報 3枚
+    { id:'meter',    grp:'info',     label:'走行距離メーター',req:true, ico:'🔢', hint:'距離がハッキリ見えるよう' },
+    { id:'regcert-1',grp:'info',     label:'車検証(表面)',    req:true, ico:'📄', hint:'車検証の表面全体' },
+    { id:'regcert-2',grp:'info',     label:'車検証(裏面)',    req:true, ico:'📃', hint:'裏面や補足情報のページ' },
+    // 傷・任意 2枚
+    { id:'damage-1', grp:'optional', label:'傷・凹み①',      req:false, ico:'🔍', hint:'気になる傷・凹み' },
+    { id:'damage-2', grp:'optional', label:'傷・凹み②',      req:false, ico:'🔍', hint:'追加で気になる箇所' }
+  ];
+  var MP_REQUIRED = MP_SHOTS.filter(function(s){ return s.req; }).length;
+  var mpShotData = {};
+
+  function mpCompress(file) {
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+          var MAX = 1280, w = img.width, h = img.height;
+          if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+          if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          resolve({ name: file.name.replace(/\.[^.]+$/, '.jpg'), data: dataUrl.split(',')[1], type: 'image/jpeg', thumb: dataUrl });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function mpUpdateProgress() {
+    var reqDone = 0;
+    MP_SHOTS.forEach(function (s) { if (s.req && mpShotData[s.id]) reqDone++; });
+    var cur   = document.getElementById('mpPwCurrent');
+    var fill  = document.getElementById('mpPwFill');
+    var stat  = document.getElementById('mpPwStatus');
+    var rem   = document.getElementById('mpPwRemaining');
+    var gate  = document.getElementById('mpPwGate');
+    if (cur)  cur.textContent = reqDone;
+    if (fill) fill.style.width = (reqDone / MP_REQUIRED * 100) + '%';
+    if (rem)  rem.textContent  = MP_REQUIRED - reqDone;
+    if (stat) {
+      if (reqDone === 0) stat.textContent = '撮影を始めてください';
+      else if (reqDone < MP_REQUIRED) stat.textContent = 'あと ' + (MP_REQUIRED - reqDone) + ' 枚必要です';
+      else stat.textContent = '✅ 撮影完了！送信できます';
+    }
+    var ready = reqDone >= MP_REQUIRED;
+    if (gate) gate.hidden = ready;
+    if (ncSubmit) ncSubmit.disabled = !ready;
+  }
+
+  function mpRenderShot(shot, idx) {
+    var slot = document.createElement('label');
+    slot.className = 'mp-pw-shot ' + (shot.req ? 'req' : 'opt');
+    slot.setAttribute('data-shot-id', shot.id);
+    slot.innerHTML =
+      '<span class="mp-pw-num">' + (idx + 1) + '</span>' +
+      '<div class="mp-pw-shot-thumb">' +
+        '<span class="mp-pw-shot-ico">' + shot.ico + '</span>' +
+        '<button type="button" class="mp-pw-shot-retake" data-retake>撮り直し</button>' +
+      '</div>' +
+      '<div class="mp-pw-shot-label">' + shot.label + '</div>' +
+      '<div class="mp-pw-shot-hint">' + shot.hint + '</div>' +
+      '<input type="file" accept="image/*" capture="environment">';
+    var input = slot.querySelector('input[type=file]');
+    input.addEventListener('change', function () {
+      var f = this.files && this.files[0];
+      if (!f) return;
+      mpCompress(f).then(function (res) {
+        mpShotData[shot.id] = res;
+        var thumb = slot.querySelector('.mp-pw-shot-thumb');
+        var ico = thumb.querySelector('.mp-pw-shot-ico');
+        if (ico) ico.remove();
+        var oldImg = thumb.querySelector('img');
+        if (oldImg) oldImg.remove();
+        var img = document.createElement('img');
+        img.src = res.thumb; img.alt = shot.label;
+        thumb.insertBefore(img, thumb.firstChild);
+        slot.classList.add('done');
+        mpUpdateProgress();
+      });
+    });
+    slot.querySelector('[data-retake]').addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      input.value = '';
+      input.click();
+    });
+    return slot;
+  }
+
+  (function mpBuildShots() {
+    if (!document.getElementById('mpPwShots-exterior')) return;
+    var offset = 0;
+    ['exterior','interior','info','optional'].forEach(function (grp) {
+      var container = document.getElementById('mpPwShots-' + grp);
+      if (!container) return;
+      MP_SHOTS.forEach(function (s, i) {
+        if (s.grp === grp) {
+          container.appendChild(mpRenderShot(s, i));
+        }
+      });
+    });
+    mpUpdateProgress();
+  })();
+
+  function mpGetPhotos() {
+    return MP_SHOTS.filter(function (s) { return mpShotData[s.id]; }).map(function (s) {
+      var p = mpShotData[s.id];
+      return { name: s.id + '_' + s.label + '.jpg', data: p.data, type: p.type, label: s.label };
+    });
+  }
 
   function setFormOpen(open) {
     if (!ncForm) return;
@@ -143,6 +300,16 @@
       var email = '';
       try { email = localStorage.getItem(EKEY) || ''; } catch (e) {}
       if (ncMailEl) ncMailEl.textContent = email;
+      // トップフォームの入力値をプリフィル（都道府県・電話・メモの車種メモ）
+      var pf = readPrefill();
+      if (pf) {
+        var tel  = document.getElementById('nc-tel');
+        var pref = document.getElementById('nc-pref');
+        var memo = document.getElementById('nc-memo');
+        if (tel  && !tel.value  && pf.tel)  tel.value  = pf.tel;
+        if (pref && !pref.value && pf.pref) pref.value = pf.pref;
+        if (memo && !memo.value && pf.car)  memo.value = 'お問い合わせ時の内容：\n' + pf.car;
+      }
       var first = ncForm.querySelector('select, input');
       if (first) setTimeout(function () { first.focus(); }, 50);
     }
@@ -185,6 +352,27 @@
       if (!maker) { ncErr.textContent = 'メーカーをご選択ください。'; return; }
       if (!model) { ncErr.textContent = '車種名をご入力ください。'; return; }
 
+      function radioVal(name) {
+        var el = ncForm.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : '';
+      }
+      var repair = radioVal('repair');
+      var flood  = radioVal('flood');
+      var meter  = radioVal('meter');
+      if (!repair) { ncErr.textContent = '「修復歴」の告知をご選択ください。'; return; }
+      if (!flood)  { ncErr.textContent = '「水没歴」の告知をご選択ください。'; return; }
+      if (!meter)  { ncErr.textContent = '「メーター改ざん」の告知をご選択ください。'; return; }
+
+      var photos = mpGetPhotos();
+      var reqShots = MP_SHOTS.filter(function (s) { return s.req; });
+      var missing = reqShots.filter(function (s) { return !mpShotData[s.id]; });
+      if (missing.length > 0) {
+        ncErr.textContent = '必須写真があと ' + missing.length + ' 枚未撮影です（' + missing[0].label + ' など）。';
+        var pw = document.querySelector('.mp-pw-progress');
+        if (pw) pw.scrollIntoView({ behavior:'smooth', block:'start' });
+        return;
+      }
+
       var kase = {
         id:     newCaseId(),
         date:   todayJP(),
@@ -198,6 +386,12 @@
           condition: document.getElementById('nc-cond').value.trim(),
           pref:      document.getElementById('nc-pref').value.trim(),
           tel:       document.getElementById('nc-tel').value.trim(),
+          repair:    repair,
+          flood:     flood,
+          meter:     meter,
+          buypath:   (document.getElementById('nc-buypath') || {}).value || '',
+          shopcnt:   (document.getElementById('nc-shopcnt') || {}).value || '',
+          sellwhen:  (document.getElementById('nc-sellwhen') || {}).value || '',
           memo:      document.getElementById('nc-memo').value.trim()
         }
       };
@@ -207,7 +401,8 @@
         source: 'BUYMO 会員マイページ [' + location.pathname + ']',
         email: email,
         name: (function(){ try { return localStorage.getItem(NKEY) || ''; } catch(e){ return ''; } })(),
-        case: kase
+        case: kase,
+        photos: photos
       };
 
       var btn = ncForm.querySelector('button[type="submit"]');
@@ -216,6 +411,23 @@
       sendCase(payload).then(function (res) {
         // GAS 未設定 or 成功 or 失敗いずれもローカル保存＋UI遷移
         saveLocalCase(email, kase);
+        // 写真データをクリア（次回投稿のために）
+        mpShotData = {};
+        try {
+          var slots = ncForm.querySelectorAll('.mp-pw-shot');
+          slots.forEach(function (el) {
+            el.classList.remove('done');
+            var img = el.querySelector('img'); if (img) img.remove();
+            var thumb = el.querySelector('.mp-pw-shot-thumb');
+            if (thumb && !thumb.querySelector('.mp-pw-shot-ico')) {
+              var ic = document.createElement('span');
+              ic.className = 'mp-pw-shot-ico';
+              ic.textContent = MP_SHOTS.find(function(s){ return s.id === el.getAttribute('data-shot-id'); }).ico;
+              thumb.insertBefore(ic, thumb.firstChild);
+            }
+          });
+          mpUpdateProgress();
+        } catch (e) {}
         ncForm.hidden = true;
         ncThanks.hidden = false;
         if (btn) { btn.disabled = false; btn.textContent = '送信して査定を依頼'; }
