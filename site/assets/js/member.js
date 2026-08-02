@@ -231,10 +231,12 @@
     var slot = document.createElement('label');
     slot.className = 'mp-pw-shot ' + (shot.req ? 'req' : 'opt');
     slot.setAttribute('data-shot-id', shot.id);
+    var guideUrl = 'assets/img/pw-guide/' + shot.id + '.webp';
     slot.innerHTML =
       '<span class="mp-pw-num">' + (idx + 1) + '</span>' +
       '<div class="mp-pw-shot-thumb">' +
-        '<span class="mp-pw-shot-ico">' + shot.ico + '</span>' +
+        '<img class="mp-pw-guide" src="' + guideUrl + '" alt="" aria-hidden="true" loading="lazy" />' +
+        '<span class="mp-pw-shot-ico" aria-hidden="true">' + shot.ico + '</span>' +
         '<button type="button" class="mp-pw-shot-retake" data-retake>撮り直し</button>' +
       '</div>' +
       '<div class="mp-pw-shot-label">' + shot.label + '</div>' +
@@ -247,13 +249,13 @@
       mpCompress(f).then(function (res) {
         mpShotData[shot.id] = res;
         var thumb = slot.querySelector('.mp-pw-shot-thumb');
-        var ico = thumb.querySelector('.mp-pw-shot-ico');
-        if (ico) ico.remove();
-        var oldImg = thumb.querySelector('img');
-        if (oldImg) oldImg.remove();
+        // 既存の撮影サムネイルがあれば置き換え
+        var oldTaken = thumb.querySelector('.mp-pw-shot-taken');
+        if (oldTaken) oldTaken.remove();
         var img = document.createElement('img');
+        img.className = 'mp-pw-shot-taken';
         img.src = res.thumb; img.alt = shot.label;
-        thumb.insertBefore(img, thumb.firstChild);
+        thumb.appendChild(img);
         slot.classList.add('done');
         mpUpdateProgress();
       });
@@ -417,14 +419,11 @@
           var slots = ncForm.querySelectorAll('.mp-pw-shot');
           slots.forEach(function (el) {
             el.classList.remove('done');
-            var img = el.querySelector('img'); if (img) img.remove();
+            var shotId = el.getAttribute('data-shot-id');
             var thumb = el.querySelector('.mp-pw-shot-thumb');
-            if (thumb && !thumb.querySelector('.mp-pw-shot-ico')) {
-              var ic = document.createElement('span');
-              ic.className = 'mp-pw-shot-ico';
-              ic.textContent = MP_SHOTS.find(function(s){ return s.id === el.getAttribute('data-shot-id'); }).ico;
-              thumb.insertBefore(ic, thumb.firstChild);
-            }
+            // 撮影サムネイル(class="mp-pw-shot-taken")のみ削除、ガイド画像(mp-pw-guide)は残す
+            var taken = thumb ? thumb.querySelector('.mp-pw-shot-taken') : null;
+            if (taken) taken.remove();
           });
           mpUpdateProgress();
         } catch (e) {}
