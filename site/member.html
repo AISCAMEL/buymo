@@ -48,6 +48,36 @@
   .mp-empty{text-align:center;color:#666;padding:30px 0;}
   .mp-empty .btn{margin-top:14px;}
   .mp-actions{max-width:720px;margin:22px auto 0;text-align:center;}
+
+  /* 新規案件フォーム */
+  .mp-newcase-wrap{max-width:720px;margin:0 auto 24px;background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:22px 26px;border:1px solid var(--border);}
+  .mp-newcase-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .mp-newcase-title{font-size:17px;font-weight:900;color:var(--text);margin:0 0 4px;line-height:1.5;}
+  .mp-newcase-lead{font-size:13px;color:var(--text-sub);margin:0;line-height:1.6;}
+  .mp-newcase-head .btn{flex-shrink:0;}
+  .mp-newcase-form{margin-top:22px;padding-top:22px;border-top:1px dashed var(--border);}
+  .mp-nc-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  @media (max-width:560px){.mp-nc-row{grid-template-columns:1fr;gap:14px;}}
+  .mp-nc-field{display:flex;flex-direction:column;}
+  .mp-nc-field label{display:block;font-size:13px;font-weight:800;color:var(--text);margin-bottom:6px;}
+  .mp-nc-field .req{background:var(--green);color:#fff;font-size:10px;font-weight:900;padding:2px 6px;border-radius:4px;margin-left:4px;letter-spacing:.05em;}
+  .mp-nc-field .opt{background:#e5e7eb;color:var(--text-sub);font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:4px;letter-spacing:.05em;}
+  .mp-nc-field input,
+  .mp-nc-field select,
+  .mp-nc-field textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:11px 12px;font-size:15px;font-family:inherit;background:#fff;color:var(--text);}
+  .mp-nc-field textarea{resize:vertical;min-height:90px;}
+  .mp-nc-field input:focus,
+  .mp-nc-field select:focus,
+  .mp-nc-field textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(15,118,110,.12);}
+  .mp-nc-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;}
+  .mp-nc-actions .btn{min-width:140px;}
+  .mp-nc-note{font-size:12px;color:var(--text-sub);margin-top:12px;line-height:1.7;background:var(--green-bg);padding:10px 12px;border-radius:8px;}
+  .mp-nc-mail{color:var(--green-dark);font-weight:700;}
+  .mp-nc-thanks{margin-top:22px;padding:24px;background:linear-gradient(135deg,#F0FDFA,#fff);border:2px solid var(--green);border-radius:12px;text-align:center;}
+  .mp-nc-thanks-ico{font-size:40px;line-height:1;margin-bottom:10px;}
+  .mp-nc-thanks h3{font-size:18px;font-weight:900;color:var(--green-dark);margin:0 0 8px;}
+  .mp-nc-thanks p{font-size:13px;color:var(--text-sub);line-height:1.8;margin:0;}
+  .mp-nc-thanks p strong{color:var(--green-dark);}
 </style>
 </head>
 <body>
@@ -89,16 +119,115 @@
         <h1 id="memberName">お客様</h1>
         <p>登録メール：<span id="memberEmail"></span>／査定状況は随時更新されます。</p>
       </div>
+
+      <!-- 新規案件追加フォーム -->
+      <section class="mp-newcase-wrap">
+        <div class="mp-newcase-head">
+          <div>
+            <h2 class="mp-newcase-title">🚗 お車情報を追加して査定を依頼</h2>
+            <p class="mp-newcase-lead">わかる範囲でOKです。当社が24時間以内に確認・査定額をご提示します。</p>
+          </div>
+          <button type="button" id="newcaseToggle" class="btn btn-primary">＋ 追加する</button>
+        </div>
+
+        <form id="newcaseForm" class="mp-newcase-form" hidden novalidate>
+          <div class="mp-nc-row">
+            <div class="mp-nc-field">
+              <label for="nc-maker">メーカー <span class="req">必須</span></label>
+              <select id="nc-maker" name="maker" required>
+                <option value="">選択してください</option>
+                <option>トヨタ</option><option>ホンダ</option><option>日産</option>
+                <option>マツダ</option><option>スバル</option><option>スズキ</option>
+                <option>ダイハツ</option><option>三菱</option><option>レクサス</option>
+                <option>いすゞ</option><option>BMW</option><option>ベンツ</option>
+                <option>アウディ</option><option>フォルクスワーゲン</option>
+                <option>その他 (メモ欄に記載)</option>
+              </select>
+            </div>
+            <div class="mp-nc-field">
+              <label for="nc-model">車種名 <span class="req">必須</span></label>
+              <input type="text" id="nc-model" name="model" placeholder="例：プリウス / アルファード" required />
+            </div>
+          </div>
+
+          <div class="mp-nc-row">
+            <div class="mp-nc-field">
+              <label for="nc-year">年式（初度登録年） <span class="opt">任意</span></label>
+              <input type="text" id="nc-year" name="year" placeholder="例：2018" inputmode="numeric" />
+            </div>
+            <div class="mp-nc-field">
+              <label for="nc-mileage">走行距離 (km) <span class="opt">任意</span></label>
+              <input type="text" id="nc-mileage" name="mileage" placeholder="例：85000" inputmode="numeric" />
+            </div>
+          </div>
+
+          <div class="mp-nc-row">
+            <div class="mp-nc-field">
+              <label for="nc-cond">お車の状態 <span class="opt">任意</span></label>
+              <select id="nc-cond" name="condition">
+                <option value="">選択してください</option>
+                <option>無事故・走行OK</option>
+                <option>修復歴あり</option>
+                <option>事故車 (現状で動く)</option>
+                <option>不動車 (動かない)</option>
+                <option>廃車予定</option>
+                <option>その他</option>
+              </select>
+            </div>
+            <div class="mp-nc-field">
+              <label for="nc-pref">お車の所在（都道府県） <span class="opt">任意</span></label>
+              <select id="nc-pref" name="pref">
+                <option value="">選択してください</option>
+                <option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option><option>山形県</option><option>福島県</option>
+                <option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option>
+                <option>新潟県</option><option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option>
+                <option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option>
+                <option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option>
+                <option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option>
+                <option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option>
+                <option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mp-nc-field">
+            <label for="nc-tel">ご連絡用電話番号 <span class="opt">任意</span></label>
+            <input type="tel" id="nc-tel" name="tel" placeholder="例：090-0000-0000 (最終確認時のみ使用)" inputmode="tel" />
+          </div>
+
+          <div class="mp-nc-field">
+            <label for="nc-memo">追加メモ <span class="opt">任意</span></label>
+            <textarea id="nc-memo" name="memo" rows="4" placeholder="装備・オプション、キズの有無、その他ご相談内容など、わかる範囲でご記入ください。"></textarea>
+          </div>
+
+          <p class="mp-err" id="ncErr"></p>
+          <div class="mp-nc-actions">
+            <button type="button" id="newcaseCancel" class="btn btn-outline">キャンセル</button>
+            <button type="submit" class="btn btn-primary btn-lg">送信して査定を依頼</button>
+          </div>
+          <p class="mp-nc-note">
+            送信内容は登録メール（<span class="mp-nc-mail"></span>）と紐付けられ、査定担当が確認します。<br>
+            ご住所などの詳細は、査定額をご確認いただいた後にお伺いします。
+          </p>
+        </form>
+
+        <div id="newcaseThanks" class="mp-nc-thanks" hidden>
+          <div class="mp-nc-thanks-ico">✅</div>
+          <h3>お車情報を受け付けました</h3>
+          <p>担当が確認のうえ、<strong>24時間以内にメールまたはマイページ</strong>で査定額をご提示いたします。<br>この後は営業のお電話はいたしません（最終確認時のみ）。</p>
+        </div>
+      </section>
+
       <div id="caseList"></div>
       <div class="mp-actions">
-        <a href="buymo-contact.html" class="btn btn-primary">別の車も査定を依頼する</a>
+        <a href="index.html#top" class="btn btn-outline">トップページに戻る</a>
       </div>
     </div>
 
   </div>
 </main>
 
-<script src="assets/js/member.js" defer></script>
+<script src="assets/js/member.js?v=2" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
