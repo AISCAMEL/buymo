@@ -47,6 +47,12 @@ var TEST_EMAILS_DEFAULT = [
   'info@aisjaltd.com',
   'test@buymo.me'
 ];
+
+// ▼ Asana 連携 (Phase 4)
+var ASANA_PROJECT_ID       = '1213180032186617';   // 「車買取案件」プロジェクト
+var ASANA_SECTION_MEMBER   = '1213180127609488';   // マイページ新規案件 → 「買取案件」
+var ASANA_SECTION_LEAD     = '1217097922471584';   // トップ問い合わせ → 「紹介お問い合わせ」
+// Script Properties に ASANA_PAT を設定すると自動反映が有効化される
 // ▲ 設定 ―――――――――――――――――――――――――――――――
 
 
@@ -59,6 +65,59 @@ function getProp(key) {
 }
 function getApiKey()      { return getProp('OPENROUTER_API_KEY'); }
 function getSlackWebhook(){ return getProp('SLACK_WEBHOOK_URL'); }
+function getAsanaPat()    { return getProp('ASANA_PAT'); }
+
+/* ============================================================
+   Asana 連携 (Phase 4)
+   ・postToAsana({title, notes, sectionId?, assigneeGid?, dueOn?})
+   ・PAT 未設定なら何もせず null を返す
+   ============================================================ */
+function postToAsana(opt) {
+  var pat = getAsanaPat();
+  if (!pat) { Logger.log('postToAsana: ASANA_PAT 未設定のためスキップ'); return null; }
+  var payload = {
+    data: {
+      projects: [ASANA_PROJECT_ID],
+      name:  String(opt.title || '(無題)').slice(0, 180),
+      notes: String(opt.notes || '').slice(0, 65000)
+    }
+  };
+  if (opt.assigneeGid) payload.data.assignee = opt.assigneeGid;
+  if (opt.dueOn)       payload.data.due_on   = opt.dueOn;
+
+  try {
+    var res = UrlFetchApp.fetch('https://app.asana.com/api/1.0/tasks', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'Authorization': 'Bearer ' + pat },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    var body = JSON.parse(res.getContentText());
+    if (res.getResponseCode() >= 300) {
+      Logger.log('postToAsana error: ' + res.getContentText());
+      return null;
+    }
+    var taskGid = body.data && body.data.gid;
+    // セクションに割り当て
+    if (taskGid && opt.sectionId) {
+      try {
+        UrlFetchApp.fetch('https://app.asana.com/api/1.0/sections/' + opt.sectionId + '/addTask', {
+          method: 'post',
+          contentType: 'application/json',
+          headers: { 'Authorization': 'Bearer ' + pat },
+          payload: JSON.stringify({ data: { task: taskGid } }),
+          muteHttpExceptions: true
+        });
+      } catch (e) { Logger.log('addTaskToSection: ' + e.message); }
+    }
+    var url = taskGid ? ('https://app.asana.com/0/' + ASANA_PROJECT_ID + '/' + taskGid) : '';
+    return { gid: taskGid, url: url };
+  } catch (e) {
+    Logger.log('postToAsana exception: ' + e.message);
+    return null;
+  }
+}
 
 /* ============================================================
    テスト送信判定 & 隔離シート記録
@@ -680,7 +739,34 @@ function handleContact(data) {
   saveLead(data, ts);
   if (data.email) sendAutoReply(data);
 
-  return { status: 'ok', photos: photoUrls.length, caseId: caseResult.id };
+  // Asana へタスク自動起票 (「紹介お問い合わせ」セクション)
+  var asanaUrl = '';
+  try {
+    var title = '[問合せ] ' + (data.name || '氏名未入力') +
+                (data.genre ? ' - ' + data.genre : '');
+    var notes =
+      '受付日時: ' + ts + '\n' +
+      '─────────────────\n' +
+      '氏名: ' + (data.name || '—') + '\n' +
+      'メール: ' + (data.email || '—') + '\n' +
+      '電話: ' + (data.phone || '—') + '\n' +
+      'ジャンル: ' + (data.genre || '—') + '\n' +
+      '流入元: ' + (data.source || '—') + '\n' +
+      (photoUrls.length ? ('─── 写真 (' + photoUrls.length + '枚) ───\n' + photoUrls.join('\n') + '\n') : '') +
+      '─── メッセージ ───\n' +
+      (data.message || '（内容なし）') + '\n' +
+      '─────────────────\n' +
+      '次のステップ: マイページ登録の案内メール送信済み\n' +
+      '▶ マイページ: ' + MEMBER_PAGE_URL;
+    var asanaRes = postToAsana({
+      title: title,
+      notes: notes,
+      sectionId: ASANA_SECTION_LEAD
+    });
+    if (asanaRes && asanaRes.url) asanaUrl = asanaRes.url;
+  } catch (e) { Logger.log('handleContact asana: ' + e.message); }
+
+  return { status: 'ok', photos: photoUrls.length, caseId: caseResult.id, asanaUrl: asanaUrl };
 }
 
 
@@ -949,7 +1035,58 @@ function handleMemberCaseNew(data) {
     });
   } catch (e) { Logger.log('handleMemberCaseNew user mail: ' + e.message); }
 
-  return { status: 'ok', caseId: kase.id || '' };
+  // Asana へタスク自動起票 (「買取案件」セクション)
+  var asanaUrl = '';
+  try {
+    var asanaTitle = '[新規] ' + (car.maker || '') + ' ' + (car.model || '') +
+                     ' — ' + (name || email);
+    var asanaNotes =
+      '案件ID: ' + (kase.id || '') + '\n' +
+      '受付日時: ' + ts + '\n' +
+      '─────────────────\n' +
+      '氏名: ' + (name || '(未登録)') + '\n' +
+      'メール: ' + email + '\n' +
+      '電話: ' + (car.tel || '未記入') + '\n' +
+      '所在: ' + (car.pref || '未記入') + '\n' +
+      '─── 車両 ───\n' +
+      'メーカー: ' + (car.maker || '') + '\n' +
+      '車種: ' + (car.model || '') + '\n' +
+      '年式: ' + (car.year || '未記入') + '\n' +
+      '走行距離: ' + (car.mileage || '未記入') + ' km\n' +
+      '状態: ' + (car.condition || '未記入') + '\n' +
+      '─── 告知 ───\n' +
+      '修復歴: ' + (car.repair || '未告知') + '\n' +
+      '水没歴: ' + (car.flood || '未告知') + '\n' +
+      'メーター改ざん: ' + (car.meter || '未告知') + '\n' +
+      '─── 商談情報 ───\n' +
+      '購入経路: ' + (car.buypath || '未記入') + '\n' +
+      '何社目: ' + (car.shopcnt || '未記入') + '\n' +
+      '希望売却時期: ' + (car.sellwhen || '未記入') + '\n' +
+      '─── 写真 (' + photoUrls.length + '枚) ───\n' +
+      (photoUrls.length ? photoUrls.join('\n') : '(写真なし)') + '\n' +
+      '─── メモ ───\n' +
+      (car.memo || '(なし)') + '\n' +
+      '─────────────────\n' +
+      '▶ マイページ: ' + MEMBER_PAGE_URL;
+    var asanaRes = postToAsana({
+      title: asanaTitle,
+      notes: asanaNotes,
+      sectionId: ASANA_SECTION_MEMBER
+    });
+    if (asanaRes && asanaRes.url) asanaUrl = asanaRes.url;
+  } catch (e) { Logger.log('handleMemberCaseNew asana: ' + e.message); }
+
+  // Slack に「Asana起票済み」を追記通知 (webhook設定時のみ)
+  try {
+    if (asanaUrl) {
+      notifySlack([
+        { type:'header', text:{ type:'plain_text', text:'📋 Asana起票済み — ' + (car.maker || '') + ' ' + (car.model || '') } },
+        { type:'section', text:{ type:'mrkdwn', text:'*会員:* ' + (name || '(未登録)') + ' <' + email + '>\n*案件ID:* ' + (kase.id || '') + '\n*Asana:* <' + asanaUrl + '|タスクを開く>' } }
+      ]);
+    }
+  } catch (e) { Logger.log('handleMemberCaseNew asana slack: ' + e.message); }
+
+  return { status: 'ok', caseId: kase.id || '', asanaUrl: asanaUrl };
 }
 
 
@@ -1037,6 +1174,16 @@ function clearTestSubmissions() {
     Logger.log((last - 1) + '行のテスト送信を削除しました');
   } catch (e) { Logger.log('clearTestSubmissions: ' + e.message); }
 }
+// Asana接続テスト (PAT/権限/プロジェクトIDの検証)
+function testAsana() {
+  var res = postToAsana({
+    title: '[TEST] BUYMO GAS 接続テスト ' + new Date().toISOString(),
+    notes: 'これは接続テストです。確認後は削除してください。\n\nこのメッセージが Asana の「車買取案件」プロジェクトに現れれば連携成功です。',
+    sectionId: ASANA_SECTION_MEMBER
+  });
+  Logger.log(res ? ('OK: ' + res.url) : 'NG: ASANA_PAT が未設定 or 権限不足');
+}
+
 // テスト送信として1件投げてみる（管理者用）
 function testAsAdmin() {
   var fake = { postData: { contents: JSON.stringify({
