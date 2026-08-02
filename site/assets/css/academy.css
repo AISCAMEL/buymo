@@ -187,6 +187,32 @@
   from{opacity:0;transform:translateY(8px) scale(.96);}
   to  {opacity:1;transform:translateY(0) scale(1);}
 }
+
+/* ボット応答内の #アンカーリンク */
+.cbot-msg a[data-cbot-anchor]{
+  display:inline-block;background:var(--green-bg);color:var(--green-dark);
+  font-weight:800;text-decoration:none;padding:1px 8px;border-radius:6px;
+  font-size:.92em;
+}
+.cbot-msg a[data-cbot-anchor]:hover{background:var(--green);color:#fff;}
+.cbot-msg a[href^="mailto:"],
+.cbot-msg a[href^="http"]{color:var(--green-dark);text-decoration:underline;font-weight:700;}
+
+/* アイドルタイマー: 「その他ご質問はありますか？」+ ボタン */
+.cbot-idle-actions{
+  display:flex;gap:8px;margin-top:10px;
+}
+.cbot-idle-btn{
+  flex:1;padding:8px 14px;border-radius:100px;
+  border:1.5px solid var(--border);background:#fff;color:var(--text);
+  font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;
+  transition:transform .12s,background .15s,color .15s;
+}
+.cbot-idle-btn:hover{transform:translateY(-1px);}
+.cbot-idle-btn.primary{
+  background:var(--green);color:#fff;border-color:var(--green);
+}
+.cbot-idle-btn.primary:hover{background:var(--green-dark);border-color:var(--green-dark);}
 @media (max-width:480px){
   .cbot-hint{font-size:13px;bottom:80px;padding:10px 32px 10px 14px;}
 }
