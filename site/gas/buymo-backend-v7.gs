@@ -33,12 +33,20 @@ var CASE_SHEET_NAME   = '案件';
 var JOIN_SHEET_NAME   = '加盟店申込';
 var LEAD_SHEET_NAME   = 'リード';                 // NEW: ドリップ配信管理
 var MEMBER_CASE_SHEET = 'マイページ案件';         // NEW: マイページからの新規案件
+var TEST_SHEET_NAME   = 'テスト送信';              // NEW: 管理者テスト送信の隔離先
 var NOTIFY_EMAIL      = 'kaitori@buymo.me';      // 管理者通知先
 var FROM_NAME         = 'BUYMO 買取事業部';
 var REPLY_TO          = 'kaitori@buymo.me';
 var MEMBER_PAGE_URL   = 'https://buymo.me/member.html';
 var DRIVE_FOLDER_NAME = 'BUYMO査定写真';
 var OPENROUTER_MODEL  = 'anthropic/claude-haiku-4-5';
+
+// テスト送信として本番シート/通知から隔離する送信元アドレス (小文字比較)
+// Script Properties に TEST_EMAILS (カンマ区切り) を設定すればこの既定に追加できる
+var TEST_EMAILS_DEFAULT = [
+  'info@aisjaltd.com',
+  'test@buymo.me'
+];
 // ▲ 設定 ―――――――――――――――――――――――――――――――
 
 
@@ -51,6 +59,61 @@ function getProp(key) {
 }
 function getApiKey()      { return getProp('OPENROUTER_API_KEY'); }
 function getSlackWebhook(){ return getProp('SLACK_WEBHOOK_URL'); }
+
+/* ============================================================
+   テスト送信判定 & 隔離シート記録
+   ============================================================ */
+function getTestEmails() {
+  var extra = (getProp('TEST_EMAILS') || '').split(',')
+    .map(function (s) { return s.trim().toLowerCase(); })
+    .filter(function (s) { return s.length > 0; });
+  return TEST_EMAILS_DEFAULT.map(function (s) { return s.toLowerCase(); }).concat(extra);
+}
+function isTestEmail(email) {
+  var e = String(email || '').trim().toLowerCase();
+  if (!e) return false;
+  return getTestEmails().indexOf(e) >= 0;
+}
+function logTestSubmission(kind, data) {
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName(TEST_SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(TEST_SHEET_NAME);
+      sheet.appendRow(['受付日時','種別','氏名','メール','要約','ペイロードJSON']);
+      sheet.getRange(1, 1, 1, 6)
+        .setFontWeight('bold').setBackground('#94A3B8').setFontColor('#ffffff');
+      sheet.setFrozenRows(1);
+    }
+    var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+    var name = String(data.name || (data.case && data.case.name) || '').slice(0, 40);
+    var email = String(data.email || '').slice(0, 80);
+    var summary = '';
+    if (kind === 'buymo_lead') {
+      summary = (data.car || data.message || '').toString().slice(0, 120);
+    } else if (kind === 'buymo_case_new') {
+      var c = (data.case && data.case.car) || {};
+      summary = (c.maker || '') + ' ' + (c.model || '') + ' / 写真' + ((data.photos && data.photos.length) || 0) + '枚';
+    } else if (kind === 'buymo_chat_start') {
+      summary = 'session=' + (data.sessionId || '') + ' / phone=' + (data.phone || '');
+    } else if (kind === 'buymo_chat_log') {
+      summary = 'session=' + (data.sessionId || '') + ' / msgs=' + ((data.messages && data.messages.length) || 0);
+    } else if (kind === 'join') {
+      summary = (data.shop || data.company || '') + ' / ' + (data.tel || '');
+    } else {
+      summary = JSON.stringify(data).slice(0, 120);
+    }
+    var payload = '';
+    try {
+      var clone = JSON.parse(JSON.stringify(data));
+      if (clone.photos && clone.photos.length) {
+        clone.photos = '[' + clone.photos.length + ' photos omitted]';
+      }
+      payload = JSON.stringify(clone).slice(0, 2000);
+    } catch (e) { payload = String(data).slice(0, 500); }
+    sheet.appendRow([ts, kind, name, email, summary, payload]);
+  } catch (e) { Logger.log('logTestSubmission: ' + e.message); }
+}
 
 /* ============================================================
    スプレッドシート取得 (スタンドアロン運用対応)
@@ -108,6 +171,11 @@ function doGet(e) {
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+    // 管理者テスト送信はテストシートに記録するだけで本番処理をスキップ
+    if (isTestEmail(data.email)) {
+      logTestSubmission(data.type || 'unknown', data);
+      return jsonOut({ status: 'ok', test: true, message: 'テスト送信として記録しました（本番シート/通知/自動返信はスキップ）' });
+    }
     if (data.type === 'column')           return jsonOut(postColumn(data));
     if (data.type === 'case')             return jsonOut(handleCase(data));
     if (data.type === 'note')             return jsonOut(appendNote(data));
@@ -710,6 +778,7 @@ function runDripCampaign() {
     var row = data[i];
     var ts = row[0], name = row[1], email = row[2], status = row[5], step = Number(row[8]) || 0;
     if (!email || status === '詳細受領' || status === '停止') continue;
+    if (isTestEmail(email)) continue; // 管理者テストは配信対象外
     if (step >= 3) continue;
     var days = Math.floor((now - new Date(ts)) / 86400000);
     var nextStep = null, sub = '', body = '';
@@ -948,3 +1017,33 @@ function testMemberCase() {
 }
 function testBot()  { Logger.log(handleBot({ q: '事故車も買取できますか？' }).answer); }
 function testDrip() { runDripCampaign(); }
+
+/* ============================================================
+   管理者ユーティリティ (GASエディタから手動で実行)
+   ============================================================ */
+// 現在テスト送信として扱うメールアドレス一覧をログに出力
+function showTestEmails() {
+  Logger.log('テストとして隔離される送信元:\n' + getTestEmails().join('\n'));
+}
+// テスト送信シートを空にする（ヘッダは残す）
+function clearTestSubmissions() {
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName(TEST_SHEET_NAME);
+    if (!sheet) { Logger.log('テスト送信シートは存在しません'); return; }
+    var last = sheet.getLastRow();
+    if (last <= 1) { Logger.log('既に空です'); return; }
+    sheet.deleteRows(2, last - 1);
+    Logger.log((last - 1) + '行のテスト送信を削除しました');
+  } catch (e) { Logger.log('clearTestSubmissions: ' + e.message); }
+}
+// テスト送信として1件投げてみる（管理者用）
+function testAsAdmin() {
+  var fake = { postData: { contents: JSON.stringify({
+    type: 'buymo_lead',
+    name: '管理者テスト', email: 'info@aisjaltd.com',
+    car: 'テスト送信 - 隔離されるはず',
+    source: 'testAsAdmin'
+  }) }};
+  Logger.log(doPost(fake).getContent());
+}
