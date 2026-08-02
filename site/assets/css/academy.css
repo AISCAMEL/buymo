@@ -720,6 +720,14 @@
   animation:bpScroll 90s linear infinite;
   will-change:transform;
 }
+/* 4台バージョン (4×3セット=12スロット): -33.33% でシームレスループ / ゆっくり */
+.buy-photos-4 .buy-photos-track{
+  animation:bpScroll3 40s linear infinite;
+}
+@keyframes bpScroll3{
+  from{transform:translateX(0);}
+  to  {transform:translateX(-33.333%);}
+}
 .buy-photos-section:hover .buy-photos-track,
 .buy-photos-section:focus-within .buy-photos-track{animation-play-state:paused;}
 @keyframes bpScroll{
