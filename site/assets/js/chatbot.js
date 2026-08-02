@@ -201,9 +201,19 @@
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
   function mdFormat(text) {
-    return esc(text)
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br>');
+    var s = esc(text);
+    // **bold**
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // URL → link
+    s = s.replace(/(https?:\/\/[^\s<>]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    // メールアドレス → mailto
+    s = s.replace(/([\w.-]+@[\w.-]+\.[\w]{2,})/g, '<a href="mailto:$1">$1</a>');
+    // #form / #chat / #faq / #features / #company / #genres / #sim → 内部リンク
+    s = s.replace(/#(form|chat|faq|features|company|genres|sim|top)\b/g,
+      '<a href="#$1" data-cbot-anchor="$1">#$1</a>');
+    // 改行
+    s = s.replace(/\n/g, '<br>');
+    return s;
   }
 
   /* ---------- Build widget ---------- */
@@ -440,24 +450,84 @@
     setTimeout(showHint, 6000);
   }
 
-  /* ---------- Events ---------- */
-  root.querySelector('.cbot-launch').addEventListener('click', function () {
+  /* ---------- パネル開閉ヘルパー & CTA スクロール ---------- */
+  function openPanel() {
     panel.hidden = false;
-    this.setAttribute('aria-expanded', 'true');
+    root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'true');
     if (!log.children.length) setMode(MODE);
     setTimeout(function(){ input.focus(); }, 100);
     hideHint();
-  });
-  root.querySelector('.cbot-x').addEventListener('click', function () {
+    resetIdleTimer();
+  }
+  function closePanel() {
     panel.hidden = true;
     root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'false');
+    clearIdleTimer();
+  }
+  // パネル内の #アンカーやCTAを押したら、パネル閉じて対象要素へスクロール
+  panel.addEventListener('click', function (e) {
+    var a = e.target.closest('a');
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    // ページ内アンカー (#form / #faq など) → 閉じてスクロール
+    if (href.charAt(0) === '#' && href.length > 1 && href !== '#chat') {
+      e.preventDefault();
+      closePanel();
+      var target = document.querySelector(href);
+      if (target) {
+        setTimeout(function () {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+      }
+    }
   });
+
+  /* ---------- アイドルタイマー (60秒無操作) ---------- */
+  var idleTimer, idlePrompted = false;
+  function clearIdleTimer() { if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; } }
+  function resetIdleTimer() {
+    clearIdleTimer();
+    if (panel.hidden) return;
+    idlePrompted = false;
+    idleTimer = setTimeout(showIdlePrompt, 60000);
+  }
+  function showIdlePrompt() {
+    if (panel.hidden || idlePrompted) return;
+    idlePrompted = true;
+    var wrap = el('div', 'cbot-msg-wrap bot cbot-idle-wrap');
+    var av = el('img', 'cbot-msg-avatar');
+    av.src = mascotSrc; av.alt = ''; av.onerror = function(){ this.style.display='none'; };
+    wrap.appendChild(av);
+    var m = el('div', 'cbot-msg bot');
+    m.innerHTML = 'その他ご質問はありますか？' +
+      '<div class="cbot-idle-actions">' +
+        '<button type="button" class="cbot-idle-btn primary" data-idle="continue">続ける</button>' +
+        '<button type="button" class="cbot-idle-btn" data-idle="close">終了する</button>' +
+      '</div>';
+    wrap.appendChild(m);
+    log.appendChild(wrap);
+    log.scrollTop = log.scrollHeight;
+    m.querySelector('[data-idle="continue"]').addEventListener('click', function () {
+      wrap.remove();
+      resetIdleTimer();
+      input.focus();
+    });
+    m.querySelector('[data-idle="close"]').addEventListener('click', function () {
+      addMsg('bot', 'ご利用ありがとうございました！\nまた気になることがあればいつでもお声がけください。');
+      setTimeout(closePanel, 1200);
+    });
+  }
+
+  /* ---------- Events ---------- */
+  root.querySelector('.cbot-launch').addEventListener('click', openPanel);
+  root.querySelector('.cbot-x').addEventListener('click', closePanel);
   root.querySelectorAll('.cbot-mode button').forEach(function (b) {
     b.addEventListener('click', function () { setMode(b.getAttribute('data-mode')); });
   });
   root.querySelector('.cbot-input').addEventListener('submit', function (e) {
-    e.preventDefault(); send(input.value);
+    e.preventDefault(); send(input.value); resetIdleTimer();
   });
+  input.addEventListener('input', resetIdleTimer);
 
   // Escキーで閉じる
   document.addEventListener('keydown', function(e){
@@ -468,20 +538,14 @@
   });
 
   /* ---------- 外部トリガー：href="#chat" のリンクでチャット起動 ---------- */
-  function openChat() {
-    panel.hidden = false;
-    root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'true');
-    if (!log.children.length) setMode(MODE);
-    setTimeout(function(){ input.focus(); }, 100);
-  }
-  window.BUYMO_OPEN_CHAT = openChat;
+  window.BUYMO_OPEN_CHAT = openPanel;
   document.addEventListener('click', function(e){
     var a = e.target.closest && e.target.closest('a');
     if (!a) return;
     var href = a.getAttribute('href') || '';
     if (href === '#chat' || href.endsWith('#chat')) {
       e.preventDefault();
-      openChat();
+      openPanel();
     }
   });
 
