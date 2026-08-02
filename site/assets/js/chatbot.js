@@ -12,6 +12,38 @@
   var history = [];
   var STORAGE_KEY = 'buymoBotHistory';
 
+  // 事前ゲート（連絡先収集）用
+  var CONTACT_KEY = 'buymoBotContact';   // { name, email, phone }
+  var SESSION_KEY = 'buymoBotSession';   // sessionId (per browser session)
+  var contactInfo = null;
+  var sessionId   = '';
+  try {
+    contactInfo = JSON.parse(sessionStorage.getItem(CONTACT_KEY) || localStorage.getItem(CONTACT_KEY) || 'null');
+    sessionId   = sessionStorage.getItem(SESSION_KEY) || '';
+  } catch (e) {}
+
+  function newSessionId() {
+    return 'sess_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+  function fireAndForget(payload) {
+    try {
+      fetch(GAS, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  function sendChatLog(status) {
+    if (!sessionId || !history.length) return;
+    fireAndForget({
+      type: 'buymo_chat_log',
+      sessionId: sessionId,
+      status: status || '進行中',
+      messages: history.slice(-40)
+    });
+  }
+
   /* ---------- ページ文脈の検出 ---------- */
   function detectContext() {
     var p = location.pathname;
@@ -246,6 +278,30 @@
         '</div>' +
         '<button class="cbot-x" aria-label="閉じる">×</button>' +
       '</div>' +
+
+      /* ---- 事前ゲート: 連絡先入力 (初回のみ表示) ---- */
+      '<form class="cbot-gate" id="cbotGate" hidden novalidate>' +
+        '<div class="cbot-gate-intro">' +
+          'はじめに、担当が対応できるようお名前とご連絡先をお伺いします。<br>' +
+          '<small>チャット履歴は担当者が確認できるよう保管されます。</small>' +
+        '</div>' +
+        '<div class="cbot-gate-field">' +
+          '<label for="cbotGName">お名前 <span class="cbot-req">必須</span></label>' +
+          '<input id="cbotGName" type="text" autocomplete="name" placeholder="例：山田 太郎" required maxlength="40">' +
+        '</div>' +
+        '<div class="cbot-gate-field">' +
+          '<label for="cbotGMail">メールアドレス <span class="cbot-req">必須</span></label>' +
+          '<input id="cbotGMail" type="email" autocomplete="email" inputmode="email" placeholder="example@buymo.me" required maxlength="80">' +
+        '</div>' +
+        '<div class="cbot-gate-field">' +
+          '<label for="cbotGTel">電話番号 <span class="cbot-opt">任意</span></label>' +
+          '<input id="cbotGTel" type="tel" autocomplete="tel" inputmode="tel" placeholder="090-0000-0000" maxlength="20">' +
+        '</div>' +
+        '<p class="cbot-gate-err" id="cbotGErr"></p>' +
+        '<button type="submit" class="cbot-gate-btn">チャットを開始する</button>' +
+        '<p class="cbot-gate-note">同意して送信することで<a href="/privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>に同意したものとみなします。</p>' +
+      '</form>' +
+
       '<div class="cbot-log" id="cbotLog" role="log" aria-live="polite"></div>' +
       '<div class="cbot-chips" id="cbotChips"></div>' +
       '<div class="cbot-quick">' +
@@ -450,16 +506,91 @@
     setTimeout(showHint, 6000);
   }
 
+  /* ---------- 事前ゲート (連絡先入力) 制御 ---------- */
+  var gateForm  = document.getElementById('cbotGate');
+  var gateName  = document.getElementById('cbotGName');
+  var gateMail  = document.getElementById('cbotGMail');
+  var gateTel   = document.getElementById('cbotGTel');
+  var gateErr   = document.getElementById('cbotGErr');
+  var chatInput = root.querySelector('.cbot-input');
+  var chatQuick = root.querySelector('.cbot-quick');
+
+  function showGate() {
+    if (gateForm) gateForm.hidden = false;
+    log.style.display   = 'none';
+    chips.style.display = 'none';
+    if (chatInput) chatInput.style.display = 'none';
+    if (chatQuick) chatQuick.style.display = 'none';
+    setTimeout(function () { if (gateName) gateName.focus(); }, 100);
+  }
+  function hideGate() {
+    if (gateForm) gateForm.hidden = true;
+    log.style.display   = '';
+    chips.style.display = '';
+    if (chatInput) chatInput.style.display = '';
+    if (chatQuick) chatQuick.style.display = '';
+  }
+
+  if (gateForm) {
+    gateForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      gateErr.textContent = '';
+      var name  = (gateName.value || '').trim();
+      var email = (gateMail.value || '').trim();
+      var phone = (gateTel.value  || '').trim();
+      if (!name)  { gateErr.textContent = 'お名前を入力してください。'; gateName.focus(); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        gateErr.textContent = 'メールアドレスを正しく入力してください。'; gateMail.focus(); return;
+      }
+      contactInfo = { name: name, email: email, phone: phone };
+      sessionId   = newSessionId();
+      try {
+        sessionStorage.setItem(CONTACT_KEY, JSON.stringify(contactInfo));
+        sessionStorage.setItem(SESSION_KEY, sessionId);
+        localStorage.setItem(CONTACT_KEY,   JSON.stringify(contactInfo));
+      } catch (er) {}
+      // GAS へ即通知 (fire-and-forget)
+      fireAndForget({
+        type: 'buymo_chat_start',
+        sessionId: sessionId,
+        name: name, email: email, phone: phone,
+        page: location.href.slice(0, 200),
+        ua:   (navigator.userAgent || '').slice(0, 200)
+      });
+      hideGate();
+      if (!log.children.length) setMode(MODE);
+      // 最初の一言を「〇〇様、ようこそ」に
+      var greetMsg = name + ' 様、お待たせしました！\nお車のご売却について、どんな質問でもお気軽にどうぞ。';
+      addMsg('bot', greetMsg);
+      history.push({ role: 'assistant', content: greetMsg });
+      setTimeout(function () { if (input) input.focus(); }, 100);
+      resetIdleTimer();
+    });
+  }
+
   /* ---------- パネル開閉ヘルパー & CTA スクロール ---------- */
   function openPanel() {
     panel.hidden = false;
     root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'true');
-    if (!log.children.length) setMode(MODE);
-    setTimeout(function(){ input.focus(); }, 100);
+    if (!contactInfo || !contactInfo.email) {
+      // ゲート未通過 → 連絡先入力を表示
+      showGate();
+    } else {
+      // ゲート通過済 → 通常のチャット
+      hideGate();
+      if (!sessionId) {
+        sessionId = newSessionId();
+        try { sessionStorage.setItem(SESSION_KEY, sessionId); } catch (e) {}
+      }
+      if (!log.children.length) setMode(MODE);
+      setTimeout(function(){ input.focus(); }, 100);
+    }
     hideHint();
     resetIdleTimer();
   }
   function closePanel() {
+    // 履歴を保存 (fire-and-forget)
+    sendChatLog('進行中');
     panel.hidden = true;
     root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'false');
     clearIdleTimer();
@@ -514,9 +645,28 @@
     });
     m.querySelector('[data-idle="close"]').addEventListener('click', function () {
       addMsg('bot', 'ご利用ありがとうございました！\nまた気になることがあればいつでもお声がけください。');
+      sendChatLog('終了');
       setTimeout(closePanel, 1200);
     });
   }
+
+  // ページ離脱時: 履歴を確定送信
+  window.addEventListener('beforeunload', function () {
+    if (sessionId && history.length) {
+      try {
+        // sendBeacon が使えれば non-blocking で確実に送信
+        var payload = JSON.stringify({
+          type: 'buymo_chat_log', sessionId: sessionId,
+          status: '中断(離脱)', messages: history.slice(-40)
+        });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(GAS, new Blob([payload], { type: 'text/plain;charset=utf-8' }));
+        } else {
+          fireAndForget(JSON.parse(payload));
+        }
+      } catch (e) {}
+    }
+  });
 
   /* ---------- Events ---------- */
   root.querySelector('.cbot-launch').addEventListener('click', openPanel);
