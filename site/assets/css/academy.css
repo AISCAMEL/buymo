@@ -688,6 +688,7 @@
 .bt-price{
   color:var(--green-dark);font-weight:900;font-size:15px;
   font-family:var(--f-body);letter-spacing:-.01em;
+  display:none; /* 価格表示を停止（復活時はこの行を削除） */
 }
 .bt-area{color:var(--text-sub);font-size:12px;font-weight:700;}
 @media (max-width:640px){
@@ -752,6 +753,7 @@
 .bp-price{
   font-size:18px;font-weight:900;color:var(--green-dark);
   font-family:var(--f-body);letter-spacing:-.01em;
+  display:none; /* 価格表示を停止（復活時はこの行を削除） */
 }
 .bp-area{font-size:11.5px;color:var(--text-sub);font-weight:700;}
 .buy-photos-note{
