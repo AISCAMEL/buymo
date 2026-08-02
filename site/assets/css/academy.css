@@ -377,6 +377,8 @@
   align-items:stretch;max-width:1120px;margin:0 auto;
 }
 @media (max-width:920px){.lead-form-grid{grid-template-columns:1fr;gap:24px;}}
+/* 写真プレビュー削除後: フォーム単独レイアウト（中央寄せ・単一カラム） */
+.lead-form-grid.lead-form-single{grid-template-columns:1fr;max-width:680px;}
 
 /* --- 左：フォームカード --- */
 .lead-form-card{
