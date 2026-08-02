@@ -129,7 +129,7 @@ img{max-width:100%;display:block;}
 .gnav a:hover{color:var(--green);border-bottom-color:var(--green);}
 .header-tel{font-size:20px;font-weight:900;color:var(--green);white-space:nowrap;display:flex;align-items:center;gap:6px;}
 .tel-ico{font-size:16px;display:inline-flex;align-items:center;line-height:0;}
-.tel-ico img{width:20px;height:20px;object-fit:contain;display:block;margin-right:6px;}
+.tel-ico img{width:26px;height:26px;object-fit:cover;display:block;margin-right:8px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.15);}
 .sticky-cta .s-tel img{width:20px;height:20px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:6px;}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;margin-left:auto;}
 .hamburger span{width:24px;height:2px;background:var(--text);border-radius:2px;transition:.3s;}
