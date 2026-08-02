@@ -688,7 +688,6 @@
 .bt-price{
   color:var(--green-dark);font-weight:900;font-size:15px;
   font-family:var(--f-body);letter-spacing:-.01em;
-  display:none; /* 価格表示を停止（復活時はこの行を削除） */
 }
 .bt-area{color:var(--text-sub);font-size:12px;font-weight:700;}
 @media (max-width:640px){
@@ -719,6 +718,14 @@
   /* 24枚 (12×2) をなめらかに流す。速度は数値変更で調整可能 */
   animation:bpScroll 90s linear infinite;
   will-change:transform;
+}
+/* 4台バージョン (4×3セット=12スロット): -33.33% でシームレスループ / ゆっくり */
+.buy-photos-4 .buy-photos-track{
+  animation:bpScroll3 40s linear infinite;
+}
+@keyframes bpScroll3{
+  from{transform:translateX(0);}
+  to  {transform:translateX(-33.333%);}
 }
 .buy-photos-section:hover .buy-photos-track,
 .buy-photos-section:focus-within .buy-photos-track{animation-play-state:paused;}
