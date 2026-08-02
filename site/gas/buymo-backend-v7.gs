@@ -242,6 +242,7 @@ function doPost(e) {
     if (data.type === 'buymo_case_new')   return jsonOut(handleMemberCaseNew(data));
     if (data.type === 'buymo_chat_start') return jsonOut(handleChatStart(data));  // NEW
     if (data.type === 'buymo_chat_log')   return jsonOut(handleChatLog(data));    // NEW
+    if (data.type === 'buymo_chat_handoff') return jsonOut(handleChatHandoff(data));  // NEW (Phase 5)
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -346,6 +347,98 @@ function handleChatLog(data) {
   } catch (e) { Logger.log('handleChatLog: ' + e.message); }
 
   return { status: 'ok' };
+}
+
+
+/* ============================================================
+   Phase 5 NEW: 担当者に繋ぐ (buymo_chat_handoff)
+   ── Slackに会話履歴付き通知＋シートに handoff=TRUE を立てる
+   ============================================================ */
+function handleChatHandoff(data) {
+  var sid = String(data.sessionId || '');
+  var name  = String(data.name  || '').replace(/[<>]/g, '');
+  var email = String(data.email || '').trim();
+  var phone = String(data.phone || '').trim();
+  var pageUrl   = String(data.pageUrl   || '');
+  var pageTitle = String(data.pageTitle || '').slice(0, 80);
+  var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+
+  // 営業時間判定 (JST 平日 10:00〜19:00)
+  var now = new Date();
+  var jstDay  = Number(Utilities.formatDate(now, 'Asia/Tokyo', 'u')); // 1(月)〜7(日)
+  var jstHour = Number(Utilities.formatDate(now, 'Asia/Tokyo', 'H'));
+  var isBusinessHours = (jstDay >= 1 && jstDay <= 5 && jstHour >= 10 && jstHour < 19);
+
+  // 会話履歴を整形
+  var messages = Array.isArray(data.messages) ? data.messages : [];
+  var transcript = messages.slice(-20).map(function (m) {
+    var role = (m && m.role === 'user') ? '👤 客' : '🤖 AI';
+    return role + ': ' + String((m && m.content) || '').slice(0, 300);
+  }).join('\n');
+
+  // シート「チャット」に handoff フラグを立てる
+  try {
+    var sheet = getChatSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][1] === sid) {
+        sheet.getRange(i + 1, 8).setValue('担当者呼出');
+        sheet.getRange(i + 1, 10).setValue(ts);
+        break;
+      }
+    }
+  } catch (e) { Logger.log('handleChatHandoff sheet: ' + e.message); }
+
+  // Slack 通知 (Webhook)
+  try {
+    var headerText = isBusinessHours
+      ? '🚨 担当者呼び出し（営業時間内 — 5分以内に折り返し必要）'
+      : '⏰ 担当者呼び出し（営業時間外 — 翌営業日の対応でOK）';
+    var actionText = isBusinessHours
+      ? '営業時間内です。5分以内に *' + phone + '* へ折り返しをお願いします。'
+      : '営業時間外です。翌営業日 (平日10:00) 以降に *' + phone + '* へご連絡ください。';
+    notifySlack([
+      { type: 'header',  text: { type: 'plain_text', text: headerText } },
+      { type: 'section', fields: [
+        { type: 'mrkdwn', text: '*お客様*\n' + (name || '(未登録)') },
+        { type: 'mrkdwn', text: '*電話*\n' + (phone || '(未登録)') },
+        { type: 'mrkdwn', text: '*メール*\n' + (email || '(未登録)') },
+        { type: 'mrkdwn', text: '*ページ*\n<' + pageUrl + '|' + pageTitle + '>' }
+      ]},
+      { type: 'section', text: { type: 'mrkdwn', text: '*会話履歴（直近20件）*\n```' + transcript.slice(0, 2800) + '```' } },
+      { type: 'context', elements: [
+        { type: 'mrkdwn', text: 'session=' + sid + ' / 受付=' + ts }
+      ]},
+      { type: 'section', text: { type: 'mrkdwn', text: actionText } },
+      { type: 'divider' }
+    ]);
+  } catch (e) { Logger.log('handleChatHandoff slack: ' + e.message); }
+
+  // 管理宛メール (Slackが未設定でも通知が届くよう二重化)
+  try {
+    MailApp.sendEmail({
+      to: NOTIFY_EMAIL,
+      subject: (isBusinessHours ? '【🚨要即対応】' : '【⏰翌営業日】') + 'チャット担当者呼び出し: ' + (name || '(未登録)'),
+      body: [
+        (isBusinessHours ? '営業時間内です。5分以内に折り返しをお願いします。' : '営業時間外です。翌営業日にご対応ください。'),
+        '',
+        '━━━ お客様情報 ━━━',
+        '氏名 : ' + (name  || '(未登録)'),
+        '電話 : ' + (phone || '(未登録)'),
+        'メール: ' + (email || '(未登録)'),
+        'ページ: ' + pageUrl,
+        '',
+        '━━━ 会話履歴 ━━━',
+        transcript,
+        '',
+        '━━━ 受付情報 ━━━',
+        'セッション: ' + sid,
+        '受付日時 : ' + ts
+      ].join('\n')
+    });
+  } catch (e) { Logger.log('handleChatHandoff mail: ' + e.message); }
+
+  return { status: 'ok', businessHours: isBusinessHours };
 }
 
 
