@@ -6,7 +6,7 @@
    ============================================================ */
 (function () {
   'use strict';
-  var ENDPOINT = ''; // 例: https://script.google.com/macros/s/XXXX/exec（空ならデモ）
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbznQShouyF1lY_-5LiPrT2KK1MPhBI4OWJd9Mv1PdHLVZF7lAdnBhHe7iRiyi80-hU7yg/exec';
   var STAGES = ['新規受付', '査定中', '商談中', '契約', '入金待ち', '完了'];
   var EKEY = 'buymo_member_email', NKEY = 'buymo_member_name';
   var CKEY = 'buymo_member_cases'; // ローカル保存の新規案件 { email: [ ...cases ] }
