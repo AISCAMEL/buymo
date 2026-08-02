@@ -258,10 +258,11 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
 
-    if (data.type === 'column') return cors(ContentService.createTextOutput(JSON.stringify(postColumn(data))));
-    if (data.type === 'case')   return cors(ContentService.createTextOutput(JSON.stringify(handleCase(data))));
-    if (data.type === 'note')   return cors(ContentService.createTextOutput(JSON.stringify(appendNote(data))));
-    if (data.type === 'join')   return cors(ContentService.createTextOutput(JSON.stringify(handleJoin(data))));
+    if (data.type === 'column')          return cors(ContentService.createTextOutput(JSON.stringify(postColumn(data))));
+    if (data.type === 'case')            return cors(ContentService.createTextOutput(JSON.stringify(handleCase(data))));
+    if (data.type === 'note')            return cors(ContentService.createTextOutput(JSON.stringify(appendNote(data))));
+    if (data.type === 'join')            return cors(ContentService.createTextOutput(JSON.stringify(handleJoin(data))));
+    if (data.type === 'buymo_case_new')  return cors(ContentService.createTextOutput(JSON.stringify(handleMemberCaseNew(data))));
     return cors(ContentService.createTextOutput(JSON.stringify(handleContact(data))));
 
   } catch (err) {
@@ -609,6 +610,115 @@ function handleContact(data) {
   slackNewLead(data, caseResult.id, photoUrls.length);
 
   return { status: 'ok', photos: photoUrls.length, caseId: caseResult.id };
+}
+
+/* ============================================================
+   マイページからの新規案件受付 (type: buymo_case_new)
+   会員がログイン後に「お車情報を追加して査定を依頼」フォームから送信
+   ============================================================ */
+function handleMemberCaseNew(data) {
+  var email = String(data.email || '').trim();
+  if (!email) return { status: 'error', message: 'email required' };
+
+  var kase = data.case || {};
+  var car  = kase.car || {};
+  var name = String(data.name || '').replace(/[<>]/g, '');
+  var ts = new Date();
+
+  // 「案件」シートに追記（存在しなければ作成）
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName('マイページ案件');
+    if (!sheet) {
+      sheet = ss.insertSheet('マイページ案件');
+      sheet.appendRow([
+        '受付日時', '案件ID', '氏名', 'メール',
+        'メーカー', '車種', '年式', '走行距離(km)', '状態', '所在(都道府県)',
+        '電話番号', 'メモ', 'ステージ', '査定額', '担当メモ'
+      ]);
+      sheet.getRange(1, 1, 1, 15).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+      sheet.setFrozenRows(1);
+    }
+    sheet.appendRow([
+      ts, kase.id || '', name, email,
+      car.maker || '', car.model || '', car.year || '', car.mileage || '',
+      car.condition || '', car.pref || '',
+      car.tel || '', car.memo || '',
+      kase.stage || '新規受付', '', ''
+    ]);
+  } catch (e) {
+    Logger.log('handleMemberCaseNew sheet error: ' + e.message);
+  }
+
+  // 管理者通知メール
+  try {
+    var adminBody =
+      '会員マイページから新規案件を受け付けました。\n\n' +
+      '【会員】' + (name || '(名前未登録)') + ' <' + email + '>\n' +
+      '【案件ID】' + (kase.id || '(自動採番なし)') + '\n' +
+      '【車種】' + (car.maker || '') + ' ' + (car.model || '') + '\n' +
+      '【年式】' + (car.year || '未記入') + '\n' +
+      '【走行距離】' + (car.mileage || '未記入') + ' km\n' +
+      '【状態】' + (car.condition || '未記入') + '\n' +
+      '【所在】' + (car.pref || '未記入') + '\n' +
+      '【電話】' + (car.tel || '未記入') + '\n' +
+      '【メモ】\n' + (car.memo || '(なし)') + '\n\n' +
+      '受付日時: ' + ts + '\n' +
+      'ソース: ' + (data.source || 'member.html');
+    MailApp.sendEmail({
+      to:      NOTIFY_EMAIL,
+      subject: '【BUYMO】マイページから新規案件: ' + (car.maker || '') + ' ' + (car.model || '') + ' (' + email + ')',
+      body:    adminBody
+    });
+  } catch (e) {
+    Logger.log('handleMemberCaseNew admin mail error: ' + e.message);
+  }
+
+  // お客様への受付確認メール
+  try {
+    var body =
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+'  BUYMO 車買取サービス\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+(name || 'お客') + ' 様\n\n' +
+'マイページからお車情報をご送信いただき、\n' +
+'誠にありがとうございます。\n\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+'  📋 受付内容\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'  案件ID   : ' + (kase.id || '(自動採番)') + '\n' +
+'  車種     : ' + (car.maker || '') + ' ' + (car.model || '') + '\n' +
+'  年式     : ' + (car.year || '未記入') + '\n' +
+'  走行距離 : ' + (car.mileage || '未記入') + ' km\n' +
+'  状態     : ' + (car.condition || '未記入') + '\n' +
+'  所在     : ' + (car.pref || '未記入') + '\n\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+'  ⏱ 次のステップ\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'  当社の査定担当が内容を確認し、\n' +
+'  24時間以内にメール／マイページで査定額をご提示します。\n\n' +
+'  ▶ マイページ: https://buymo.me/member.html\n\n' +
+'その間、営業のお電話は一切いたしません。\n' +
+'ご不明な点はこのメールにご返信いただければ担当が対応いたします。\n\n' +
+'───────────────────\n' +
+'合同会社アイズ 買取事業部\n' +
+'BUYMO ｜ https://buymo.me/\n' +
+'マイページ ｜ https://buymo.me/member.html\n' +
+'✉  kaitori@buymo.me\n' +
+'〒979-0204 福島県いわき市四倉町細谷字大町1番\n' +
+'───────────────────\n';
+    MailApp.sendEmail({
+      to:      email,
+      subject: '【BUYMO】お車情報を受け付けました｜査定額は24時間以内にご連絡します',
+      body:    body,
+      name:    'BUYMO 買取事業部',
+      replyTo: 'kaitori@buymo.me'
+    });
+  } catch (e) {
+    Logger.log('handleMemberCaseNew user mail error: ' + e.message);
+  }
+
+  return { status: 'ok', caseId: kase.id || '' };
 }
 
 /* ============================================================
