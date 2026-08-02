@@ -1267,6 +1267,39 @@ function clearTestSubmissions() {
     Logger.log((last - 1) + '行のテスト送信を削除しました');
   } catch (e) { Logger.log('clearTestSubmissions: ' + e.message); }
 }
+// Slack Bot 接続テスト (SLACK_BOT_TOKEN / SLACK_CHANNEL_ID の検証)
+function testSlackBot() {
+  var token   = getProp('SLACK_BOT_TOKEN');
+  var channel = getProp('SLACK_CHANNEL_ID');
+  if (!token)   { Logger.log('NG: SLACK_BOT_TOKEN が未設定です'); return; }
+  if (!channel) { Logger.log('NG: SLACK_CHANNEL_ID が未設定です'); return; }
+  try {
+    var res = UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
+      method: 'post',
+      contentType: 'application/json; charset=utf-8',
+      headers: { 'Authorization': 'Bearer ' + token },
+      payload: JSON.stringify({
+        channel: channel,
+        text: '✅ BUYMO GAS → Slack 接続テスト ' + new Date().toISOString(),
+        blocks: [
+          { type: 'header', text: { type: 'plain_text', text: '✅ BUYMO GAS 接続テスト' } },
+          { type: 'section', text: { type: 'mrkdwn', text: 'このメッセージがチャンネルに表示されていれば *Bot Token とチャンネルID は正しく登録されています* 🎉\n\nこの後 Phase 6 の双方向同期を実装できます。' } },
+          { type: 'context', elements: [{ type: 'mrkdwn', text: '受信時刻: ' + Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss') }] }
+        ]
+      }),
+      muteHttpExceptions: true
+    });
+    var body = JSON.parse(res.getContentText());
+    if (body.ok) {
+      Logger.log('OK: Slackチャンネルに投稿しました (ts=' + body.ts + ')');
+    } else {
+      Logger.log('NG: Slack API エラー = ' + body.error + '\n(全レス: ' + res.getContentText().slice(0, 500) + ')');
+    }
+  } catch (e) {
+    Logger.log('NG: 例外 = ' + e.message);
+  }
+}
+
 // Asana接続テスト (PAT/権限/プロジェクトIDの検証)
 function testAsana() {
   var res = postToAsana({
