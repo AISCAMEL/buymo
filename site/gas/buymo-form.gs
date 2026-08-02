@@ -39,6 +39,31 @@ var OPENROUTER_MODEL = 'anthropic/claude-haiku-4-5';
 
 
 /* ============================================================
+   スプレッドシート取得ヘルパー
+   スタンドアロン運用 (script.google.com から直接作成) では
+   SpreadsheetApp.getActiveSpreadsheet() が null になるため、
+   Script Properties の SPREADSHEET_ID から openById() で開く。
+
+   セットアップ:
+     1. Google スプレッドシートを新規作成 (どんな空シートでもOK)
+     2. URL: https://docs.google.com/spreadsheets/d/{ここのID}/edit
+        の {ここのID} 部分をコピー
+     3. GASエディタ → プロジェクトの設定 → スクリプトプロパティ
+        → プロパティ名: SPREADSHEET_ID / 値: 上でコピーしたID
+   ============================================================ */
+function getSS() {
+  var ss = null;
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
+  if (ss) return ss;
+  try {
+    var id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+    if (id) return SpreadsheetApp.openById(id);
+  } catch (e2) { Logger.log('getSS openById error: ' + e2.message); }
+  throw new Error('スプレッドシートが見つかりません。Script Properties の SPREADSHEET_ID を設定してください。');
+}
+
+
+/* ============================================================
    doPost — フォーム受信 / 新規案件受付
      type=buymo_case_new  → マイページからのお車情報追加
      (default)            → トップページ等のお問い合わせフォーム
@@ -81,7 +106,7 @@ function handleContact(data) {
   var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
 
   // シート記録
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = getSS();
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
@@ -192,7 +217,7 @@ name + ' 様\n\n' +
      列: [受付日時, 氏名, メール, ジャンル, 車種メモ, ステータス, 詳細返信日, 最終配信日, 配信ステップ]
    ============================================================ */
 function getLeadSheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = getSS();
   var sheet = ss.getSheetByName(LEAD_SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(LEAD_SHEET_NAME);
@@ -346,7 +371,7 @@ function handleMemberCaseNew(data) {
 
   // 「マイページ案件」シートに追記
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSS();
     var sheet = ss.getSheetByName(CASE_SHEET_NAME);
     if (!sheet) {
       sheet = ss.insertSheet(CASE_SHEET_NAME);
