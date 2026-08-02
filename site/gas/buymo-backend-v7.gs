@@ -108,15 +108,117 @@ function doGet(e) {
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
-    if (data.type === 'column')         return jsonOut(postColumn(data));
-    if (data.type === 'case')           return jsonOut(handleCase(data));
-    if (data.type === 'note')           return jsonOut(appendNote(data));
-    if (data.type === 'join')           return jsonOut(handleJoin(data));
-    if (data.type === 'buymo_case_new') return jsonOut(handleMemberCaseNew(data));  // NEW
+    if (data.type === 'column')           return jsonOut(postColumn(data));
+    if (data.type === 'case')             return jsonOut(handleCase(data));
+    if (data.type === 'note')             return jsonOut(appendNote(data));
+    if (data.type === 'join')             return jsonOut(handleJoin(data));
+    if (data.type === 'buymo_case_new')   return jsonOut(handleMemberCaseNew(data));
+    if (data.type === 'buymo_chat_start') return jsonOut(handleChatStart(data));  // NEW
+    if (data.type === 'buymo_chat_log')   return jsonOut(handleChatLog(data));    // NEW
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
   }
+}
+
+
+/* ============================================================
+   ⑬ NEW: チャット開始通知 + 履歴保存
+   Sheet「チャット」列:
+     [開始日時, セッションID, 氏名, メール, 電話, ページURL, User-Agent, ステータス, 履歴]
+   ============================================================ */
+var CHAT_SHEET_NAME = 'チャット';
+
+function getChatSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(CHAT_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(CHAT_SHEET_NAME);
+    sheet.appendRow(['開始日時','セッションID','氏名','メール','電話','ページURL','User-Agent','ステータス','履歴','最終更新']);
+    sheet.getRange(1, 1, 1, 10).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+    sheet.setColumnWidth(9, 480);
+  }
+  return sheet;
+}
+
+function handleChatStart(data) {
+  var name  = String(data.name  || '').replace(/[<>]/g, '');
+  var email = String(data.email || '').trim();
+  var phone = String(data.phone || '').trim();
+  var page  = String(data.page  || '').slice(0, 200);
+  var ua    = String(data.ua    || '').slice(0, 200);
+  var sid   = String(data.sessionId || ('sess_' + new Date().getTime()));
+  var ts    = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+
+  // シート追記
+  try {
+    var sheet = getChatSheet();
+    sheet.appendRow([ts, sid, name, email, phone, page, ua, '進行中', '', ts]);
+  } catch (e) { Logger.log('handleChatStart sheet: ' + e.message); }
+
+  // Slack 通知
+  notifySlack([
+    { type: 'section', text: { type: 'mrkdwn', text: ':speech_balloon: *AIチャットが開始されました*' } },
+    { type: 'section', fields: [
+      { type: 'mrkdwn', text: '*氏名*\n' + (name || '(未入力)') },
+      { type: 'mrkdwn', text: '*メール*\n' + (email || '(未入力)') },
+      { type: 'mrkdwn', text: '*電話*\n' + (phone || '(未入力)') },
+      { type: 'mrkdwn', text: '*ページ*\n' + (page || '—') },
+      { type: 'mrkdwn', text: '*セッション*\n' + sid },
+      { type: 'mrkdwn', text: '*開始日時*\n' + ts }
+    ]},
+    { type: 'divider' }
+  ]);
+
+  // 管理者メール通知
+  try {
+    MailApp.sendEmail({
+      to:      NOTIFY_EMAIL,
+      subject: '【BUYMO】AIチャット開始: ' + (name || '(未入力)') + ' <' + email + '>',
+      body: [
+        '■ AIチャットが開始されました', '',
+        '開始日時   : ' + ts,
+        '氏名       : ' + (name || '(未入力)'),
+        'メール     : ' + (email || '(未入力)'),
+        '電話       : ' + (phone || '(未入力)'),
+        'ページURL  : ' + page,
+        'セッション : ' + sid, '',
+        '※ 対話履歴は終了時に別途通知されます。'
+      ].join('\n')
+    });
+  } catch (e) { Logger.log('handleChatStart mail: ' + e.message); }
+
+  return { status: 'ok', sessionId: sid };
+}
+
+function handleChatLog(data) {
+  var sid = String(data.sessionId || '');
+  if (!sid) return { status: 'error', message: 'sessionId required' };
+  var messages = Array.isArray(data.messages) ? data.messages : [];
+  var transcript = messages.map(function (m) {
+    var role = (m && m.role === 'user') ? 'ユーザー' : 'AI';
+    return '[' + role + '] ' + String(m && m.content || '').slice(0, 500);
+  }).join('\n───────\n');
+  var status = String(data.status || '進行中');
+  var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+
+  try {
+    var sheet = getChatSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][1] === sid) {
+        sheet.getRange(i + 1, 8).setValue(status);
+        sheet.getRange(i + 1, 9).setValue(transcript);
+        sheet.getRange(i + 1, 10).setValue(ts);
+        return { status: 'ok' };
+      }
+    }
+    // 該当セッションなし → 新規追加
+    sheet.appendRow([ts, sid, '', '', '', '', '', status, transcript, ts]);
+  } catch (e) { Logger.log('handleChatLog: ' + e.message); }
+
+  return { status: 'ok' };
 }
 
 
