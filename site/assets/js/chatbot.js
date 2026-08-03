@@ -306,6 +306,7 @@
       '<div class="cbot-chips" id="cbotChips"></div>' +
       '<div class="cbot-quick">' +
         '<a class="cbot-quick-btn primary" href="#form">✏️ 無料査定</a>' +
+        '<button type="button" class="cbot-quick-btn cbot-handoff" id="cbotHandoff">👤 担当者に繋ぐ</button>' +
         '<a class="cbot-quick-btn" href="mailto:kaitori@buymo.me">✉️ メール</a>' +
       '</div>' +
       '<form class="cbot-input" autocomplete="off">' +
@@ -678,6 +679,64 @@
     e.preventDefault(); send(input.value); resetIdleTimer();
   });
   input.addEventListener('input', resetIdleTimer);
+
+  /* ---------- 「担当者に繋ぐ」ハンドオフ ---------- */
+  var handoffBtn = document.getElementById('cbotHandoff');
+  var handoffSent = false;
+  if (handoffBtn) {
+    handoffBtn.addEventListener('click', function () {
+      if (handoffSent) {
+        addMsg('bot', 'すでに担当者へ通知済みです。折り返しをお待ちください。');
+        return;
+      }
+      if (!contactInfo || !contactInfo.email) {
+        addMsg('bot', 'まずは連絡先（お名前・メール）のご入力をお願いします。');
+        showGate();
+        return;
+      }
+      // 確認モーダル
+      var confirmWrap = el('div', 'cbot-msg-wrap bot cbot-handoff-confirm');
+      var av = el('img', 'cbot-msg-avatar');
+      av.src = mascotSrc; av.alt = ''; av.onerror = function () { this.style.display = 'none'; };
+      confirmWrap.appendChild(av);
+      var m = el('div', 'cbot-msg bot');
+      m.innerHTML =
+        '担当者に接続してもよろしいですか？<br>' +
+        '<small>これまでの会話内容と連絡先を担当者へ共有し、営業時間内であれば5分以内に折り返します（平日10:00〜19:00）。</small>' +
+        '<div class="cbot-idle-actions">' +
+          '<button type="button" class="cbot-idle-btn primary" data-hd="yes">はい、繋いでください</button>' +
+          '<button type="button" class="cbot-idle-btn" data-hd="no">キャンセル</button>' +
+        '</div>';
+      confirmWrap.appendChild(m);
+      log.appendChild(confirmWrap);
+      log.scrollTop = log.scrollHeight;
+      m.querySelector('[data-hd="no"]').addEventListener('click', function () {
+        confirmWrap.remove();
+      });
+      m.querySelector('[data-hd="yes"]').addEventListener('click', function () {
+        confirmWrap.remove();
+        handoffSent = true;
+        handoffBtn.disabled = true;
+        handoffBtn.textContent = '✅ 通知済み';
+        // GAS へ送信
+        fireAndForget({
+          type: 'buymo_chat_handoff',
+          sessionId: sessionId || '',
+          name:  contactInfo.name  || '',
+          email: contactInfo.email || '',
+          phone: contactInfo.phone || '',
+          pageUrl: location.href,
+          pageTitle: document.title || '',
+          messages: history.slice(-20)
+        });
+        addMsg('bot', '担当者に通知しました。\n\n' +
+          '📞 営業時間内（平日10:00〜19:00）であれば5分以内に折り返しご連絡いたします。\n' +
+          '⏰ 営業時間外の場合は翌営業日にご対応します。\n\n' +
+          'このままチャットを続けていただいてOKです。');
+        if (window.BuymoGA) window.BuymoGA.track('chat_handoff', { session: sessionId });
+      });
+    });
+  }
 
   // Escキーで閉じる
   document.addEventListener('keydown', function(e){

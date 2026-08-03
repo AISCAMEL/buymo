@@ -33,12 +33,26 @@ var CASE_SHEET_NAME   = '案件';
 var JOIN_SHEET_NAME   = '加盟店申込';
 var LEAD_SHEET_NAME   = 'リード';                 // NEW: ドリップ配信管理
 var MEMBER_CASE_SHEET = 'マイページ案件';         // NEW: マイページからの新規案件
+var TEST_SHEET_NAME   = 'テスト送信';              // NEW: 管理者テスト送信の隔離先
 var NOTIFY_EMAIL      = 'kaitori@buymo.me';      // 管理者通知先
 var FROM_NAME         = 'BUYMO 買取事業部';
 var REPLY_TO          = 'kaitori@buymo.me';
 var MEMBER_PAGE_URL   = 'https://buymo.me/member.html';
 var DRIVE_FOLDER_NAME = 'BUYMO査定写真';
 var OPENROUTER_MODEL  = 'anthropic/claude-haiku-4-5';
+
+// テスト送信として本番シート/通知から隔離する送信元アドレス (小文字比較)
+// Script Properties に TEST_EMAILS (カンマ区切り) を設定すればこの既定に追加できる
+var TEST_EMAILS_DEFAULT = [
+  'info@aisjaltd.com',
+  'test@buymo.me'
+];
+
+// ▼ Asana 連携 (Phase 4)
+var ASANA_PROJECT_ID       = '1213180032186617';   // 「車買取案件」プロジェクト
+var ASANA_SECTION_MEMBER   = '1213180127609488';   // マイページ新規案件 → 「買取案件」
+var ASANA_SECTION_LEAD     = '1217097922471584';   // トップ問い合わせ → 「紹介お問い合わせ」
+// Script Properties に ASANA_PAT を設定すると自動反映が有効化される
 // ▲ 設定 ―――――――――――――――――――――――――――――――
 
 
@@ -51,6 +65,114 @@ function getProp(key) {
 }
 function getApiKey()      { return getProp('OPENROUTER_API_KEY'); }
 function getSlackWebhook(){ return getProp('SLACK_WEBHOOK_URL'); }
+function getAsanaPat()    { return getProp('ASANA_PAT'); }
+
+/* ============================================================
+   Asana 連携 (Phase 4)
+   ・postToAsana({title, notes, sectionId?, assigneeGid?, dueOn?})
+   ・PAT 未設定なら何もせず null を返す
+   ============================================================ */
+function postToAsana(opt) {
+  var pat = getAsanaPat();
+  if (!pat) { Logger.log('postToAsana: ASANA_PAT 未設定のためスキップ'); return null; }
+  var payload = {
+    data: {
+      projects: [ASANA_PROJECT_ID],
+      name:  String(opt.title || '(無題)').slice(0, 180),
+      notes: String(opt.notes || '').slice(0, 65000)
+    }
+  };
+  if (opt.assigneeGid) payload.data.assignee = opt.assigneeGid;
+  if (opt.dueOn)       payload.data.due_on   = opt.dueOn;
+
+  try {
+    var res = UrlFetchApp.fetch('https://app.asana.com/api/1.0/tasks', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'Authorization': 'Bearer ' + pat },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    var body = JSON.parse(res.getContentText());
+    if (res.getResponseCode() >= 300) {
+      Logger.log('postToAsana error: ' + res.getContentText());
+      return null;
+    }
+    var taskGid = body.data && body.data.gid;
+    // セクションに割り当て
+    if (taskGid && opt.sectionId) {
+      try {
+        UrlFetchApp.fetch('https://app.asana.com/api/1.0/sections/' + opt.sectionId + '/addTask', {
+          method: 'post',
+          contentType: 'application/json',
+          headers: { 'Authorization': 'Bearer ' + pat },
+          payload: JSON.stringify({ data: { task: taskGid } }),
+          muteHttpExceptions: true
+        });
+      } catch (e) { Logger.log('addTaskToSection: ' + e.message); }
+    }
+    var url = taskGid ? ('https://app.asana.com/0/' + ASANA_PROJECT_ID + '/' + taskGid) : '';
+    return { gid: taskGid, url: url };
+  } catch (e) {
+    Logger.log('postToAsana exception: ' + e.message);
+    return null;
+  }
+}
+
+/* ============================================================
+   テスト送信判定 & 隔離シート記録
+   ============================================================ */
+function getTestEmails() {
+  var extra = (getProp('TEST_EMAILS') || '').split(',')
+    .map(function (s) { return s.trim().toLowerCase(); })
+    .filter(function (s) { return s.length > 0; });
+  return TEST_EMAILS_DEFAULT.map(function (s) { return s.toLowerCase(); }).concat(extra);
+}
+function isTestEmail(email) {
+  var e = String(email || '').trim().toLowerCase();
+  if (!e) return false;
+  return getTestEmails().indexOf(e) >= 0;
+}
+function logTestSubmission(kind, data) {
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName(TEST_SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(TEST_SHEET_NAME);
+      sheet.appendRow(['受付日時','種別','氏名','メール','要約','ペイロードJSON']);
+      sheet.getRange(1, 1, 1, 6)
+        .setFontWeight('bold').setBackground('#94A3B8').setFontColor('#ffffff');
+      sheet.setFrozenRows(1);
+    }
+    var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+    var name = String(data.name || (data.case && data.case.name) || '').slice(0, 40);
+    var email = String(data.email || '').slice(0, 80);
+    var summary = '';
+    if (kind === 'buymo_lead') {
+      summary = (data.car || data.message || '').toString().slice(0, 120);
+    } else if (kind === 'buymo_case_new') {
+      var c = (data.case && data.case.car) || {};
+      summary = (c.maker || '') + ' ' + (c.model || '') + ' / 写真' + ((data.photos && data.photos.length) || 0) + '枚';
+    } else if (kind === 'buymo_chat_start') {
+      summary = 'session=' + (data.sessionId || '') + ' / phone=' + (data.phone || '');
+    } else if (kind === 'buymo_chat_log') {
+      summary = 'session=' + (data.sessionId || '') + ' / msgs=' + ((data.messages && data.messages.length) || 0);
+    } else if (kind === 'join') {
+      summary = (data.shop || data.company || '') + ' / ' + (data.tel || '');
+    } else {
+      summary = JSON.stringify(data).slice(0, 120);
+    }
+    var payload = '';
+    try {
+      var clone = JSON.parse(JSON.stringify(data));
+      if (clone.photos && clone.photos.length) {
+        clone.photos = '[' + clone.photos.length + ' photos omitted]';
+      }
+      payload = JSON.stringify(clone).slice(0, 2000);
+    } catch (e) { payload = String(data).slice(0, 500); }
+    sheet.appendRow([ts, kind, name, email, summary, payload]);
+  } catch (e) { Logger.log('logTestSubmission: ' + e.message); }
+}
 
 /* ============================================================
    スプレッドシート取得 (スタンドアロン運用対応)
@@ -108,6 +230,11 @@ function doGet(e) {
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+    // 管理者テスト送信はテストシートに記録するだけで本番処理をスキップ
+    if (isTestEmail(data.email)) {
+      logTestSubmission(data.type || 'unknown', data);
+      return jsonOut({ status: 'ok', test: true, message: 'テスト送信として記録しました（本番シート/通知/自動返信はスキップ）' });
+    }
     if (data.type === 'column')           return jsonOut(postColumn(data));
     if (data.type === 'case')             return jsonOut(handleCase(data));
     if (data.type === 'note')             return jsonOut(appendNote(data));
@@ -115,6 +242,7 @@ function doPost(e) {
     if (data.type === 'buymo_case_new')   return jsonOut(handleMemberCaseNew(data));
     if (data.type === 'buymo_chat_start') return jsonOut(handleChatStart(data));  // NEW
     if (data.type === 'buymo_chat_log')   return jsonOut(handleChatLog(data));    // NEW
+    if (data.type === 'buymo_chat_handoff') return jsonOut(handleChatHandoff(data));  // NEW (Phase 5)
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -219,6 +347,98 @@ function handleChatLog(data) {
   } catch (e) { Logger.log('handleChatLog: ' + e.message); }
 
   return { status: 'ok' };
+}
+
+
+/* ============================================================
+   Phase 5 NEW: 担当者に繋ぐ (buymo_chat_handoff)
+   ── Slackに会話履歴付き通知＋シートに handoff=TRUE を立てる
+   ============================================================ */
+function handleChatHandoff(data) {
+  var sid = String(data.sessionId || '');
+  var name  = String(data.name  || '').replace(/[<>]/g, '');
+  var email = String(data.email || '').trim();
+  var phone = String(data.phone || '').trim();
+  var pageUrl   = String(data.pageUrl   || '');
+  var pageTitle = String(data.pageTitle || '').slice(0, 80);
+  var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+
+  // 営業時間判定 (JST 平日 10:00〜19:00)
+  var now = new Date();
+  var jstDay  = Number(Utilities.formatDate(now, 'Asia/Tokyo', 'u')); // 1(月)〜7(日)
+  var jstHour = Number(Utilities.formatDate(now, 'Asia/Tokyo', 'H'));
+  var isBusinessHours = (jstDay >= 1 && jstDay <= 5 && jstHour >= 10 && jstHour < 19);
+
+  // 会話履歴を整形
+  var messages = Array.isArray(data.messages) ? data.messages : [];
+  var transcript = messages.slice(-20).map(function (m) {
+    var role = (m && m.role === 'user') ? '👤 客' : '🤖 AI';
+    return role + ': ' + String((m && m.content) || '').slice(0, 300);
+  }).join('\n');
+
+  // シート「チャット」に handoff フラグを立てる
+  try {
+    var sheet = getChatSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][1] === sid) {
+        sheet.getRange(i + 1, 8).setValue('担当者呼出');
+        sheet.getRange(i + 1, 10).setValue(ts);
+        break;
+      }
+    }
+  } catch (e) { Logger.log('handleChatHandoff sheet: ' + e.message); }
+
+  // Slack 通知 (Webhook)
+  try {
+    var headerText = isBusinessHours
+      ? '🚨 担当者呼び出し（営業時間内 — 5分以内に折り返し必要）'
+      : '⏰ 担当者呼び出し（営業時間外 — 翌営業日の対応でOK）';
+    var actionText = isBusinessHours
+      ? '営業時間内です。5分以内に *' + phone + '* へ折り返しをお願いします。'
+      : '営業時間外です。翌営業日 (平日10:00) 以降に *' + phone + '* へご連絡ください。';
+    notifySlack([
+      { type: 'header',  text: { type: 'plain_text', text: headerText } },
+      { type: 'section', fields: [
+        { type: 'mrkdwn', text: '*お客様*\n' + (name || '(未登録)') },
+        { type: 'mrkdwn', text: '*電話*\n' + (phone || '(未登録)') },
+        { type: 'mrkdwn', text: '*メール*\n' + (email || '(未登録)') },
+        { type: 'mrkdwn', text: '*ページ*\n<' + pageUrl + '|' + pageTitle + '>' }
+      ]},
+      { type: 'section', text: { type: 'mrkdwn', text: '*会話履歴（直近20件）*\n```' + transcript.slice(0, 2800) + '```' } },
+      { type: 'context', elements: [
+        { type: 'mrkdwn', text: 'session=' + sid + ' / 受付=' + ts }
+      ]},
+      { type: 'section', text: { type: 'mrkdwn', text: actionText } },
+      { type: 'divider' }
+    ]);
+  } catch (e) { Logger.log('handleChatHandoff slack: ' + e.message); }
+
+  // 管理宛メール (Slackが未設定でも通知が届くよう二重化)
+  try {
+    MailApp.sendEmail({
+      to: NOTIFY_EMAIL,
+      subject: (isBusinessHours ? '【🚨要即対応】' : '【⏰翌営業日】') + 'チャット担当者呼び出し: ' + (name || '(未登録)'),
+      body: [
+        (isBusinessHours ? '営業時間内です。5分以内に折り返しをお願いします。' : '営業時間外です。翌営業日にご対応ください。'),
+        '',
+        '━━━ お客様情報 ━━━',
+        '氏名 : ' + (name  || '(未登録)'),
+        '電話 : ' + (phone || '(未登録)'),
+        'メール: ' + (email || '(未登録)'),
+        'ページ: ' + pageUrl,
+        '',
+        '━━━ 会話履歴 ━━━',
+        transcript,
+        '',
+        '━━━ 受付情報 ━━━',
+        'セッション: ' + sid,
+        '受付日時 : ' + ts
+      ].join('\n')
+    });
+  } catch (e) { Logger.log('handleChatHandoff mail: ' + e.message); }
+
+  return { status: 'ok', businessHours: isBusinessHours };
 }
 
 
@@ -612,7 +832,34 @@ function handleContact(data) {
   saveLead(data, ts);
   if (data.email) sendAutoReply(data);
 
-  return { status: 'ok', photos: photoUrls.length, caseId: caseResult.id };
+  // Asana へタスク自動起票 (「紹介お問い合わせ」セクション)
+  var asanaUrl = '';
+  try {
+    var title = '[問合せ] ' + (data.name || '氏名未入力') +
+                (data.genre ? ' - ' + data.genre : '');
+    var notes =
+      '受付日時: ' + ts + '\n' +
+      '─────────────────\n' +
+      '氏名: ' + (data.name || '—') + '\n' +
+      'メール: ' + (data.email || '—') + '\n' +
+      '電話: ' + (data.phone || '—') + '\n' +
+      'ジャンル: ' + (data.genre || '—') + '\n' +
+      '流入元: ' + (data.source || '—') + '\n' +
+      (photoUrls.length ? ('─── 写真 (' + photoUrls.length + '枚) ───\n' + photoUrls.join('\n') + '\n') : '') +
+      '─── メッセージ ───\n' +
+      (data.message || '（内容なし）') + '\n' +
+      '─────────────────\n' +
+      '次のステップ: マイページ登録の案内メール送信済み\n' +
+      '▶ マイページ: ' + MEMBER_PAGE_URL;
+    var asanaRes = postToAsana({
+      title: title,
+      notes: notes,
+      sectionId: ASANA_SECTION_LEAD
+    });
+    if (asanaRes && asanaRes.url) asanaUrl = asanaRes.url;
+  } catch (e) { Logger.log('handleContact asana: ' + e.message); }
+
+  return { status: 'ok', photos: photoUrls.length, caseId: caseResult.id, asanaUrl: asanaUrl };
 }
 
 
@@ -710,6 +957,7 @@ function runDripCampaign() {
     var row = data[i];
     var ts = row[0], name = row[1], email = row[2], status = row[5], step = Number(row[8]) || 0;
     if (!email || status === '詳細受領' || status === '停止') continue;
+    if (isTestEmail(email)) continue; // 管理者テストは配信対象外
     if (step >= 3) continue;
     var days = Math.floor((now - new Date(ts)) / 86400000);
     var nextStep = null, sub = '', body = '';
@@ -769,21 +1017,66 @@ function handleMemberCaseNew(data) {
   var name = String(data.name || '').replace(/[<>]/g, '');
   var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
 
+  // 写真をGoogle Driveへ保存（あれば）
+  var photoUrls = [];
+  try {
+    if (data.photos && data.photos.length) {
+      var folderLabel = (name || 'noname').replace(/[\/\\:\*\?\"\<\>\|]/g, '_') + '_' + (kase.id || '');
+      photoUrls = savePhotosToDrive(data.photos, folderLabel);
+    }
+  } catch (e) { Logger.log('handleMemberCaseNew photos: ' + e.message); }
+  var photoUrlText = photoUrls.length ? photoUrls.join('\n') : '';
+
   try {
     var ss = getSS();
     var sheet = ss.getSheetByName(MEMBER_CASE_SHEET);
+    var HEADERS = ['受付日時','案件ID','氏名','メール','メーカー','車種','年式','走行距離(km)','状態','所在(都道府県)','電話番号',
+                   '修復歴','水没歴','メーター改ざん','購入経路','何社目','希望売却時期',
+                   '写真枚数','写真URL','メモ','ステージ','査定額','担当メモ'];
     if (!sheet) {
       sheet = ss.insertSheet(MEMBER_CASE_SHEET);
-      sheet.appendRow(['受付日時','案件ID','氏名','メール','メーカー','車種','年式','走行距離(km)','状態','所在(都道府県)','電話番号','メモ','ステージ','査定額','担当メモ']);
-      sheet.getRange(1, 1, 1, 15).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+      sheet.appendRow(HEADERS);
+      sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
       sheet.setFrozenRows(1);
+    } else {
+      // 既存シートに新列が無ければ末尾に追加してマイグレーション
+      var curCols = sheet.getLastColumn();
+      var curHead = sheet.getRange(1, 1, 1, curCols).getValues()[0];
+      var missing = HEADERS.filter(function (h) { return curHead.indexOf(h) < 0; });
+      if (missing.length) {
+        sheet.getRange(1, curCols + 1, 1, missing.length).setValues([missing])
+          .setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+      }
     }
-    sheet.appendRow([
-      ts, kase.id || '', name, email,
-      car.maker || '', car.model || '', car.year || '', car.mileage || '',
-      car.condition || '', car.pref || '', car.tel || '', car.memo || '',
-      kase.stage || '新規受付', '', ''
-    ]);
+    // ヘッダに従って値をマップして列ズレに強くする
+    var head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var vals = {
+      '受付日時':          ts,
+      '案件ID':            kase.id || '',
+      '氏名':              name,
+      'メール':            email,
+      'メーカー':          car.maker || '',
+      '車種':              car.model || '',
+      '年式':              car.year || '',
+      '走行距離(km)':      car.mileage || '',
+      '状態':              car.condition || '',
+      '所在(都道府県)':    car.pref || '',
+      '電話番号':          car.tel || '',
+      '修復歴':            car.repair || '',
+      '水没歴':            car.flood || '',
+      'メーター改ざん':    car.meter || '',
+      '購入経路':          car.buypath || '',
+      '何社目':            car.shopcnt || '',
+      '希望売却時期':      car.sellwhen || '',
+      '写真枚数':          photoUrls.length || 0,
+      '写真URL':           photoUrlText,
+      'メモ':              car.memo || '',
+      'ステージ':          kase.stage || '新規受付',
+      '査定額':            '',
+      '担当メモ':          ''
+    };
+    var row = head.map(function (h) { return vals[h] != null ? vals[h] : ''; });
+    sheet.appendRow(row);
   } catch (e) { Logger.log('handleMemberCaseNew sheet: ' + e.message); }
 
   try {
@@ -794,7 +1087,17 @@ function handleMemberCaseNew(data) {
       '【車種】' + (car.maker || '') + ' ' + (car.model || '') + '\n' +
       '【年式】' + (car.year || '') + '\n【走行距離】' + (car.mileage || '') + ' km\n' +
       '【状態】' + (car.condition || '') + '\n【所在】' + (car.pref || '') + '\n' +
-      '【電話】' + (car.tel || '') + '\n【メモ】\n' + (car.memo || '(なし)') + '\n\n受付日時: ' + ts;
+      '【電話】' + (car.tel || '') + '\n' +
+      '\n─ 告知 ─\n' +
+      '【修復歴】' + (car.repair || '未告知') + '\n' +
+      '【水没歴】' + (car.flood || '未告知') + '\n' +
+      '【メーター改ざん】' + (car.meter || '未告知') + '\n' +
+      '\n─ 商談情報 ─\n' +
+      '【購入経路】' + (car.buypath || '未記入') + '\n' +
+      '【何社目】' + (car.shopcnt || '未記入') + '\n' +
+      '【希望売却時期】' + (car.sellwhen || '未記入') + '\n' +
+      '\n【写真】' + (photoUrls.length ? (photoUrls.length + '枚\n' + photoUrls.join('\n')) : '(なし)') + '\n' +
+      '【メモ】\n' + (car.memo || '(なし)') + '\n\n受付日時: ' + ts;
     MailApp.sendEmail({
       to: NOTIFY_EMAIL,
       subject: '【BUYMO】マイページから新規案件: ' + (car.maker || '') + ' ' + (car.model || '') + ' (' + email + ')',
@@ -825,7 +1128,58 @@ function handleMemberCaseNew(data) {
     });
   } catch (e) { Logger.log('handleMemberCaseNew user mail: ' + e.message); }
 
-  return { status: 'ok', caseId: kase.id || '' };
+  // Asana へタスク自動起票 (「買取案件」セクション)
+  var asanaUrl = '';
+  try {
+    var asanaTitle = '[新規] ' + (car.maker || '') + ' ' + (car.model || '') +
+                     ' — ' + (name || email);
+    var asanaNotes =
+      '案件ID: ' + (kase.id || '') + '\n' +
+      '受付日時: ' + ts + '\n' +
+      '─────────────────\n' +
+      '氏名: ' + (name || '(未登録)') + '\n' +
+      'メール: ' + email + '\n' +
+      '電話: ' + (car.tel || '未記入') + '\n' +
+      '所在: ' + (car.pref || '未記入') + '\n' +
+      '─── 車両 ───\n' +
+      'メーカー: ' + (car.maker || '') + '\n' +
+      '車種: ' + (car.model || '') + '\n' +
+      '年式: ' + (car.year || '未記入') + '\n' +
+      '走行距離: ' + (car.mileage || '未記入') + ' km\n' +
+      '状態: ' + (car.condition || '未記入') + '\n' +
+      '─── 告知 ───\n' +
+      '修復歴: ' + (car.repair || '未告知') + '\n' +
+      '水没歴: ' + (car.flood || '未告知') + '\n' +
+      'メーター改ざん: ' + (car.meter || '未告知') + '\n' +
+      '─── 商談情報 ───\n' +
+      '購入経路: ' + (car.buypath || '未記入') + '\n' +
+      '何社目: ' + (car.shopcnt || '未記入') + '\n' +
+      '希望売却時期: ' + (car.sellwhen || '未記入') + '\n' +
+      '─── 写真 (' + photoUrls.length + '枚) ───\n' +
+      (photoUrls.length ? photoUrls.join('\n') : '(写真なし)') + '\n' +
+      '─── メモ ───\n' +
+      (car.memo || '(なし)') + '\n' +
+      '─────────────────\n' +
+      '▶ マイページ: ' + MEMBER_PAGE_URL;
+    var asanaRes = postToAsana({
+      title: asanaTitle,
+      notes: asanaNotes,
+      sectionId: ASANA_SECTION_MEMBER
+    });
+    if (asanaRes && asanaRes.url) asanaUrl = asanaRes.url;
+  } catch (e) { Logger.log('handleMemberCaseNew asana: ' + e.message); }
+
+  // Slack に「Asana起票済み」を追記通知 (webhook設定時のみ)
+  try {
+    if (asanaUrl) {
+      notifySlack([
+        { type:'header', text:{ type:'plain_text', text:'📋 Asana起票済み — ' + (car.maker || '') + ' ' + (car.model || '') } },
+        { type:'section', text:{ type:'mrkdwn', text:'*会員:* ' + (name || '(未登録)') + ' <' + email + '>\n*案件ID:* ' + (kase.id || '') + '\n*Asana:* <' + asanaUrl + '|タスクを開く>' } }
+      ]);
+    }
+  } catch (e) { Logger.log('handleMemberCaseNew asana slack: ' + e.message); }
+
+  return { status: 'ok', caseId: kase.id || '', asanaUrl: asanaUrl };
 }
 
 
@@ -893,3 +1247,76 @@ function testMemberCase() {
 }
 function testBot()  { Logger.log(handleBot({ q: '事故車も買取できますか？' }).answer); }
 function testDrip() { runDripCampaign(); }
+
+/* ============================================================
+   管理者ユーティリティ (GASエディタから手動で実行)
+   ============================================================ */
+// 現在テスト送信として扱うメールアドレス一覧をログに出力
+function showTestEmails() {
+  Logger.log('テストとして隔離される送信元:\n' + getTestEmails().join('\n'));
+}
+// テスト送信シートを空にする（ヘッダは残す）
+function clearTestSubmissions() {
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName(TEST_SHEET_NAME);
+    if (!sheet) { Logger.log('テスト送信シートは存在しません'); return; }
+    var last = sheet.getLastRow();
+    if (last <= 1) { Logger.log('既に空です'); return; }
+    sheet.deleteRows(2, last - 1);
+    Logger.log((last - 1) + '行のテスト送信を削除しました');
+  } catch (e) { Logger.log('clearTestSubmissions: ' + e.message); }
+}
+// Slack Bot 接続テスト (SLACK_BOT_TOKEN / SLACK_CHANNEL_ID の検証)
+function testSlackBot() {
+  var token   = getProp('SLACK_BOT_TOKEN');
+  var channel = getProp('SLACK_CHANNEL_ID');
+  if (!token)   { Logger.log('NG: SLACK_BOT_TOKEN が未設定です'); return; }
+  if (!channel) { Logger.log('NG: SLACK_CHANNEL_ID が未設定です'); return; }
+  try {
+    var res = UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
+      method: 'post',
+      contentType: 'application/json; charset=utf-8',
+      headers: { 'Authorization': 'Bearer ' + token },
+      payload: JSON.stringify({
+        channel: channel,
+        text: '✅ BUYMO GAS → Slack 接続テスト ' + new Date().toISOString(),
+        blocks: [
+          { type: 'header', text: { type: 'plain_text', text: '✅ BUYMO GAS 接続テスト' } },
+          { type: 'section', text: { type: 'mrkdwn', text: 'このメッセージがチャンネルに表示されていれば *Bot Token とチャンネルID は正しく登録されています* 🎉\n\nこの後 Phase 6 の双方向同期を実装できます。' } },
+          { type: 'context', elements: [{ type: 'mrkdwn', text: '受信時刻: ' + Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss') }] }
+        ]
+      }),
+      muteHttpExceptions: true
+    });
+    var body = JSON.parse(res.getContentText());
+    if (body.ok) {
+      Logger.log('OK: Slackチャンネルに投稿しました (ts=' + body.ts + ')');
+    } else {
+      Logger.log('NG: Slack API エラー = ' + body.error + '\n(全レス: ' + res.getContentText().slice(0, 500) + ')');
+    }
+  } catch (e) {
+    Logger.log('NG: 例外 = ' + e.message);
+  }
+}
+
+// Asana接続テスト (PAT/権限/プロジェクトIDの検証)
+function testAsana() {
+  var res = postToAsana({
+    title: '[TEST] BUYMO GAS 接続テスト ' + new Date().toISOString(),
+    notes: 'これは接続テストです。確認後は削除してください。\n\nこのメッセージが Asana の「車買取案件」プロジェクトに現れれば連携成功です。',
+    sectionId: ASANA_SECTION_MEMBER
+  });
+  Logger.log(res ? ('OK: ' + res.url) : 'NG: ASANA_PAT が未設定 or 権限不足');
+}
+
+// テスト送信として1件投げてみる（管理者用）
+function testAsAdmin() {
+  var fake = { postData: { contents: JSON.stringify({
+    type: 'buymo_lead',
+    name: '管理者テスト', email: 'info@aisjaltd.com',
+    car: 'テスト送信 - 隔離されるはず',
+    source: 'testAsAdmin'
+  }) }};
+  Logger.log(doPost(fake).getContent());
+}
