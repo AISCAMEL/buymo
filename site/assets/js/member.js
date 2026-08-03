@@ -23,6 +23,20 @@
     } catch (e) { return null; }
   }
 
+  // ?reset=1 で BUYMO 関連 localStorage を全消去（管理者テスト用）
+  (function handleReset() {
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('reset') === '1') {
+        [EKEY, NKEY, CKEY, PKEY].forEach(function (k) { localStorage.removeItem(k); });
+        // クエリを外して再読込
+        var clean = location.pathname;
+        alert('BUYMO会員ページのローカルデータを全消去しました。');
+        location.replace(clean);
+      }
+    } catch (e) {}
+  })();
+
   var loginView = document.getElementById('memberLogin');
   var dashView = document.getElementById('memberDash');
 
