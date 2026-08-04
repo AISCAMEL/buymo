@@ -18,8 +18,11 @@
   var contactInfo = null;
   var sessionId   = '';
   try {
-    contactInfo = JSON.parse(sessionStorage.getItem(CONTACT_KEY) || localStorage.getItem(CONTACT_KEY) || 'null');
+    // 連絡先はセッション単位（新しいブラウザセッションでは毎回ゲートを表示する）
+    // ※ 以前 localStorage に永続保存していたため、残っていれば破棄する
+    contactInfo = JSON.parse(sessionStorage.getItem(CONTACT_KEY) || 'null');
     sessionId   = sessionStorage.getItem(SESSION_KEY) || '';
+    try { localStorage.removeItem(CONTACT_KEY); } catch (e2) {}
   } catch (e) {}
 
   function newSessionId() {
@@ -588,9 +591,9 @@
       contactInfo = { name: name, email: email, phone: phone };
       sessionId   = newSessionId();
       try {
+        // セッション単位で保持（永続化しない＝次回セッションでは再度ゲート表示）
         sessionStorage.setItem(CONTACT_KEY, JSON.stringify(contactInfo));
         sessionStorage.setItem(SESSION_KEY, sessionId);
-        localStorage.setItem(CONTACT_KEY,   JSON.stringify(contactInfo));
       } catch (er) {}
       // GAS へ即通知 (fire-and-forget)
       fireAndForget({
