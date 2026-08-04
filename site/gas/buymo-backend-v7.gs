@@ -217,6 +217,7 @@ function doGet(e) {
     if (action === 'cases')  return jsonOut(getCases());
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
+    if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
@@ -424,7 +425,122 @@ function handleChatHandoff(data) {
     });
   } catch (e) { Logger.log('handleChatHandoff mail: ' + e.message); }
 
+  // 営業時間内かつ Bot Token 設定済みなら、Botでスレッド投稿し双方向同期を有効化
+  try {
+    if (isBusinessHours && getProp('SLACK_BOT_TOKEN') && getProp('SLACK_CHANNEL_ID')) {
+      var rootText = '🟢 *担当対応リクエスト*（このスレッドに返信するとお客様の画面に表示されます）\n' +
+        'お客様: ' + (name || '(未登録)') + ' / ' + (phone || '電話未登録') + ' / ' + email + '\n' +
+        'session=' + sid + '\n' +
+        '直近の会話:\n' + transcript.slice(0, 2500);
+      var ts2 = slackBotPost(rootText, null);
+      if (ts2) saveChatThread(sid, getProp('SLACK_CHANNEL_ID'), ts2);
+    }
+  } catch (e) { Logger.log('handleChatHandoff bot thread: ' + e.message); }
+
   return { status: 'ok', businessHours: isBusinessHours };
+}
+
+/* ============================================================
+   Phase 6: Slack ⇄ サイトチャット 双方向（ポーリング方式・Events API不要）
+   ・handleChatHandoff が Bot で親メッセージを投稿し ts を保存
+   ・担当者はそのSlackスレッドに返信
+   ・ブラウザが action=chatreplies をポーリングし、GASが
+     conversations.replies を Bot Token で読み、担当者の返信のみ返す
+   ============================================================ */
+var CHAT_THREAD_SHEET = 'チャットスレッド';
+
+function slackBotPost(text, threadTs) {
+  var token = getProp('SLACK_BOT_TOKEN');
+  var channel = getProp('SLACK_CHANNEL_ID');
+  if (!token || !channel) return null;
+  try {
+    var payload = { channel: channel, text: String(text || '').slice(0, 3500) };
+    if (threadTs) payload.thread_ts = threadTs;
+    var res = UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
+      method: 'post', contentType: 'application/json; charset=utf-8',
+      headers: { 'Authorization': 'Bearer ' + token },
+      payload: JSON.stringify(payload), muteHttpExceptions: true
+    });
+    var body = JSON.parse(res.getContentText());
+    return body.ok ? body.ts : null;
+  } catch (e) { Logger.log('slackBotPost: ' + e.message); return null; }
+}
+
+function getChatThreadSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(CHAT_THREAD_SHEET);
+  if (!sheet) {
+    sheet = ss.insertSheet(CHAT_THREAD_SHEET);
+    sheet.appendRow(['セッションID', 'チャンネル', 'thread_ts', '作成日時']);
+    sheet.getRange(1, 1, 1, 4).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+function saveChatThread(sid, channel, ts) {
+  try {
+    var sheet = getChatThreadSheet();
+    // 既存があれば更新、なければ追加
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === sid) { sheet.getRange(i + 1, 3).setValue(ts); return; }
+    }
+    sheet.appendRow([sid, channel, ts, Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss')]);
+  } catch (e) { Logger.log('saveChatThread: ' + e.message); }
+}
+function lookupChatThread(sid) {
+  try {
+    var sheet = getChatThreadSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === sid) return { channel: rows[i][1], ts: rows[i][2] };
+    }
+  } catch (e) { Logger.log('lookupChatThread: ' + e.message); }
+  return null;
+}
+
+// 担当者(Slack)の返信を取得（Bot以外＝人間の返信のみ、since以降）
+function getChatReplies(session, since) {
+  var sid = String(session || '');
+  if (!sid) return { replies: [] };
+  var token = getProp('SLACK_BOT_TOKEN');
+  var th = lookupChatThread(sid);
+  if (!token || !th || !th.ts) return { replies: [] };
+  var sinceNum = parseFloat(since || '0') || 0;
+  try {
+    var url = 'https://slack.com/api/conversations.replies?channel=' + encodeURIComponent(th.channel) +
+              '&ts=' + encodeURIComponent(th.ts) + '&limit=50';
+    var res = UrlFetchApp.fetch(url, {
+      method: 'get', headers: { 'Authorization': 'Bearer ' + token }, muteHttpExceptions: true
+    });
+    var body = JSON.parse(res.getContentText());
+    if (!body.ok || !body.messages) return { replies: [] };
+    var out = [];
+    body.messages.forEach(function (m) {
+      // 親メッセージ(ts===th.ts)とBot発言を除外し、人間の返信のみ
+      if (String(m.ts) === String(th.ts)) return;
+      if (m.bot_id || m.subtype === 'bot_message' || !m.user) return;
+      var tsNum = parseFloat(m.ts) || 0;
+      if (tsNum <= sinceNum) return;
+      out.push({ ts: tsNum, by: resolveSlackUserName(m.user, token), text: String(m.text || '') });
+    });
+    return { replies: out };
+  } catch (e) { Logger.log('getChatReplies: ' + e.message); return { replies: [] }; }
+}
+
+var _slackUserCache = {};
+function resolveSlackUserName(uid, token) {
+  if (!uid) return '担当者';
+  if (_slackUserCache[uid]) return _slackUserCache[uid];
+  try {
+    var res = UrlFetchApp.fetch('https://slack.com/api/users.info?user=' + encodeURIComponent(uid), {
+      method: 'get', headers: { 'Authorization': 'Bearer ' + token }, muteHttpExceptions: true
+    });
+    var body = JSON.parse(res.getContentText());
+    var nm = (body.ok && body.user) ? (body.user.real_name || body.user.name || '担当者') : '担当者';
+    _slackUserCache[uid] = nm;
+    return nm;
+  } catch (e) { return '担当者'; }
 }
 
 
