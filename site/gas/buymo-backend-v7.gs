@@ -1015,11 +1015,12 @@ name + ' 様\n\n' +
 'AIチャット（buymo.me 右下）でもお気軽にご相談いただけます。\n\n' +
 'それでは、マイページでのご登録をお待ちしております。\n\n' +
 '───────────────────\n' +
-'合同会社アイズ 買取事業部\n' +
+'BUYMO買取センター\n' +
+'〒971-8138 福島県いわき市若葉台1丁目31番\n' +
 'BUYMO ｜ https://buymo.me/\n' +
 'マイページ ｜ ' + MEMBER_PAGE_URL + '\n' +
 '✉  ' + REPLY_TO + '\n' +
-'〒979-0204 福島県いわき市四倉町細谷字大町1番\n' +
+'（運営：合同会社アイズ）\n' +
 '───────────────────\n';
   try {
     MailApp.sendEmail({ to: data.email, subject: subject, body: body, name: FROM_NAME, replyTo: REPLY_TO });
@@ -1084,7 +1085,7 @@ function dripBodyReminder(name) {
     '━━━━━━━━━━━━━━\n  🔑 マイページ登録はこちら\n━━━━━━━━━━━━━━\n' +
     '  ▶  ' + MEMBER_PAGE_URL + '\n\n' +
     'ご登録後、お車の情報を追記いただければ、\n当社が最短24時間以内に査定額をご提示いたします。\n\n' +
-    '合同会社アイズ 買取事業部\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉ ' + REPLY_TO + '\n';
+    'BUYMO買取センター（運営：合同会社アイズ）\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉ ' + REPLY_TO + '\n';
 }
 function dripBodyValue(name) {
   return (name || 'お客') + ' 様\n\nBUYMO 買取事業部です。\n\n' +
@@ -1093,7 +1094,7 @@ function dripBodyValue(name) {
     '  ③ 洗車・車内清掃を済ませておく\n  ④ 純正パーツ・記録簿を揃える\n\n' +
     '━━━━━━━━━━━━━━\n  🔑 まずはマイページでご登録を\n━━━━━━━━━━━━━━\n' +
     '  ▶  ' + MEMBER_PAGE_URL + '\n\n' +
-    '合同会社アイズ 買取事業部\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉ ' + REPLY_TO + '\n';
+    'BUYMO買取センター（運営：合同会社アイズ）\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉ ' + REPLY_TO + '\n';
 }
 function dripBodyFinal(name) {
   return (name || 'お客') + ' 様\n\nBUYMO 買取事業部です。\n\n' +
@@ -1103,7 +1104,7 @@ function dripBodyFinal(name) {
     '  ・全国47都道府県対応\n  ・査定料・出張費・レッカー費すべて無料\n' +
     '  ・電話営業は一切なし\n  ・3営業日以内に確実にお振込み\n\n' +
     'これで自動配信は終了とさせていただきます。\n\n' +
-    '合同会社アイズ 買取事業部\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉ ' + REPLY_TO + '\n\n' +
+    'BUYMO買取センター（運営：合同会社アイズ）\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉ ' + REPLY_TO + '\n\n' +
     '※ 配信を止めたい場合は「配信停止」とだけ返信ください。\n';
 }
 
@@ -1221,7 +1222,7 @@ function handleMemberCaseNew(data) {
 '  当社の査定担当が内容を確認し、24時間以内にメール／マイページで査定額をご提示します。\n\n' +
 '  ▶ マイページ: ' + MEMBER_PAGE_URL + '\n\n' +
 'その間、営業のお電話は一切いたしません。\n\n' +
-'合同会社アイズ 買取事業部\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉  ' + REPLY_TO + '\n';
+'BUYMO買取センター（運営：合同会社アイズ）\nBUYMO ｜ https://buymo.me/\nマイページ ｜ ' + MEMBER_PAGE_URL + '\n✉  ' + REPLY_TO + '\n';
     MailApp.sendEmail({
       to: email,
       subject: '【BUYMO】お車情報を受け付けました｜査定額は24時間以内にご連絡します',
