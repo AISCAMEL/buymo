@@ -286,9 +286,12 @@ function handleChatStart(data) {
     sheet.appendRow([ts, sid, name, email, phone, page, ua, '進行中', '', ts]);
   } catch (e) { Logger.log('handleChatStart sheet: ' + e.message); }
 
-  // Slack 通知
+  // Slack 通知のみ（チャット開始は「申し込み完了」ではないためメールは送らない）
+  // メール送信は次のタイミングだけ:
+  //   ・フォーム送信で申込完了 → handleContact → sendAutoReply(お客様へ自動返信)
+  //   ・「担当者に繋ぐ」を明示的に押した → handleChatHandoff → 管理者メール
   notifySlack([
-    { type: 'section', text: { type: 'mrkdwn', text: ':speech_balloon: *AIチャットが開始されました*' } },
+    { type: 'section', text: { type: 'mrkdwn', text: ':speech_balloon: *AIチャットが開始されました*（メール未送信・様子見）' } },
     { type: 'section', fields: [
       { type: 'mrkdwn', text: '*氏名*\n' + (name || '(未入力)') },
       { type: 'mrkdwn', text: '*メール*\n' + (email || '(未入力)') },
@@ -299,24 +302,6 @@ function handleChatStart(data) {
     ]},
     { type: 'divider' }
   ]);
-
-  // 管理者メール通知
-  try {
-    MailApp.sendEmail({
-      to:      NOTIFY_EMAIL,
-      subject: '【BUYMO】AIチャット開始: ' + (name || '(未入力)') + ' <' + email + '>',
-      body: [
-        '■ AIチャットが開始されました', '',
-        '開始日時   : ' + ts,
-        '氏名       : ' + (name || '(未入力)'),
-        'メール     : ' + (email || '(未入力)'),
-        '電話       : ' + (phone || '(未入力)'),
-        'ページURL  : ' + page,
-        'セッション : ' + sid, '',
-        '※ 対話履歴は終了時に別途通知されます。'
-      ].join('\n')
-    });
-  } catch (e) { Logger.log('handleChatStart mail: ' + e.message); }
 
   return { status: 'ok', sessionId: sid };
 }

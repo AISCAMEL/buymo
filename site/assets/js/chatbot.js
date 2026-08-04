@@ -416,16 +416,19 @@
   }
 
   /* ---------- Send ---------- */
-  // 「担当者に相談」ボタンを状況に応じて表示する
-  var userMsgCount = 0;
+  // 「担当者に相談」ボタンは “会話が進んでも解決しない時だけ” 表示する
+  var userMsgCount = 0;   // ユーザー発言数
+  var fallbackCount = 0;  // AIが答えられなかった回数
+  var MSG_THRESHOLD = 5;      // これ以上やりとりが続いたら提示
+  var FALLBACK_THRESHOLD = 2; // AIがこの回数答えられなかったら提示
   function revealHandoff(reason) {
     var row = document.getElementById('cbotHandoffRow');
     if (!row || !row.hidden) return;
     row.hidden = false;
     if (window.BuymoGA) window.BuymoGA.track('handoff_offered', { reason: reason || '' });
   }
-  // 人に繋ぎたい意図のキーワード
-  var HUMAN_KW = ['担当', '担当者', '人と', '人に', 'オペレータ', 'スタッフ', '電話', '折り返し', '直接', '相談したい', 'クレーム'];
+  // お客様が明示的に「人に繋いでほしい」と言った時のキーワード
+  var HUMAN_KW = ['担当者', '担当の方', '人と話', '人に繋', '人につな', 'オペレータ', 'スタッフと', '電話して', '電話で', '折り返し', '直接話', 'クレーム'];
 
   function send(text) {
     text = (text || '').trim();
@@ -436,7 +439,7 @@
     input.value = '';
     chips.style.display = 'none';
 
-    // 意図が「人に繋ぎたい」なら即ボタン表示
+    // ① お客様が明示的に「人に繋いでほしい」と言った時だけ即表示
     var hitHuman = HUMAN_KW.some(function (k) { return text.indexOf(k) >= 0; });
     if (hitHuman) revealHandoff('keyword');
 
@@ -444,7 +447,6 @@
     aiAsk(text, function (aiReply) {
       typing.remove();
       if (aiReply) {
-        // AIが答えた場合はCTAはなし（ただしフォームCTA付ける）
         var lower = aiReply.toLowerCase();
         var cta = [];
         if (lower.indexOf('査定') >= 0 || lower.indexOf('お申') >= 0 || lower.indexOf('お申し込み') >= 0) {
@@ -453,14 +455,16 @@
         addMsg('bot', aiReply, cta);
         history.push({ role: 'assistant', content: aiReply });
       } else {
-        // AIが答えられずルールベースにフォールバック → 人に繋ぐ選択肢を提示
+        // AIが答えられずフォールバック（未解決のサイン）
+        fallbackCount++;
         var res = ruleAnswer(text);
         addMsg('bot', res.text, res.cta);
         history.push({ role: 'assistant', content: res.text });
-        revealHandoff('ai_fallback');
       }
-      // 会話が2往復以上続いたら（＝解決に時間がかかっている）ボタンを提示
-      if (userMsgCount >= 2) revealHandoff('multi_turn');
+      // ② AIが繰り返し答えられない、または ③ 会話が長引いて解決しない場合のみ提示
+      if (fallbackCount >= FALLBACK_THRESHOLD || userMsgCount >= MSG_THRESHOLD) {
+        revealHandoff(fallbackCount >= FALLBACK_THRESHOLD ? 'repeat_fallback' : 'long_convo');
+      }
     });
   }
 
