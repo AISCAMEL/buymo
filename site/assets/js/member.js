@@ -198,6 +198,33 @@
 
   if (saved) { show(saved); }
 
+  // 申込済みメールか確認（JSONP）。ENDPOINT未設定時は素通り（デモ）
+  function authCheck(email, cb) {
+    if (!ENDPOINT) { cb({ ok: true, demo: true }); return; }
+    var done = false;
+    var cbName = '__authcb_' + Date.now();
+    var timer = setTimeout(function () {
+      if (done) return; done = true;
+      try { delete window[cbName]; } catch (e) {}
+      // タイムアウト時は安全側でなく素通り（シート障害等でのロックアウト回避）
+      cb({ ok: true, degraded: true });
+    }, 8000);
+    window[cbName] = function (res) {
+      if (done) return; done = true;
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch (e) {}
+      cb(res || { ok: false });
+    };
+    var s = document.createElement('script');
+    s.src = ENDPOINT + '?action=authcheck&email=' + encodeURIComponent(email) + '&callback=' + cbName;
+    s.onerror = function () {
+      if (done) return; done = true;
+      clearTimeout(timer);
+      cb({ ok: true, degraded: true });
+    };
+    document.body.appendChild(s);
+  }
+
   // ログイン/登録フォーム
   var f = document.getElementById('memberForm');
   if (f) {
@@ -205,12 +232,26 @@
       e.preventDefault();
       var email = document.getElementById('mEmail').value.trim();
       var name = document.getElementById('mName').value.trim();
+      var errEl = document.getElementById('mErr');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById('mErr').textContent = 'メールアドレスを正しく入力してください';
+        errEl.textContent = 'メールアドレスを正しく入力してください';
         return;
       }
-      try { localStorage.setItem(EKEY, email); if (name) localStorage.setItem(NKEY, name); } catch (e2) {}
-      show(email);
+      var btn = f.querySelector('button[type="submit"]');
+      var btnText = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = '確認しています…'; }
+      errEl.textContent = '';
+      authCheck(email, function (res) {
+        if (btn) { btn.disabled = false; btn.textContent = btnText; }
+        if (res && res.ok) {
+          try { localStorage.setItem(EKEY, email); if (name) localStorage.setItem(NKEY, name); } catch (e2) {}
+          show(email);
+        } else {
+          errEl.innerHTML = 'このメールアドレスでの査定のお申し込みが確認できませんでした。<br>' +
+            'お申し込みがまだの方は、先に<a href="index.html#form">お問い合わせフォーム</a>からお申し込みください。<br>' +
+            'メールアドレスにお間違いがないかもご確認ください。';
+        }
+      });
     });
   }
   var lo = document.getElementById('memberLogout');
