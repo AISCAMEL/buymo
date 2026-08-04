@@ -38,7 +38,7 @@
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a href="index.html#top" class="logo" aria-label="BUYMO ホーム">
-      <span class="logo-mark" aria-hidden="true"><img src="/assets/img/buymo/logo-mark.png" alt="" /></span>
+      <span class="logo-mark" aria-hidden="true"><img src="/assets/img/buymo/logo-mark.png?v=2" alt="" /></span>
       <span class="logo-text">BUYMO</span>
     </a>
     <nav class="gnav" id="gnav" aria-label="メインナビゲーション">
@@ -118,21 +118,9 @@
   <section class="form-section" id="form" aria-labelledby="form-title">
     <div class="container form-inner">
       <form class="quote-form" id="quoteForm" novalidate>
-        <h2 id="form-title">より詳しく伝えたい方へ</h2>
-        <p class="form-lead">必須項目をご入力のうえ送信してください。<br>無料査定をご希望の方は車両情報もご記入ください。</p>
+        <h2 id="form-title">無料査定・お問い合わせ</h2>
+        <p class="form-lead">お名前とメールアドレスだけでOK。<br>写真を送るだけでオンライン査定、担当者よりメールでご連絡します。</p>
         <p class="form-context" id="formContext" hidden></p>
-
-        <div class="field">
-          <label for="f-type">お問い合わせ種別</label>
-          <select id="f-type" name="type" required>
-            <option value="">選択してください</option>
-            <option>無料査定の申し込み</option>
-            <option>買取についての相談</option>
-            <option>出張査定の日程相談</option>
-            <option>その他のお問い合わせ</option>
-          </select>
-          <p class="err" data-for="f-type"></p>
-        </div>
 
         <div class="field">
           <label for="f-name">お名前</label>
@@ -148,28 +136,23 @@
 
         <div class="field-row">
           <div class="field">
-            <label for="f-pref">都道府県（任意）</label>
+            <label for="f-pref">都道府県 <span class="opt">任意</span></label>
             <select id="f-pref" name="pref">
               <option value="">選択してください</option>
             </select>
             <p class="err" data-for="f-pref"></p>
           </div>
           <div class="field">
-            <label for="f-maker">車種（任意）</label>
-            <select id="f-maker" name="maker">
-              <option value="">選択してください</option>
-              <option>トヨタ</option><option>ホンダ</option><option>日産</option>
-              <option>マツダ</option><option>スバル</option><option>スズキ</option>
-              <option>ダイハツ</option><option>三菱</option><option>その他</option>
-            </select>
-            <p class="err" data-for="f-maker"></p>
+            <label for="f-tel">お電話番号 <span class="opt">任意</span></label>
+            <input type="tel" id="f-tel" name="tel" placeholder="例：090-0000-0000" inputmode="tel" />
+            <p class="err" data-for="f-tel"></p>
           </div>
         </div>
 
         <div class="field">
-          <label for="f-message">お問い合わせ内容</label>
-          <textarea id="f-message" name="message" rows="5" placeholder="ご相談内容や車両の状態（年式・走行距離・キズなど）をご記入ください。" required></textarea>
-          <p class="err" data-for="f-message"></p>
+          <label for="f-car">お車について <span class="opt">任意</span></label>
+          <input type="text" id="f-car" name="car" placeholder="例：プリウス 2019年式 / 事故車 / 走行10万km など" />
+          <p class="err" data-for="f-car"></p>
         </div>
 
         <div class="field field-check">
@@ -177,7 +160,7 @@
           <p class="err" data-for="f-agree"></p>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg">送信する</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">今すぐ無料査定を申し込む</button>
         <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
       </form>
 
@@ -223,7 +206,7 @@
   </nav>
   <div class="container grid grid-3 footer-grid">
     <div class="footer-col">
-      <a href="index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true"><img src="/assets/img/buymo/logo-mark.png" alt="" /></span><span class="logo-text">BUYMO</span></a>
+      <a href="index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true"><img src="/assets/img/buymo/logo-mark.png?v=2" alt="" /></span><span class="logo-text">BUYMO</span></a>
       <p class="footer-company">合同会社アイズ</p>
       <p>〒971-8138<br>福島県いわき市若葉台1丁目31-11</p>
       <p>✉️ kaitori@buymo.me</p>
