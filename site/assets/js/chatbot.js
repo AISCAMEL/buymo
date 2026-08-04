@@ -251,12 +251,9 @@
   /* ---------- Build widget ---------- */
   var root = el('div', 'cbot');
   // AIオペレーター(女性)の写真をパネル上部＆起動ボタン両方に使用
-  var mascotSrc = '/assets/img/buymo/chatbot-avatar.png';
-  // 相対パスで assets を解決（サブディレクトリからでも動くよう）
-  var depth = (location.pathname.match(/\/[^\/]+/g) || []).length - 1;
-  var prefix = depth > 0 ? '../'.repeat(depth) : '';
-  mascotSrc = prefix + 'assets/img/buymo/chatbot-avatar.png';
-  var chatIconSrc = prefix + 'assets/img/buymo/chatbot-avatar.png';
+  // ルート配信サイトのため絶対パスで統一（ディレクトリURL /area/tokyo/ でも確実に解決）
+  var mascotSrc   = '/assets/img/buymo/chatbot-avatar.png';
+  var chatIconSrc = '/assets/img/buymo/chatbot-avatar.png';
 
   root.innerHTML =
     '<div class="cbot-hint" id="cbotHint" hidden aria-hidden="true">' +
