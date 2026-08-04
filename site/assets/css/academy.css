@@ -137,12 +137,26 @@
 .cbot{position:fixed;right:24px;bottom:24px;z-index:140;}
 .cbot-launch{
   position:relative;width:68px;height:68px;border-radius:50%;border:3px solid #fff;cursor:pointer;
-  color:#fff;padding:0;overflow:hidden;
+  color:#fff;padding:0;overflow:visible;
   background:linear-gradient(135deg,var(--bot-accent),var(--bot-head));
   box-shadow:0 10px 28px rgba(10,107,60,.4);
   transition:transform .2s,box-shadow .2s;
+  /* 存在に気づいてもらうためのバウンス：4秒ごとに2回跳ねる */
+  animation:cbot-attention 4s ease-in-out 2s infinite;
 }
-.cbot-launch:hover{transform:scale(1.08);box-shadow:0 14px 34px rgba(10,107,60,.5);}
+.cbot-launch:hover{transform:scale(1.08);box-shadow:0 14px 34px rgba(10,107,60,.5);animation-play-state:paused;}
+/* 写真が丸から欠けないようクリップは内側の画像で担保 */
+.cbot-launch .cbot-launch-img{border-radius:50%;overflow:hidden;}
+@keyframes cbot-attention{
+  0%, 40%, 100% { transform:translateY(0) scale(1); }
+  10%           { transform:translateY(-14px) scale(1.06); }
+  20%           { transform:translateY(0) scale(1); }
+  28%           { transform:translateY(-8px) scale(1.03); }
+  35%           { transform:translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce){
+  .cbot-launch{ animation:none; }
+}
 /* 人物写真をボタン全体に丸くフィット */
 .cbot-launch-img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
 .cbot-launch-ico{font-size:28px;}

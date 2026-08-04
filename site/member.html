@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>会員マイページ｜BUYMO</title>
+<title>査定状況の確認｜BUYMO</title>
 <meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
@@ -23,6 +23,8 @@
   .mp-field input{width:100%;height:50px;border:1px solid #ddd;border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;}
   .mp-field input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,107,53,.15);}
   .mp-err{color:#e53935;font-size:13px;min-height:18px;}
+  .mp-login-note{font-size:12px;color:#888;text-align:center;margin-top:14px;line-height:1.6;}
+  .mp-login-note a{color:var(--green,#0F766E);font-weight:700;}
   .mp-greet{max-width:720px;margin:0 auto 18px;}
   .mp-greet h1{font-size:22px;font-weight:900;}
   .mp-greet p{color:#666;font-size:14px;}
@@ -142,7 +144,7 @@
 <header class="mp-header">
   <div class="container">
     <a href="index.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
-    <span class="mp-h-title">会員マイページ</span>
+    <span class="mp-h-title">査定状況の確認</span>
     <a href="#" class="mp-logout" id="memberLogout" style="display:none">ログアウト</a>
   </div>
 </header>
@@ -153,19 +155,20 @@
     <!-- ログイン/登録 -->
     <div id="memberLogin">
       <div class="mp-card">
-        <h1>会員マイページ</h1>
-        <p class="mp-lead">ご登録のメールアドレスで、査定状況・買取の進捗をご確認いただけます。</p>
+        <h1>査定状況の確認</h1>
+        <p class="mp-lead">お問い合わせ時にご登録のメールアドレスで、査定状況・買取の進捗をご確認いただけます。</p>
         <form id="memberForm" novalidate>
           <div class="mp-field">
             <label for="mName">お名前（任意）</label>
             <input type="text" id="mName" placeholder="例：山田 太郎" />
           </div>
           <div class="mp-field">
-            <label for="mEmail">メールアドレス</label>
+            <label for="mEmail">ご登録のメールアドレス</label>
             <input type="email" id="mEmail" placeholder="例：example@buymo.jp" required />
           </div>
           <p class="mp-err" id="mErr"></p>
-          <button type="submit" class="btn btn-primary btn-block btn-lg">ログイン／登録</button>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">査定状況を確認する</button>
+          <p class="mp-login-note">※ 査定のお申し込みがまだの方は、先に<a href="index.html#form">お問い合わせフォーム</a>からお申し込みください。</p>
         </form>
       </div>
     </div>
