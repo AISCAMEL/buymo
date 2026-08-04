@@ -20,17 +20,6 @@
 <link rel="canonical" href="https://buymo.me/buymo-contact.html" />
 <link rel="stylesheet" href="assets/css/buymo.css?v=18" />
 <link rel="stylesheet" href="assets/css/buymo-contact.css" />
-<style>
-.quick-contact{background:linear-gradient(135deg,#0e1b33 0%,#0A6B3C 100%);padding:52px 24px;text-align:center;color:#fff;}
-.quick-contact-box{max-width:660px;margin:0 auto;}
-.qc-badge{display:inline-block;background:#FF6B35;color:#fff;font-size:12px;font-weight:800;padding:4px 16px;border-radius:100px;margin-bottom:14px;letter-spacing:.05em;}
-.quick-contact h2{font-size:28px;font-weight:900;margin-bottom:8px;}
-.quick-contact p{font-size:14px;opacity:.8;margin-bottom:24px;}
-.quick-form{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-.quick-form input{height:52px;border:none;border-radius:10px;padding:0 16px;font-size:15px;font-family:inherit;min-width:200px;flex:1;}
-.quick-form .btn{height:52px;padding:0 28px;border-radius:10px;font-size:15px;white-space:nowrap;flex:0 0 auto;}
-.qc-note{font-size:12px;opacity:.6;margin-top:14px;}
-</style>
 </head>
 <body>
 
@@ -94,23 +83,6 @@
         <h2>所在地</h2>
         <p class="contact-note">合同会社アイズ<br>〒979-0204<br>福島県いわき市四倉町細谷字大町1番</p>
       </article>
-    </div>
-  </section>
-
-  <!-- ============ クイック査定申込 ============ -->
-  <section class="quick-contact" aria-labelledby="quick-title">
-    <div class="container">
-      <div class="quick-contact-box">
-        <div class="qc-badge">30秒で申込</div>
-        <h2 id="quick-title">お名前とメールアドレスだけでOK</h2>
-        <p>写真を送るだけでオンライン査定。担当者よりメールでご連絡します。</p>
-        <form id="quickForm" class="quick-form" novalidate>
-          <input type="text" id="qName" name="name" placeholder="お名前（例：山田 太郎）" required />
-          <input type="email" id="qEmail" name="email" placeholder="メールアドレス（例：example@mail.com）" required />
-          <button type="submit" class="btn btn-primary btn-lg">今すぐ無料査定を申し込む</button>
-        </form>
-        <p class="qc-note">24時間受付・しつこい電話は一切しません</p>
-      </div>
     </div>
   </section>
 
@@ -243,18 +215,5 @@
 <script src="assets/js/analytics.js?v=2" defer></script>
 <script src="assets/js/genres.js" defer></script>
 <script src="assets/js/buymo.js" defer></script>
-<script>
-document.getElementById('quickForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  var n = document.getElementById('qName').value.trim();
-  var em = document.getElementById('qEmail').value.trim();
-  if(!n || !em){ alert('お名前とメールアドレスをご入力ください'); return; }
-  if(typeof window.HQ === 'undefined' && window.BUYMO_GAS_ENDPOINT){
-    fetch(window.BUYMO_GAS_ENDPOINT, {method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({type:'inquiry',name:n,email:em,source:'quick'})}).catch(function(){});
-  }
-  window.location.href = 'buymo-thanks.html?quick=1&name=' + encodeURIComponent(n);
-});
-</script>
 </body>
 </html>
