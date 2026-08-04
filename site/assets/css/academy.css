@@ -358,9 +358,20 @@
 .cbot-quick-btn.primary:hover{background:var(--bot-head);border-color:var(--bot-head);color:#fff;}
 button.cbot-quick-btn{cursor:pointer;font-family:inherit;}
 button.cbot-quick-btn:disabled{opacity:.6;cursor:not-allowed;}
-button.cbot-handoff{background:#FFF7ED;border-color:#F59E0B;color:#B45309;}
-button.cbot-handoff:hover:not(:disabled){background:#F59E0B;border-color:#F59E0B;color:#fff;}
 .cbot-msg small{display:block;font-size:11px;color:#6B6560;margin-top:6px;line-height:1.5;}
+
+/* 担当者に相談CTA（状況に応じて表示・横幅いっぱいで折返さない） */
+.cbot-handoff-row{padding:8px 14px 0;background:#f7f9fb;flex-shrink:0;}
+.cbot-handoff-cta{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
+  background:#FFF7ED;border:1.5px solid #F59E0B;border-radius:10px;
+  padding:11px 12px;font-size:13px;font-weight:800;color:#B45309;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  animation:handoffPop .35s cubic-bezier(.34,1.56,.64,1);transition:all .15s;
+}
+.cbot-handoff-cta:hover:not(:disabled){background:#F59E0B;border-color:#F59E0B;color:#fff;}
+.cbot-handoff-cta:disabled{opacity:.6;cursor:not-allowed;}
+@keyframes handoffPop{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
 /* 入力欄 */
 .cbot-input{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eee;background:#fff;flex-shrink:0;}

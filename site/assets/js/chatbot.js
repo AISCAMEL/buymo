@@ -304,9 +304,11 @@
 
       '<div class="cbot-log" id="cbotLog" role="log" aria-live="polite"></div>' +
       '<div class="cbot-chips" id="cbotChips"></div>' +
+      '<div class="cbot-handoff-row" id="cbotHandoffRow" hidden>' +
+        '<button type="button" class="cbot-handoff-cta" id="cbotHandoff">👤 担当者（人）に相談する</button>' +
+      '</div>' +
       '<div class="cbot-quick">' +
         '<a class="cbot-quick-btn primary" href="#form">✏️ 無料査定</a>' +
-        '<button type="button" class="cbot-quick-btn cbot-handoff" id="cbotHandoff">👤 担当者に繋ぐ</button>' +
         '<a class="cbot-quick-btn" href="mailto:kaitori@buymo.me">✉️ メール</a>' +
       '</div>' +
       '<form class="cbot-input" autocomplete="off">' +
@@ -417,13 +419,29 @@
   }
 
   /* ---------- Send ---------- */
+  // 「担当者に相談」ボタンを状況に応じて表示する
+  var userMsgCount = 0;
+  function revealHandoff(reason) {
+    var row = document.getElementById('cbotHandoffRow');
+    if (!row || !row.hidden) return;
+    row.hidden = false;
+    if (window.BuymoGA) window.BuymoGA.track('handoff_offered', { reason: reason || '' });
+  }
+  // 人に繋ぎたい意図のキーワード
+  var HUMAN_KW = ['担当', '担当者', '人と', '人に', 'オペレータ', 'スタッフ', '電話', '折り返し', '直接', '相談したい', 'クレーム'];
+
   function send(text) {
     text = (text || '').trim();
     if (!text) return;
     addMsg('user', text);
     history.push({ role: 'user', content: text });
+    userMsgCount++;
     input.value = '';
     chips.style.display = 'none';
+
+    // 意図が「人に繋ぎたい」なら即ボタン表示
+    var hitHuman = HUMAN_KW.some(function (k) { return text.indexOf(k) >= 0; });
+    if (hitHuman) revealHandoff('keyword');
 
     var typing = addTyping();
     aiAsk(text, function (aiReply) {
@@ -438,10 +456,14 @@
         addMsg('bot', aiReply, cta);
         history.push({ role: 'assistant', content: aiReply });
       } else {
+        // AIが答えられずルールベースにフォールバック → 人に繋ぐ選択肢を提示
         var res = ruleAnswer(text);
         addMsg('bot', res.text, res.cta);
         history.push({ role: 'assistant', content: res.text });
+        revealHandoff('ai_fallback');
       }
+      // 会話が2往復以上続いたら（＝解決に時間がかかっている）ボタンを提示
+      if (userMsgCount >= 2) revealHandoff('multi_turn');
     });
   }
 

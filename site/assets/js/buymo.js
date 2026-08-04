@@ -701,25 +701,5 @@
     });
   }
 
-  /* ---- 10. チャット30秒プロンプト（滞在ユーザーへ声かけ） ---- */
-  var CHAT_PROMPT_KEY = 'buymo_chat_prompt_shown';
-  var promptShown = false;
-  try { promptShown = sessionStorage.getItem(CHAT_PROMPT_KEY) === '1'; } catch(e){}
-  if (!promptShown) {
-    setTimeout(function() {
-      if (promptShown) return;
-      var launcher = document.querySelector('.cbot-launch');
-      var panel = document.querySelector('.cbot-panel');
-      if (!launcher || (panel && !panel.hidden)) return;
-      // 吹き出し風のプロンプトを launcher に追加
-      var bubble = document.createElement('div');
-      bubble.className = 'cbot-hint-bubble';
-      bubble.innerHTML = '💬 何か気になる点はありますか？<br>AIがすぐお答えします';
-      launcher.appendChild(bubble);
-      promptShown = true;
-      try { sessionStorage.setItem(CHAT_PROMPT_KEY, '1'); } catch(e){}
-      setTimeout(function(){ if (bubble.parentNode) bubble.remove(); }, 12000);
-      if (window.BuymoGA) window.BuymoGA.track('chat_hint_shown');
-    }, 30000);
-  }
+  /* ---- 10. チャット声かけヒントは chatbot.js に一本化（重複・縦組みバグ回避のため削除） ---- */
 })();
