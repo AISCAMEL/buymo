@@ -723,6 +723,16 @@
   input.addEventListener('input', resetIdleTimer);
 
   /* ---------- 「担当者に繋ぐ」ハンドオフ ---------- */
+  // 営業時間判定（JST 平日 10:00〜19:00）
+  function isBusinessHoursJST() {
+    var now = new Date();
+    // UTC→JST(+9)に補正して曜日/時を求める
+    var jst = new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000);
+    var day = jst.getDay();   // 0=日, 6=土
+    var hour = jst.getHours();
+    return (day >= 1 && day <= 5 && hour >= 10 && hour < 19);
+  }
+
   var handoffBtn = document.getElementById('cbotHandoff');
   var handoffSent = false;
   if (handoffBtn) {
@@ -736,31 +746,39 @@
         showGate();
         return;
       }
-      // 確認モーダル
+      var biz = isBusinessHoursJST();
+      // 確認モーダル（営業時間内/外で文言を変える）
       var confirmWrap = el('div', 'cbot-msg-wrap bot cbot-handoff-confirm');
       var av = el('img', 'cbot-msg-avatar');
       av.src = mascotSrc; av.alt = ''; av.onerror = function () { this.style.display = 'none'; };
       confirmWrap.appendChild(av);
       var m = el('div', 'cbot-msg bot');
-      m.innerHTML =
-        '担当者に接続してもよろしいですか？<br>' +
-        '<small>これまでの会話内容と連絡先を担当者へ共有し、営業時間内であれば5分以内に折り返します（平日10:00〜19:00）。</small>' +
-        '<div class="cbot-idle-actions">' +
-          '<button type="button" class="cbot-idle-btn primary" data-hd="yes">はい、繋いでください</button>' +
-          '<button type="button" class="cbot-idle-btn" data-hd="no">キャンセル</button>' +
-        '</div>';
+      m.innerHTML = biz
+        ? ('いま担当者におつなぎできます。接続してもよろしいですか？<br>' +
+           '<small>これまでの会話内容と連絡先を担当者へ共有します。営業時間内（平日10:00〜19:00）は、担当者がこのチャットで直接ご返信します。</small>' +
+           '<div class="cbot-idle-actions">' +
+             '<button type="button" class="cbot-idle-btn primary" data-hd="yes">担当者につなぐ</button>' +
+             '<button type="button" class="cbot-idle-btn" data-hd="no">キャンセル</button>' +
+           '</div>')
+        : ('現在は営業時間外です（対応：平日10:00〜19:00）。<br>' +
+           '<small>いまはAIが引き続きお答えします。担当者への引き継ぎをご希望の場合は、内容を記録し翌営業日にご連絡します。</small>' +
+           '<div class="cbot-idle-actions">' +
+             '<button type="button" class="cbot-idle-btn primary" data-hd="yes">翌営業日の連絡を希望</button>' +
+             '<button type="button" class="cbot-idle-btn" data-hd="no">AIに続けて質問する</button>' +
+           '</div>');
       confirmWrap.appendChild(m);
       log.appendChild(confirmWrap);
       log.scrollTop = log.scrollHeight;
       m.querySelector('[data-hd="no"]').addEventListener('click', function () {
         confirmWrap.remove();
+        if (!biz) addMsg('bot', '承知しました。引き続きご質問をどうぞ！');
       });
       m.querySelector('[data-hd="yes"]').addEventListener('click', function () {
         confirmWrap.remove();
         handoffSent = true;
         handoffBtn.disabled = true;
-        handoffBtn.textContent = '✅ 通知済み';
-        // GAS へ送信
+        handoffBtn.textContent = biz ? '✅ 担当者に接続中' : '✅ 受付しました';
+        // GAS へ送信（GAS側でも営業時間判定して通知を出し分け）
         fireAndForget({
           type: 'buymo_chat_handoff',
           sessionId: sessionId || '',
@@ -769,15 +787,46 @@
           phone: contactInfo.phone || '',
           pageUrl: location.href,
           pageTitle: document.title || '',
+          businessHours: biz,
           messages: history.slice(-20)
         });
-        addMsg('bot', '担当者に通知しました。\n\n' +
-          '📞 営業時間内（平日10:00〜19:00）であれば5分以内に折り返しご連絡いたします。\n' +
-          '⏰ 営業時間外の場合は翌営業日にご対応します。\n\n' +
-          'このままチャットを続けていただいてOKです。');
-        if (window.BuymoGA) window.BuymoGA.track('chat_handoff', { session: sessionId });
+        if (biz) {
+          addMsg('bot', '担当者におつなぎしています。少々お待ちください。\n\nこのチャット画面のまま、担当者からのご返信をお待ちいただけます。');
+          startHandoffPolling();  // 担当者の返信をポーリング取得
+        } else {
+          addMsg('bot', '受け付けました。翌営業日（平日10:00〜）に担当者よりご連絡いたします。\n\nそれまでの間も、AIがお答えできますのでお気軽にどうぞ。');
+        }
+        if (window.BuymoGA) window.BuymoGA.track('chat_handoff', { session: sessionId, biz: biz });
       });
     });
+  }
+
+  // 担当者(Slack)からの返信を取得して画面に表示するポーリング（Phase 6）
+  var handoffPollTimer = null, lastReplyTs = 0;
+  function startHandoffPolling() {
+    if (handoffPollTimer) return;
+    var POLL_MS = 5000;
+    handoffPollTimer = setInterval(function () {
+      if (!sessionId || panel.hidden) return;
+      var cb = '__hreply_' + Date.now();
+      window[cb] = function (res) {
+        try { delete window[cb]; } catch (e) {}
+        if (res && res.replies && res.replies.length) {
+          res.replies.forEach(function (r) {
+            if (r.ts && r.ts > lastReplyTs) {
+              lastReplyTs = r.ts;
+              addMsg('bot', '👤 ' + (r.by || '担当者') + '：\n' + r.text);
+            }
+          });
+        }
+      };
+      var s = document.createElement('script');
+      s.src = GAS + '?action=chatreplies&session=' + encodeURIComponent(sessionId) +
+              '&since=' + lastReplyTs + '&callback=' + cb;
+      s.onerror = function () { try { delete window[cb]; } catch (e) {} };
+      document.body.appendChild(s);
+      setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 8000);
+    }, POLL_MS);
   }
 
   // Escキーで閉じる
