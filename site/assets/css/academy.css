@@ -207,6 +207,8 @@
   padding:22px 20px;background:#fff;display:flex;flex-direction:column;gap:12px;
   overflow-y:auto;flex:1;
 }
+/* hidden 属性を確実に効かせる（display:flex に負けないよう明示） */
+.cbot-gate[hidden]{display:none !important;}
 .cbot-gate-intro{
   font-size:13.5px;line-height:1.7;color:var(--text);
   padding:12px 14px;background:var(--green-bg);border-radius:10px;
