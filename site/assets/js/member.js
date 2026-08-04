@@ -23,6 +23,73 @@
     } catch (e) { return null; }
   }
 
+  // 自由入力の車種テキストから メーカー / 車種名 を推定する
+  // 例: "トヨタ プリウス 2019" → { maker:'トヨタ', model:'プリウス' }
+  //     "TOYOTA アルファード" → { maker:'トヨタ', model:'アルファード' }
+  function parseCarText(text) {
+    var s = String(text || '').trim();
+    if (!s) return { maker: '', model: '' };
+    // ドロップダウンの選択肢 + 英語/別表記のゆらぎ吸収
+    var MAKERS = [
+      { v: 'トヨタ',           kw: ['トヨタ', 'toyota', 'レクサス'] },  // レクサスは別途下で上書き
+      { v: 'レクサス',         kw: ['レクサス', 'lexus'] },
+      { v: 'ホンダ',           kw: ['ホンダ', 'honda'] },
+      { v: '日産',             kw: ['日産', 'ニッサン', 'nissan'] },
+      { v: 'マツダ',           kw: ['マツダ', 'mazda'] },
+      { v: 'スバル',           kw: ['スバル', 'subaru'] },
+      { v: 'スズキ',           kw: ['スズキ', 'suzuki'] },
+      { v: 'ダイハツ',         kw: ['ダイハツ', 'daihatsu'] },
+      { v: '三菱',             kw: ['三菱', 'ミツビシ', 'mitsubishi'] },
+      { v: 'いすゞ',           kw: ['いすゞ', 'いすず', 'isuzu'] },
+      { v: 'BMW',              kw: ['bmw', 'ビーエムダブリュー'] },
+      { v: 'ベンツ',           kw: ['ベンツ', 'メルセデス', 'benz', 'mercedes'] },
+      { v: 'アウディ',         kw: ['アウディ', 'audi'] },
+      { v: 'フォルクスワーゲン', kw: ['フォルクスワーゲン', 'ワーゲン', 'vw', 'volkswagen'] }
+    ];
+    var lower = s.toLowerCase();
+    var found = null, matchedKw = '';
+    // 「レクサス」を先に判定（トヨタ誤爆防止）
+    if (/レクサス|lexus/i.test(s)) {
+      found = 'レクサス'; matchedKw = (s.match(/レクサス|lexus/i) || [''])[0];
+    } else {
+      for (var i = 0; i < MAKERS.length; i++) {
+        for (var j = 0; j < MAKERS[i].kw.length; j++) {
+          if (lower.indexOf(MAKERS[i].kw[j]) >= 0) {
+            found = MAKERS[i].v; matchedKw = MAKERS[i].kw[j];
+            break;
+          }
+        }
+        if (found) break;
+      }
+    }
+    var model = '';
+    if (found && matchedKw) {
+      // マッチしたメーカー表記を除去 → 先頭の1語を車種名として抽出
+      var rest = s.replace(new RegExp(matchedKw, 'i'), ' ')
+                  .replace(/[0-9０-９]{2,4}\s*年?/g, ' ')  // 年式を除去
+                  .replace(/\s+/g, ' ').trim();
+      model = (rest.split(/[\s、,／\/]+/)[0] || '').trim();
+    } else {
+      // メーカー不明 → 先頭語を車種名候補に
+      model = (s.split(/[\s、,／\/]+/)[0] || '').trim();
+    }
+    return { maker: found || '', model: model };
+  }
+
+  // ?reset=1 で BUYMO 関連 localStorage を全消去（管理者テスト用）
+  (function handleReset() {
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('reset') === '1') {
+        [EKEY, NKEY, CKEY, PKEY].forEach(function (k) { localStorage.removeItem(k); });
+        // クエリを外して再読込
+        var clean = location.pathname;
+        alert('BUYMO会員ページのローカルデータを全消去しました。');
+        location.replace(clean);
+      }
+    } catch (e) {}
+  })();
+
   var loginView = document.getElementById('memberLogin');
   var dashView = document.getElementById('memberDash');
 
@@ -302,7 +369,7 @@
       var email = '';
       try { email = localStorage.getItem(EKEY) || ''; } catch (e) {}
       if (ncMailEl) ncMailEl.textContent = email;
-      // トップフォームの入力値をプリフィル（都道府県・電話・メモの車種メモ）
+      // トップフォームの入力値をプリフィル（都道府県・電話・メーカー・車種・メモ）
       var pf = readPrefill();
       if (pf) {
         var tel  = document.getElementById('nc-tel');
@@ -310,7 +377,16 @@
         var memo = document.getElementById('nc-memo');
         if (tel  && !tel.value  && pf.tel)  tel.value  = pf.tel;
         if (pref && !pref.value && pf.pref) pref.value = pf.pref;
-        if (memo && !memo.value && pf.car)  memo.value = 'お問い合わせ時の内容：\n' + pf.car;
+        // 自由入力の車種テキストからメーカー/車種を自動判定して転用
+        if (pf.car) {
+          var parsed = parseCarText(pf.car);
+          var mk = document.getElementById('nc-maker');
+          var md = document.getElementById('nc-model');
+          if (mk && !mk.value && parsed.maker) mk.value = parsed.maker;
+          if (md && !md.value && parsed.model) md.value = parsed.model;
+          // メモには元の入力をそのまま残す（判定漏れ対策）
+          if (memo && !memo.value) memo.value = 'お問い合わせ時の内容：\n' + pf.car;
+        }
       }
       var first = ncForm.querySelector('select, input');
       if (first) setTimeout(function () { first.focus(); }, 50);

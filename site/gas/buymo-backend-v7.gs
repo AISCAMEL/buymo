@@ -711,11 +711,61 @@ function getCases() {
   cases.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   return cases;
 }
-// マイページ用: そのメアドの案件のみを取得 (member.js からJSONPで呼ばれる)
+// マイページ「マイページ案件」シートから該当メールの案件を取得
+function getMyMemberCases(email) {
+  if (!email) return [];
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName(MEMBER_CASE_SHEET);
+    if (!sheet) return [];
+    var last = sheet.getLastRow();
+    if (last < 2) return [];
+    var head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var idx = function (h) { return head.indexOf(h); };
+    var iDate = idx('受付日時'), iId = idx('案件ID'), iName = idx('氏名'),
+        iEmail = idx('メール'), iMaker = idx('メーカー'), iModel = idx('車種'),
+        iPref = idx('所在(都道府県)'), iStage = idx('ステージ'),
+        iAmount = idx('査定額'), iMemo = idx('メモ');
+    var rows = sheet.getRange(2, 1, last - 1, sheet.getLastColumn()).getValues();
+    var target = String(email).toLowerCase();
+    return rows.filter(function (r) {
+      return String(r[iEmail] || '').toLowerCase() === target;
+    }).map(function (r) {
+      var maker = r[iMaker] || '', model = r[iModel] || '';
+      var d = r[iDate];
+      return {
+        id:     r[iId] || '',
+        date:   d ? Utilities.formatDate(new Date(d), 'Asia/Tokyo', 'yyyy/MM/dd') : '',
+        name:   r[iName]  || '',
+        email:  r[iEmail] || '',
+        genre:  (maker + ' ' + model).trim() || 'マイページ案件',
+        stage:  r[iStage] || '新規受付',
+        amount: r[iAmount] || 0,
+        memo:   r[iMemo]  || '',
+        source: 'member',
+        pref:   r[iPref]  || ''
+      };
+    });
+  } catch (e) { Logger.log('getMyMemberCases: ' + e.message); return []; }
+}
+
+// マイページ用: そのメアドの案件を「案件」+「マイページ案件」両シートから統合取得
 function getMyCases(email) {
   if (!email) return [];
-  var all = getCases();
-  return all.filter(function (c) { return String(c.email).toLowerCase() === String(email).toLowerCase(); });
+  var target = String(email).toLowerCase();
+  var mainCases = getCases().filter(function (c) {
+    return String(c.email).toLowerCase() === target;
+  });
+  var memberCases = getMyMemberCases(email);
+  // 案件ID重複時は「案件」シート優先（ステージ更新が反映されるため）
+  var seenIds = {};
+  mainCases.forEach(function (c) { if (c.id) seenIds[c.id] = true; });
+  var unique = mainCases.concat(memberCases.filter(function (c) {
+    return !c.id || !seenIds[c.id];
+  }));
+  // 日付降順
+  unique.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  return unique;
 }
 function handleCase(data) {
   var sheet = getCaseSheet(), rows = sheet.getDataRange().getValues();
@@ -1267,6 +1317,38 @@ function clearTestSubmissions() {
     Logger.log((last - 1) + '行のテスト送信を削除しました');
   } catch (e) { Logger.log('clearTestSubmissions: ' + e.message); }
 }
+// 管理者テストで汚れた案件シートを掃除する
+// (「案件」「マイページ案件」「リード」から isTestEmail(email) 該当行を削除)
+function cleanupAdminData() {
+  var target = getTestEmails();
+  var deleted = { '案件': 0, 'マイページ案件': 0, 'リード': 0 };
+  try {
+    var ss = getSS();
+    ['案件', 'マイページ案件', 'リード'].forEach(function (sheetName) {
+      var sheet = ss.getSheetByName(sheetName);
+      if (!sheet) return;
+      var last = sheet.getLastRow();
+      if (last < 2) return;
+      var head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      var emailCol = head.indexOf('メール');
+      if (emailCol < 0) return;
+      // 下から順に削除（インデックスがずれないように）
+      var rows = sheet.getRange(2, 1, last - 1, sheet.getLastColumn()).getValues();
+      for (var i = rows.length - 1; i >= 0; i--) {
+        var email = String(rows[i][emailCol] || '').trim().toLowerCase();
+        if (target.indexOf(email) >= 0) {
+          sheet.deleteRow(i + 2); // +2: ヘッダ行 + 1-index
+          deleted[sheetName]++;
+        }
+      }
+    });
+    Logger.log('管理者テストデータを削除しました:\n' +
+      '案件: ' + deleted['案件'] + '行\n' +
+      'マイページ案件: ' + deleted['マイページ案件'] + '行\n' +
+      'リード: ' + deleted['リード'] + '行');
+  } catch (e) { Logger.log('cleanupAdminData: ' + e.message); }
+}
+
 // Slack Bot 接続テスト (SLACK_BOT_TOKEN / SLACK_CHANNEL_ID の検証)
 function testSlackBot() {
   var token   = getProp('SLACK_BOT_TOKEN');
