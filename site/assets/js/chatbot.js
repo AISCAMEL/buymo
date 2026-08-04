@@ -177,7 +177,7 @@
 
         // 個人情報
         { k: ['個人情報','安全','漏洩','プライバシー'],
-          a: 'お客様の個人情報は**厳格に管理**しております。プライバシーマーク相当の運用で、目的外利用は一切いたしません。',
+          a: 'お客様の個人情報は**厳格に管理**しております。プライバシーポリシーに基づき適切に取り扱い、目的外利用は一切いたしません。',
           cta: [{ label: 'プライバシーポリシー', href: '/privacy.html' }] },
 
         // 会員
@@ -503,8 +503,27 @@
       hideHint();
       root.querySelector('.cbot-launch').click();
     });
-    // 6秒後にヒント表示
-    setTimeout(showHint, 6000);
+    // ページを一定量スクロールした後にヒント表示（全ページ共通）
+    // 条件: ページの25%以上 または 700px 以上スクロール
+    var hintShown = false;
+    function maybeShowHint() {
+      if (hintShown) return;
+      var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+      var docH = Math.max(
+        document.body.scrollHeight, document.documentElement.scrollHeight
+      ) - window.innerHeight;
+      var ratio = docH > 0 ? (y / docH) : 0;
+      if (y >= 700 || ratio >= 0.25) {
+        hintShown = true;
+        window.removeEventListener('scroll', maybeShowHint);
+        showHint();
+      }
+    }
+    window.addEventListener('scroll', maybeShowHint, { passive: true });
+    // スクロールが起きない短いページ用フォールバック（20秒後）
+    setTimeout(function () {
+      if (!hintShown) { hintShown = true; showHint(); }
+    }, 20000);
   }
 
   /* ---------- 事前ゲート (連絡先入力) 制御 ---------- */

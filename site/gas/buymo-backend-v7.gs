@@ -216,6 +216,7 @@ function doGet(e) {
     if (action === 'check')  return jsonOut(checkDuplicate(p.title, p.body || ''));
     if (action === 'cases')  return jsonOut(getCases());
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
+    if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
@@ -767,6 +768,56 @@ function getMyCases(email) {
   unique.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   return unique;
 }
+
+// ログイン可否判定: そのメールで問い合わせ/案件/リードが1件でもあれば許可
+// (査定のお申し込みが無い第三者のログインを防ぐ)
+function authCheck(email) {
+  var e = String(email || '').trim().toLowerCase();
+  if (!e) return { ok: false, reason: 'no_email' };
+  // 管理者テストメールは常に許可（動作確認用）
+  if (isTestEmail(e)) return { ok: true, test: true };
+  try {
+    // 統合案件（案件 + マイページ案件）を確認
+    if (getMyCases(email).length > 0) return { ok: true };
+    // リードシート（問い合わせ受付）も確認
+    var ss = getSS();
+    var lead = ss.getSheetByName(LEAD_SHEET_NAME);
+    if (lead) {
+      var last = lead.getLastRow();
+      if (last >= 2) {
+        var head = lead.getRange(1, 1, 1, lead.getLastColumn()).getValues()[0];
+        var col = head.indexOf('メール');
+        if (col >= 0) {
+          var vals = lead.getRange(2, col + 1, last - 1, 1).getValues();
+          for (var i = 0; i < vals.length; i++) {
+            if (String(vals[i][0] || '').trim().toLowerCase() === e) return { ok: true };
+          }
+        }
+      }
+    }
+    // 問い合わせシートも確認
+    var cont = ss.getSheetByName(SHEET_NAME);
+    if (cont) {
+      var last2 = cont.getLastRow();
+      if (last2 >= 2) {
+        var head2 = cont.getRange(1, 1, 1, cont.getLastColumn()).getValues()[0];
+        var col2 = head2.indexOf('メール');
+        if (col2 >= 0) {
+          var vals2 = cont.getRange(2, col2 + 1, last2 - 1, 1).getValues();
+          for (var j = 0; j < vals2.length; j++) {
+            if (String(vals2[j][0] || '').trim().toLowerCase() === e) return { ok: true };
+          }
+        }
+      }
+    }
+  } catch (err) {
+    // 判定でエラーが出た場合は安全側に倒さず、ログを残して許可（UX優先・シート障害時のロックアウト回避）
+    Logger.log('authCheck error: ' + err.message);
+    return { ok: true, degraded: true };
+  }
+  return { ok: false, reason: 'not_found' };
+}
+
 function handleCase(data) {
   var sheet = getCaseSheet(), rows = sheet.getDataRange().getValues();
   for (var i = 1; i < rows.length; i++) {
