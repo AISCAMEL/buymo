@@ -437,7 +437,35 @@ function handleChatHandoff(data) {
     }
   } catch (e) { Logger.log('handleChatHandoff bot thread: ' + e.message); }
 
-  return { status: 'ok', businessHours: isBusinessHours };
+  // Asana へタスク自動起票（「紹介お問い合わせ」セクション）
+  var asanaUrl = '';
+  try {
+    var title = '[チャット相談] ' + (name || '氏名未登録') +
+                (isBusinessHours ? '（要即対応）' : '（翌営業日）');
+    var notes =
+      '受付日時: ' + ts + '\n' +
+      '区分: チャットからの担当者呼び出し' + (isBusinessHours ? '（営業時間内）' : '（営業時間外）') + '\n' +
+      '─────────────────\n' +
+      '氏名: ' + (name || '(未登録)') + '\n' +
+      'メール: ' + (email || '(未登録)') + '\n' +
+      '電話: ' + (phone || '(未登録)') + '\n' +
+      'ページ: ' + pageUrl + '\n' +
+      'セッション: ' + sid + '\n' +
+      '─── 会話履歴（直近20件）───\n' +
+      transcript + '\n' +
+      '─────────────────\n' +
+      (isBusinessHours
+        ? '営業時間内です。Slackの該当スレッドに返信するとお客様画面に表示されます。'
+        : '営業時間外の受付です。翌営業日にご連絡ください。');
+    var asanaRes = postToAsana({
+      title: title,
+      notes: notes,
+      sectionId: ASANA_SECTION_LEAD
+    });
+    if (asanaRes && asanaRes.url) asanaUrl = asanaRes.url;
+  } catch (e) { Logger.log('handleChatHandoff asana: ' + e.message); }
+
+  return { status: 'ok', businessHours: isBusinessHours, asanaUrl: asanaUrl };
 }
 
 /* ============================================================
