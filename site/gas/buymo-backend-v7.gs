@@ -217,7 +217,6 @@ function doGet(e) {
     if (action === 'cases')  return jsonOut(getCases());
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
-    if (action === 'login')  return jsonp(p.callback, staffLogin(p.email || '', p.pw || '', p.role || '')); // NEW: 本部/加盟店ログイン
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
     return jsonOut({ error: 'unknown action' });
@@ -946,54 +945,6 @@ function authCheck(email) {
     return { ok: true, degraded: true };
   }
   return { ok: false, reason: 'not_found' };
-}
-
-/* ============================================================
-   本部/加盟店 業務ログイン（メールアドレスの許可リスト方式）
-   - パスワードは使わない（メールアドレスで判定）。pw は無視。
-   - 許可メールは Script Properties で管理：
-       HQ_EMAILS       = 本部スタッフのメール（カンマ区切り）
-       PARTNER_EMAILS  = 加盟店スタッフのメール（カンマ区切り）
-     既定で会社メール（下記）は本部として常に許可。
-   - 本部(hq)は全権限。加盟店(partner)は加盟店ページのみ。
-   ============================================================ */
-var HQ_EMAILS_DEFAULT = ['info@aisjaltd.com', 'kaitori@buymo.me', 'test@buymo.me'];
-
-function staffEmails(propKey, defaults) {
-  var extra = (getProp(propKey) || '').split(',')
-    .map(function (s) { return String(s).trim().toLowerCase(); })
-    .filter(function (s) { return s; });
-  var base = (defaults || []).map(function (s) { return s.toLowerCase(); });
-  return base.concat(extra);
-}
-
-// メールから役割を判定：'hq' / 'partner' / null
-function staffRole(email) {
-  var e = String(email || '').trim().toLowerCase();
-  if (!e) return null;
-  if (staffEmails('HQ_EMAILS', HQ_EMAILS_DEFAULT).indexOf(e) >= 0) return 'hq';
-  if (staffEmails('PARTNER_EMAILS', []).indexOf(e) >= 0) return 'partner';
-  return null;
-}
-
-// 本部/加盟店ログイン（auth.js の action=login から呼ばれる）
-function staffLogin(email, pw, requestedRole) {
-  var e = String(email || '').trim().toLowerCase();
-  if (!e) return { ok: false, error: 'メールアドレスを入力してください' };
-
-  var role = staffRole(e);
-  if (!role) {
-    return { ok: false, error: '未登録のアカウントです。ログインできるメールは本部へご確認ください。' };
-  }
-  // 本部ボタンで入れるのは本部のみ。加盟店ボタンは本部・加盟店どちらも可。
-  if (requestedRole === 'hq' && role !== 'hq') {
-    return { ok: false, error: '本部権限がありません。加盟店でログインしてください。' };
-  }
-  var effectiveRole = (requestedRole === 'partner' && role === 'hq') ? 'partner' : role;
-
-  // クライアント側ゲート用トークン（有効期限つき・簡易）。TTL は auth.js 側の既定を使用。
-  var token = 'staff-' + Utilities.base64EncodeWebSafe(e + '|' + effectiveRole + '|' + (new Date().getTime()));
-  return { ok: true, token: token, role: effectiveRole, name: e };
 }
 
 function handleCase(data) {

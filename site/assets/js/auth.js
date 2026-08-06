@@ -1,9 +1,9 @@
 /* ============================================================
    BUYMO 認証（フロント）
    - 業務ページ（本部/加盟店）にログインゲートをかける
-   - ENDPOINT 未設定：デモ認証（メール+任意PWでログイン）
-   - ENDPOINT 設定時：GAS の doGet(action=login) でセッショントークン取得
-   ※ セキュリティの前提・限界は docs/BUYMO_認証設計.md を参照
+   - ログインはメールアドレスの許可リスト方式（パスワード不要・サーバー不要）
+     許可メールは下の STAFF_HQ / STAFF_PARTNER を編集して追加する
+   - 会員（お客様）マイページは別方式（member 側で GAS の authcheck を使用）
    ============================================================ */
 window.AUTH = (function () {
   'use strict';
@@ -20,21 +20,28 @@ window.AUTH = (function () {
 
   function home(r) { return r === 'partner' ? 'hq.html?role=partner' : (r === 'member' ? 'member.html' : 'hq-dashboard.html'); }
 
+  /* 本部/加盟店の許可メール（ここに追加するだけでログインできます）
+     ※ メールアドレス方式・パスワード不要。小文字で記載。 */
+  var STAFF_HQ = ['info@aisjaltd.com', 'kaitori@buymo.me', 'test@buymo.me'];
+  var STAFF_PARTNER = []; // 例: 'store-iwaki@example.com'
+
+  function staffRoleOf(email) {
+    email = String(email || '').trim().toLowerCase();
+    if (STAFF_HQ.indexOf(email) >= 0) return 'hq';
+    if (STAFF_PARTNER.indexOf(email) >= 0) return 'partner';
+    return null;
+  }
+
+  // 本部/加盟店ログイン（メール許可リストで判定。サーバー不要）
   function login(email, pw, r, cb) {
     email = (email || '').trim();
     if (!email) { cb(false, 'メールアドレスを入力してください'); return; }
-    if (!ENDPOINT) {
-      set({ token: 'demo-' + Math.random().toString(36).slice(2), role: r || 'hq', name: email, email: email, exp: now() + TTL });
-      cb(true); return;
-    }
-    window.__login = function (d) {
-      if (d && d.ok) { set({ token: d.token, role: d.role || r, name: d.name || email, email: email, exp: now() + (d.ttl || TTL) }); cb(true); }
-      else cb(false, (d && d.error) || 'ログインに失敗しました');
-    };
-    var s = document.createElement('script');
-    s.src = ENDPOINT + '?action=login&email=' + encodeURIComponent(email) + '&pw=' + encodeURIComponent(pw) + '&role=' + encodeURIComponent(r || '') + '&callback=__login';
-    s.onerror = function () { cb(false, '接続に失敗しました'); };
-    document.body.appendChild(s);
+    var role = staffRoleOf(email);
+    if (!role) { cb(false, '登録されていないメールアドレスです。本部にご確認ください。'); return; }
+    if (r === 'hq' && role !== 'hq') { cb(false, '本部権限がありません。「加盟店でログイン」をご利用ください。'); return; }
+    var eff = (r === 'partner' && role === 'hq') ? 'partner' : role; // 本部は加盟店ページも閲覧可
+    set({ token: 'staff-' + Math.random().toString(36).slice(2), role: eff, name: email, email: email, exp: now() + TTL });
+    cb(true);
   }
 
   function logout() {
