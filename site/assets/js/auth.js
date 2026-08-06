@@ -22,7 +22,7 @@ window.AUTH = (function () {
 
   function login(email, pw, r, cb) {
     email = (email || '').trim();
-    if (!email || !pw) { cb(false, 'メールとパスワードを入力してください'); return; }
+    if (!email) { cb(false, 'メールアドレスを入力してください'); return; }
     if (!ENDPOINT) {
       set({ token: 'demo-' + Math.random().toString(36).slice(2), role: r || 'hq', name: email, email: email, exp: now() + TTL });
       cb(true); return;
