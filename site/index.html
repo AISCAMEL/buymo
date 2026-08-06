@@ -175,7 +175,12 @@
   <section class="hero" aria-labelledby="hero-title">
     <!-- hero-art は .hero 直下に配置してフルブリード背景として機能させる -->
     <div class="hero-art" aria-hidden="true">
-      <img class="hero-img-main" src="assets/img/buymo/hero-photo.png?v=3" alt="" loading="eager" fetchpriority="high" />
+      <picture>
+        <source media="(max-width:640px)" type="image/webp" srcset="assets/img/buymo/hero-photo-mobile.webp?v=4" />
+        <source media="(max-width:640px)" srcset="assets/img/buymo/hero-photo-mobile.jpg?v=4" />
+        <source type="image/webp" srcset="assets/img/buymo/hero-photo.webp?v=4" />
+        <img class="hero-img-main" src="assets/img/buymo/hero-photo.jpg?v=4" alt="" width="2000" height="1116" loading="eager" fetchpriority="high" />
+      </picture>
     </div>
     <div class="container hero-inner">
       <div class="hero-copy reveal">

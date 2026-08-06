@@ -5,6 +5,19 @@
   var all = [];
   var stores = HQ.getStores();
 
+  // クリックtoCall：電話をタップ発信リンクに（スマホ/PCの電話アプリが起動）
+  function telLink(tel) {
+    var t = String(tel || '').trim();
+    if (!t) return '<span class="td-sub">—</span>';
+    var num = t.replace(/[^0-9+]/g, '');
+    return '<a class="lead-tel" href="tel:' + num + '" title="タップで発信">📞 ' + HQ.esc(t) + '</a>';
+  }
+  function mailLink(email) {
+    var e = String(email || '').trim();
+    if (!e) return '';
+    return '<a href="mailto:' + HQ.esc(e) + '">' + HQ.esc(e) + '</a>';
+  }
+
   // 滞留判定（受付から5日以上・未完了の初期〜商談ステージ）
   var STALE_DAYS = 5, EARLY = ['新規受付', '査定中', '商談中'];
   function daysSince(d) { if (!d) return 0; var t = new Date(String(d).replace(/\//g, '-') + 'T00:00:00'); if (isNaN(t)) return 0; return Math.floor((new Date() - t) / 86400000); }
@@ -60,7 +73,7 @@
         '<td>' + HQ.esc(c.id) + '</td>' +
         '<td class="td-sub">' + HQ.esc(c.date || '—') + (isStale(c) ? ' <span class="lead-stale">滞留' + daysSince(c.date) + '日</span>' : '') + '</td>' +
         '<td>' + HQ.esc(c.name) + '</td>' +
-        '<td>' + HQ.esc(c.tel || '') + '<br><span class="td-sub">' + HQ.esc(c.email || '') + '</span></td>' +
+        '<td>' + telLink(c.tel) + '<br><span class="td-sub">' + mailLink(c.email) + '</span></td>' +
         '<td>' + HQ.esc(c.genre || '') + '</td>' +
         '<td><select class="js-store">' + storeOptions(c.assignee) + '</select></td>' +
         '<td><select class="js-stage stage-sel s' + HQ.stageIdx(c.stage) + '">' + stageOptions(c.stage) + '</select></td>' +
