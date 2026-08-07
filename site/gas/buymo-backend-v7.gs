@@ -245,6 +245,7 @@ function doPost(e) {
     if (data.type === 'buymo_chat_start') return jsonOut(handleChatStart(data));  // NEW
     if (data.type === 'buymo_chat_log')   return jsonOut(handleChatLog(data));    // NEW
     if (data.type === 'buymo_chat_handoff') return jsonOut(handleChatHandoff(data));  // NEW (Phase 5)
+    if (data.type === 'buymo_case_decision') return jsonOut(handleCaseDecision(data)); // NEW: 売却する/しない
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -695,7 +696,7 @@ function slackNewLead(data, caseId, photoCount) {
   ]);
 }
 function slackStageChange(caseId, name, genre, from, to, assignee) {
-  var emoji = { '新規受付':'📥','査定中':'🔍','商談中':'💬','契約':'✍️','入金待ち':'💰','完了':'✅' };
+  var emoji = { '新規受付':'📥','査定中':'🔍','査定額提示':'💴','商談中':'💬','契約':'✍️','入金待ち':'💰','完了':'✅','見送り':'🔴' };
   notifySlack([
     { type: 'section', text: { type: 'mrkdwn', text: (emoji[to] || '📌') + ' *ステージ変更* `' + (from || '?') + '` → `' + to + '`' } },
     { type: 'section', fields: [
@@ -893,9 +894,262 @@ function getMyCases(email) {
   var unique = mainCases.concat(memberCases.filter(function (c) {
     return !c.id || !seenIds[c.id];
   }));
+  // 各案件に意思決定（売却する/しない・理由）を付与
+  var decMap = getAllDecisions();
+  unique.forEach(function (c) {
+    var d = c.id ? decMap[c.id] : null;
+    c.decision = d ? d.decision : '';        // 'sell' | 'nosell' | ''
+    c.decisionReason = d ? d.reason : '';
+    c.decisionDate = d ? d.date : '';
+  });
   // 日付降順
   unique.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   return unique;
+}
+
+/* ============================================================
+   ⑭ NEW: 査定額提示後の意思決定（売却する/しない）+ 見送り理由
+   ・専用シート「意思決定」で案件IDに紐付け
+   ・列: 案件ID / メール / 意思決定 / 見送り理由 / 決定日時 / リマインド段階 / 最終リマインド日
+   ============================================================ */
+var DECISION_SHEET = '意思決定';
+
+function getDecisionSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(DECISION_SHEET);
+  if (!sheet) {
+    sheet = ss.insertSheet(DECISION_SHEET);
+    sheet.appendRow(['案件ID','メール','意思決定','見送り理由','決定日時','リマインド段階','最終リマインド日']);
+    sheet.getRange(1, 1, 1, 7).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+function getAllDecisions() {
+  var map = {};
+  try {
+    var sheet = getDecisionSheet();
+    var last = sheet.getLastRow();
+    if (last < 2) return map;
+    var rows = sheet.getRange(2, 1, last - 1, 7).getValues();
+    rows.forEach(function (r) {
+      if (r[0]) map[String(r[0])] = { email: r[1], decision: r[2], reason: r[3], date: r[4], step: Number(r[5]) || 0 };
+    });
+  } catch (e) { Logger.log('getAllDecisions: ' + e.message); }
+  return map;
+}
+function saveDecision(caseId, email, decision, reason) {
+  var sheet = getDecisionSheet();
+  var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+  var rows = sheet.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]) === String(caseId)) {
+      sheet.getRange(i + 1, 3).setValue(decision);
+      if (reason !== undefined) sheet.getRange(i + 1, 4).setValue(reason || '');
+      sheet.getRange(i + 1, 5).setValue(ts);
+      return;
+    }
+  }
+  sheet.appendRow([caseId, email, decision, reason || '', ts, 0, '']);
+}
+
+// 案件のステージを更新（案件 / マイページ案件 両シートを探して更新）
+function updateCaseStageAnywhere(caseId, newStage) {
+  try {
+    var ss = getSS();
+    var sheets = [
+      { s: ss.getSheetByName(CASE_SHEET_NAME), idCol: 0, stageHeader: 'ステージ', stageCol: 7 },
+      { s: ss.getSheetByName(MEMBER_CASE_SHEET), idCol: null, stageHeader: 'ステージ', stageCol: null }
+    ];
+    // 案件シート（位置固定）
+    var cs = ss.getSheetByName(CASE_SHEET_NAME);
+    if (cs) {
+      var r1 = cs.getDataRange().getValues();
+      for (var i = 1; i < r1.length; i++) {
+        if (String(r1[i][0]) === String(caseId)) { cs.getRange(i + 1, 8).setValue(newStage); break; }
+      }
+    }
+    // マイページ案件シート（ヘッダ参照）
+    var ms = ss.getSheetByName(MEMBER_CASE_SHEET);
+    if (ms && ms.getLastRow() > 1) {
+      var head = ms.getRange(1, 1, 1, ms.getLastColumn()).getValues()[0];
+      var idC = head.indexOf('案件ID'), stC = head.indexOf('ステージ');
+      if (idC >= 0 && stC >= 0) {
+        var r2 = ms.getRange(2, 1, ms.getLastRow() - 1, ms.getLastColumn()).getValues();
+        for (var j = 0; j < r2.length; j++) {
+          if (String(r2[j][idC]) === String(caseId)) { ms.getRange(j + 2, stC + 1).setValue(newStage); break; }
+        }
+      }
+    }
+  } catch (e) { Logger.log('updateCaseStageAnywhere: ' + e.message); }
+}
+
+function handleCaseDecision(data) {
+  var caseId = String(data.caseId || '').trim();
+  var email  = String(data.email || '').trim();
+  var decision = (data.decision === 'sell') ? 'sell' : (data.decision === 'nosell' ? 'nosell' : '');
+  var reason = String(data.reason || '').replace(/[<>]/g, '').slice(0, 500);
+  if (!caseId || !decision) return { status: 'error', message: 'caseId and decision required' };
+
+  saveDecision(caseId, email, decision, reason);
+
+  var name = '';
+  try {
+    var all = getCases().concat(getMyMemberCases(email));
+    for (var i = 0; i < all.length; i++) { if (String(all[i].id) === caseId) { name = all[i].name || ''; break; } }
+  } catch (e) {}
+
+  if (decision === 'sell') {
+    // 売却へ → 商談中に進める
+    updateCaseStageAnywhere(caseId, '商談中');
+    try {
+      notifySlack([
+        { type: 'header', text: { type: 'plain_text', text: '🎉 売却の意思あり（要フォロー）' } },
+        { type: 'section', text: { type: 'mrkdwn', text: '*案件:* ' + caseId + '\n*会員:* ' + (name || '') + ' <' + email + '>\n査定額にご納得 → 商談へ。書類準備の連絡をお願いします。' } }
+      ]);
+    } catch (e) {}
+    try {
+      MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: '【BUYMO】売却の意思あり: ' + caseId + ' (' + email + ')',
+        body: 'お客様が「売却する」を選択しました。\n案件: ' + caseId + '\n会員: ' + name + ' <' + email + '>\n商談・書類準備へお進みください。' });
+    } catch (e) {}
+    // お客様へ次のステップ案内
+    if (email) sendSellNextStepMail(name, email, caseId);
+    // Asana
+    try { postToAsana({ title: '[売却意思] ' + (name || email) + ' / ' + caseId, notes: 'お客様が売却を選択。商談・書類準備へ。\nメール: ' + email, sectionId: ASANA_SECTION_MEMBER }); } catch (e) {}
+  } else {
+    // 見送り → 顧客として登録・理由を記録
+    updateCaseStageAnywhere(caseId, '見送り');
+    try {
+      notifySlack([
+        { type: 'header', text: { type: 'plain_text', text: '🔴 今回は見送り（理由記録）' } },
+        { type: 'section', text: { type: 'mrkdwn', text: '*案件:* ' + caseId + '\n*会員:* ' + (name || '') + ' <' + email + '>\n*理由:* ' + (reason || '(未記入)') } }
+      ]);
+    } catch (e) {}
+    try {
+      MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: '【BUYMO】今回は見送り: ' + caseId + ' (' + email + ')',
+        body: 'お客様が「売却しない」を選択しました。\n案件: ' + caseId + '\n会員: ' + name + ' <' + email + '>\n理由: ' + (reason || '(未記入)') + '\n\n※顧客として登録済み。将来の再アプローチ候補。' });
+    } catch (e) {}
+  }
+  return { status: 'ok', decision: decision };
+}
+
+function sendSellNextStepMail(name, email, caseId) {
+  try {
+    var body =
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n  BUYMO 車買取サービス\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+(name || 'お客') + ' 様\n\n' +
+'このたびは売却をご決断いただき、誠にありがとうございます。\n' +
+'ここから先も、すべて無料でサポートいたします。\n\n' +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n  ⏱ 次のステップ\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'  1. 担当より最終確認のご連絡（お電話は最終確認のこの1回のみ）\n' +
+'  2. 必要書類のご案内（車検証・印鑑証明・振込口座など）\n' +
+'  3. ご契約・書類のご返送\n' +
+'  4. ご自宅までお車を無料でお引き取り\n' +
+'  5. 3営業日以内にご指定口座へお振込み\n\n' +
+'  ▶ マイページ: ' + MEMBER_PAGE_URL + '\n\n' +
+'ご不明点はこのメールにご返信ください。\n\n' +
+'BUYMO買取センター（運営：合同会社アイズ）\n〒971-8138 福島県いわき市若葉台1丁目31-11\n✉ ' + REPLY_TO + '\n';
+    MailApp.sendEmail({ to: email, subject: '【BUYMO】売却手続きのご案内｜案件 ' + caseId, body: body, name: FROM_NAME, replyTo: REPLY_TO });
+  } catch (e) { Logger.log('sendSellNextStepMail: ' + e.message); }
+}
+
+/* ============================================================
+   ⑮ NEW: 査定額提示リマインダー（意思決定するまでステップ配信）
+   ・ステージ「査定額提示」かつ金額>0かつ未決定の案件が対象
+   ・配信間隔: 2 → 3 → 4 → 7 → 以降7日ごと（決定するまで継続）
+   ・トリガー: 日タイマー（毎日1回）で runQuoteReminders を実行
+   ============================================================ */
+var QUOTE_REMIND_GAPS = [2, 3, 4, 7]; // step1後2日, 以降3,4,7… 5回目以降は7日固定
+var QUOTE_REMIND_MAX  = 20;           // 安全上限（無限送信防止）
+
+// 両シートから「査定額提示」かつ金額>0の案件を収集
+function collectQuoteCases() {
+  var out = [];
+  try {
+    getCases().forEach(function (c) {
+      if (c.stage === '査定額提示' && Number(c.amount) > 0 && c.email) {
+        out.push({ id: c.id, email: c.email, name: c.name, amount: c.amount });
+      }
+    });
+  } catch (e) {}
+  try {
+    var ss = getSS(); var ms = ss.getSheetByName(MEMBER_CASE_SHEET);
+    if (ms && ms.getLastRow() > 1) {
+      var head = ms.getRange(1, 1, 1, ms.getLastColumn()).getValues()[0];
+      var idC = head.indexOf('案件ID'), emC = head.indexOf('メール'), nmC = head.indexOf('氏名'),
+          stC = head.indexOf('ステージ'), amC = head.indexOf('査定額');
+      var rows = ms.getRange(2, 1, ms.getLastRow() - 1, ms.getLastColumn()).getValues();
+      rows.forEach(function (r) {
+        if (String(r[stC]) === '査定額提示' && Number(r[amC]) > 0 && r[emC]) {
+          out.push({ id: r[idC], email: r[emC], name: r[nmC], amount: r[amC] });
+        }
+      });
+    }
+  } catch (e) {}
+  return out;
+}
+
+function runQuoteReminders() {
+  var cases = collectQuoteCases();
+  var sheet = getDecisionSheet();
+  var now = new Date();
+  var today = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
+  var rows = sheet.getDataRange().getValues();
+  // 案件ID → 行番号 のマップ
+  var rowOf = {};
+  for (var i = 1; i < rows.length; i++) rowOf[String(rows[i][0])] = i + 1;
+  var sent = 0;
+
+  cases.forEach(function (c) {
+    var rn = rowOf[String(c.id)];
+    var decision = '', step = 0, last = '';
+    if (rn) { decision = rows[rn - 1][2]; step = Number(rows[rn - 1][5]) || 0; last = rows[rn - 1][6]; }
+    if (decision) return;                 // 既に決定済みは対象外
+    if (step >= QUOTE_REMIND_MAX) return; // 安全上限
+
+    // 次の配信までの必要間隔
+    var gap = QUOTE_REMIND_GAPS[Math.min(step, QUOTE_REMIND_GAPS.length - 1)];
+    if (step > 0 && last) {
+      var days = Math.floor((now - new Date(String(last).replace(/\//g, '-') + 'T00:00:00')) / 86400000);
+      if (days < gap) return;             // まだ間隔が空いていない
+    }
+    // 送信
+    try {
+      MailApp.sendEmail({
+        to: c.email, name: FROM_NAME, replyTo: REPLY_TO,
+        subject: quoteRemindSubject(step + 1),
+        body: quoteRemindBody(c.name, c.amount, step + 1)
+      });
+      if (rn) {
+        sheet.getRange(rn, 6).setValue(step + 1);
+        sheet.getRange(rn, 7).setValue(today);
+      } else {
+        sheet.appendRow([c.id, c.email, '', '', '', step + 1, today]);
+        rowOf[String(c.id)] = sheet.getLastRow();
+      }
+      sent++;
+    } catch (e) { Logger.log('runQuoteReminders send: ' + e.message); }
+  });
+  Logger.log('runQuoteReminders: sent ' + sent);
+}
+
+function quoteRemindSubject(n) {
+  if (n === 1) return '【BUYMO】査定額をご確認ください｜売却のご意思をお聞かせください';
+  if (n <= 3) return '【BUYMO】査定額のご確認はお済みですか？（リマインド）';
+  return '【BUYMO】査定額の有効期限が近づいています｜ご検討状況をお聞かせください';
+}
+function quoteRemindBody(name, amount, n) {
+  var amt = '¥' + (Number(amount) || 0).toLocaleString('en-US');
+  return (name || 'お客') + ' 様\n\n' +
+    'BUYMO買取センターです。\n' +
+    'ご提示中の査定額について、まだ「売却する／しない」のご回答をいただけていないようです。\n\n' +
+    '━━━━━━━━━━━━━━\n  💰 ご提示中の査定額: ' + amt + '\n━━━━━━━━━━━━━━\n\n' +
+    'マイページからワンタップで、売却するか・しないかをお選びいただけます。\n' +
+    '「売却しない」をお選びの場合も、差し支えなければ理由を教えていただけると助かります。\n\n' +
+    '  ▶ マイページで回答する: ' + MEMBER_PAGE_URL + '\n\n' +
+    (n >= 4 ? '※ 査定額は市場変動により見直しとなる場合があります。お早めのご検討をおすすめします。\n\n' : '') +
+    '（このご案内は、ご回答いただくと自動的に停止します）\n\n' +
+    'BUYMO買取センター（運営：合同会社アイズ）\n✉ ' + REPLY_TO + '\n';
 }
 
 // ログイン可否判定: そのメールで問い合わせ/案件/リードが1件でもあれば許可
