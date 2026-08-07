@@ -144,18 +144,20 @@
 
   HQ.nav('dashboard');
 
-  // お知らせ
+  // お知らせ（本部が登録したものを共有＝GASから取得）
   (function () {
-    var notices = HQ.getNotices().slice(0, 3);
     var el = document.getElementById('noticeList');
-    if (!notices.length) { el.innerHTML = '<p class="p-empty">現在お知らせはありません。</p>'; return; }
-    el.innerHTML = notices.map(function (n) {
-      return '<div class="p-notice-item">' +
-        '<span class="p-notice-lv">' + (n.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' +
-        '<div class="p-notice-body"><div class="p-notice-t">' + HQ.esc(n.t) + '</div>' +
-        '<div class="p-notice-d">' + HQ.esc(n.date || '') + '</div></div>' +
-        '</div>';
-    }).join('');
+    HQ.loadNotices(function (all) {
+      var notices = (all || []).slice(0, 3);
+      if (!notices.length) { el.innerHTML = '<p class="p-empty">現在お知らせはありません。</p>'; return; }
+      el.innerHTML = notices.map(function (n) {
+        return '<div class="p-notice-item">' +
+          '<span class="p-notice-lv">' + (n.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' +
+          '<div class="p-notice-body"><div class="p-notice-t">' + HQ.esc(n.t) + '</div>' +
+          '<div class="p-notice-d">' + HQ.esc(n.date || '') + '</div></div>' +
+          '</div>';
+      }).join('');
+    });
   })();
 
   // 案件

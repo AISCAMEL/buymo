@@ -45,23 +45,25 @@
 <script>
   HQ.nav('notices');
   function nowStr(){var d=new Date();function p(n){return('0'+n).slice(-2);}return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate());}
-  function render(){
-    var a=HQ.getNotices();
+  function renderList(a){
+    a = a || [];
     document.getElementById('noticeList').innerHTML = a.length ? a.map(function(n){
       return '<div class="na-card '+(n.lv||'info')+'"><div class="na-head"><span class="na-lv">'+(n.lv==='warn'?'重要':'お知らせ')+'</span><strong>'+HQ.esc(n.t)+'</strong><span class="na-date">'+HQ.esc(n.date||'')+'</span>'+
         '<button class="na-del" data-id="'+HQ.esc(n.id)+'">削除</button></div><p>'+HQ.esc(n.b)+'</p></div>';
     }).join('') : '<p class="alert-none">お知らせはまだありません。</p>';
   }
+  // 共有（GAS）から取得して表示
+  function render(){ HQ.loadNotices(renderList); }
   document.getElementById('noticeForm').addEventListener('submit',function(e){
     e.preventDefault();
     var t=document.getElementById('nTitle').value.trim(); var b=document.getElementById('nBody').value.trim();
     if(!t||!b)return;
     HQ.addNotice({id:'N-'+Date.now().toString().slice(-6),t:t,b:b,lv:document.getElementById('nLevel').value,date:nowStr()});
-    e.target.reset(); render();
+    e.target.reset(); renderList(HQ.getNotices()); // 登録直後はローカルで即時反映（共有には数秒で反映）
   });
   document.getElementById('noticeList').addEventListener('click',function(e){
     var b=e.target.closest('.na-del'); if(!b)return;
-    HQ.deleteNotice(b.getAttribute('data-id')); render();
+    HQ.deleteNotice(b.getAttribute('data-id')); renderList(HQ.getNotices());
   });
   render();
 </script>
