@@ -7,7 +7,7 @@
 (function () {
   'use strict';
   var ENDPOINT = 'https://script.google.com/macros/s/AKfycbwdClZM_NxxnEYz0DRQLFv9WAPV7zgoIhwHeTI73UDT1yC3Tt7BUU-H-Cx9JyKnMFb7nA/exec';
-  var STAGES = ['新規受付', '査定中', '商談中', '契約', '入金待ち', '完了'];
+  var STAGES = ['新規受付', '査定中', '査定額提示', '商談中', '契約', '入金待ち', '完了'];
   var EKEY = 'buymo_member_email', NKEY = 'buymo_member_name';
   var CKEY = 'buymo_member_cases'; // ローカル保存の新規案件 { email: [ ...cases ] }
   var PKEY = 'buymo_form_prefill'; // トップフォームから引き継ぎ
@@ -116,10 +116,12 @@
   var NEXT = {
     '新規受付': '担当より査定日程のご連絡をします。',
     '査定中': '査定結果（買取金額）をご提示します。',
+    '査定額提示': '査定額をご確認のうえ、売却するかどうかお選びください。',
     '商談中': '金額にご納得いただけたらご契約へ進みます。',
     '契約': '名義変更などの手続きを無料で進めます。',
     '入金待ち': 'ご指定の口座へお振込みします（3営業日以内）。',
-    '完了': 'お取引は完了しました。ありがとうございました。'
+    '完了': 'お取引は完了しました。ありがとうございました。',
+    '見送り': '今回は見送りとなりました。またのご利用をお待ちしております。'
   };
   /* ---- ローカル案件ストア ---- */
   function loadLocalCases(email) {
@@ -159,21 +161,83 @@
       return;
     }
     wrap.innerHTML = list.map(function (c) {
+      var isMikokuri = (c.stage === '見送り');
       var idx = STAGES.indexOf(c.stage); if (idx < 0) idx = 0;
-      var steps = STAGES.map(function (s, i) {
+      var steps = isMikokuri ? '' : STAGES.map(function (s, i) {
         var cls = i < idx ? 'done' : (i === idx ? 'current' : '');
         return '<li class="' + cls + '"><span class="mp-dot"></span><span class="mp-step-label">' + s + '</span></li>';
       }).join('');
-      return '<div class="mp-case">' +
+
+      // 査定額提示 & 未決定 → 意思決定ブロック
+      var decisionBlock = '';
+      if (c.stage === '査定額提示' && c.amount && !c.decision) {
+        decisionBlock =
+          '<div class="mp-decide" data-caseid="' + c.id + '">' +
+            '<p class="mp-decide-lead">査定額をご確認のうえ、下記からお選びください。</p>' +
+            '<div class="mp-decide-btns">' +
+              '<button type="button" class="btn btn-primary mp-decide-yes" data-caseid="' + c.id + '">この金額で売却する</button>' +
+              '<button type="button" class="btn btn-outline mp-decide-no" data-caseid="' + c.id + '">今回は見送る</button>' +
+            '</div>' +
+          '</div>';
+      }
+      // 決定済みの表示
+      var decidedNote = '';
+      if (c.decision === 'sell') {
+        decidedNote = '<p class="mp-decided ok">✅ 売却するを選択済み。担当より手続きのご案内をします。</p>';
+      } else if (c.decision === 'nosell') {
+        decidedNote = '<p class="mp-decided ng">今回は見送りを選択済み。またのご利用をお待ちしております。</p>';
+      }
+
+      return '<div class="mp-case' + (isMikokuri ? ' mp-case-closed' : '') + '">' +
         '<div class="mp-case-head"><span class="mp-id">' + c.id + '</span>' +
           (c.genre ? '<span class="mp-tag">' + c.genre + '</span>' : '') +
           (c.date ? '<span class="mp-date">📅 受付 ' + c.date + '</span>' : '') +
           '<span class="mp-stage">' + c.stage + '</span></div>' +
-        '<ol class="mp-stepper">' + steps + '</ol>' +
+        (steps ? '<ol class="mp-stepper">' + steps + '</ol>' : '') +
         (c.amount ? '<p class="mp-amount">提示金額：<strong>' + yen(c.amount) + '</strong></p>' : '<p class="mp-amount">査定金額は確定後に表示されます。</p>') +
+        decisionBlock +
+        decidedNote +
         (NEXT[c.stage] ? '<p class="mp-next">次のステップ：<b>' + NEXT[c.stage] + '</b></p>' : '') +
         '</div>';
     }).join('');
+
+    // 意思決定ボタンのイベント
+    wrap.querySelectorAll('.mp-decide-yes').forEach(function (b) {
+      b.addEventListener('click', function () { submitDecision(b.getAttribute('data-caseid'), 'sell', ''); });
+    });
+    wrap.querySelectorAll('.mp-decide-no').forEach(function (b) {
+      b.addEventListener('click', function () { openReasonModal(b.getAttribute('data-caseid')); });
+    });
+  }
+
+  /* ---- 意思決定の送信 ---- */
+  function submitDecision(caseId, decision, reason) {
+    var email = '';
+    try { email = localStorage.getItem(EKEY) || ''; } catch (e) {}
+    var payload = { type: 'buymo_case_decision', caseId: caseId, email: email, decision: decision, reason: reason || '' };
+    if (ENDPOINT) {
+      fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) }).catch(function () {});
+    }
+    if (window.BuymoGA) window.BuymoGA.track('case_decision', { decision: decision });
+    // 楽観的にUI更新
+    if (decision === 'sell') {
+      alert('売却するを承りました。担当より手続きのご案内をいたします。');
+    } else {
+      alert('ご回答ありがとうございました。またのご利用をお待ちしております。');
+    }
+    setTimeout(function () { loadCases(email); }, 600);
+  }
+
+  /* ---- 見送り理由モーダル ---- */
+  function openReasonModal(caseId) {
+    var modal = document.getElementById('reasonModal');
+    if (!modal) return;
+    modal.setAttribute('data-caseid', caseId);
+    var sel = document.getElementById('reasonSelect');
+    var free = document.getElementById('reasonFree');
+    if (sel) sel.value = '';
+    if (free) free.value = '';
+    modal.hidden = false;
   }
 
   // 既ログイン？
@@ -557,6 +621,26 @@
         }, 5000);
         if (window.BuymoGA) window.BuymoGA.track('member_case_submit', { source: 'member_page' });
       });
+    });
+  }
+
+  /* ---- 見送り理由モーダルの操作 ---- */
+  var reasonModal = document.getElementById('reasonModal');
+  if (reasonModal) {
+    var rmCancel = document.getElementById('reasonCancel');
+    var rmSubmit = document.getElementById('reasonSubmit');
+    var rmSelect = document.getElementById('reasonSelect');
+    var rmFree   = document.getElementById('reasonFree');
+    function closeReason() { reasonModal.hidden = true; }
+    if (rmCancel) rmCancel.addEventListener('click', closeReason);
+    reasonModal.addEventListener('click', function (e) { if (e.target === reasonModal) closeReason(); });
+    if (rmSubmit) rmSubmit.addEventListener('click', function () {
+      var caseId = reasonModal.getAttribute('data-caseid');
+      var reason = (rmSelect && rmSelect.value ? rmSelect.value : '') +
+                   (rmFree && rmFree.value.trim() ? '（' + rmFree.value.trim() + '）' : '');
+      if (!reason) { reason = '理由未選択'; }
+      closeReason();
+      submitDecision(caseId, 'nosell', reason);
     });
   }
 })();
