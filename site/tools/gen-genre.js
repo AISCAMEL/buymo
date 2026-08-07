@@ -88,6 +88,36 @@ const COPY = {
   },
 };
 
+/* ---- ジャンル別キャッチコピー（ヒーローの見出し上に表示） ----
+   無い場合はカテゴリ名にフォールバック */
+const CATCH = {
+  haisha:      'その廃車、まだ0円じゃない。',
+  jiko:        'ぶつけた車も、まだ売れる。',
+  fudou:       '動かない、が値段になる。',
+  kasoukou:    '10万km超えは、終わりじゃない。',
+  loan:        'ローンが残っていても、売れる。',
+  hiace:       'ハイエースは、世界が欲しがる。',
+  landcruiser: 'ランクルは、時間が経っても強い。',
+  alphard:     '高級ミニバンは、高く手放す。',
+  prius:       '定番プリウスを、確実に高く。',
+  jimny:       'ジムニーは、待ってでも欲しい車。',
+  keitora:     '働いた軽トラに、正当な値を。',
+  kei:         '人気の軽は、高く回る。',
+  suv:         'SUV人気を、そのまま価格に。',
+  minivan:     '家族を乗せた1台に、高値を。',
+  sedan:       '定番セダンも、抜かりなく高く。',
+  truck:       '働くクルマも、まとめて高く。',
+  import:      '外車は、専門ルートで真価が出る。',
+  luxury:      'ブランドの価値を、正しく評価。',
+  ev:          'EVもハイブリッドも、これからが強い。',
+  kyusha:      '古いほど、価値が上がる車がある。',
+  zeppan:      'もう造られない車に、高い値を。',
+  wheel:       'ホイール1本から、値が付く。',
+  tire:        '眠るタイヤも、現金に変わる。',
+  parts:       '外したパーツも、まだ売れる。',
+};
+function catchFor(g) { return CATCH[g.slug] || g.cat; }
+
 /* カテゴリ別の既定コピー（個別 COPY が無いジャンル用フォールバック） */
 const CAT_DEFAULT = {
   '状態・お悩みで買取': {
@@ -287,7 +317,7 @@ ${header(rel, 'genre')}
   <section class="page-hero area-hero" aria-labelledby="page-title">
     <div class="container">
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="${rel}index.html#top">ホーム</a><span aria-hidden="true">›</span><a href="${rel}genre/">買取ジャンル</a><span aria-hidden="true">›</span><span>${esc(g.name)}</span></nav>
-      <p class="hero-lead">${esc(g.icon)} ${esc(g.cat)}</p>
+      <p class="hero-lead">${esc(g.icon)} ${esc(catchFor(g))}</p>
       <h1 id="page-title">${esc(g.name)}は<span class="hl">BUYMO</span></h1>
       <p class="page-lead">${esc(g.desc)} 手数料0円・無料出張査定・3営業日以内に入金で、あなたの車を1円でも高く買取します。</p>
       <div class="area-cta">

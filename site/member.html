@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=18" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=19" />
 <style>
   .mp-header{background:var(--navy);color:#fff;height:64px;display:flex;align-items:center;}
   .mp-header .container{display:flex;align-items:center;gap:16px;width:100%;}
@@ -49,6 +49,17 @@
   .mp-greet h1{font-size:22px;font-weight:900;}
   .mp-greet p{color:#666;font-size:14px;}
   #caseList{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:18px;}
+  /* 案件サマリー / 読み込み中 / 要対応アラート */
+  #caseSummary{max-width:720px;margin:0 auto 14px;}
+  .mp-summary{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:12px 18px;font-size:14px;color:#444;}
+  .mp-summary b{color:var(--orange);font-size:18px;font-weight:900;}
+  .mp-summary .mp-summary-refresh{margin-left:auto;background:none;border:1.5px solid var(--border,#ddd);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;color:#555;cursor:pointer;font-family:inherit;}
+  .mp-summary .mp-summary-refresh:hover{border-color:var(--orange);color:var(--orange);}
+  .mp-alert{max-width:720px;margin:0 auto 14px;background:#FFF4E6;border:1.5px solid #FFB870;border-radius:12px;padding:12px 18px;font-size:14px;font-weight:700;color:#B45309;display:flex;align-items:center;gap:8px;}
+  .mp-loading{max-width:720px;margin:0 auto;text-align:center;color:#999;font-size:14px;padding:40px 0;}
+  .mp-loading::before{content:"";display:inline-block;width:22px;height:22px;margin-right:10px;vertical-align:-5px;border:3px solid #eee;border-top-color:var(--orange);border-radius:50%;animation:mp-spin .8s linear infinite;}
+  @keyframes mp-spin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion:reduce){.mp-loading::before{animation:none;}}
   .mp-case{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px;}
   .mp-case-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
   .mp-id{font-size:12px;color:#999;font-weight:700;}
@@ -398,6 +409,8 @@
         </div>
       </section>
 
+      <div id="caseAlert"></div>
+      <div id="caseSummary"></div>
       <div id="caseList"></div>
       <div class="mp-actions">
         <a href="index.html#top" class="btn btn-outline">トップページに戻る</a>
@@ -448,7 +461,7 @@
 
 </main>
 
-<script src="assets/js/member.js?v=11" defer></script>
+<script src="assets/js/member.js?v=12" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

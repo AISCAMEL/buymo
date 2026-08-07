@@ -138,8 +138,28 @@
     } catch (e) {}
   }
 
+  // 受付日で新しい順に並べ替え（日付不明は末尾）
+  function sortCasesNewest(list) {
+    return list.slice().sort(function (a, b) {
+      var da = String(a.date || '').replace(/\//g, '-');
+      var db = String(b.date || '').replace(/\//g, '-');
+      if (da === db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return da < db ? 1 : -1;
+    });
+  }
+
+  function showLoading() {
+    var wrap = document.getElementById('caseList');
+    if (wrap) wrap.innerHTML = '<div class="mp-loading">査定状況を読み込んでいます…</div>';
+    var sm = document.getElementById('caseSummary'); if (sm) sm.innerHTML = '';
+    var al = document.getElementById('caseAlert');   if (al) al.innerHTML = '';
+  }
+
   function loadCases(email) {
     var local = loadLocalCases(email);
+    showLoading();
     if (ENDPOINT) {
       window.__mycase = function (d) {
         var remote = (d && d.length) ? d : [];
@@ -154,12 +174,42 @@
     }
   }
 
+  function renderSummary(list) {
+    var sm = document.getElementById('caseSummary');
+    var al = document.getElementById('caseAlert');
+    if (!sm) return;
+    var active = list.filter(function (c) { return c.stage !== '見送り' && c.stage !== '完了'; }).length;
+    var done   = list.filter(function (c) { return c.stage === '完了'; }).length;
+    // 査定額提示・未決定＝お客様の回答待ち
+    var awaiting = list.filter(function (c) {
+      return c.stage === '査定額提示' && c.amount && (!c.decision || c.decision === 'renegotiate');
+    }).length;
+    var parts = ['<span>進行中 <b>' + active + '</b> 件</span>'];
+    if (done) parts.push('<span>完了 <b>' + done + '</b> 件</span>');
+    parts.push('<button type="button" class="mp-summary-refresh" id="caseRefresh">🔄 更新</button>');
+    sm.innerHTML = '<div class="mp-summary">' + parts.join('') + '</div>';
+    var rb = document.getElementById('caseRefresh');
+    if (rb) rb.addEventListener('click', function () {
+      var email = ''; try { email = localStorage.getItem(EKEY) || ''; } catch (e) {}
+      if (email) loadCases(email);
+    });
+    if (al) {
+      al.innerHTML = awaiting
+        ? '<div class="mp-alert">🔔 査定額をご提示中です。下記からご回答をお待ちしています（' + awaiting + '件）。</div>'
+        : '';
+    }
+  }
+
   function renderCases(list) {
     var wrap = document.getElementById('caseList');
+    list = sortCasesNewest(list);
     if (!list.length) {
       wrap.innerHTML = '<div class="mp-empty">現在進行中の案件はありません。<br><a class="btn btn-primary" href="buymo-contact.html">無料査定を依頼する</a></div>';
+      var sm0 = document.getElementById('caseSummary'); if (sm0) sm0.innerHTML = '';
+      var al0 = document.getElementById('caseAlert');   if (al0) al0.innerHTML = '';
       return;
     }
+    renderSummary(list);
     wrap.innerHTML = list.map(function (c) {
       var isMikokuri = (c.stage === '見送り');
       var idx = STAGES.indexOf(c.stage); if (idx < 0) idx = 0;
@@ -288,6 +338,15 @@
   })();
 
   if (saved) { show(saved); }
+  else {
+    // 未ログイン時：入力の手間を減らすため、空いている項目にフォーカス
+    try {
+      var mn0 = document.getElementById('mName');
+      var me0 = document.getElementById('mEmail');
+      var focusEl = (me0 && !me0.value) ? me0 : (mn0 && !mn0.value ? mn0 : me0);
+      if (focusEl) setTimeout(function () { focusEl.focus(); }, 100);
+    } catch (e) {}
+  }
 
   // 申込済みメールか確認（JSONP）。ENDPOINT未設定時は素通り（デモ）
   function authCheck(email, cb) {
@@ -689,4 +748,12 @@
       submitDecision(caseId, 'renegotiate', msg || '再査定希望');
     });
   }
+
+  /* ---- Escキーで開いているモーダルを閉じる（操作性向上） ---- */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' && e.keyCode !== 27) return;
+    [reasonModal, reneModal].forEach(function (m) {
+      if (m && !m.hidden) m.hidden = true;
+    });
+  });
 })();
