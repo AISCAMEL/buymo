@@ -23,14 +23,22 @@ window.AUTH = (function () {
   /* 本部/加盟店の許可メール（ここに追加するだけでログインできます）
      ※ メールアドレス方式・パスワード不要。小文字で記載。 */
   var STAFF_HQ = ['info@aisjaltd.com', 'kaitori@buymo.me', 'test@buymo.me'];
-  var STAFF_PARTNER = []; // 例: 'store-iwaki@example.com'
+  /* 加盟店：メール → 担当店名。
+     本部が案件をこの「店名」に割り当てると、その店のアカウントだけに案件が表示されます。
+     店名は本部の「加盟店管理」の店名と一致させること（既定：いわき店/郡山店/仙台店）。 */
+  var STAFF_PARTNER = {
+    'iwaki@buymo.test': 'いわき店',
+    'koriyama@buymo.test': '郡山店',
+    'sendai@buymo.test': '仙台店'
+  };
 
   function staffRoleOf(email) {
     email = String(email || '').trim().toLowerCase();
     if (STAFF_HQ.indexOf(email) >= 0) return 'hq';
-    if (STAFF_PARTNER.indexOf(email) >= 0) return 'partner';
+    if (Object.prototype.hasOwnProperty.call(STAFF_PARTNER, email)) return 'partner';
     return null;
   }
+  function partnerStoreOf(email) { return STAFF_PARTNER[String(email || '').trim().toLowerCase()] || ''; }
 
   // 本部/加盟店ログイン（メール許可リストで判定。サーバー不要）
   function login(email, pw, r, cb) {
@@ -40,12 +48,16 @@ window.AUTH = (function () {
     if (!role) { cb(false, '登録されていないメールアドレスです。本部にご確認ください。'); return; }
     if (r === 'hq' && role !== 'hq') { cb(false, '本部権限がありません。「加盟店でログイン」をご利用ください。'); return; }
     var eff = (r === 'partner' && role === 'hq') ? 'partner' : role; // 本部は加盟店ページも閲覧可
-    set({ token: 'staff-' + Math.random().toString(36).slice(2), role: eff, name: email, email: email, exp: now() + TTL });
+    var store = (eff === 'partner') ? partnerStoreOf(email) : ''; // 加盟店＝自分の店名
+    set({ token: 'staff-' + Math.random().toString(36).slice(2), role: eff, name: email, email: email, store: store, exp: now() + TTL });
+    // 案件ボード(board.js)が参照する値を設定（自店のみ表示に使用）
+    try { localStorage.setItem('buymo_role', eff); localStorage.setItem('buymo_who', store); } catch (e) {}
     cb(true);
   }
 
   function logout() {
     var s = get(); clear();
+    try { localStorage.removeItem('buymo_who'); localStorage.removeItem('buymo_role'); } catch (e) {}
     if (ENDPOINT && s) { var x = document.createElement('script'); x.src = ENDPOINT + '?action=logout&t=' + encodeURIComponent(s.token); (document.body || document.documentElement).appendChild(x); }
   }
 
