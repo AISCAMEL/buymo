@@ -311,6 +311,12 @@
     }).join('');
   }
 
-  /* ---- 案件ロード ---- */
-  HQ.loadCases(function (list) { buildCaseSelect(list); });
+  /* ---- 案件ロード（加盟店は自店の案件のみ） ---- */
+  HQ.loadCases(function (list) {
+    var role = (window.AUTH && AUTH.role) ? AUTH.role() : 'hq';
+    var s = (window.AUTH && AUTH.get) ? AUTH.get() : null;
+    var who = (s && s.store) ? s.store : '';
+    var vis = (role === 'partner' && who) ? list.filter(function (c) { return c.assignee === who; }) : list;
+    buildCaseSelect(vis);
+  });
 })();
