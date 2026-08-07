@@ -82,10 +82,10 @@
 
   var KB = {
     user: {
-      title:  '買取AIサポート',
-      greetTop: 'こんにちは！車の売却について、AIが24時間お答えします。\n下のボタンから、または直接ご質問ください。',
-      greetArea: function(name){ return name + 'の買取について、AIがお答えします。エリア対応・査定・引取など何でもどうぞ。'; },
-      greetGenre: function(name){ return name + 'について、AIがお答えします。相場・査定・買取の流れなどお気軽に。'; },
+      title:  'あゆか｜買取サポート',
+      greetTop: 'こんにちは！BUYMO買取サポートの「あゆか」です😊\n車の売却について24時間お答えします。下のボタンから、または直接ご質問ください。',
+      greetArea: function(name){ return 'BUYMO買取サポートの「あゆか」です😊\n' + name + 'の買取について、エリア対応・査定・引取など何でもどうぞ。'; },
+      greetGenre: function(name){ return 'BUYMO買取サポートの「あゆか」です😊\n' + name + 'について、相場・査定・買取の流れなどお気軽に。'; },
       chips: ['今いくらで売れる？', '事故車もOK？', '入金までの日数は？', '必要書類は？', 'しつこい営業は？', 'まとめて売却したい'],
       rules: [
         // 営業・対応
