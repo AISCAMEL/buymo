@@ -150,11 +150,12 @@
 </main>
 
 <script src="assets/js/auth.js"></script>
+<script src="assets/js/hq-common.js"></script>
 <script>
   var CKEY='buymo_community_v2';
   function load(){ try{return JSON.parse(localStorage.getItem(CKEY))||seed();}catch(e){return seed();} }
   function save(a){ try{localStorage.setItem(CKEY,JSON.stringify(a));}catch(e){} }
-  function who(){ var s=(window.AUTH&&AUTH.get())?AUTH.get():null; return s?(s.name||'加盟店'):'加盟店'; }
+  function who(){ var s=(window.AUTH&&AUTH.get())?AUTH.get():null; if(!s)return '加盟店'; return s.role==='hq'?'BUYMO本部':(s.store||s.name||'加盟店'); }
   function nowStr(){ var d=new Date(); function p(n){return('0'+n).slice(-2);} return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()); }
   function seed(){ return [
     {who:'BUYMO本部',tag:'本部',t:'コミュニティへようこそ！',b:'加盟店の皆さん、コミュニティをご利用いただきありがとうございます。\n成功事例・困りごと・査定のコツなど、なんでも気軽に投稿してください。本部からもノウハウを随時シェアしていきます。質問は直接メッセージでも受け付けています（担当：吉田）。',time:'2026/06/01 09:00',likes:12},
@@ -168,7 +169,7 @@
     {who:'仙台西店',tag:'手続き',t:'ローン残債ありの車の取り扱い方',b:'お客様がローン完済していない場合は、買取代金でローンを精算する「ローン完済サービス」が使えます。\nただし残債が買取額を上回る場合は自己負担が発生するのでその説明が重要。トークスクリプトの「ローン残債あり」ページを参考にしてください。',time:'2026/06/28 08:50',likes:10}
   ]; }
   function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  var posts=load();
+  var posts=[];
   var activeTag='';
 
   function render(){
@@ -197,8 +198,9 @@
     var b=document.getElementById('cmBody').value.trim();
     var tag=document.getElementById('cmTag').value;
     if(!t||!b)return;
-    posts.unshift({who:who(),tag:tag,t:t,b:b,time:nowStr(),likes:0});
-    save(posts); render();
+    var p={id:'P-'+Date.now(),who:who(),tag:tag,t:t,b:b,time:nowStr(),likes:0};
+    posts.unshift(p); save(posts); render();
+    if(window.HQ&&HQ.addCommunityPost)HQ.addCommunityPost(p); // 共有（GAS）へ
     document.getElementById('cmTitle').value=''; document.getElementById('cmBody').value='';
   });
 
@@ -206,6 +208,7 @@
     var b=e.target.closest('.cm-like'); if(!b)return;
     var i=Number(b.getAttribute('data-i'));
     posts[i].likes=(posts[i].likes||0)+1; save(posts); render();
+    if(window.HQ&&HQ.likeCommunity&&posts[i].id)HQ.likeCommunity(posts[i].id); // 共有（GAS）へ
   });
 
   document.querySelector('.cm-filter').addEventListener('click', function(e){
@@ -215,9 +218,14 @@
     render();
   });
 
-  render();
+  // 共有（GAS）から取得。未接続/空ならローカル(seed)を表示。
+  (function(){
+    function ensureIds(a){ (a||[]).forEach(function(p,i){ if(!p.id) p.id='local-'+i; }); return a||[]; }
+    if(window.HQ&&HQ.loadCommunity){
+      HQ.loadCommunity(function(list){ posts=ensureIds((list&&list.length)?list:load()); render(); });
+    } else { posts=ensureIds(load()); render(); }
+  })();
 </script>
-<script src="assets/js/hq-common.js"></script>
 <script src="assets/js/notices.js"></script>
 <script>window.BUYMO_BOT_MODE='partner';</script>
 <script src="assets/js/chatbot.js" defer></script>

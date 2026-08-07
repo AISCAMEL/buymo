@@ -105,6 +105,26 @@ window.HQ = (function () {
   function addNotice(n) { var a = getNotices(); a.unshift(n); saveNotices(a); if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'notice', token: authToken(), id: n.id, title: n.t, body: n.b, level: n.lv, date: n.date }) }).catch(function () {}); }
   function deleteNotice(id) { saveNotices(getNotices().filter(function (n) { return n.id !== id; })); if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'notice_delete', token: authToken(), id: id }) }).catch(function () {}); }
 
+  /* 加盟店コミュニティ（共有：GAS「コミュニティ」シート） */
+  function loadCommunity(cb) {
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=community')
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && d.length) ? d : null); })
+        .catch(function () { cb(null); });
+    } else { cb(null); }
+  }
+  function addCommunityPost(p) {
+    if (!ENDPOINT) return;
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'community', token: authToken(), id: p.id, who: p.who, tag: p.tag, title: p.t, body: p.b, time: p.time }) }).catch(function () {});
+  }
+  function likeCommunity(id) {
+    if (!ENDPOINT) return;
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'community_like', token: authToken(), id: id }) }).catch(function () {});
+  }
+
   function yen(n) { return '¥' + (Number(n) || 0).toLocaleString('en-US'); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function stageIdx(s) { var i = STAGES.indexOf(s); return i < 0 ? 0 : i; }
@@ -126,6 +146,7 @@ window.HQ = (function () {
       ['notices', 'お知らせ', 'hq-notices.html'],
       ['column', 'コラム', 'hq-column.html'],
       ['academy', 'アカデミー管理', 'hq-academy.html'],
+      ['community', 'コミュニティ', 'partner-community.html'],
       ['report', '営業レポート', 'report.html'],
       ['documents', '書類発行', 'hq-documents.html']
     ];
@@ -139,6 +160,7 @@ window.HQ = (function () {
     loadCases: loadCases, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
+    loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
     yen: yen, esc: esc, stageIdx: stageIdx, nav: nav
   };
 })();

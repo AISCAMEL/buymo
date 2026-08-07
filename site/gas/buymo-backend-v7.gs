@@ -35,6 +35,7 @@ var LEAD_SHEET_NAME   = 'リード';                 // NEW: ドリップ配信�
 var MEMBER_CASE_SHEET = 'マイページ案件';         // NEW: マイページからの新規案件
 var TEST_SHEET_NAME   = 'テスト送信';              // NEW: 管理者テスト送信の隔離先
 var NOTICE_SHEET_NAME = 'お知らせ';                // NEW: 本部→加盟店 お知らせ
+var COMMUNITY_SHEET_NAME = 'コミュニティ';         // NEW: 加盟店コミュニティ（共有）
 var NOTIFY_EMAIL      = 'kaitori@buymo.me';      // 管理者通知先
 var FROM_NAME         = 'BUYMO 買取事業部';
 var REPLY_TO          = 'kaitori@buymo.me';
@@ -217,6 +218,7 @@ function doGet(e) {
     if (action === 'check')  return jsonOut(checkDuplicate(p.title, p.body || ''));
     if (action === 'cases')  return jsonOut(getCases());
     if (action === 'notices') return jsonOut(getNoticesData());                      // NEW: 本部→加盟店 お知らせ配信
+    if (action === 'community') return jsonOut(getCommunityData());                   // NEW: 加盟店コミュニティ（共有）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
@@ -250,6 +252,8 @@ function doPost(e) {
     if (data.type === 'buymo_case_decision') return jsonOut(handleCaseDecision(data)); // NEW: 売却する/しない
     if (data.type === 'notice')           return jsonOut(saveNotice(data));        // NEW: お知らせ登録
     if (data.type === 'notice_delete')    return jsonOut(deleteNoticeData(data.id)); // NEW: お知らせ削除
+    if (data.type === 'community')        return jsonOut(saveCommunityPost(data));  // NEW: コミュニティ投稿
+    if (data.type === 'community_like')   return jsonOut(likeCommunityPost(data.id)); // NEW: いいね
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -1383,6 +1387,64 @@ function deleteNoticeData(id) {
   var ids = sheet.getRange(2, 1, last - 1, 1).getValues();
   for (var i = 0; i < ids.length; i++) {
     if (String(ids[i][0]) === String(id)) { sheet.deleteRow(i + 2); return { ok: true, deleted: true }; }
+  }
+  return { ok: true };
+}
+
+/* ============================================================
+   加盟店コミュニティ（共有：スプレッドシート「コミュニティ」）
+   列: [ID, 日時, 投稿者, タグ, タイトル, 本文, いいね]
+   ============================================================ */
+function getCommunitySheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(COMMUNITY_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(COMMUNITY_SHEET_NAME);
+    sheet.appendRow(['ID', '日時', '投稿者', 'タグ', 'タイトル', '本文', 'いいね']);
+    sheet.getRange(1, 1, 1, 7).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+// 投稿一覧（新しい順）
+function getCommunityData() {
+  try {
+    var sheet = getCommunitySheet();
+    var last = sheet.getLastRow();
+    if (last < 2) return [];
+    var vals = sheet.getRange(2, 1, last - 1, 7).getValues();
+    var out = [];
+    for (var i = 0; i < vals.length; i++) {
+      var r = vals[i];
+      if (!r[0]) continue;
+      out.push({ id: String(r[0]), time: String(r[1] || ''), who: String(r[2] || ''), tag: String(r[3] || ''), t: String(r[4] || ''), b: String(r[5] || ''), likes: Number(r[6] || 0) });
+    }
+    out.reverse();
+    return out;
+  } catch (e) { return []; }
+}
+
+// 投稿を追加
+function saveCommunityPost(data) {
+  var sheet = getCommunitySheet();
+  var id = String(data.id || ('P-' + new Date().getTime()));
+  sheet.appendRow([id, String(data.time || ''), String(data.who || '加盟店'), String(data.tag || 'その他'), String(data.title || ''), String(data.body || ''), 0]);
+  return { ok: true, id: id };
+}
+
+// いいね +1
+function likeCommunityPost(id) {
+  var sheet = getCommunitySheet();
+  var last = sheet.getLastRow();
+  if (last < 2) return { ok: true };
+  var ids = sheet.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]) === String(id)) {
+      var cell = sheet.getRange(i + 2, 7);
+      cell.setValue(Number(cell.getValue() || 0) + 1);
+      return { ok: true };
+    }
   }
   return { ok: true };
 }
