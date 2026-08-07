@@ -987,7 +987,9 @@ function updateCaseStageAnywhere(caseId, newStage) {
 function handleCaseDecision(data) {
   var caseId = String(data.caseId || '').trim();
   var email  = String(data.email || '').trim();
-  var decision = (data.decision === 'sell') ? 'sell' : (data.decision === 'nosell' ? 'nosell' : '');
+  var decision = (data.decision === 'sell') ? 'sell'
+               : (data.decision === 'nosell') ? 'nosell'
+               : (data.decision === 'renegotiate') ? 'renegotiate' : '';
   var reason = String(data.reason || '').replace(/[<>]/g, '').slice(0, 500);
   if (!caseId || !decision) return { status: 'error', message: 'caseId and decision required' };
 
@@ -1016,6 +1018,19 @@ function handleCaseDecision(data) {
     if (email) sendSellNextStepMail(name, email, caseId);
     // Asana
     try { postToAsana({ title: '[売却意思] ' + (name || email) + ' / ' + caseId, notes: 'お客様が売却を選択。商談・書類準備へ。\nメール: ' + email, sectionId: ASANA_SECTION_MEMBER }); } catch (e) {}
+  } else if (decision === 'renegotiate') {
+    // 再交渉 → ステージは「査定額提示」のまま。担当へ再査定依頼を通知。自動リマインドは一旦停止。
+    try {
+      notifySlack([
+        { type: 'header', text: { type: 'plain_text', text: '💬 再査定のご相談（あと少しで売却）' } },
+        { type: 'section', text: { type: 'mrkdwn', text: '*案件:* ' + caseId + '\n*会員:* ' + (name || '') + ' <' + email + '>\n*ご希望:* ' + (reason || '(未記入)') + '\n価格を調整できれば成約の可能性大。至急ご対応を。' } }
+      ]);
+    } catch (e) {}
+    try {
+      MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: '【BUYMO】再査定のご相談: ' + caseId + ' (' + email + ')',
+        body: 'お客様が「もう少し高ければ売りたい」を選択しました。\n案件: ' + caseId + '\n会員: ' + name + ' <' + email + '>\nご希望: ' + (reason || '(未記入)') + '\n\n価格調整・再査定のうえ、金額を更新して再度ご提示ください。' });
+    } catch (e) {}
+    try { postToAsana({ title: '[再査定希望] ' + (name || email) + ' / ' + caseId, notes: 'お客様が再交渉を希望。\nご希望: ' + (reason || '(未記入)') + '\nメール: ' + email + '\n価格調整のうえ再提示を。', sectionId: ASANA_SECTION_MEMBER }); } catch (e) {}
   } else {
     // 見送り → 顧客として登録・理由を記録
     updateCaseStageAnywhere(caseId, '見送り');
