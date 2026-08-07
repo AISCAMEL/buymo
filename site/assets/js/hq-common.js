@@ -88,9 +88,22 @@ window.HQ = (function () {
     ];
   }
   function getNotices() { return readLS(NKEY, seedNotices); }
+  // GAS（共有）からお知らせを取得。未接続/失敗時はローカルにフォールバック。
+  function loadNotices(cb) {
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=notices')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var list = (d && d.length) ? d : [];
+          if (list.length) saveNotices(list);
+          cb(list.length ? list : readLS(NKEY, seedNotices));
+        })
+        .catch(function () { cb(readLS(NKEY, seedNotices)); });
+    } else { cb(readLS(NKEY, seedNotices)); }
+  }
   function saveNotices(a) { try { localStorage.setItem(NKEY, JSON.stringify(a)); } catch (e) {} }
-  function addNotice(n) { var a = getNotices(); a.unshift(n); saveNotices(a); if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'notice', token: authToken(), id: n.id, title: n.t, body: n.b, level: n.lv }) }).catch(function () {}); }
-  function deleteNotice(id) { saveNotices(getNotices().filter(function (n) { return n.id !== id; })); }
+  function addNotice(n) { var a = getNotices(); a.unshift(n); saveNotices(a); if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'notice', token: authToken(), id: n.id, title: n.t, body: n.b, level: n.lv, date: n.date }) }).catch(function () {}); }
+  function deleteNotice(id) { saveNotices(getNotices().filter(function (n) { return n.id !== id; })); if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'notice_delete', token: authToken(), id: id }) }).catch(function () {}); }
 
   function yen(n) { return '¥' + (Number(n) || 0).toLocaleString('en-US'); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -125,7 +138,7 @@ window.HQ = (function () {
     ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON,
     loadCases: loadCases, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
-    getNotices: getNotices, addNotice: addNotice, deleteNotice: deleteNotice,
+    getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     yen: yen, esc: esc, stageIdx: stageIdx, nav: nav
   };
 })();
