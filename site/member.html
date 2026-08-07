@@ -430,9 +430,25 @@
     </div>
   </div>
 
+  <!-- 再交渉モーダル -->
+  <div class="mp-modal" id="reneModal" hidden>
+    <div class="mp-modal-box" role="dialog" aria-modal="true" aria-labelledby="reneTitle">
+      <h3 id="reneTitle">もう少し高ければ売りたい</h3>
+      <p>ご希望の条件をお聞かせください。担当が再査定・調整のうえ、改めてご連絡します。</p>
+      <label for="reneHope">ご希望金額（任意）</label>
+      <input type="text" id="reneHope" inputmode="numeric" placeholder="例：120万円 / あと10万円 など" style="width:100%;border:1.5px solid var(--border,#ddd);border-radius:8px;padding:10px 12px;font-size:15px;font-family:inherit;margin-bottom:14px;" />
+      <label for="reneNote">ひとこと（任意）</label>
+      <textarea id="reneNote" placeholder="他社の見積り状況、希望時期など"></textarea>
+      <div class="mp-modal-actions">
+        <button type="button" id="reneCancel" class="btn btn-outline">キャンセル</button>
+        <button type="button" id="reneSubmit" class="btn btn-primary">担当に相談する</button>
+      </div>
+    </div>
+  </div>
+
 </main>
 
-<script src="assets/js/member.js?v=10" defer></script>
+<script src="assets/js/member.js?v=11" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

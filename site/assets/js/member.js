@@ -168,14 +168,17 @@
         return '<li class="' + cls + '"><span class="mp-dot"></span><span class="mp-step-label">' + s + '</span></li>';
       }).join('');
 
-      // 査定額提示 & 未決定 → 意思決定ブロック
+      // 査定額提示 & 未決定（または再交渉中）→ 意思決定ブロック
       var decisionBlock = '';
-      if (c.stage === '査定額提示' && c.amount && !c.decision) {
+      if (c.stage === '査定額提示' && c.amount && (!c.decision || c.decision === 'renegotiate')) {
         decisionBlock =
           '<div class="mp-decide" data-caseid="' + c.id + '">' +
-            '<p class="mp-decide-lead">査定額をご確認のうえ、下記からお選びください。</p>' +
+            (c.decision === 'renegotiate'
+              ? '<p class="mp-decide-lead">再査定のご相談を承りました。担当より改めてご連絡します。<br>あらためてご判断いただけます。</p>'
+              : '<p class="mp-decide-lead">査定額をご確認のうえ、下記からお選びください。</p>') +
             '<div class="mp-decide-btns">' +
               '<button type="button" class="btn btn-primary mp-decide-yes" data-caseid="' + c.id + '">この金額で売却する</button>' +
+              '<button type="button" class="btn btn-outline mp-decide-re" data-caseid="' + c.id + '">もう少し高ければ売りたい</button>' +
               '<button type="button" class="btn btn-outline mp-decide-no" data-caseid="' + c.id + '">今回は見送る</button>' +
             '</div>' +
           '</div>';
@@ -183,7 +186,8 @@
       // 決定済みの表示
       var decidedNote = '';
       if (c.decision === 'sell') {
-        decidedNote = '<p class="mp-decided ok">✅ 売却するを選択済み。担当より手続きのご案内をします。</p>';
+        decidedNote = '<div class="mp-decided ok">✅ 売却するを選択済み。<br>' +
+          '<b>次のステップ：</b>担当より最終確認のご連絡 → 必要書類（車検証・印鑑証明・振込口座）のご案内 → ご契約 → 無料引取 → 3営業日以内にお振込み。</div>';
       } else if (c.decision === 'nosell') {
         decidedNote = '<p class="mp-decided ng">今回は見送りを選択済み。またのご利用をお待ちしております。</p>';
       }
@@ -203,11 +207,32 @@
 
     // 意思決定ボタンのイベント
     wrap.querySelectorAll('.mp-decide-yes').forEach(function (b) {
-      b.addEventListener('click', function () { submitDecision(b.getAttribute('data-caseid'), 'sell', ''); });
+      b.addEventListener('click', function () {
+        if (confirm('この金額で売却を進めます。よろしいですか？')) submitDecision(b.getAttribute('data-caseid'), 'sell', '');
+      });
+    });
+    wrap.querySelectorAll('.mp-decide-re').forEach(function (b) {
+      b.addEventListener('click', function () { openReneModal(b.getAttribute('data-caseid')); });
     });
     wrap.querySelectorAll('.mp-decide-no').forEach(function (b) {
       b.addEventListener('click', function () { openReasonModal(b.getAttribute('data-caseid')); });
     });
+  }
+
+  /* ---- 再交渉モーダル ---- */
+  function openReneModal(caseId) {
+    var modal = document.getElementById('reneModal');
+    if (!modal) { // フォールバック
+      var msg = prompt('ご希望の金額や条件があればご記入ください（任意）');
+      submitDecision(caseId, 'renegotiate', msg || '');
+      return;
+    }
+    modal.setAttribute('data-caseid', caseId);
+    var hope = document.getElementById('reneHope');
+    var note = document.getElementById('reneNote');
+    if (hope) hope.value = '';
+    if (note) note.value = '';
+    modal.hidden = false;
   }
 
   /* ---- 意思決定の送信 ---- */
@@ -222,6 +247,8 @@
     // 楽観的にUI更新
     if (decision === 'sell') {
       alert('売却するを承りました。担当より手続きのご案内をいたします。');
+    } else if (decision === 'renegotiate') {
+      alert('再査定のご相談を承りました。担当より改めてご連絡いたします。');
     } else {
       alert('ご回答ありがとうございました。またのご利用をお待ちしております。');
     }
@@ -641,6 +668,25 @@
       if (!reason) { reason = '理由未選択'; }
       closeReason();
       submitDecision(caseId, 'nosell', reason);
+    });
+  }
+
+  /* ---- 再交渉モーダルの操作 ---- */
+  var reneModal = document.getElementById('reneModal');
+  if (reneModal) {
+    var reCancel = document.getElementById('reneCancel');
+    var reSubmit = document.getElementById('reneSubmit');
+    var reHope   = document.getElementById('reneHope');
+    var reNote   = document.getElementById('reneNote');
+    function closeRene() { reneModal.hidden = true; }
+    if (reCancel) reCancel.addEventListener('click', closeRene);
+    reneModal.addEventListener('click', function (e) { if (e.target === reneModal) closeRene(); });
+    if (reSubmit) reSubmit.addEventListener('click', function () {
+      var caseId = reneModal.getAttribute('data-caseid');
+      var msg = (reHope && reHope.value.trim() ? 'ご希望額: ' + reHope.value.trim() : '') +
+                (reNote && reNote.value.trim() ? '（' + reNote.value.trim() + '）' : '');
+      closeRene();
+      submitDecision(caseId, 'renegotiate', msg || '再査定希望');
     });
   }
 })();
