@@ -2,15 +2,16 @@
    BUYMO 看板ボード（hq.html / portal）スタイル
    ============================================================ */
 .portal-header{background:var(--navy);color:#fff;height:64px;display:flex;align-items:center;}
-.portal-header .container{display:flex;align-items:center;gap:16px;width:100%;}
-.portal-header .logo{color:#fff;font-size:22px;}
-.portal-title{font-weight:700;font-size:16px;}
+.portal-header .container{display:flex;align-items:center;gap:12px;width:100%;}
+.portal-header .logo{color:#fff;font-size:20px;flex:0 0 auto;}
+.portal-title{font-weight:700;font-size:14px;flex:0 0 auto;}
 .portal-role{margin-left:auto;background:rgba(255,255,255,.15);border-radius:30px;padding:6px 16px;font-weight:700;font-size:14px;}
-.portal-nav{display:flex;gap:6px;margin-left:auto;}
-.portal-nav a{color:#cdd6ee;font-weight:700;font-size:14px;padding:6px 14px;border-radius:30px;}
+.portal-nav{display:flex;gap:2px;margin-left:auto;flex-wrap:nowrap;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.portal-nav::-webkit-scrollbar{display:none;}
+.portal-nav a{color:#cdd6ee;font-weight:700;font-size:12.5px;padding:5px 10px;border-radius:30px;white-space:nowrap;}
 .portal-nav a[aria-current],.portal-nav a:hover{background:rgba(255,255,255,.15);color:#fff;}
-.portal-nav + .portal-logout{margin-left:16px;}
-.portal-logout{color:#cdd6ee;font-weight:700;font-size:14px;}
+.portal-nav + .portal-logout{margin-left:12px;}
+.portal-logout{color:#cdd6ee;font-weight:700;font-size:12.5px;white-space:nowrap;flex:0 0 auto;}
 
 /* 営業レポート */
 .kpi-row-5{grid-template-columns:repeat(5,1fr);}
