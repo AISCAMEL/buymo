@@ -1167,6 +1167,103 @@ function quoteRemindBody(name, amount, n) {
     'BUYMO買取センター（運営：合同会社アイズ）\n✉ ' + REPLY_TO + '\n';
 }
 
+/* ============================================================
+   ⑯ NEW: 見送り客の掘り起こし（ウィンバック）自動配信
+   ・意思決定シートで decision='nosell'（今回は見送り）の案件が対象
+   ・決定日から 30日後・60日後 に再アプローチメールを配信（最大2通）
+   ・掘り起こし段階(列8)・掘り起こし最終日(列9)で送信管理
+   ・トリガー: 日タイマー（毎日1回）で runWinbackCampaign を実行
+   ============================================================ */
+var WINBACK_GAPS = [30, 60]; // 決定日からの経過日数（この日数を超えたら送る）。最大2通
+var WINBACK_MAX  = 2;
+
+// 意思決定シートに掘り起こし用の列(8:掘り起こし段階, 9:掘り起こし最終日)を用意
+function ensureWinbackCols(sheet) {
+  try {
+    var head = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+    if (head.indexOf('掘り起こし段階') < 0) sheet.getRange(1, 8).setValue('掘り起こし段階');
+    if (head.indexOf('掘り起こし最終日') < 0) sheet.getRange(1, 9).setValue('掘り起こし最終日');
+    sheet.getRange(1, 1, 1, 9).setFontWeight('bold');
+  } catch (e) { Logger.log('ensureWinbackCols: ' + e.message); }
+}
+
+function runWinbackCampaign() {
+  var sheet = getDecisionSheet();
+  ensureWinbackCols(sheet);
+  var last = sheet.getLastRow();
+  if (last < 2) { Logger.log('runWinbackCampaign: no rows'); return; }
+  var now = new Date();
+  var today = Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd');
+  var rows = sheet.getRange(2, 1, last - 1, 9).getValues();
+
+  // 名前解決用（案件・マイページ案件から案件ID→氏名）
+  var nameOf = {};
+  try { getCases().forEach(function (c) { if (c.id) nameOf[String(c.id)] = c.name || ''; }); } catch (e) {}
+
+  var sent = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var caseId = String(rows[i][0] || '');
+    var email  = String(rows[i][1] || '').trim();
+    var decision = String(rows[i][2] || '');
+    var decidedAt = rows[i][4];               // 決定日時
+    var wStep = Number(rows[i][7]) || 0;      // 掘り起こし段階(列8)
+    var wLast = rows[i][8];                    // 掘り起こし最終日(列9)
+    if (decision !== 'nosell' || !email) continue;
+    if (wStep >= WINBACK_MAX) continue;        // 送信上限
+    if (!decidedAt) continue;
+
+    // 決定日からの経過日数で判定
+    var base = new Date(String(decidedAt).replace(/\//g, '-').replace(' ', 'T'));
+    if (isNaN(base.getTime())) continue;
+    var daysSinceDecision = Math.floor((now - base) / 86400000);
+    var needDays = WINBACK_GAPS[Math.min(wStep, WINBACK_GAPS.length - 1)];
+    if (daysSinceDecision < needDays) continue;
+
+    // 直近の掘り起こしから最低20日は空ける（連投防止）
+    if (wLast) {
+      var d2 = Math.floor((now - new Date(String(wLast).replace(/\//g, '-') + 'T00:00:00')) / 86400000);
+      if (d2 < 20) continue;
+    }
+
+    var name = nameOf[caseId] || '';
+    try {
+      MailApp.sendEmail({
+        to: email, name: FROM_NAME, replyTo: REPLY_TO,
+        subject: winbackSubject(wStep + 1),
+        body: winbackBody(name, wStep + 1)
+      });
+      sheet.getRange(i + 2, 8).setValue(wStep + 1);
+      sheet.getRange(i + 2, 9).setValue(today);
+      sent++;
+    } catch (e) { Logger.log('runWinbackCampaign send: ' + e.message); }
+  }
+  Logger.log('runWinbackCampaign: sent ' + sent);
+}
+
+function winbackSubject(n) {
+  if (n === 1) return '【BUYMO】その後、お車のご状況はいかがですか？｜再査定のご案内';
+  return '【BUYMO】今なら買取相場が変動しています｜無料の再査定はいかがですか';
+}
+function winbackBody(name, n) {
+  var body =
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n  BUYMO 車買取サービス\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+(name || 'お客') + ' 様\n\n' +
+'先日はBUYMOの査定をご利用いただき、ありがとうございました。\n' +
+(n === 1
+  ? 'その後、お車のご状況はいかがでしょうか。\nもし「やっぱり手放そうか」とお考えでしたら、いつでもお手伝いいたします。\n\n'
+  : '中古車の買取相場は日々変動しており、前回から金額が上がっているお車も少なくありません。\nもう一度、最新の相場で無料査定してみませんか？\n\n') +
+'━━━━━━━━━━━━━━━━━━━━━━━━━━\n  ✅ BUYMOの再査定はここが安心\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+'  ・査定は何度でも無料。もちろん今回もしつこい営業はいたしません\n' +
+'  ・お電話は最終確認の1回のみ。あとはLINE・メールで完結\n' +
+'  ・売却が決まればご自宅まで無料でお引き取り\n\n' +
+'  ▶ もう一度査定する（30秒）: ' + (typeof SITE_URL !== 'undefined' ? SITE_URL : 'https://buymo.me/') + '\n' +
+'  ▶ マイページ: ' + MEMBER_PAGE_URL + '\n\n' +
+'「今は考えていない」という場合は、このメールは破棄してください。\n' +
+'今後のご案内が不要な場合は、お手数ですがこのメールにご返信ください。\n\n' +
+'BUYMO買取センター（運営：合同会社アイズ）\n〒971-8138 福島県いわき市若葉台1丁目31-11\n✉ ' + REPLY_TO + '\n';
+  return body;
+}
+
 // ログイン可否判定: そのメールで問い合わせ/案件/リードが1件でもあれば許可
 // (査定のお申し込みが無い第三者のログインを防ぐ)
 function authCheck(email) {
