@@ -574,9 +574,11 @@
 
   // モード適用（写真セクションの表示・ボタン文言・ゲート）
   function mpApplyMode() {
+    // 本査定（写真16枚）は廃止。概算査定のみで運用。
+    mpMode = 'quick';
     var sec  = document.getElementById('ncPhotoSection');
-    if (sec) sec.hidden = (mpMode !== 'full');
-    if (ncSubmit) ncSubmit.textContent = (mpMode === 'full') ? '本査定を依頼する' : '概算査定を依頼する';
+    if (sec) sec.hidden = true;
+    if (ncSubmit) ncSubmit.textContent = '査定を依頼する';
     mpRefreshSubmit();
   }
 
@@ -837,11 +839,7 @@
       var el = ncForm.querySelector('input[name="' + n + '"][value="' + f[n] + '"]');
       if (el) el.checked = true;
     });
-    if (d.mode === 'full' || d.mode === 'quick') {
-      mpMode = d.mode;
-      var r = ncForm.querySelector('input[name="ncmode"][value="' + d.mode + '"]'); if (r) r.checked = true;
-    }
-    mpApplyMode();
+    mpApplyMode(); // 概算のみ（旧下書きの本査定モードは無視）
     mpRestoreShots(d.shots);
     mpRefreshSubmit();
   }

@@ -130,16 +130,6 @@
     .mp-nc-radios label{font-size:12px;padding:10px 2px;gap:3px;}
   }
 
-  /* 査定タイプ（概算/本査定） */
-  .mp-mode{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 20px;}
-  .mp-mode-opt{position:relative;display:flex;align-items:center;gap:8px;border:2px solid var(--border,#e2e8f0);border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all .15s;}
-  .mp-mode-opt input{width:auto;height:auto;margin:0;flex:0 0 auto;accent-color:var(--green);transform:scale(1.2);}
-  .mp-mode-opt .mp-mode-body{display:flex;flex-direction:column;line-height:1.3;}
-  .mp-mode-opt .mp-mode-body b{font-size:14px;font-weight:900;color:var(--text);}
-  .mp-mode-opt .mp-mode-body small{font-size:11px;color:var(--text-sub);}
-  .mp-mode-opt:has(input:checked){border-color:var(--green);background:var(--green-bg,#F0FDFA);}
-  @media (max-width:420px){.mp-mode{grid-template-columns:1fr;} }
-
   /* 下書き再開バナー */
   .mp-draft-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:#FFF7ED;border:1.5px solid #FFB870;border-radius:12px;padding:12px 16px;margin-bottom:18px;}
   .mp-draft-banner[hidden]{display:none;}
@@ -264,18 +254,6 @@
               <button type="button" id="ncDraftResume" class="btn btn-primary">続きから再開</button>
               <button type="button" id="ncDraftDiscard" class="btn btn-outline">最初から</button>
             </span>
-          </div>
-
-          <!-- 査定タイプ選択（#3 概算/本査定の2段階化） -->
-          <div class="mp-mode" role="radiogroup" aria-label="査定タイプ">
-            <label class="mp-mode-opt">
-              <input type="radio" name="ncmode" value="quick" checked />
-              <span class="mp-mode-body"><b>まず概算査定</b><small>写真なしでOK・約30秒</small></span>
-            </label>
-            <label class="mp-mode-opt">
-              <input type="radio" name="ncmode" value="full" />
-              <span class="mp-mode-body"><b>本査定</b><small>写真16枚でより正確に</small></span>
-            </label>
           </div>
 
           <div class="mp-nc-row">
@@ -560,7 +538,7 @@
 
 </main>
 
-<script src="assets/js/member.js?v=14" defer></script>
+<script src="assets/js/member.js?v=15" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
