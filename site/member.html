@@ -119,10 +119,10 @@
   .mp-nc-section-note{font-size:12px;color:var(--text-sub);margin:0 0 14px;line-height:1.6;}
   /* 常に横3分割：スマホでも縦積みにならない */
   .mp-nc-radios{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-  .mp-nc-radios label{min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;border:1.5px solid var(--border);border-radius:8px;padding:10px 4px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);background:#fff;transition:all .15s;text-align:center;line-height:1.2;white-space:nowrap;}
-  .mp-nc-radios label span{overflow:hidden;text-overflow:ellipsis;}
+  .mp-nc-radios label{min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;border:1.5px solid var(--border);border-radius:8px;padding:10px 6px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);background:#fff;transition:all .15s;text-align:center;line-height:1.2;}
+  .mp-nc-radios label span{flex:0 1 auto;white-space:nowrap;}
   .mp-nc-radios label:hover{border-color:var(--green);background:var(--green-bg);}
-  .mp-nc-radios input[type="radio"]{margin:0;flex-shrink:0;accent-color:var(--green);}
+  .mp-nc-radios input[type="radio"]{width:auto;height:auto;min-width:0;margin:0;flex:0 0 auto;accent-color:var(--green);transform:scale(1.2);}
   .mp-nc-radios input[type="radio"]:checked + span{color:var(--green-dark);font-weight:900;}
   .mp-nc-radios label:has(input:checked){border-color:var(--green);background:var(--green-bg);}
   @media (max-width:380px){
@@ -165,6 +165,19 @@
   .mp-pw-shot.done.req::after{display:none;}
   .mp-pw-shot.opt::after{content:'任意';position:absolute;top:4px;right:6px;background:#94a3b8;color:#fff;font-size:9px;font-weight:900;padding:2px 5px;border-radius:6px;z-index:2;}
   .mp-pw-shot input[type="file"]{display:none;}
+  /* 写真ガイドモーダル */
+  .mp-guide-box{max-width:400px;text-align:center;}
+  .mp-guide-badge{display:inline-block;background:var(--green,#0F766E);color:#fff;font-size:12px;font-weight:900;border-radius:20px;padding:3px 12px;margin-bottom:8px;}
+  .mp-guide-box h3{text-align:center;}
+  .mp-guide-figure{background:#F1F5F9;border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:10px;margin:12px 0;}
+  .mp-guide-figure img{display:block;width:100%;max-width:280px;margin:0 auto;border-radius:8px;aspect-ratio:1;object-fit:contain;background:#fff;}
+  .mp-guide-hint{font-size:14px;font-weight:700;color:var(--text,#1a1a1a);text-align:center;margin:0 0 12px;line-height:1.6;}
+  .mp-guide-tips{text-align:left;margin:0 0 18px;padding:12px 14px 12px 30px;background:#F0FDFA;border-radius:10px;font-size:12px;color:var(--green-dark,#0F766E);line-height:1.7;}
+  .mp-guide-tips li{margin:0 0 2px;}
+  .mp-guide-actions{justify-content:space-between;}
+  .mp-guide-actions .btn{flex:1;}
+  .mp-pw-shot-guidebtn{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);background:rgba(15,118,110,.92);color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;cursor:pointer;z-index:3;white-space:nowrap;}
+  .mp-pw-shot.done .mp-pw-shot-guidebtn{display:none;}
 
   .mp-pw-gate{margin-top:16px;padding:14px 16px;border-radius:10px;background:#FEF3C7;border:1.5px solid #F59E0B;font-size:13px;color:#92400E;font-weight:700;text-align:center;line-height:1.6;}
   .mp-pw-gate strong{color:#B45309;}
@@ -244,11 +257,33 @@
           <div class="mp-nc-row">
             <div class="mp-nc-field">
               <label for="nc-year">年式（初度登録年） <span class="opt">任意</span></label>
-              <input type="text" id="nc-year" name="year" placeholder="例：2018" inputmode="numeric" />
+              <select id="nc-year" name="year">
+                <option value="">選択してください</option>
+                <option>2026年</option><option>2025年</option><option>2024年</option><option>2023年</option><option>2022年</option>
+                <option>2021年</option><option>2020年</option><option>2019年</option><option>2018年</option><option>2017年</option>
+                <option>2016年</option><option>2015年</option><option>2014年</option><option>2013年</option><option>2012年</option>
+                <option>2011年</option><option>2010年</option><option>2009年</option><option>2008年</option><option>2007年</option>
+                <option>2006年</option><option>2005年</option><option>2004年</option><option>2003年</option><option>2002年</option>
+                <option>2001年</option><option>2000年</option>
+                <option>1999年以前</option>
+                <option>わからない</option>
+              </select>
             </div>
             <div class="mp-nc-field">
-              <label for="nc-mileage">走行距離 (km) <span class="opt">任意</span></label>
-              <input type="text" id="nc-mileage" name="mileage" placeholder="例：85000" inputmode="numeric" />
+              <label for="nc-mileage">走行距離 <span class="opt">任意</span></label>
+              <select id="nc-mileage" name="mileage">
+                <option value="">選択してください</option>
+                <option>1万km未満</option>
+                <option>1〜3万km</option>
+                <option>3〜5万km</option>
+                <option>5〜7万km</option>
+                <option>7〜10万km</option>
+                <option>10〜13万km</option>
+                <option>13〜16万km</option>
+                <option>16〜20万km</option>
+                <option>20万km以上</option>
+                <option>わからない</option>
+              </select>
             </div>
           </div>
 
@@ -459,9 +494,30 @@
     </div>
   </div>
 
+  <!-- 写真撮影ガイドモーダル（スロットをタップすると表示） -->
+  <div class="mp-modal" id="photoGuideModal" hidden>
+    <div class="mp-modal-box mp-guide-box" role="dialog" aria-modal="true" aria-labelledby="pgTitle">
+      <div class="mp-guide-badge" id="pgBadge">1 / 16</div>
+      <h3 id="pgTitle">フロント正面</h3>
+      <div class="mp-guide-figure">
+        <img id="pgGuideImg" src="" alt="お手本" />
+      </div>
+      <p class="mp-guide-hint" id="pgHint">車の正面全体が入るように撮影してください。</p>
+      <ul class="mp-guide-tips">
+        <li>明るい場所で、ピントを合わせて撮影してください</li>
+        <li>上のお手本の構図に近づけると査定がスムーズです</li>
+        <li>キズ・汚れはそのままでOK（正確な査定のため）</li>
+      </ul>
+      <div class="mp-modal-actions mp-guide-actions">
+        <button type="button" id="pgCancel" class="btn btn-outline">閉じる</button>
+        <button type="button" id="pgShoot" class="btn btn-primary">📷 この写真を撮る／選ぶ</button>
+      </div>
+    </div>
+  </div>
+
 </main>
 
-<script src="assets/js/member.js?v=12" defer></script>
+<script src="assets/js/member.js?v=13" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
