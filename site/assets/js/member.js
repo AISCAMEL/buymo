@@ -442,7 +442,7 @@
   ];
   var MP_REQUIRED = MP_SHOTS.filter(function(s){ return s.req; }).length;
   var mpShotData = {};
-  var mpMode = 'quick'; // 'quick'（概算・写真なしでOK） / 'full'（本査定・写真必須）
+  var mpMode = 'full'; // 写真必須の単一フロー
 
   /* ============================================================
      #1 下書き保存（IndexedDB）— 写真は容量が大きいので localStorage ではなく IDB
@@ -574,11 +574,11 @@
 
   // モード適用（写真セクションの表示・ボタン文言・ゲート）
   function mpApplyMode() {
-    // 本査定（写真16枚）は廃止。概算査定のみで運用。
-    mpMode = 'quick';
+    // 写真は必須（画像が無いと査定不可）。切替トグルは無し・単一フローで運用。
+    mpMode = 'full';
     var sec  = document.getElementById('ncPhotoSection');
-    if (sec) sec.hidden = true;
-    if (ncSubmit) ncSubmit.textContent = '査定を依頼する';
+    if (sec) sec.hidden = false;
+    if (ncSubmit) ncSubmit.textContent = '写真を送って査定を依頼';
     mpRefreshSubmit();
   }
 
@@ -953,7 +953,7 @@
         }
       };
 
-      var assessType = (mpMode === 'full') ? '本査定' : '概算査定';
+      var assessType = '査定';
       kase.car.assessType = assessType;
       var payload = {
         type: 'buymo_case_new',
@@ -993,7 +993,7 @@
         ncThanks.hidden = false;
         if (btn) { btn.disabled = false; btn.textContent = btnLabel || '送信して査定を依頼'; }
         ncForm.reset();
-        mpMode = 'quick';
+        mpMode = 'full';
         // 送信の反映を確認（JSONPで実データ確認）
         var thanksP = ncThanks.querySelector('p');
         var confMsg = thanksP ? thanksP.innerHTML : '';
