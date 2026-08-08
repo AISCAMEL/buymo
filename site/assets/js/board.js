@@ -205,8 +205,9 @@
     var sel = document.querySelector('input[name="cpSaleM"]:checked');
     var g = function (id) { var el = document.getElementById(id); return el ? el.value : ''; };
     var ck = function (id) { var el = document.getElementById(id); return !!(el && el.checked); };
+    var bpEl = document.getElementById('cpBuyPrice');
     return {
-      amount: Number(c.amount) || 0,
+      amount: bpEl ? (Number(bpEl.value) || 0) : (Number(c.amount) || 0),
       saleMethod: sel ? sel.value : (c.saleMethod || ''),
       salePrice: Number(g('cpSalePrice')) || 0,
       shipping: Number(g('cpShipping')) || 0,
@@ -222,14 +223,24 @@
     var st = document.getElementById('cpSaleStatus');
     var tc = saleInputCase();
     var method = tc.saleMethod;
+    // 差引き（買取金額と精算書金額の差）を常時表示
+    var diffEl = document.getElementById('cpSaleDiff');
+    if (diffEl) {
+      var diff = (tc.salePrice || 0) - (tc.amount || 0);
+      if (tc.amount || tc.salePrice) {
+        var sign = diff >= 0 ? 'plus' : 'minus';
+        diffEl.innerHTML = '差引き（粗利）＝ ② ' + HQ.yen(tc.salePrice) + ' − ① ' + HQ.yen(tc.amount) +
+          ' ＝ <strong class="' + sign + '">' + HQ.yen(diff) + '</strong>';
+      } else { diffEl.innerHTML = ''; }
+    }
     // オークションのみ実費欄を表示
     if (hqBox) hqBox.style.display = (method === 'オークション') ? '' : 'none';
     if (!method) { if (res) res.innerHTML = '<span class="cp-sale-hint">売却方法を選択してください。</span>'; if (st) st.innerHTML = ''; return; }
     var r = HQ.calcSale(tc);
     var lines = [
-      '<span>仕入（買取額）：' + HQ.yen(r.buyP) + '</span>',
-      '<span>' + (method === 'オークション' ? '落札額' : '売却額') + '：' + HQ.yen(r.saleP) + '</span>',
-      '<span class="profit">粗利：' + HQ.yen(r.profit) + '</span>'
+      '<span>買取金額（仕入れ）：' + HQ.yen(r.buyP) + '</span>',
+      '<span>精算書の金額（' + (method === 'オークション' ? '落札額' : '売却額') + '）：' + HQ.yen(r.saleP) + '</span>',
+      '<span class="profit">差引き（粗利）：' + HQ.yen(r.profit) + '</span>'
     ];
     if (method === 'オークション') {
       lines.push('<span class="fee-detail">├ 出品代行：' + HQ.yen(r.agencyFee) + '（税込）</span>');
@@ -259,7 +270,9 @@
     var c = findCase(panelId); if (!c) return;
     var tc = saleInputCase();
     if (!tc.saleMethod) { alert('売却方法を選択してください。'); return; }
-    if (tc.salePrice <= 0) { alert(tc.saleMethod === 'オークション' ? '落札額（USS精算書の金額）を入力してください。' : '売却額を入力してください。'); return; }
+    if (tc.amount <= 0) { alert('買取金額（仕入れ）を入力してください。'); return; }
+    if (tc.salePrice <= 0) { alert(tc.saleMethod === 'オークション' ? '精算書の金額（落札額）を入力してください。' : '精算書の金額（売却額）を入力してください。'); return; }
+    c.amount = tc.amount;
     c.saleMethod = tc.saleMethod; c.salePrice = tc.salePrice;
     c.shipping = tc.shipping; c.claimCost = tc.claimCost; c.reListFee = tc.reListFee; c.reListed = tc.reListed;
     var r = HQ.calcSale(c); c.hqFee = r.hqFee; c.partnerNet = r.partnerNet;
@@ -270,7 +283,7 @@
   }
   function printSettlement(c) {
     if (!c) return;
-    var tc = saleInputCase(); tc.amount = Number(c.amount) || 0;
+    var tc = saleInputCase();
     if (!tc.saleMethod) { alert('売却方法を選択してください。'); return; }
     var r = HQ.calcSale(tc);
     var method = r.method;
@@ -285,7 +298,7 @@
     ];
     if (method === 'オークション') {
       rows = rows.concat([
-        ['仕入れ価格（買取額）', fy(r.buyP)], ['落札価格', fy(r.saleP)], ['粗利', fy(r.profit)],
+        ['① 買取金額（仕入れ）', fy(r.buyP)], ['② 精算書の金額（落札額）', fy(r.saleP)], ['差引き（粗利）', fy(r.profit)],
         ['出品代行手数料（税込）', fy(r.agencyFee)], ['成約手数料（粗利5%）', fy(r.commission)]
       ]);
       if (r.shipping) rows.push(['陸送費', fy(r.shipping)]);
@@ -294,7 +307,7 @@
       rows.push(['本部手数料 合計', fy(r.hqFee)]);
       rows.push(['加盟店受取額', fy(r.partnerNet)]);
     } else {
-      rows = rows.concat([['売却額', fy(r.saleP)], ['本部手数料（一律・税抜）', fy(r.hqFee)], ['加盟店受取額', fy(r.partnerNet)]]);
+      rows = rows.concat([['① 買取金額（仕入れ）', fy(r.buyP)], ['② 精算書の金額（売却額）', fy(r.saleP)], ['差引き（粗利）', fy(r.profit)], ['本部手数料（一律・税抜）', fy(r.hqFee)], ['加盟店受取額', fy(r.partnerNet)]]);
     }
     var trs = rows.map(function (r2, i) {
       var cls = (r2[0].indexOf('本部手数料') >= 0) ? ' class="s-fee"' : (r2[0].indexOf('加盟店受取') >= 0) ? ' class="s-partner"' : (r2[0].indexOf('粗利') >= 0) ? ' class="s-profit"' : '';
@@ -338,7 +351,7 @@
           '<label>ジャンル<input id="cpGenre"></label>' +
           '<label>担当（加盟店）<select id="cpAssignee"></select></label>' +
           '<label>ステージ<select id="cpStage"></select></label>' +
-          '<label>金額<input id="cpAmount" type="number" min="0"></label>' +
+          '<label>金額（買取金額）<input id="cpAmount" type="number" min="0"></label>' +
           '<label class="cp-full">メモ<textarea id="cpMemo" rows="2"></textarea></label>' +
           '<label>クレーム対応<select id="cpClaim"><option value="なし">— なし —</option><option value="受付中">⚠️ 受付中</option><option value="対応中">🔧 対応中</option><option value="解決済み">✅ 解決済み</option></select></label>' +
         '</div>' +
@@ -383,7 +396,9 @@
             '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="オークション" id="cpSaleAuction"> オークション<span class="cp-sale-note">出品代行¥10,000＋成約手数料（粗利5%）＋実費</span></label>' +
           '</div>' +
           '<div class="cp-sale-fields">' +
-            '<label class="cp-sale-price-l" id="cpSalePriceLabel">落札額／売却額（USS精算書の金額・円）<input id="cpSalePrice" type="number" min="0" placeholder="0"></label>' +
+            '<label class="cp-sale-price-l">① 買取金額（仕入れ・円）<input id="cpBuyPrice" type="number" min="0" placeholder="0"></label>' +
+            '<label class="cp-sale-price-l" id="cpSalePriceLabel">② 精算書の金額（落札額・円）<input id="cpSalePrice" type="number" min="0" placeholder="0"></label>' +
+            '<div class="cp-sale-diff" id="cpSaleDiff"></div>' +
           '</div>' +
           '<div class="cp-sale-hqcost" id="cpSaleHqCost" style="display:none;">' +
             '<div class="cp-sale-hqcost-head">本部実費（本部が入力・加盟店負担／清算時に差引）</div>' +
@@ -417,10 +432,16 @@
     panel.querySelectorAll('input[name="cpSaleM"]').forEach(function (r) {
       r.addEventListener('change', function () { updateSaleCalc(); });
     });
-    ['cpSalePrice', 'cpShipping', 'cpClaimCost', 'cpReListFee'].forEach(function (id) {
+    ['cpBuyPrice', 'cpSalePrice', 'cpShipping', 'cpClaimCost', 'cpReListFee'].forEach(function (id) {
       var el = document.getElementById(id); if (el) el.addEventListener('input', updateSaleCalc);
     });
     var relCk = document.getElementById('cpReListed'); if (relCk) relCk.addEventListener('change', updateSaleCalc);
+    // 買取金額は上部「金額」欄と相互同期（どちらを編集しても一致させる）
+    var buyEl = document.getElementById('cpBuyPrice'), amtEl = document.getElementById('cpAmount');
+    if (buyEl && amtEl) {
+      buyEl.addEventListener('input', function () { amtEl.value = buyEl.value; });
+      amtEl.addEventListener('input', function () { buyEl.value = amtEl.value; updateSaleCalc(); });
+    }
     document.getElementById('cpSaleApply').addEventListener('click', applySale);
     document.getElementById('cpSettlement').addEventListener('click', function () { printSettlement(findCase(panelId)); });
     // ロール別の操作制御：売却方法・落札額は加盟店が入力／実費は本部が入力
@@ -431,22 +452,22 @@
     var note = document.getElementById('cpSaleRoleNote');
     var applyBtn = document.getElementById('cpSaleApply');
     var methodInputs = panel.querySelectorAll('input[name="cpSaleM"]');
-    var priceEl = document.getElementById('cpSalePrice');
+    var priceEls = [document.getElementById('cpBuyPrice'), document.getElementById('cpSalePrice')];
     var hqInputs = ['cpShipping', 'cpClaimCost', 'cpReListFee', 'cpReListed'].map(function (id) { return document.getElementById(id); });
     if (role === 'partner') {
-      // 加盟店：売却方法・落札額を選択／申請できる。実費は本部入力のため閲覧のみ。
+      // 加盟店：売却方法・買取金額・精算書金額を入力／申請できる。実費は本部入力のため閲覧のみ。
       methodInputs.forEach(function (r) { r.disabled = false; });
-      if (priceEl) priceEl.readOnly = false;
+      priceEls.forEach(function (el) { if (el) el.readOnly = false; });
       hqInputs.forEach(function (el) { if (el) el.disabled = true; });
       if (applyBtn) applyBtn.style.display = '';
-      if (note) note.innerHTML = '売却方法の選択・落札額の入力・<strong>本部への申請</strong>は加盟店が行います。陸送・クレーム・再出品などの実費は本部が入力します。';
+      if (note) note.innerHTML = '売却方法の選択・買取金額・精算書の金額の入力・<strong>本部への申請</strong>は加盟店が行います。陸送・クレーム・再出品などの実費は本部が入力します。';
     } else {
-      // 本部：売却方法・落札額は加盟店選択（閲覧のみ）。実費のみ入力可。
+      // 本部：売却方法・金額は加盟店入力（閲覧のみ）。実費のみ入力可。
       methodInputs.forEach(function (r) { r.disabled = true; });
-      if (priceEl) priceEl.readOnly = true;
+      priceEls.forEach(function (el) { if (el) el.readOnly = true; });
       hqInputs.forEach(function (el) { if (el) el.disabled = false; });
       if (applyBtn) applyBtn.style.display = 'none';
-      if (note) note.innerHTML = '売却方法・落札額は<strong>加盟店が選択・申請</strong>します（本部は閲覧のみ）。本部は陸送・クレーム・再出品などの実費を入力してください。';
+      if (note) note.innerHTML = '売却方法・買取金額・精算書の金額は<strong>加盟店が入力・申請</strong>します（本部は閲覧のみ）。本部は陸送・クレーム・再出品などの実費を入力してください。';
     }
   }
   function opts(arr, sel, withEmpty) {
@@ -470,6 +491,7 @@
     var dr = document.getElementById('cpSaleDirect'), ar = document.getElementById('cpSaleAuction');
     if (dr) dr.checked = c.saleMethod === '直販';
     if (ar) ar.checked = c.saleMethod === 'オークション';
+    var bp = document.getElementById('cpBuyPrice'); if (bp) bp.value = c.amount || '';
     var sp = document.getElementById('cpSalePrice'); if (sp) sp.value = c.salePrice || '';
     var sh = document.getElementById('cpShipping'); if (sh) sh.value = c.shipping || '';
     var cl = document.getElementById('cpClaimCost'); if (cl) cl.value = c.claimCost || '';
