@@ -130,6 +130,28 @@
     .mp-nc-radios label{font-size:12px;padding:10px 2px;gap:3px;}
   }
 
+  /* 査定タイプ（概算/本査定） */
+  .mp-mode{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 20px;}
+  .mp-mode-opt{position:relative;display:flex;align-items:center;gap:8px;border:2px solid var(--border,#e2e8f0);border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all .15s;}
+  .mp-mode-opt input{width:auto;height:auto;margin:0;flex:0 0 auto;accent-color:var(--green);transform:scale(1.2);}
+  .mp-mode-opt .mp-mode-body{display:flex;flex-direction:column;line-height:1.3;}
+  .mp-mode-opt .mp-mode-body b{font-size:14px;font-weight:900;color:var(--text);}
+  .mp-mode-opt .mp-mode-body small{font-size:11px;color:var(--text-sub);}
+  .mp-mode-opt:has(input:checked){border-color:var(--green);background:var(--green-bg,#F0FDFA);}
+  @media (max-width:420px){.mp-mode{grid-template-columns:1fr;} }
+
+  /* 下書き再開バナー */
+  .mp-draft-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:#FFF7ED;border:1.5px solid #FFB870;border-radius:12px;padding:12px 16px;margin-bottom:18px;}
+  .mp-draft-banner[hidden]{display:none;}
+  .mp-draft-txt{font-size:13px;font-weight:700;color:#B45309;}
+  .mp-draft-btns{display:flex;gap:8px;}
+  .mp-draft-btns .btn{padding:6px 14px;font-size:13px;}
+
+  /* 撮影スロットのハイライト（自動送り） */
+  .mp-pw-shot.mp-next-target{animation:mp-pulse 1.2s ease-in-out 2;border-color:var(--orange,#FF6B35)!important;}
+  @keyframes mp-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,53,0);}50%{box-shadow:0 0 0 5px rgba(255,107,53,.35);}}
+  @media (prefers-reduced-motion:reduce){.mp-pw-shot.mp-next-target{animation:none;}}
+
   /* 写真アップロード（マイページ版） */
   .mp-pw-progress{background:#F0FDFA;border:2px solid var(--green);border-radius:12px;padding:14px 16px;margin-bottom:14px;position:sticky;top:8px;z-index:5;}
   .mp-pw-progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;color:var(--green-dark);font-weight:800;}
@@ -235,6 +257,27 @@
         </div>
 
         <form id="newcaseForm" class="mp-newcase-form" hidden novalidate>
+          <!-- 下書き再開バナー（#1） -->
+          <div id="ncDraftBanner" class="mp-draft-banner" hidden>
+            <span class="mp-draft-txt">📝 入力途中のデータがあります。続きから再開しますか？</span>
+            <span class="mp-draft-btns">
+              <button type="button" id="ncDraftResume" class="btn btn-primary">続きから再開</button>
+              <button type="button" id="ncDraftDiscard" class="btn btn-outline">最初から</button>
+            </span>
+          </div>
+
+          <!-- 査定タイプ選択（#3 概算/本査定の2段階化） -->
+          <div class="mp-mode" role="radiogroup" aria-label="査定タイプ">
+            <label class="mp-mode-opt">
+              <input type="radio" name="ncmode" value="quick" checked />
+              <span class="mp-mode-body"><b>まず概算査定</b><small>写真なしでOK・約30秒</small></span>
+            </label>
+            <label class="mp-mode-opt">
+              <input type="radio" name="ncmode" value="full" />
+              <span class="mp-mode-body"><b>本査定</b><small>写真16枚でより正確に</small></span>
+            </label>
+          </div>
+
           <div class="mp-nc-row">
             <div class="mp-nc-field">
               <label for="nc-maker">メーカー <span class="req">必須</span></label>
@@ -397,9 +440,9 @@
           </div>
 
           <!-- ▼ 写真アップロード（車両15カット + 車検証 = 16枚必須） -->
-          <div class="mp-nc-section">
-            <h3 class="mp-nc-section-title">お車の写真 <span class="req">必須</span></h3>
-            <p class="mp-nc-section-note">正確な査定額のご提示に必要です。<strong>16枚（車両15枚＋車検証1枚）を撮影</strong>していただくと送信できます。スマホのカメラでOKです。</p>
+          <div class="mp-nc-section" id="ncPhotoSection">
+            <h3 class="mp-nc-section-title">お車の写真 <span class="req" id="ncPhotoBadge">必須</span></h3>
+            <p class="mp-nc-section-note" id="ncPhotoNote">正確な査定額のご提示に必要です。<strong>15枚（車両14枚＋車検証1枚）を撮影</strong>していただくと送信できます。スマホのカメラでOKです。</p>
 
             <div class="mp-pw-progress">
               <div class="mp-pw-progress-head">
@@ -517,7 +560,7 @@
 
 </main>
 
-<script src="assets/js/member.js?v=13" defer></script>
+<script src="assets/js/member.js?v=14" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
