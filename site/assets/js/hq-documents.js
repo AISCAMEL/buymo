@@ -177,9 +177,9 @@
       var rowsHtml;
       if (method === 'オークション') {
         rowsHtml = [
-          '<tr><td class="label">仕入れ価格（買取額）</td><td>' + yen(r.buyP) + '</td></tr>',
-          '<tr><td class="label">落札価格</td><td>' + yen(r.saleP) + '</td></tr>',
-          '<tr><td class="label" style="background:#f9f0e6;">粗利</td><td style="font-weight:700;">' + yen(r.profit) + '</td></tr>',
+          '<tr><td class="label">① 買取金額（仕入れ）</td><td>' + yen(r.buyP) + '</td></tr>',
+          '<tr><td class="label">② 精算書の金額（落札額）</td><td>' + yen(r.saleP) + '</td></tr>',
+          '<tr><td class="label" style="background:#f9f0e6;">差引き（粗利）</td><td style="font-weight:700;">' + yen(r.profit) + '</td></tr>',
           '<tr><td class="label">出品代行手数料（税込）</td><td>' + yen(r.agencyFee) + '</td></tr>',
           '<tr><td class="label">成約手数料（粗利5%）</td><td>' + yen(r.commission) + '</td></tr>'
         ];
@@ -191,8 +191,9 @@
         rowsHtml = rowsHtml.join('');
       } else {
         rowsHtml = [
-          '<tr><td class="label">売却額</td><td>' + yen(r.saleP) + '</td></tr>',
-          '<tr><td class="label" style="background:#f9f0e6;">粗利</td><td style="font-weight:700;">' + yen(r.profit) + '</td></tr>',
+          '<tr><td class="label">① 買取金額（仕入れ）</td><td>' + yen(r.buyP) + '</td></tr>',
+          '<tr><td class="label">② 精算書の金額（売却額）</td><td>' + yen(r.saleP) + '</td></tr>',
+          '<tr><td class="label" style="background:#f9f0e6;">差引き（粗利）</td><td style="font-weight:700;">' + yen(r.profit) + '</td></tr>',
           '<tr><td class="label" style="background:#fde8e8;">本部手数料（一律・税抜）</td><td style="color:#C0392B;font-weight:700;">' + yen(r.hqFee) + '</td></tr>',
           '<tr><td class="label" style="background:#e8f7ec;">加盟店受取額</td><td style="color:#15803d;font-weight:900;font-size:12pt;">' + yen(r.partnerNet) + '</td></tr>'
         ].join('');
