@@ -181,14 +181,15 @@ function logTestSubmission(kind, data) {
    スプレッドシート取得 (スタンドアロン運用対応)
    ============================================================ */
 function getSS() {
-  var ss = null;
-  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
-  if (ss) return ss;
+  // SPREADSHEET_ID が設定されていれば最優先で使う（バインド先が別シートでも本物データに接続できる）
   var id = getProp('SPREADSHEET_ID');
   if (id) {
     try { return SpreadsheetApp.openById(id); }
     catch (e2) { Logger.log('openById error: ' + e2.message); }
   }
+  var ss = null;
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
+  if (ss) return ss;
   throw new Error('スプレッドシート未接続。Script Properties の SPREADSHEET_ID を設定するか、シートに紐付けてください。');
 }
 
