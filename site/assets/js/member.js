@@ -680,7 +680,7 @@
       '<div class="mp-pw-shot-thumb">' +
         '<img class="mp-pw-guide" src="' + guideUrl + '" alt="" aria-hidden="true" loading="lazy" />' +
         '<span class="mp-pw-shot-ico" aria-hidden="true">' + shot.ico + '</span>' +
-        '<button type="button" class="mp-pw-shot-guidebtn" data-guide>📷 撮り方を見る</button>' +
+        '<button type="button" class="mp-pw-shot-guidebtn" data-guide>📷 撮り方</button>' +
         '<button type="button" class="mp-pw-shot-retake" data-retake>撮り直し</button>' +
       '</div>' +
       '<div class="mp-pw-shot-label">' + shot.label + '</div>' +
@@ -707,24 +707,24 @@
         mpFocusNext();            // #2 次の未撮影へ
       });
     });
-    // スロット全体／「撮り方を見る」→ ガイドモーダルを表示
-    function openGuide(e) {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      openPhotoGuide(shot, idx, input);
-    }
+    // スロットをクリック → その場でファイル選択を開く（PC=ダイアログ / スマホ=カメラ・アルバム選択）
+    function openPicker() { input.value = ''; input.click(); }
     slot.addEventListener('click', function (e) {
-      // 撮り直し・撮影済みサムネイルのクリックは除外
-      if (e.target.closest('[data-retake]')) return;
-      openGuide(e);
+      if (e.target.closest('[data-guide]') || e.target.closest('[data-retake]')) return;
+      openPicker();
     });
     slot.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') openGuide(e);
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }
     });
-    // 撮り直しはガイドを挟まず即カメラ起動
+    // 「撮り方」ボタン → ガイドモーダルのみ表示（ファイル選択はしない）
+    slot.querySelector('[data-guide]').addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      openPhotoGuide(shot, idx, input);
+    });
+    // 「撮り直し」ボタン → 再選択
     slot.querySelector('[data-retake]').addEventListener('click', function (e) {
       e.preventDefault(); e.stopPropagation();
-      input.value = '';
-      input.click();
+      openPicker();
     });
     return slot;
   }
