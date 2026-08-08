@@ -486,15 +486,18 @@
   }
 
   function mpRenderShot(shot, idx) {
-    var slot = document.createElement('label');
+    var slot = document.createElement('div');
     slot.className = 'mp-pw-shot ' + (shot.req ? 'req' : 'opt');
     slot.setAttribute('data-shot-id', shot.id);
+    slot.setAttribute('role', 'button');
+    slot.setAttribute('tabindex', '0');
     var guideUrl = 'assets/img/pw-guide/' + shot.id + '.webp';
     slot.innerHTML =
       '<span class="mp-pw-num">' + (idx + 1) + '</span>' +
       '<div class="mp-pw-shot-thumb">' +
         '<img class="mp-pw-guide" src="' + guideUrl + '" alt="" aria-hidden="true" loading="lazy" />' +
         '<span class="mp-pw-shot-ico" aria-hidden="true">' + shot.ico + '</span>' +
+        '<button type="button" class="mp-pw-shot-guidebtn" data-guide>📷 撮り方を見る</button>' +
         '<button type="button" class="mp-pw-shot-retake" data-retake>撮り直し</button>' +
       '</div>' +
       '<div class="mp-pw-shot-label">' + shot.label + '</div>' +
@@ -518,6 +521,20 @@
         mpUpdateProgress();
       });
     });
+    // スロット全体／「撮り方を見る」→ ガイドモーダルを表示
+    function openGuide(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      openPhotoGuide(shot, idx, input);
+    }
+    slot.addEventListener('click', function (e) {
+      // 撮り直し・撮影済みサムネイルのクリックは除外
+      if (e.target.closest('[data-retake]')) return;
+      openGuide(e);
+    });
+    slot.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') openGuide(e);
+    });
+    // 撮り直しはガイドを挟まず即カメラ起動
     slot.querySelector('[data-retake]').addEventListener('click', function (e) {
       e.preventDefault(); e.stopPropagation();
       input.value = '';
@@ -525,6 +542,38 @@
     });
     return slot;
   }
+
+  /* ---- 写真撮影ガイドモーダル ---- */
+  var _pgInput = null;
+  function openPhotoGuide(shot, idx, input) {
+    var modal = document.getElementById('photoGuideModal');
+    if (!modal) { if (input) input.click(); return; } // フォールバック：直接カメラ
+    _pgInput = input;
+    var badge = document.getElementById('pgBadge');
+    var title = document.getElementById('pgTitle');
+    var img   = document.getElementById('pgGuideImg');
+    var hint  = document.getElementById('pgHint');
+    if (badge) badge.textContent = (idx + 1) + '枚目';
+    if (title) title.textContent = shot.label + (shot.req ? '（必須）' : '（任意）');
+    if (img)   { img.src = 'assets/img/pw-guide/' + shot.id + '.webp'; img.alt = shot.label + ' のお手本'; }
+    if (hint)  hint.textContent = shot.hint;
+    modal.hidden = false;
+  }
+  (function wirePhotoGuide() {
+    var modal = document.getElementById('photoGuideModal');
+    if (!modal) return;
+    function closeGuide() { modal.hidden = true; _pgInput = null; }
+    var cancel = document.getElementById('pgCancel');
+    var shoot  = document.getElementById('pgShoot');
+    if (cancel) cancel.addEventListener('click', closeGuide);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeGuide(); });
+    if (shoot) shoot.addEventListener('click', function () {
+      var input = _pgInput;
+      modal.hidden = true;
+      if (input) { input.value = ''; input.click(); }
+      _pgInput = null;
+    });
+  })();
 
   (function mpBuildShots() {
     if (!document.getElementById('mpPwShots-exterior')) return;
@@ -752,7 +801,7 @@
   /* ---- Escキーで開いているモーダルを閉じる（操作性向上） ---- */
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' && e.keyCode !== 27) return;
-    [reasonModal, reneModal].forEach(function (m) {
+    [reasonModal, reneModal, document.getElementById('photoGuideModal')].forEach(function (m) {
       if (m && !m.hidden) m.hidden = true;
     });
   });
