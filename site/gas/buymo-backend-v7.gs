@@ -246,6 +246,7 @@ function doPost(e) {
     }
     if (data.type === 'column')           return jsonOut(postColumn(data));
     if (data.type === 'case')             return jsonOut(handleCase(data));
+    if (data.type === 'case_delete')      return jsonOut(deleteCaseRow(data.id));       // NEW: 案件削除
     if (data.type === 'note')             return jsonOut(appendNote(data));
     if (data.type === 'join')             return jsonOut(handleJoin(data));
     if (data.type === 'buymo_case_photo') return jsonOut(handleCasePhoto(data));   // NEW(#4): 1枚ずつ先行アップロード
@@ -1593,6 +1594,18 @@ function handleCase(data) {
     data.genre || '', data.assignee || '', data.stage || '新規受付',
     Number(data.amount) || 0, data.memo || '', data.source || '']);
   return { status: 'ok', action: 'created', id: id };
+}
+// 案件を削除（案件シートから該当IDの行を削除）
+function deleteCaseRow(id) {
+  if (!id) return { status: 'error', message: 'id required' };
+  var sheet = getCaseSheet(), rows = sheet.getDataRange().getValues();
+  for (var i = rows.length - 1; i >= 1; i--) {
+    if (rows[i][0] === id) {
+      sheet.deleteRow(i + 1);
+      return { status: 'ok', action: 'deleted', id: id };
+    }
+  }
+  return { status: 'ok', action: 'notfound', id: id };
 }
 function appendNote(data) {
   var sheet = getCaseSheet(), rows = sheet.getDataRange().getValues();

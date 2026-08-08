@@ -51,6 +51,11 @@ window.HQ = (function () {
     if (i >= 0) { var m; for (m in c) arr[i][m] = c[m]; } else { arr.unshift(c); }
     saveCases(arr); postCase(c);
   }
+  function deleteCase(id) {
+    saveCases(getCasesLS().filter(function (c) { return c.id !== id; }));
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'case_delete', token: authToken(), id: id }) }).catch(function () {});
+  }
   function authToken() { return (window.AUTH && AUTH.token) ? AUTH.token() : ''; }
   function postCase(c) {
     if (!ENDPOINT) return;
@@ -193,7 +198,7 @@ window.HQ = (function () {
 
   return {
     ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON,
-    loadCases: loadCases, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase,
+    loadCases: loadCases, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,

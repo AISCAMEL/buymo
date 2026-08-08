@@ -168,8 +168,11 @@
 .cp-fields .cp-full{grid-column:1 / -1;}
 .cp-fields input,.cp-fields select,.cp-fields textarea{border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;}
 .cp-fields input:focus,.cp-fields select:focus,.cp-fields textarea:focus{outline:none;border-color:var(--orange);}
-.cp-save{width:100%;height:46px;margin-top:16px;border:none;border-radius:10px;background:var(--orange);color:#fff;font-weight:900;font-size:15px;cursor:pointer;}
+.cp-btn-row{display:flex;gap:10px;margin-top:16px;align-items:stretch;}
+.cp-save{flex:1;height:46px;border:none;border-radius:10px;background:var(--orange);color:#fff;font-weight:900;font-size:15px;cursor:pointer;}
 .cp-save:hover{filter:brightness(1.05);}
+.cp-delete{height:46px;padding:0 16px;border:1px solid #C0392B;border-radius:10px;background:#fff;color:#C0392B;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;}
+.cp-delete:hover{background:#C0392B;color:#fff;}
 .cp-hist-area{margin-top:22px;border-top:1px solid #eee;padding-top:18px;}
 .cp-hist-area h3{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:12px;}
 .cp-note-add{display:flex;gap:8px;margin-bottom:14px;}
