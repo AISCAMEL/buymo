@@ -355,7 +355,10 @@
           '<label class="cp-full">メモ<textarea id="cpMemo" rows="2"></textarea></label>' +
           '<label>クレーム対応<select id="cpClaim"><option value="なし">— なし —</option><option value="受付中">⚠️ 受付中</option><option value="対応中">🔧 対応中</option><option value="解決済み">✅ 解決済み</option></select></label>' +
         '</div>' +
-        '<button class="cp-save" id="cpSave">保存する</button>' +
+        '<div class="cp-btn-row">' +
+          '<button class="cp-save" id="cpSave">保存する</button>' +
+          '<button class="cp-delete" id="cpDelete" style="display:none;">🗑 案件を削除</button>' +
+        '</div>' +
         '<div class="cp-hist-area"><h3>対応履歴</h3>' +
           '<div class="cp-note-add"><input id="cpNote" placeholder="対応メモを記録（例：電話で出張日程を調整）"><button id="cpNoteBtn">記録</button></div>' +
           '<ol class="cp-timeline" id="cpTimeline"></ol>' +
@@ -417,6 +420,11 @@
     document.body.appendChild(panel);
     panel.addEventListener('click', function (e) { if (e.target.hasAttribute('data-close')) closePanel(); });
     document.getElementById('cpSave').addEventListener('click', savePanel);
+    var delBtn = document.getElementById('cpDelete');
+    if (delBtn) {
+      if (role === 'hq') delBtn.style.display = '';
+      delBtn.addEventListener('click', deleteCurrentCase);
+    }
     document.getElementById('cpNoteBtn').addEventListener('click', addNote);
     document.getElementById('cpNote').addEventListener('keydown', function (e) { if (e.key === 'Enter') addNote(); });
     document.getElementById('cpFuTmpl').addEventListener('change', function () {
@@ -513,6 +521,13 @@
     panel.classList.add('open');
   }
   function closePanel() { if (panel) panel.classList.remove('open'); panelId = null; }
+  function deleteCurrentCase() {
+    var c = findCase(panelId); if (!c) return;
+    if (!window.confirm('案件「' + (c.id) + '　' + (c.name || '') + '」を削除します。\nこの操作は取り消せません。よろしいですか？')) return;
+    HQ.deleteCase(c.id);
+    cases = cases.filter(function (x) { return x.id !== c.id; });
+    closePanel(); render();
+  }
   function savePanel() {
     var c = findCase(panelId); if (!c) return;
     var newStage = document.getElementById('cpStage').value;
