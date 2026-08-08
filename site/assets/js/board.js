@@ -34,10 +34,32 @@
   function addHistory(c, m) { c.history = c.history || []; c.history.unshift({ t: nowStr(), m: m }); }
   function save(c) { HQ.upsertCase(c); }
 
+  function renderSaleAlertBanner(list) {
+    var board = document.getElementById('board');
+    if (!board || !board.parentNode) return;
+    var banner = document.getElementById('saleAlertBanner');
+    var pending = list.filter(function (c) { return HQ.needsSaleApp(c); });
+    if (!pending.length) { if (banner) banner.remove(); return; }
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'saleAlertBanner'; banner.className = 'sale-alert-banner';
+      board.parentNode.insertBefore(banner, board);
+    }
+    var ids = pending.map(function (c) { return '<button class="sale-alert-chip" data-id="' + HQ.esc(c.id) + '">' + HQ.esc(c.id) + '｜' + HQ.esc(c.name || '') + '</button>'; }).join('');
+    banner.innerHTML = '<span class="sale-alert-icon">🚨</span>' +
+      '<strong>売却未申請が ' + pending.length + '件</strong>' +
+      '<span class="sale-alert-msg">' + (role === 'partner' ? '案件を開いて本部へ申請してください。' : '加盟店の申請待ちです。') + '</span>' +
+      '<span class="sale-alert-ids">' + ids + '</span>';
+    banner.querySelectorAll('.sale-alert-chip').forEach(function (btn) {
+      btn.addEventListener('click', function () { openPanel(btn.getAttribute('data-id')); });
+    });
+  }
+
   function render() {
     var board = document.getElementById('board');
     board.innerHTML = '';
     var list = visible();
+    renderSaleAlertBanner(list);
 
     /* 未割当カラム（本部のみ） */
     if (role === 'hq') {
@@ -80,12 +102,14 @@
       items.forEach(function (c) {
         var card = document.createElement('div');
         var hasActiveClaim = c.claimStatus && c.claimStatus !== 'なし' && c.claimStatus !== '解決済み';
-        card.className = 'kb-card' + (isStale(c) ? ' stale' : '') + (hasActiveClaim ? ' has-claim' : ''); card.draggable = true; card.dataset.id = c.id;
+        var needsSale = HQ.needsSaleApp(c);
+        card.className = 'kb-card' + (isStale(c) ? ' stale' : '') + (hasActiveClaim ? ' has-claim' : '') + (needsSale ? ' needs-sale' : ''); card.draggable = true; card.dataset.id = c.id;
         var hist = (c.history && c.history.length) ? '<span class="kb-hist">📝' + c.history.length + '</span>' : '';
         var staleTag = isStale(c) ? '<span class="kb-stale">滞留' + daysSince(c.date) + '日</span>' : '';
         var claimBadge = hasActiveClaim ? '<span class="kb-claim">⚠️' + HQ.esc(c.claimStatus) + '</span>' : '';
+        var saleBadge = needsSale ? '<span class="kb-sale-alert">🚨売却未申請</span>' : '';
         card.innerHTML = '<div class="kb-card-top"><span class="kb-id">' + c.id + '</span>' +
-          (c.genre ? '<span class="kb-tag">' + HQ.esc(c.genre) + '</span>' : '') + staleTag + claimBadge + hist + '</div>' +
+          (c.genre ? '<span class="kb-tag">' + HQ.esc(c.genre) + '</span>' : '') + staleTag + claimBadge + saleBadge + hist + '</div>' +
           '<div class="kb-name">' + HQ.esc(c.name || '') + '</div>' +
           '<div class="kb-meta">' + (c.date ? '<span class="kb-date">📅' + HQ.esc(c.date) + '</span>' : '') + HQ.esc(c.assignee || '担当未定') + (c.amount ? '・' + HQ.yen(c.amount) : '') + '</div>' +
           (c.memo ? '<div class="kb-memo">' + HQ.esc(c.memo) + '</div>' : '');
@@ -174,57 +198,107 @@
     flash(document.getElementById('cpFuAdd'), '追加しました ✓');
   }
 
-  /* ---- 売却管理 ---- */
-  function updateSaleCalc() {
+  /* ---- 売却管理（加盟店が売却方法を選択・申請／本部は実費入力・閲覧） ---- */
+  // 現在のパネル入力から一時ケースを組み立てて計算に使う
+  function saleInputCase() {
+    var c = findCase(panelId) || {};
     var sel = document.querySelector('input[name="cpSaleM"]:checked');
-    var row = document.getElementById('cpSaleCalcRow');
+    var g = function (id) { var el = document.getElementById(id); return el ? el.value : ''; };
+    var ck = function (id) { var el = document.getElementById(id); return !!(el && el.checked); };
+    return {
+      amount: Number(c.amount) || 0,
+      saleMethod: sel ? sel.value : (c.saleMethod || ''),
+      salePrice: Number(g('cpSalePrice')) || 0,
+      shipping: Number(g('cpShipping')) || 0,
+      claimCost: Number(g('cpClaimCost')) || 0,
+      reListFee: Number(g('cpReListFee')) || 0,
+      reListed: ck('cpReListed')
+    };
+  }
+  function saleSig(c) { var r = HQ.calcSale(c); return [r.method, r.saleP, r.hqFee].join('|'); }
+  function updateSaleCalc() {
     var res = document.getElementById('cpSaleResult');
-    if (!sel) { if (row) row.style.display = 'none'; return; }
-    var method = sel.value;
-    var c = findCase(panelId);
-    var buyP = c ? (Number(c.amount) || 0) : 0;
+    var hqBox = document.getElementById('cpSaleHqCost');
+    var st = document.getElementById('cpSaleStatus');
+    var tc = saleInputCase();
+    var method = tc.saleMethod;
+    // オークションのみ実費欄を表示
+    if (hqBox) hqBox.style.display = (method === 'オークション') ? '' : 'none';
+    if (!method) { if (res) res.innerHTML = '<span class="cp-sale-hint">売却方法を選択してください。</span>'; if (st) st.innerHTML = ''; return; }
+    var r = HQ.calcSale(tc);
+    var lines = [
+      '<span>仕入（買取額）：' + HQ.yen(r.buyP) + '</span>',
+      '<span>' + (method === 'オークション' ? '落札額' : '売却額') + '：' + HQ.yen(r.saleP) + '</span>',
+      '<span class="profit">粗利：' + HQ.yen(r.profit) + '</span>'
+    ];
     if (method === 'オークション') {
-      if (row) row.style.display = '';
-      var saleP = Number((document.getElementById('cpSalePrice') || {}).value) || 0;
-      var profit = saleP - buyP;
-      var fee = Math.round(Math.max(0, profit) * 0.05);
-      var partner = profit - fee;
-      if (res) res.innerHTML =
-        '<span>仕入：' + HQ.yen(buyP) + '</span>' +
-        '<span>粗利：' + HQ.yen(profit) + '</span>' +
-        '<span class="fee">本部手数料（5%）：' + HQ.yen(fee) + '</span>' +
-        '<span class="partner">加盟店取り分：' + HQ.yen(partner) + '</span>';
-    } else {
-      if (row) row.style.display = 'none';
-      if (res) res.innerHTML = '<span class="fee">本部手数料（固定）：¥30,000</span>';
+      lines.push('<span class="fee-detail">├ 出品代行：' + HQ.yen(r.agencyFee) + '（税込）</span>');
+      lines.push('<span class="fee-detail">├ 成約手数料（粗利5%）：' + HQ.yen(r.commission) + '</span>');
+      if (r.shipping) lines.push('<span class="fee-detail">├ 陸送費：' + HQ.yen(r.shipping) + '</span>');
+      if (r.claimCost) lines.push('<span class="fee-detail">├ クレーム処理：' + HQ.yen(r.claimCost) + '</span>');
+      if (r.reListFee) lines.push('<span class="fee-detail">├ 再出品手数料：' + HQ.yen(r.reListFee) + '</span>');
     }
+    lines.push('<span class="fee">本部手数料 合計：' + HQ.yen(r.hqFee) + (method === '直販' ? '（一律・税抜）' : '') + '</span>');
+    lines.push('<span class="partner">加盟店取り分：' + HQ.yen(r.partnerNet) + '</span>');
+    if (res) res.innerHTML = lines.join('');
+    // 申請状態バッジ
+    if (st) {
+      var c = findCase(panelId) || {};
+      var applied = !!c.saleApplied && c.saleAppliedSig === saleSig(tc);
+      if (applied) {
+        st.innerHTML = '<span class="cp-sale-badge applied">✅ 申請済み（' + HQ.esc(c.saleAppliedAt || '') + '）</span>';
+      } else if (c.saleApplied) {
+        st.innerHTML = '<span class="cp-sale-badge redo">⚠️ 内容が変更されています — 再申請してください</span>';
+      } else {
+        st.innerHTML = '<span class="cp-sale-badge pending">⚠️ 未申請 — 本部への申請が必要です</span>';
+      }
+    }
+  }
+  // 加盟店：本部へ売却申請（必須）
+  function applySale() {
+    var c = findCase(panelId); if (!c) return;
+    var tc = saleInputCase();
+    if (!tc.saleMethod) { alert('売却方法を選択してください。'); return; }
+    if (tc.salePrice <= 0) { alert(tc.saleMethod === 'オークション' ? '落札額（USS精算書の金額）を入力してください。' : '売却額を入力してください。'); return; }
+    c.saleMethod = tc.saleMethod; c.salePrice = tc.salePrice;
+    c.shipping = tc.shipping; c.claimCost = tc.claimCost; c.reListFee = tc.reListFee; c.reListed = tc.reListed;
+    var r = HQ.calcSale(c); c.hqFee = r.hqFee; c.partnerNet = r.partnerNet;
+    c.saleApplied = true; c.saleAppliedAt = nowStr(); c.saleAppliedSig = saleSig(c);
+    addHistory(c, '売却申請：' + r.method + '／' + (r.method === 'オークション' ? '落札額' : '売却額') + HQ.yen(r.saleP) + '（本部手数料' + HQ.yen(r.hqFee) + '・加盟店取り分' + HQ.yen(r.partnerNet) + '）');
+    save(c); HQ.postSaleApplication(c); render(); fillPanel(c);
+    flash(document.getElementById('cpSaleApply'), '申請しました ✓');
   }
   function printSettlement(c) {
     if (!c) return;
-    var sel = document.querySelector('input[name="cpSaleM"]:checked');
-    if (!sel) { alert('売却方法を選択してください'); return; }
-    var method = sel.value;
-    var buyP = Number(c.amount) || 0;
-    var saleP = method === 'オークション' ? (Number((document.getElementById('cpSalePrice') || {}).value) || 0) : 0;
-    var profit = saleP - buyP;
-    var hqFee = method === 'オークション' ? Math.round(Math.max(0, profit) * 0.05) : 30000;
-    var partnerAmt = method === 'オークション' ? (profit - hqFee) : 0;
+    var tc = saleInputCase(); tc.amount = Number(c.amount) || 0;
+    if (!tc.saleMethod) { alert('売却方法を選択してください。'); return; }
+    var r = HQ.calcSale(tc);
+    var method = r.method;
     function p(n) { return ('0' + n).slice(-2); }
     var now = new Date(); var due = new Date(); due.setDate(due.getDate() + 7);
     function ds(d) { return d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()); }
     function fy(n) { return '¥' + (Number(n) || 0).toLocaleString('en-US'); }
     var rows = [
       ['案件ID', c.id], ['お名前', c.name || '—'], ['ジャンル', c.genre || '—'],
-      ['担当加盟店', c.assignee || '—'], ['売却方法', method]
+      ['担当加盟店', c.assignee || '—'], ['売却方法', method],
+      ['申請状況', c.saleApplied ? ('申請済み ' + HQ.esc(c.saleAppliedAt || '')) : '未申請']
     ];
     if (method === 'オークション') {
-      rows = rows.concat([['仕入れ価格（査定額）', fy(buyP)], ['落札価格', fy(saleP)], ['粗利', fy(profit)], ['本部手数料（5%）', fy(hqFee)], ['加盟店受取額', fy(partnerAmt)]]);
+      rows = rows.concat([
+        ['仕入れ価格（買取額）', fy(r.buyP)], ['落札価格', fy(r.saleP)], ['粗利', fy(r.profit)],
+        ['出品代行手数料（税込）', fy(r.agencyFee)], ['成約手数料（粗利5%）', fy(r.commission)]
+      ]);
+      if (r.shipping) rows.push(['陸送費', fy(r.shipping)]);
+      if (r.claimCost) rows.push(['クレーム処理費', fy(r.claimCost)]);
+      if (r.reListFee) rows.push(['再出品手数料', fy(r.reListFee)]);
+      rows.push(['本部手数料 合計', fy(r.hqFee)]);
+      rows.push(['加盟店受取額', fy(r.partnerNet)]);
     } else {
-      rows.push(['本部手数料（固定）', fy(30000)]);
+      rows = rows.concat([['売却額', fy(r.saleP)], ['本部手数料（一律・税抜）', fy(r.hqFee)], ['加盟店受取額', fy(r.partnerNet)]]);
     }
-    var trs = rows.map(function (r, i) {
-      var cls = (r[0].indexOf('本部手数料') >= 0) ? ' class="s-fee"' : (r[0].indexOf('加盟店受取') >= 0) ? ' class="s-partner"' : (r[0].indexOf('粗利') >= 0) ? ' class="s-profit"' : '';
-      return '<tr' + cls + '><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+    var trs = rows.map(function (r2, i) {
+      var cls = (r2[0].indexOf('本部手数料') >= 0) ? ' class="s-fee"' : (r2[0].indexOf('加盟店受取') >= 0) ? ' class="s-partner"' : (r2[0].indexOf('粗利') >= 0) ? ' class="s-profit"' : '';
+      return '<tr' + cls + '><td>' + r2[0] + '</td><td>' + r2[1] + '</td></tr>';
     }).join('');
     var html = '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>清算書 ' + c.id + '</title>' +
       '<style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Noto Sans JP",sans-serif;padding:40px;max-width:640px;margin:auto;color:#111;}' +
@@ -301,16 +375,28 @@
           '<ol class="cp-fu-list" id="cpFuList"></ol>' +
         '</div>' +
         '<div class="cp-sale-area">' +
-          '<h3>買取後の管理</h3>' +
+          '<h3>売却管理（買取後）</h3>' +
+          '<p class="cp-sale-role-note" id="cpSaleRoleNote"></p>' +
+          '<div class="cp-sale-status" id="cpSaleStatus"></div>' +
           '<div class="cp-sale-methods">' +
-            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="直販" id="cpSaleDirect"> 直販<span class="cp-sale-note">本部手数料：¥30,000（固定）</span></label>' +
-            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="オークション" id="cpSaleAuction"> オークション<span class="cp-sale-note">利益の5%</span></label>' +
+            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="直販" id="cpSaleDirect"> 直販（自社）<span class="cp-sale-note">本部手数料 一律 ¥30,000（税抜）</span></label>' +
+            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="オークション" id="cpSaleAuction"> オークション<span class="cp-sale-note">出品代行¥10,000＋成約手数料（粗利5%）＋実費</span></label>' +
           '</div>' +
-          '<div class="cp-sale-calc-row" id="cpSaleCalcRow" style="display:none;">' +
-            '<label>落札価格（円）<input id="cpSalePrice" type="number" min="0" placeholder="0"></label>' +
-            '<div class="cp-sale-result" id="cpSaleResult"></div>' +
+          '<div class="cp-sale-fields">' +
+            '<label class="cp-sale-price-l" id="cpSalePriceLabel">落札額／売却額（USS精算書の金額・円）<input id="cpSalePrice" type="number" min="0" placeholder="0"></label>' +
           '</div>' +
-          '<button id="cpSettlement">清算書を発行 📄</button>' +
+          '<div class="cp-sale-hqcost" id="cpSaleHqCost" style="display:none;">' +
+            '<div class="cp-sale-hqcost-head">本部実費（本部が入力・加盟店負担／清算時に差引）</div>' +
+            '<label>陸送費（円）<input id="cpShipping" type="number" min="0" placeholder="0"></label>' +
+            '<label>クレーム処理費（円）<input id="cpClaimCost" type="number" min="0" placeholder="0"></label>' +
+            '<label>再出品手数料（円）<input id="cpReListFee" type="number" min="0" placeholder="0"></label>' +
+            '<label class="cp-sale-check"><input type="checkbox" id="cpReListed"> 再出品あり（手数料を加算）</label>' +
+          '</div>' +
+          '<div class="cp-sale-result" id="cpSaleResult"></div>' +
+          '<div class="cp-sale-actions">' +
+            '<button id="cpSaleApply" class="cp-sale-apply">本部へ申請する</button>' +
+            '<button id="cpSettlement" class="cp-sale-settle">清算書を発行 📄</button>' +
+          '</div>' +
         '</div>' +
       '</aside>';
     document.body.appendChild(panel);
@@ -331,8 +417,37 @@
     panel.querySelectorAll('input[name="cpSaleM"]').forEach(function (r) {
       r.addEventListener('change', function () { updateSaleCalc(); });
     });
-    document.getElementById('cpSalePrice').addEventListener('input', updateSaleCalc);
+    ['cpSalePrice', 'cpShipping', 'cpClaimCost', 'cpReListFee'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) el.addEventListener('input', updateSaleCalc);
+    });
+    var relCk = document.getElementById('cpReListed'); if (relCk) relCk.addEventListener('change', updateSaleCalc);
+    document.getElementById('cpSaleApply').addEventListener('click', applySale);
     document.getElementById('cpSettlement').addEventListener('click', function () { printSettlement(findCase(panelId)); });
+    // ロール別の操作制御：売却方法・落札額は加盟店が入力／実費は本部が入力
+    applySaleRoleUI();
+  }
+  // 売却セクションの権限制御
+  function applySaleRoleUI() {
+    var note = document.getElementById('cpSaleRoleNote');
+    var applyBtn = document.getElementById('cpSaleApply');
+    var methodInputs = panel.querySelectorAll('input[name="cpSaleM"]');
+    var priceEl = document.getElementById('cpSalePrice');
+    var hqInputs = ['cpShipping', 'cpClaimCost', 'cpReListFee', 'cpReListed'].map(function (id) { return document.getElementById(id); });
+    if (role === 'partner') {
+      // 加盟店：売却方法・落札額を選択／申請できる。実費は本部入力のため閲覧のみ。
+      methodInputs.forEach(function (r) { r.disabled = false; });
+      if (priceEl) priceEl.readOnly = false;
+      hqInputs.forEach(function (el) { if (el) el.disabled = true; });
+      if (applyBtn) applyBtn.style.display = '';
+      if (note) note.innerHTML = '売却方法の選択・落札額の入力・<strong>本部への申請</strong>は加盟店が行います。陸送・クレーム・再出品などの実費は本部が入力します。';
+    } else {
+      // 本部：売却方法・落札額は加盟店選択（閲覧のみ）。実費のみ入力可。
+      methodInputs.forEach(function (r) { r.disabled = true; });
+      if (priceEl) priceEl.readOnly = true;
+      hqInputs.forEach(function (el) { if (el) el.disabled = false; });
+      if (applyBtn) applyBtn.style.display = 'none';
+      if (note) note.innerHTML = '売却方法・落札額は<strong>加盟店が選択・申請</strong>します（本部は閲覧のみ）。本部は陸送・クレーム・再出品などの実費を入力してください。';
+    }
   }
   function opts(arr, sel, withEmpty) {
     var o = withEmpty ? '<option value="">— 未割当 —</option>' : '';
@@ -356,6 +471,10 @@
     if (dr) dr.checked = c.saleMethod === '直販';
     if (ar) ar.checked = c.saleMethod === 'オークション';
     var sp = document.getElementById('cpSalePrice'); if (sp) sp.value = c.salePrice || '';
+    var sh = document.getElementById('cpShipping'); if (sh) sh.value = c.shipping || '';
+    var cl = document.getElementById('cpClaimCost'); if (cl) cl.value = c.claimCost || '';
+    var rf = document.getElementById('cpReListFee'); if (rf) rf.value = c.reListFee || '';
+    var rl = document.getElementById('cpReListed'); if (rl) rl.checked = !!c.reListed;
     updateSaleCalc();
   }
   function renderTimeline(c) {
@@ -390,10 +509,16 @@
     c.claimStatus = newClaim;
     var selSale = document.querySelector('input[name="cpSaleM"]:checked');
     if (selSale) {
+      var prevSig = c.saleApplied ? saleSig(c) : null;
       c.saleMethod = selSale.value;
       c.salePrice = Number(document.getElementById('cpSalePrice').value) || 0;
-      var sp = c.salePrice, bp = Number(c.amount) || 0;
-      c.hqFee = c.saleMethod === 'オークション' ? Math.round(Math.max(0, sp - bp) * 0.05) : 30000;
+      c.shipping = Number((document.getElementById('cpShipping') || {}).value) || 0;
+      c.claimCost = Number((document.getElementById('cpClaimCost') || {}).value) || 0;
+      c.reListFee = Number((document.getElementById('cpReListFee') || {}).value) || 0;
+      c.reListed = !!(document.getElementById('cpReListed') || {}).checked;
+      var r = HQ.calcSale(c); c.hqFee = r.hqFee; c.partnerNet = r.partnerNet;
+      // 申請済みの内容が変わったら再申請が必要（申請状態を解除）
+      if (c.saleApplied && prevSig !== saleSig(c)) { c.saleApplied = false; c.saleAppliedSig = ''; }
     }
     save(c); render(); fillPanel(c);
     flash(document.getElementById('cpSave'), '保存しました ✓');

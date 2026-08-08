@@ -169,15 +169,34 @@
   function docSettlement(f) {
     var c = findCaseFull(f.caseId);
     if (c && c.saleMethod) {
-      var method = c.saleMethod;
-      var buyP = Number(c.amount) || 0;
-      var saleP = Number(c.salePrice) || 0;
-      var profit = saleP - buyP;
-      var hqFee = method === 'オークション' ? Math.round(Math.max(0, profit) * 0.05) : 30000;
-      var partnerAmt = method === 'オークション' ? (profit - hqFee) : (saleP - hqFee);
+      var r = HQ.calcSale(c);
+      var method = r.method;
       var d = new Date(); var due = new Date(); due.setDate(due.getDate() + 7);
       function p(n) { return ('0' + n).slice(-2); }
       function ds(dt) { return dt.getFullYear() + '/' + p(dt.getMonth()+1) + '/' + p(dt.getDate()); }
+      var rowsHtml;
+      if (method === 'オークション') {
+        rowsHtml = [
+          '<tr><td class="label">仕入れ価格（買取額）</td><td>' + yen(r.buyP) + '</td></tr>',
+          '<tr><td class="label">落札価格</td><td>' + yen(r.saleP) + '</td></tr>',
+          '<tr><td class="label" style="background:#f9f0e6;">粗利</td><td style="font-weight:700;">' + yen(r.profit) + '</td></tr>',
+          '<tr><td class="label">出品代行手数料（税込）</td><td>' + yen(r.agencyFee) + '</td></tr>',
+          '<tr><td class="label">成約手数料（粗利5%）</td><td>' + yen(r.commission) + '</td></tr>'
+        ];
+        if (r.shipping) rowsHtml.push('<tr><td class="label">陸送費</td><td>' + yen(r.shipping) + '</td></tr>');
+        if (r.claimCost) rowsHtml.push('<tr><td class="label">クレーム処理費</td><td>' + yen(r.claimCost) + '</td></tr>');
+        if (r.reListFee) rowsHtml.push('<tr><td class="label">再出品手数料</td><td>' + yen(r.reListFee) + '</td></tr>');
+        rowsHtml.push('<tr><td class="label" style="background:#fde8e8;">本部手数料 合計</td><td style="color:#C0392B;font-weight:700;">' + yen(r.hqFee) + '</td></tr>');
+        rowsHtml.push('<tr><td class="label" style="background:#e8f7ec;">加盟店受取額</td><td style="color:#15803d;font-weight:900;font-size:12pt;">' + yen(r.partnerNet) + '</td></tr>');
+        rowsHtml = rowsHtml.join('');
+      } else {
+        rowsHtml = [
+          '<tr><td class="label">売却額</td><td>' + yen(r.saleP) + '</td></tr>',
+          '<tr><td class="label" style="background:#f9f0e6;">粗利</td><td style="font-weight:700;">' + yen(r.profit) + '</td></tr>',
+          '<tr><td class="label" style="background:#fde8e8;">本部手数料（一律・税抜）</td><td style="color:#C0392B;font-weight:700;">' + yen(r.hqFee) + '</td></tr>',
+          '<tr><td class="label" style="background:#e8f7ec;">加盟店受取額</td><td style="color:#15803d;font-weight:900;font-size:12pt;">' + yen(r.partnerNet) + '</td></tr>'
+        ].join('');
+      }
       return '<h1>清 算 書</h1>' +
         '<p class="sub">発行日：' + ds(d) + '　支払期限：' + ds(due) + '（1週間以内）</p>' +
         '<table>' +
@@ -186,15 +205,8 @@
         '<tr><td class="label">ジャンル</td><td>' + esc(c.genre || '—') + '</td></tr>' +
         '<tr><td class="label">担当加盟店</td><td>' + esc(c.assignee || '—') + '</td></tr>' +
         '<tr><td class="label">売却方法</td><td>' + esc(method) + '</td></tr>' +
-        (method === 'オークション' ? [
-          '<tr><td class="label">仕入れ価格</td><td>' + yen(buyP) + '</td></tr>',
-          '<tr><td class="label">落札価格</td><td>' + yen(saleP) + '</td></tr>',
-          '<tr><td class="label" style="background:#f9f0e6;">粗利</td><td style="font-weight:700;">' + yen(profit) + '</td></tr>',
-          '<tr><td class="label" style="background:#fde8e8;">本部手数料（5%）</td><td style="color:#C0392B;font-weight:700;">' + yen(hqFee) + '</td></tr>',
-          '<tr><td class="label" style="background:#e8f7ec;">加盟店受取額</td><td style="color:#15803d;font-weight:900;font-size:12pt;">' + yen(partnerAmt) + '</td></tr>'
-        ].join('') : [
-          '<tr><td class="label" style="background:#fde8e8;">本部手数料（固定）</td><td style="color:#C0392B;font-weight:700;">¥30,000</td></tr>'
-        ].join('')) +
+        '<tr><td class="label">申請状況</td><td>' + (c.saleApplied ? '申請済み ' + esc(c.saleAppliedAt || '') : '未申請') + '</td></tr>' +
+        rowsHtml +
         '</table>' +
         '<p class="note" style="margin-top:6mm;">BUYMO ／ 合同会社アイズ　〒971-8138 福島県いわき市若葉台1丁目31-11<br>お支払いは期限内にお振込みいたします。</p>';
     } else {

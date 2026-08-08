@@ -36,6 +36,7 @@ var MEMBER_CASE_SHEET = 'マイページ案件';         // NEW: マイページ
 var TEST_SHEET_NAME   = 'テスト送信';              // NEW: 管理者テスト送信の隔離先
 var NOTICE_SHEET_NAME = 'お知らせ';                // NEW: 本部→加盟店 お知らせ
 var COMMUNITY_SHEET_NAME = 'コミュニティ';         // NEW: 加盟店コミュニティ（共有）
+var SALE_SHEET_NAME   = '売却申請';               // NEW: 加盟店→本部 売却申請
 var NOTIFY_EMAIL      = 'kaitori@buymo.me';      // 管理者通知先
 var FROM_NAME         = 'BUYMO 買取事業部';
 var REPLY_TO          = 'kaitori@buymo.me';
@@ -219,6 +220,7 @@ function doGet(e) {
     if (action === 'cases')  return jsonOut(getCases());
     if (action === 'notices') return jsonOut(getNoticesData());                      // NEW: 本部→加盟店 お知らせ配信
     if (action === 'community') return jsonOut(getCommunityData());                   // NEW: 加盟店コミュニティ（共有）
+    if (action === 'sales')  return jsonOut(getSaleApplications());                    // NEW: 売却申請一覧（本部用）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
@@ -254,6 +256,7 @@ function doPost(e) {
     if (data.type === 'notice_delete')    return jsonOut(deleteNoticeData(data.id)); // NEW: お知らせ削除
     if (data.type === 'community')        return jsonOut(saveCommunityPost(data));  // NEW: コミュニティ投稿
     if (data.type === 'community_like')   return jsonOut(likeCommunityPost(data.id)); // NEW: いいね
+    if (data.type === 'sale_apply')       return jsonOut(handleSaleApplication(data)); // NEW: 加盟店→本部 売却申請
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -1447,6 +1450,125 @@ function likeCommunityPost(id) {
     }
   }
   return { ok: true };
+}
+
+/* ============================================================
+   売却申請（加盟店→本部）
+   Sheet「売却申請」列:
+     [申請日時, 案件ID, お名前, 担当加盟店, 売却方法, 買取額, 落札額, 粗利,
+      出品代行, 成約手数料, 陸送費, クレーム, 再出品, 本部手数料合計, 加盟店取り分, ステータス]
+   ============================================================ */
+function getSaleSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(SALE_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SALE_SHEET_NAME);
+    sheet.appendRow(['申請日時', '案件ID', 'お名前', '担当加盟店', '売却方法', '買取額', '落札額', '粗利',
+      '出品代行', '成約手数料', '陸送費', 'クレーム', '再出品', '本部手数料合計', '加盟店取り分', 'ステータス']);
+    sheet.getRange(1, 1, 1, 16).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+// 加盟店からの売却申請を記録し、本部へメール通知
+function handleSaleApplication(data) {
+  var sheet = getSaleSheet();
+  var id = String(data.id || '');
+  var at = String(data.at || Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'));
+  var row = [at, id, String(data.name || ''), String(data.assignee || ''), String(data.method || ''),
+    Number(data.buyP || 0), Number(data.salePrice || 0), Number(data.profit || 0),
+    Number(data.agencyFee || 0), Number(data.commission || 0), Number(data.shipping || 0),
+    Number(data.claimCost || 0), Number(data.reListFee || 0), Number(data.hqFee || 0),
+    Number(data.partnerNet || 0), '申請済み'];
+  // 既存の同一案件IDの行があれば更新、なければ追加
+  var last = sheet.getLastRow();
+  var found = -1;
+  if (last >= 2) {
+    var ids = sheet.getRange(2, 2, last - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) { if (String(ids[i][0]) === id) { found = i + 2; break; } }
+  }
+  if (found > 0) { sheet.getRange(found, 1, 1, 16).setValues([row]); }
+  else { sheet.appendRow(row); }
+  // 本部へメール通知
+  try {
+    var yen = function (n) { return '¥' + (Number(n) || 0).toLocaleString('en-US'); };
+    var body = '加盟店から売却申請がありました。\n\n' +
+      '案件ID：' + id + '\n' +
+      'お名前：' + String(data.name || '') + '\n' +
+      '担当加盟店：' + String(data.assignee || '') + '\n' +
+      '売却方法：' + String(data.method || '') + '\n' +
+      '──────────────\n' +
+      '買取額（仕入れ）：' + yen(data.buyP) + '\n' +
+      '落札額／売却額：' + yen(data.salePrice) + '\n' +
+      '粗利：' + yen(data.profit) + '\n';
+    if (String(data.method) === 'オークション') {
+      body += '　出品代行：' + yen(data.agencyFee) + '\n' +
+        '　成約手数料（粗利5%）：' + yen(data.commission) + '\n' +
+        '　陸送費：' + yen(data.shipping) + '\n' +
+        '　クレーム処理：' + yen(data.claimCost) + '\n' +
+        '　再出品手数料：' + yen(data.reListFee) + '\n';
+    }
+    body += '本部手数料 合計：' + yen(data.hqFee) + '\n' +
+      '加盟店取り分：' + yen(data.partnerNet) + '\n' +
+      '──────────────\n' +
+      '申請日時：' + at + '\n';
+    MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: '【BUYMO】売却申請: ' + id + '（' + String(data.assignee || '') + '／' + String(data.method || '') + '）',
+      body: body, name: FROM_NAME, replyTo: REPLY_TO });
+  } catch (e) {}
+  return { ok: true, id: id };
+}
+
+// 売却申請一覧（本部用）
+function getSaleApplications() {
+  try {
+    var sheet = getSaleSheet();
+    var last = sheet.getLastRow();
+    if (last < 2) return [];
+    var vals = sheet.getRange(2, 1, last - 1, 16).getValues();
+    var out = [];
+    for (var i = 0; i < vals.length; i++) {
+      var r = vals[i];
+      if (!r[1]) continue;
+      out.push({ at: String(r[0]), id: String(r[1]), name: String(r[2]), assignee: String(r[3]), method: String(r[4]),
+        buyP: Number(r[5]), salePrice: Number(r[6]), profit: Number(r[7]), agencyFee: Number(r[8]), commission: Number(r[9]),
+        shipping: Number(r[10]), claimCost: Number(r[11]), reListFee: Number(r[12]), hqFee: Number(r[13]), partnerNet: Number(r[14]), status: String(r[15]) });
+    }
+    out.reverse();
+    return out;
+  } catch (e) { return []; }
+}
+
+/* ============================================================
+   未申請アラーム（時間主導トリガーで実行）
+   「案件」シートで売却済み相当（契約/入金待ち/完了）だが
+   「売却申請」シートに申請が無い案件を本部へメール通知する。
+   ▼ 設定: トリガー追加 → buymoSaleUnfiledAlarm / 時間主導型 / 日タイマー（例:9-10時）
+   ============================================================ */
+function buymoSaleUnfiledAlarm() {
+  try {
+    var cases = getCases();               // 案件一覧（[{id,name,assignee,stage,...}]）
+    var sold = ['契約', '入金待ち', '完了'];
+    var applied = {};
+    var apps = getSaleApplications();
+    for (var i = 0; i < apps.length; i++) applied[apps[i].id] = true;
+    var pending = [];
+    for (var j = 0; j < cases.length; j++) {
+      var c = cases[j];
+      var stage = String(c.stage || '');
+      if (sold.indexOf(stage) >= 0 && !applied[c.id]) pending.push(c);
+    }
+    if (!pending.length) return { ok: true, pending: 0 };
+    var lines = pending.map(function (c) {
+      return '・' + c.id + '｜' + (c.name || '') + '｜' + (c.assignee || '担当未定') + '｜' + (c.stage || '');
+    }).join('\n');
+    var body = '売却済み（契約・入金待ち・完了）ですが、売却申請が未提出の案件が ' + pending.length + '件あります。\n' +
+      '担当加盟店に申請を促してください。\n\n' + lines + '\n\n' +
+      '本部ボード：https://buymo.me/hq.html?role=hq\n';
+    MailApp.sendEmail({ to: NOTIFY_EMAIL, subject: '【BUYMO】売却未申請アラーム（' + pending.length + '件）',
+      body: body, name: FROM_NAME, replyTo: REPLY_TO });
+    return { ok: true, pending: pending.length };
+  } catch (e) { return { ok: false, error: e.message }; }
 }
 
 function handleCase(data) {

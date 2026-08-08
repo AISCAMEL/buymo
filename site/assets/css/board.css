@@ -236,15 +236,47 @@
 .cp-sale-methods{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
 .cp-sale-opt{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;cursor:pointer;}
 .cp-sale-note{font-size:12px;font-weight:400;color:#888;margin-left:4px;}
-.cp-sale-calc-row label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:12px;color:#666;}
-.cp-sale-calc-row input{border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;margin-bottom:10px;}
-.cp-sale-calc-row input:focus{outline:none;border-color:var(--orange);}
-.cp-sale-result{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;background:#f7f9fc;border-radius:8px;padding:10px 12px;}
+.cp-sale-result{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;background:#f7f9fc;border-radius:8px;padding:12px 14px;}
 .cp-sale-result span{font-size:13px;color:#555;}
-.cp-sale-result .fee{color:#C0392B;font-weight:700;}
-.cp-sale-result .partner{color:#15803d;font-weight:700;font-size:15px;}
-#cpSettlement{width:100%;height:44px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-weight:900;font-size:14px;cursor:pointer;margin-top:4px;}
+.cp-sale-result .profit{font-weight:700;color:var(--navy);}
+.cp-sale-result .fee-detail{font-size:12px;color:#888;padding-left:6px;}
+.cp-sale-result .fee{color:#C0392B;font-weight:900;border-top:1px dashed #dbe2ec;padding-top:6px;margin-top:2px;}
+.cp-sale-result .partner{color:#15803d;font-weight:900;font-size:16px;}
+.cp-sale-result .cp-sale-hint{color:#999;}
+/* 権限説明・申請状態 */
+.cp-sale-role-note{font-size:12px;color:#667;background:#eef4f3;border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.6;}
+.cp-sale-status{margin-bottom:10px;}
+.cp-sale-badge{display:inline-block;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:900;}
+.cp-sale-badge.pending{background:#FDE8E8;color:#C0392B;}
+.cp-sale-badge.redo{background:#FEF3C7;color:#B45309;}
+.cp-sale-badge.applied{background:#E8F7EC;color:#15803d;}
+/* 入力欄 */
+.cp-sale-fields label,.cp-sale-hqcost label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:12px;color:#666;margin-bottom:10px;}
+.cp-sale-fields input,.cp-sale-hqcost input[type="number"]{border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;}
+.cp-sale-fields input:focus,.cp-sale-hqcost input:focus{outline:none;border-color:var(--orange);}
+.cp-sale-hqcost{background:#fbfcfe;border:1px solid #eef1f6;border-radius:10px;padding:12px 14px 2px;margin-bottom:14px;}
+.cp-sale-hqcost-head{font-size:11px;font-weight:900;color:#8a94a6;margin-bottom:10px;letter-spacing:.02em;}
+.cp-sale-check{flex-direction:row!important;align-items:center;gap:8px!important;}
+.cp-sale-hqcost input[type="checkbox"]{width:18px;height:18px;}
+.cp-sale-fields input:read-only,.cp-sale-hqcost input:disabled{background:#f1f3f7;color:#889;cursor:not-allowed;}
+.cp-sale-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.cp-sale-apply{flex:1;min-width:150px;height:46px;border:none;border-radius:10px;background:var(--orange,#E8703A);color:#fff;font-weight:900;font-size:14px;cursor:pointer;}
+.cp-sale-apply:hover{filter:brightness(1.08);}
+.cp-sale-apply:disabled{opacity:.6;cursor:default;}
+#cpSettlement{flex:1;min-width:150px;height:46px;border:none;border-radius:10px;background:var(--navy);color:#fff;font-weight:900;font-size:14px;cursor:pointer;}
 #cpSettlement:hover{filter:brightness(1.1);}
+/* カードの売却未申請バッジ */
+.kb-card.needs-sale{border-left-color:#C0392B;box-shadow:0 0 0 2px rgba(192,57,43,.12) inset;}
+.kb-sale-alert{background:#C0392B;color:#fff;font-size:10px;font-weight:900;border-radius:6px;padding:1px 6px;white-space:nowrap;animation:salePulse 1.6s ease-in-out infinite;}
+@keyframes salePulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+/* 売却未申請バナー */
+.sale-alert-banner{display:flex;align-items:center;flex-wrap:wrap;gap:10px;background:#FDECEC;border:1px solid #f3b9b3;border-left:5px solid #C0392B;border-radius:10px;padding:12px 16px;margin-bottom:16px;}
+.sale-alert-banner .sale-alert-icon{font-size:18px;}
+.sale-alert-banner strong{color:#C0392B;font-size:14px;}
+.sale-alert-banner .sale-alert-msg{font-size:13px;color:#7a3b36;}
+.sale-alert-banner .sale-alert-ids{display:flex;flex-wrap:wrap;gap:6px;}
+.sale-alert-chip{background:#fff;border:1px solid #e2a49d;color:#C0392B;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+.sale-alert-chip:hover{background:#C0392B;color:#fff;}
 
 /* 営業レポート：見出し＋CSV出力ボタン */
 .report-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
