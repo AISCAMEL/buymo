@@ -685,7 +685,7 @@
       '</div>' +
       '<div class="mp-pw-shot-label">' + shot.label + '</div>' +
       '<div class="mp-pw-shot-hint">' + shot.hint + '</div>' +
-      '<input type="file" accept="image/*" capture="environment">';
+      '<input type="file" accept="image/*">';
     var input = slot.querySelector('input[type=file]');
     input.addEventListener('change', function () {
       var f = this.files && this.files[0];
