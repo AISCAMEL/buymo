@@ -55,8 +55,44 @@ window.HQ = (function () {
   function postCase(c) {
     if (!ENDPOINT) return;
     fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ type: 'case', token: authToken(), id: c.id, name: c.name, phone: c.tel, email: c.email, genre: c.genre, assignee: c.assignee, stage: c.stage, amount: c.amount, memo: c.memo }) }).catch(function () {});
+      body: JSON.stringify({ type: 'case', token: authToken(), id: c.id, name: c.name, phone: c.tel, email: c.email, genre: c.genre, assignee: c.assignee, stage: c.stage, amount: c.amount, memo: c.memo,
+        saleMethod: c.saleMethod || '', salePrice: c.salePrice || 0, shipping: c.shipping || 0, claimCost: c.claimCost || 0, reListFee: c.reListFee || 0, reListed: c.reListed ? 1 : 0,
+        hqFee: c.hqFee || 0, partnerNet: c.partnerNet || 0, saleApplied: c.saleApplied ? 1 : 0, saleAppliedAt: c.saleAppliedAt || '' }) }).catch(function () {});
   }
+
+  /* 売却申請（加盟店→本部）。GAS「売却申請」シートに記録＋本部へメール通知。 */
+  function postSaleApplication(c) {
+    if (!ENDPOINT) return;
+    var r = calcSale(c);
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'sale_apply', token: authToken(), id: c.id, name: c.name || '', assignee: c.assignee || '',
+        method: r.method, buyP: r.buyP, salePrice: r.saleP, profit: r.profit, agencyFee: r.agencyFee, commission: r.commission,
+        shipping: r.shipping, claimCost: r.claimCost, reListFee: r.reListFee, hqFee: r.hqFee, partnerNet: r.partnerNet, at: c.saleAppliedAt || '' }) }).catch(function () {});
+  }
+
+  /* 売却手数料の計算（本部手数料・加盟店取り分）— board.js と書類発行で共通利用 */
+  function calcSale(c) {
+    var method = (c && c.saleMethod) || '';
+    var buyP = Number(c && c.amount) || 0;
+    var saleP = Number(c && c.salePrice) || 0;
+    var profit = saleP - buyP;
+    var shipping = Number(c && c.shipping) || 0;
+    var claimCost = Number(c && c.claimCost) || 0;
+    var reListFee = (c && c.reListed) ? (Number(c.reListFee) || 0) : 0;
+    var agencyFee = 0, commission = 0, hqFee = 0;
+    if (method === '直販') {
+      hqFee = 30000; // 一律（税抜）
+    } else if (method === 'オークション') {
+      agencyFee = 10000; // 出品代行（税込）
+      commission = Math.round(Math.max(0, profit) * 0.05); // 成約手数料＝粗利×5%
+      hqFee = agencyFee + commission + shipping + claimCost + reListFee;
+    }
+    var partnerNet = profit - hqFee;
+    return { method: method, buyP: buyP, saleP: saleP, profit: profit, agencyFee: agencyFee, commission: commission,
+      shipping: shipping, claimCost: claimCost, reListFee: reListFee, hqFee: hqFee, partnerNet: partnerNet };
+  }
+  // 売却の申請が必要な状態か（売却方法を選択済みだが未申請）
+  function needsSaleApp(c) { return !!(c && c.saleMethod && !c.saleApplied); }
 
   function note(id, text) {
     if (!ENDPOINT) return;
@@ -159,6 +195,7 @@ window.HQ = (function () {
     ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON,
     loadCases: loadCases, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
+    postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
     yen: yen, esc: esc, stageIdx: stageIdx, nav: nav
