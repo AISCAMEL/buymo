@@ -225,6 +225,7 @@ function doGet(e) {
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
+    if (action === 'ping')   return jsonp(p.callback, { v: 8, features: ['case_photo'] }); // #4 機能検出
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
     return jsonOut({ error: err.message });
@@ -247,6 +248,7 @@ function doPost(e) {
     if (data.type === 'case')             return jsonOut(handleCase(data));
     if (data.type === 'note')             return jsonOut(appendNote(data));
     if (data.type === 'join')             return jsonOut(handleJoin(data));
+    if (data.type === 'buymo_case_photo') return jsonOut(handleCasePhoto(data));   // NEW(#4): 1枚ずつ先行アップロード
     if (data.type === 'buymo_case_new')   return jsonOut(handleMemberCaseNew(data));
     if (data.type === 'buymo_chat_start') return jsonOut(handleChatStart(data));  // NEW
     if (data.type === 'buymo_chat_log')   return jsonOut(handleChatLog(data));    // NEW
@@ -1632,6 +1634,31 @@ function savePhotosToDrive(photos, label) {
   return urls;
 }
 
+/* ============================================================
+   #4 NEW: マイページの写真を1枚ずつ先行アップロード
+   ・draftId 単位のドラフトフォルダに保存
+   ・案件送信(buymo_case_new)時に handleMemberCaseNew が取り込む
+   ============================================================ */
+function draftFolder(draftId) {
+  var root   = getOrCreateFolder(null, DRIVE_FOLDER_NAME);
+  var drafts = getOrCreateFolder(root.getId(), '_drafts');
+  var safe   = String(draftId || 'unknown').replace(/[^A-Za-z0-9_\-]/g, '_');
+  return getOrCreateFolder(drafts.getId(), safe);
+}
+function handleCasePhoto(data) {
+  var draftId = String(data.draftId || '');
+  var p = data.photo;
+  if (!draftId || !p || !p.data) return { status: 'error', message: 'draftId and photo required' };
+  try {
+    var folder = draftFolder(draftId);
+    var fname = (data.shotId || 'photo') + '_' + (data.label || '') + '.jpg';
+    var blob = Utilities.newBlob(Utilities.base64Decode(p.data), p.type || 'image/jpeg', fname);
+    var file = folder.createFile(blob);
+    try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e2) {}
+    return { status: 'ok' };
+  } catch (e) { Logger.log('handleCasePhoto: ' + e.message); return { status: 'error', message: e.message }; }
+}
+
 
 /* ============================================================
    ① お問い合わせフォーム受信
@@ -1880,6 +1907,18 @@ function handleMemberCaseNew(data) {
       photoUrls = savePhotosToDrive(data.photos, folderLabel);
     }
   } catch (e) { Logger.log('handleMemberCaseNew photos: ' + e.message); }
+  // #4: 事前に1枚ずつアップロードされた写真（draftId のドラフトフォルダ）を取り込む
+  try {
+    if (data.draftId) {
+      var df = draftFolder(data.draftId);
+      var it = df.getFiles();
+      while (it.hasNext()) {
+        var f = it.next();
+        try { f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e2) {}
+        photoUrls.push(f.getUrl());
+      }
+    }
+  } catch (e) { Logger.log('handleMemberCaseNew draft merge: ' + e.message); }
   var photoUrlText = photoUrls.length ? photoUrls.join('\n') : '';
 
   try {

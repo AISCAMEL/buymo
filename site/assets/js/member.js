@@ -442,6 +442,80 @@
   ];
   var MP_REQUIRED = MP_SHOTS.filter(function(s){ return s.req; }).length;
   var mpShotData = {};
+  var mpMode = 'quick'; // 'quick'（概算・写真なしでOK） / 'full'（本査定・写真必須）
+
+  /* ============================================================
+     #1 下書き保存（IndexedDB）— 写真は容量が大きいので localStorage ではなく IDB
+     ============================================================ */
+  var IDB_NAME = 'buymo_member', IDB_STORE = 'ncDraft';
+  function idbOpen() {
+    return new Promise(function (res, rej) {
+      try {
+        var r = indexedDB.open(IDB_NAME, 1);
+        r.onupgradeneeded = function () { try { r.result.createObjectStore(IDB_STORE); } catch (e) {} };
+        r.onsuccess = function () { res(r.result); };
+        r.onerror = function () { rej(r.error); };
+      } catch (e) { rej(e); }
+    });
+  }
+  function idbPut(key, val) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(val, key);
+        tx.oncomplete = function () { res(true); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbGet(key) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (res) {
+        var tx = db.transaction(IDB_STORE, 'readonly');
+        var rq = tx.objectStore(IDB_STORE).get(key);
+        rq.onsuccess = function () { res(rq.result || null); };
+        rq.onerror = function () { res(null); };
+      });
+    }).catch(function () { return null; });
+  }
+  function idbDel(key) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (res) {
+        var tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(key);
+        tx.oncomplete = function () { res(true); };
+        tx.onerror = function () { res(false); };
+      });
+    }).catch(function () {});
+  }
+
+  function ncEmail() { try { return localStorage.getItem(EKEY) || ''; } catch (e) { return ''; } }
+  function ncDraftKey() { return 'draft_' + ncEmail(); }
+  var NC_FIELD_IDS = ['nc-maker','nc-model','nc-year','nc-mileage','nc-cond','nc-pref','nc-tel','nc-buypath','nc-shopcnt','nc-sellwhen','nc-memo'];
+  function ncRadioVal(name) { var el = ncForm && ncForm.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; }
+  function ncCollectFields() {
+    var f = {};
+    NC_FIELD_IDS.forEach(function (id) { var el = document.getElementById(id); if (el) f[id] = el.value; });
+    ['repair','flood','meter'].forEach(function (n) { f[n] = ncRadioVal(n); });
+    return f;
+  }
+  var _ncDraftTimer = null;
+  function ncSaveDraftSoon() {
+    if (!ncForm || ncForm.hidden) return;
+    var email = ncEmail(); if (!email) return;
+    clearTimeout(_ncDraftTimer);
+    _ncDraftTimer = setTimeout(function () {
+      idbPut(ncDraftKey(), { ts: Date.now(), mode: mpMode, fields: ncCollectFields(), shots: mpShotData }).catch(function () {});
+    }, 500);
+  }
+  function ncClearDraft() { idbDel(ncDraftKey()); }
+  function ncDraftMeaningful(d) {
+    if (!d) return false;
+    var f = d.fields || {};
+    if (f['nc-maker'] || f['nc-model'] || (f['nc-memo'] && f['nc-memo'].indexOf('お問い合わせ時の内容') !== 0)) return true;
+    if (d.shots && Object.keys(d.shots).length > 0) return true;
+    return false;
+  }
 
   function mpCompress(file) {
     return new Promise(function (resolve) {
@@ -464,14 +538,17 @@
     });
   }
 
+  function mpReqDone() {
+    var n = 0; MP_SHOTS.forEach(function (s) { if (s.req && mpShotData[s.id]) n++; }); return n;
+  }
   function mpUpdateProgress() {
-    var reqDone = 0;
-    MP_SHOTS.forEach(function (s) { if (s.req && mpShotData[s.id]) reqDone++; });
+    var reqDone = mpReqDone();
     var cur   = document.getElementById('mpPwCurrent');
     var fill  = document.getElementById('mpPwFill');
     var stat  = document.getElementById('mpPwStatus');
     var rem   = document.getElementById('mpPwRemaining');
-    var gate  = document.getElementById('mpPwGate');
+    var total = document.getElementById('mpPwTotal');
+    if (total) total.textContent = MP_REQUIRED;
     if (cur)  cur.textContent = reqDone;
     if (fill) fill.style.width = (reqDone / MP_REQUIRED * 100) + '%';
     if (rem)  rem.textContent  = MP_REQUIRED - reqDone;
@@ -480,9 +557,113 @@
       else if (reqDone < MP_REQUIRED) stat.textContent = 'あと ' + (MP_REQUIRED - reqDone) + ' 枚必要です';
       else stat.textContent = '✅ 撮影完了！送信できます';
     }
-    var ready = reqDone >= MP_REQUIRED;
-    if (gate) gate.hidden = ready;
+    mpRefreshSubmit();
+  }
+
+  // 送信ボタンの有効/無効・ゲート表示（モード別）
+  function mpRefreshSubmit() {
+    var mk = document.getElementById('nc-maker'), md = document.getElementById('nc-model');
+    var baseOK = (mk && mk.value.trim()) && (md && md.value.trim()) &&
+                 ncRadioVal('repair') && ncRadioVal('flood') && ncRadioVal('meter');
+    var reqDone = mpReqDone();
+    var ready = mpMode === 'full' ? (baseOK && reqDone >= MP_REQUIRED) : !!baseOK;
     if (ncSubmit) ncSubmit.disabled = !ready;
+    var gate = document.getElementById('mpPwGate');
+    if (gate) gate.hidden = !(mpMode === 'full' && !ready);
+  }
+
+  // モード適用（写真セクションの表示・ボタン文言・ゲート）
+  function mpApplyMode() {
+    var sec  = document.getElementById('ncPhotoSection');
+    if (sec) sec.hidden = (mpMode !== 'full');
+    if (ncSubmit) ncSubmit.textContent = (mpMode === 'full') ? '本査定を依頼する' : '概算査定を依頼する';
+    mpRefreshSubmit();
+  }
+
+  // 次の未撮影スロットへ自動スクロール＆ハイライト（#2）
+  function mpFocusNext() {
+    var next = null;
+    for (var i = 0; i < MP_SHOTS.length; i++) {
+      var s = MP_SHOTS[i];
+      if (!mpShotData[s.id] && (mpMode === 'full' ? true : s.req)) { next = s; break; }
+    }
+    if (!next) return;
+    var el = document.querySelector('.mp-pw-shot[data-shot-id="' + next.id + '"]');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('mp-next-target');
+    void el.offsetWidth; // reflow でアニメ再始動
+    el.classList.add('mp-next-target');
+  }
+
+  // 下書きから写真サムネイルを復元
+  function mpRestoreShots(shots) {
+    if (!shots) return;
+    Object.keys(shots).forEach(function (id) {
+      var res = shots[id]; if (!res) return;
+      mpShotData[id] = res;
+      var slot = document.querySelector('.mp-pw-shot[data-shot-id="' + id + '"]');
+      if (!slot) return;
+      var thumb = slot.querySelector('.mp-pw-shot-thumb');
+      if (thumb && res.thumb) {
+        var old = thumb.querySelector('.mp-pw-shot-taken'); if (old) old.remove();
+        var img = document.createElement('img');
+        img.className = 'mp-pw-shot-taken'; img.src = res.thumb; img.alt = '';
+        thumb.appendChild(img);
+      }
+      slot.classList.add('done');
+    });
+    mpUpdateProgress();
+  }
+
+  /* ============================================================
+     #4 その場で1枚ずつアップロード（巨大な一括送信を避け、成功確認も行う）
+     ・バックエンドが対応（action=ping の features に 'case_photo'）している時だけ有効化
+     ・未対応（旧デプロイ）なら従来どおり送信時に一括。誤送信は起きない設計
+     ============================================================ */
+  var mpLiveUpload = false, mpDraftId = '';
+  function mpNewDraftId() { return 'DRAFT-' + Date.now().toString(36) + '-' + Math.floor(Math.random() * 1e6).toString(36); }
+  function mpPing() {
+    if (!ENDPOINT) return;
+    var cb = '__bmping_' + Date.now();
+    window[cb] = function (r) {
+      try { mpLiveUpload = !!(r && r.features && r.features.indexOf('case_photo') >= 0); } catch (e) {}
+      try { delete window[cb]; } catch (e) {}
+    };
+    var s = document.createElement('script');
+    s.src = ENDPOINT + '?action=ping&callback=' + cb;
+    s.onerror = function () { try { delete window[cb]; } catch (e) {} };
+    document.body.appendChild(s);
+  }
+  function mpUploadShot(shot, res) {
+    if (!mpLiveUpload || !ENDPOINT || !mpDraftId) return;
+    var slot = document.querySelector('.mp-pw-shot[data-shot-id="' + shot.id + '"]');
+    if (slot) slot.setAttribute('data-up', 'sending');
+    var payload = { type: 'buymo_case_photo', email: ncEmail(), draftId: mpDraftId,
+      shotId: shot.id, label: shot.label, photo: { name: shot.id + '.jpg', data: res.data, type: res.type } };
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+      .then(function () { res.uploaded = true; if (slot) slot.setAttribute('data-up', 'done'); })
+      .catch(function () { if (slot) slot.setAttribute('data-up', 'failed'); });
+  }
+  // 送信後、mycase をポーリングして案件が反映されたか確認（JSONP GET は取得可能）
+  function mpConfirmCase(email, caseId, cb) {
+    if (!ENDPOINT) { cb(true); return; }
+    var tries = 0, max = 6;
+    (function poll() {
+      tries++;
+      var name = '__bmconf_' + Date.now() + '_' + tries;
+      window[name] = function (list) {
+        try { delete window[name]; } catch (e) {}
+        var hit = Array.isArray(list) && list.some(function (c) { return String(c.id) === String(caseId); });
+        if (hit) { cb(true); return; }
+        if (tries >= max) { cb(false); return; }
+        setTimeout(poll, 2500);
+      };
+      var s = document.createElement('script');
+      s.src = ENDPOINT + '?action=mycase&email=' + encodeURIComponent(email) + '&callback=' + name;
+      s.onerror = function () { try { delete window[name]; } catch (e) {} if (tries >= max) cb(false); else setTimeout(poll, 2500); };
+      document.body.appendChild(s);
+    })();
   }
 
   function mpRenderShot(shot, idx) {
@@ -519,6 +700,9 @@
         thumb.appendChild(img);
         slot.classList.add('done');
         mpUpdateProgress();
+        ncSaveDraftSoon();        // #1 下書き保存
+        mpUploadShot(shot, res);  // #4 その場で1枚アップロード
+        mpFocusNext();            // #2 次の未撮影へ
       });
     });
     // スロット全体／「撮り方を見る」→ ガイドモーダルを表示
@@ -593,7 +777,7 @@
   function mpGetPhotos() {
     return MP_SHOTS.filter(function (s) { return mpShotData[s.id]; }).map(function (s) {
       var p = mpShotData[s.id];
-      return { name: s.id + '_' + s.label + '.jpg', data: p.data, type: p.type, label: s.label };
+      return { __id: s.id, name: s.id + '_' + s.label + '.jpg', data: p.data, type: p.type, label: s.label };
     });
   }
 
@@ -628,12 +812,62 @@
           if (memo && !memo.value) memo.value = 'お問い合わせ時の内容：\n' + pf.car;
         }
       }
+      // #4 バックエンド対応チェック＆下書きID
+      mpPing();
+      if (!mpDraftId) mpDraftId = mpNewDraftId();
+      // モード初期化（既定は概算）
+      mpApplyMode();
+      // #1 下書きがあれば再開バナーを表示（自動では上書きしない）
+      idbGet(ncDraftKey()).then(function (d) {
+        var banner = document.getElementById('ncDraftBanner');
+        if (banner) banner.hidden = !ncDraftMeaningful(d);
+        _ncPendingDraft = ncDraftMeaningful(d) ? d : null;
+      });
       var first = ncForm.querySelector('select, input');
       if (first) setTimeout(function () { first.focus(); }, 50);
     }
   }
+  var _ncPendingDraft = null;
+  function ncApplyDraft(d) {
+    if (!d) return;
+    var f = d.fields || {};
+    NC_FIELD_IDS.forEach(function (id) { var el = document.getElementById(id); if (el && f[id] != null) el.value = f[id]; });
+    ['repair','flood','meter'].forEach(function (n) {
+      if (!f[n]) return;
+      var el = ncForm.querySelector('input[name="' + n + '"][value="' + f[n] + '"]');
+      if (el) el.checked = true;
+    });
+    if (d.mode === 'full' || d.mode === 'quick') {
+      mpMode = d.mode;
+      var r = ncForm.querySelector('input[name="ncmode"][value="' + d.mode + '"]'); if (r) r.checked = true;
+    }
+    mpApplyMode();
+    mpRestoreShots(d.shots);
+    mpRefreshSubmit();
+  }
   if (ncToggle) ncToggle.addEventListener('click', function () { setFormOpen(ncForm.hidden); });
   if (ncCancel) ncCancel.addEventListener('click', function () { setFormOpen(false); });
+
+  // 下書き再開バナー
+  var ncDraftResume = document.getElementById('ncDraftResume');
+  var ncDraftDiscard = document.getElementById('ncDraftDiscard');
+  if (ncDraftResume) ncDraftResume.addEventListener('click', function () {
+    ncApplyDraft(_ncPendingDraft);
+    var b = document.getElementById('ncDraftBanner'); if (b) b.hidden = true;
+  });
+  if (ncDraftDiscard) ncDraftDiscard.addEventListener('click', function () {
+    ncClearDraft(); _ncPendingDraft = null;
+    var b = document.getElementById('ncDraftBanner'); if (b) b.hidden = true;
+  });
+
+  // 査定タイプ切替（概算/本査定）
+  if (ncForm) ncForm.querySelectorAll('input[name="ncmode"]').forEach(function (r) {
+    r.addEventListener('change', function () { mpMode = this.value; mpApplyMode(); ncSaveDraftSoon(); });
+  });
+
+  // 入力のたびに送信可否を更新＆下書き保存
+  if (ncForm) ncForm.addEventListener('input', function () { mpRefreshSubmit(); ncSaveDraftSoon(); });
+  if (ncForm) ncForm.addEventListener('change', function () { mpRefreshSubmit(); ncSaveDraftSoon(); });
 
   function newCaseId() {
     var n = Math.floor(Math.random() * 9000) + 1000;
@@ -681,15 +915,22 @@
       if (!flood)  { ncErr.textContent = '「水没歴」の告知をご選択ください。'; return; }
       if (!meter)  { ncErr.textContent = '「メーター改ざん」の告知をご選択ください。'; return; }
 
-      var photos = mpGetPhotos();
-      var reqShots = MP_SHOTS.filter(function (s) { return s.req; });
-      var missing = reqShots.filter(function (s) { return !mpShotData[s.id]; });
-      if (missing.length > 0) {
-        ncErr.textContent = '必須写真があと ' + missing.length + ' 枚未撮影です（' + missing[0].label + ' など）。';
-        var pw = document.querySelector('.mp-pw-progress');
-        if (pw) pw.scrollIntoView({ behavior:'smooth', block:'start' });
-        return;
+      // 本査定モードのみ写真必須。概算モードは写真なしでOK
+      if (mpMode === 'full') {
+        var reqShots = MP_SHOTS.filter(function (s) { return s.req; });
+        var missing = reqShots.filter(function (s) { return !mpShotData[s.id]; });
+        if (missing.length > 0) {
+          ncErr.textContent = '必須写真があと ' + missing.length + ' 枚未撮影です（' + missing[0].label + ' など）。';
+          var pw = document.querySelector('.mp-pw-progress');
+          if (pw) pw.scrollIntoView({ behavior:'smooth', block:'start' });
+          return;
+        }
       }
+      // 送信する写真：ライブアップ済みのものは base64 を省き draftId で紐付け（巨大送信の回避）
+      var photos = mpGetPhotos().filter(function (p) {
+        if (!mpLiveUpload) return true;               // 従来動作：全部同梱
+        var sd = mpShotData[p.__id]; return !(sd && sd.uploaded); // 未アップ分だけ同梱
+      });
 
       var kase = {
         id:     newCaseId(),
@@ -714,21 +955,28 @@
         }
       };
 
+      var assessType = (mpMode === 'full') ? '本査定' : '概算査定';
+      kase.car.assessType = assessType;
       var payload = {
         type: 'buymo_case_new',
-        source: 'BUYMO 会員マイページ [' + location.pathname + ']',
+        source: 'BUYMO 会員マイページ [' + location.pathname + '] / ' + assessType,
         email: email,
         name: (function(){ try { return localStorage.getItem(NKEY) || ''; } catch(e){ return ''; } })(),
+        assessType: assessType,
+        draftId: mpLiveUpload ? mpDraftId : '',
         case: kase,
         photos: photos
       };
 
       var btn = ncForm.querySelector('button[type="submit"]');
+      var btnLabel = btn ? btn.textContent : '';
       if (btn) { btn.disabled = true; btn.textContent = '送信中…'; }
 
       sendCase(payload).then(function (res) {
         // GAS 未設定 or 成功 or 失敗いずれもローカル保存＋UI遷移
         saveLocalCase(email, kase);
+        // 下書きを消去（次回は最初から）
+        ncClearDraft(); mpDraftId = '';
         // 写真データをクリア（次回投稿のために）
         mpShotData = {};
         try {
@@ -745,16 +993,28 @@
         } catch (e) {}
         ncForm.hidden = true;
         ncThanks.hidden = false;
-        if (btn) { btn.disabled = false; btn.textContent = '送信して査定を依頼'; }
+        if (btn) { btn.disabled = false; btn.textContent = btnLabel || '送信して査定を依頼'; }
         ncForm.reset();
-        // 案件リスト再描画
+        mpMode = 'quick';
+        // 送信の反映を確認（JSONPで実データ確認）
+        var thanksP = ncThanks.querySelector('p');
+        var confMsg = thanksP ? thanksP.innerHTML : '';
+        mpConfirmCase(email, kase.id, function (ok) {
+          if (thanksP) {
+            thanksP.innerHTML = ok
+              ? '✅ <strong>送信を確認しました。</strong>担当が確認のうえ、24時間以内にメールまたはマイページで査定額をご提示します。'
+              : confMsg + '<br><small style="color:#888">※ 反映確認に時間がかかっています。通信状況により少し遅れる場合があります。</small>';
+          }
+          loadCases(email);
+        });
+        // 案件リスト再描画（先に一度）
         loadCases(email);
-        // 5秒後にサンクスを閉じてトグルを戻す
+        // 8秒後にサンクスを閉じてトグルを戻す
         setTimeout(function () {
           ncThanks.hidden = true;
           setFormOpen(false);
-        }, 5000);
-        if (window.BuymoGA) window.BuymoGA.track('member_case_submit', { source: 'member_page' });
+        }, 8000);
+        if (window.BuymoGA) window.BuymoGA.track('member_case_submit', { source: 'member_page', assessType: assessType });
       });
     });
   }
