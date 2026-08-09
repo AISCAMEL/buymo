@@ -7,7 +7,7 @@
    ============================================================ */
 window.AUTH = (function () {
   'use strict';
-  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxiD6NKw30bukOAIqAOw5Qb8rARkFROzp54tyf3RD10dgjWOacFn8TjO3aTfS1aQoZ4Og/exec';
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbw5sELZSA7TOkZjB67J4_0CEidTEbre4AkKwU502ti9XCErxARtn7bSWcmWcPH5xopByw/exec';
   var KEY = 'buymo_session';
   var TTL = 8 * 3600 * 1000;
 
