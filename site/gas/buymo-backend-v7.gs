@@ -843,19 +843,74 @@ function nextCaseId() {
   var sheet = getCaseSheet();
   return 'CS-' + String(7000 + Math.max(sheet.getLastRow(), 1)).slice(-4);
 }
+var VEHICLE_HEADER = '車両情報';  // 案件シートの車両情報JSON列
 function getCases() {
   var sheet = getCaseSheet(), rows = sheet.getDataRange().getValues(), cases = [];
+  var head = rows.length ? rows[0] : [];
+  var vIdx = head.indexOf(VEHICLE_HEADER);  // 無ければ -1
   for (var i = 1; i < rows.length; i++) {
     var r = rows[i];
     if (!r[0]) continue;
+    var carInfo = null;
+    if (vIdx >= 0 && r[vIdx]) { try { carInfo = JSON.parse(r[vIdx]); } catch (e) {} }
     cases.push({
       id: r[0], date: r[1] ? Utilities.formatDate(new Date(r[1]), 'Asia/Tokyo', 'yyyy/MM/dd') : '',
       name: r[2], tel: r[3], email: r[4], genre: r[5], assignee: r[6],
-      stage: r[7], amount: r[8] || 0, memo: r[9] || '', source: r[10] || ''
+      stage: r[7], amount: r[8] || 0, memo: r[9] || '', source: r[10] || '',
+      car: carInfo ? (carInfo.car || null) : null,
+      carPhotos: carInfo ? (carInfo.photos || []) : [],
+      carInputAt: carInfo ? (carInfo.inputAt || '') : ''
     });
   }
   cases.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   return cases;
+}
+
+/* マイページの車両情報を、初回お問い合わせ案件（同一メールの最古の未完了案件）に転記して更新。
+   一致が無ければ新規案件を作成。案件シートに「車両情報」列(JSON)を用意する。 */
+function mergeVehicleIntoCase(email, name, kase, car, photoUrls) {
+  var sheet = getCaseSheet();
+  var lastCol = Math.max(sheet.getLastColumn(), 11);
+  var head = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var vIdx = head.indexOf(VEHICLE_HEADER);
+  if (vIdx < 0) {
+    sheet.getRange(1, lastCol + 1).setValue(VEHICLE_HEADER)
+      .setFontWeight('bold').setBackground('#0A6B3C').setFontColor('#ffffff');
+    vIdx = lastCol; // 0-based
+  }
+  var vCol = vIdx + 1;
+  var blob = JSON.stringify({
+    car: car || {}, photos: photoUrls || [],
+    inputAt: Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'),
+    memberCaseId: (kase && kase.id) || ''
+  });
+  var genre = ((car && car.maker) || '') + ((car && car.model) ? ' ' + car.model : '');
+  var target = String(email || '').toLowerCase();
+  var rows = sheet.getDataRange().getValues();
+  // 同一メールで最古の未完了案件（＝初回お問い合わせ）を探す
+  var matchRow = -1;
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][4] || '').toLowerCase() !== target) continue;
+    var st = String(rows[i][7] || '');
+    if (st === '完了' || st === '失注' || st === '見送り') continue;
+    matchRow = i + 1; break; // シート行番号（1-based）
+  }
+  if (matchRow > 0) {
+    sheet.getRange(matchRow, vCol).setValue(blob);                 // 車両情報JSON
+    if (!rows[matchRow - 1][5] && genre.trim()) sheet.getRange(matchRow, 6).setValue(genre.trim()); // ジャンル空なら補完
+    if (!rows[matchRow - 1][3] && car && car.tel) sheet.getRange(matchRow, 4).setValue(car.tel);    // 電話空なら補完
+    var curStage = String(rows[matchRow - 1][7] || '');
+    if (curStage === '新規受付' || curStage === '') sheet.getRange(matchRow, 8).setValue('査定中');   // 査定へ前進
+    return String(rows[matchRow - 1][0] || '');
+  }
+  // 一致が無ければ新規案件を作成（末尾に追加）
+  var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+  var id = (kase && kase.id) || nextCaseId();
+  var newRow = [id, ts, name || '', (car && car.tel) || '', email, genre.trim(), '', '査定中', 0, (car && car.memo) || '', 'マイページ'];
+  while (newRow.length < vCol) newRow.push('');
+  newRow[vIdx] = blob;
+  sheet.appendRow(newRow);
+  return id;
 }
 // マイページ「マイページ案件」シートから該当メールの案件を取得
 function getMyMemberCases(email) {
@@ -1986,6 +2041,10 @@ function handleMemberCaseNew(data) {
     var row = head.map(function (h) { return vals[h] != null ? vals[h] : ''; });
     sheet.appendRow(row);
   } catch (e) { Logger.log('handleMemberCaseNew sheet: ' + e.message); }
+
+  // ★ 初回お問い合わせ案件（案件シート）に車両情報を転記して自動更新（ボードに反映）
+  var boardCaseId = '';
+  try { boardCaseId = mergeVehicleIntoCase(email, name, kase, car, photoUrls); } catch (e) { Logger.log('mergeVehicleIntoCase: ' + e.message); }
 
   try {
     var adminBody =

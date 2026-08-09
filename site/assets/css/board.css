@@ -168,6 +168,22 @@
 .cp-fields .cp-full{grid-column:1 / -1;}
 .cp-fields input,.cp-fields select,.cp-fields textarea{border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;}
 .cp-fields input:focus,.cp-fields select:focus,.cp-fields textarea:focus{outline:none;border-color:var(--orange);}
+/* お客様入力の車両情報（マイページ転記・査定用） */
+.cp-vehicle-area{margin-top:16px;background:#eef4f3;border:1px solid #d5e6e2;border-radius:12px;padding:14px 16px;}
+.cp-vehicle-area h3{font-size:14px;font-weight:900;color:var(--navy);margin-bottom:10px;}
+.cp-vehicle-at{font-size:11px;font-weight:400;color:#889;margin-left:6px;}
+.cp-vehicle-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;}
+.cp-vehicle-row{display:flex;gap:8px;font-size:13px;border-bottom:1px dashed #dbe7e3;padding-bottom:5px;}
+.cp-vehicle-k{color:#6a7b78;font-weight:700;min-width:84px;flex-shrink:0;}
+.cp-vehicle-v{color:#0f2a26;font-weight:700;}
+.cp-vehicle-memo{grid-column:1/-1;font-size:13px;margin-top:6px;}
+.cp-vehicle-memo div{background:#fff;border-radius:8px;padding:8px 10px;margin-top:4px;color:#333;line-height:1.6;}
+.cp-vehicle-photos{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.cp-vehicle-photos-head{width:100%;font-size:12px;font-weight:700;color:#6a7b78;margin-bottom:2px;}
+.cp-vehicle-photo{background:#fff;border:1px solid var(--teal,#0F766E);color:var(--teal,#0F766E);border-radius:16px;padding:3px 12px;font-size:12px;font-weight:700;text-decoration:none;}
+.cp-vehicle-photo:hover{background:var(--teal,#0F766E);color:#fff;}
+.kb-car{background:#E8F7EC;color:#15803d;font-size:10px;font-weight:900;border-radius:6px;padding:1px 6px;white-space:nowrap;}
+@media (max-width:600px){.cp-vehicle-grid{grid-template-columns:1fr;}}
 .cp-btn-row{display:flex;gap:10px;margin-top:16px;align-items:stretch;}
 .cp-save{flex:1;height:46px;border:none;border-radius:10px;background:var(--orange);color:#fff;font-weight:900;font-size:15px;cursor:pointer;}
 .cp-save:hover{filter:brightness(1.05);}
