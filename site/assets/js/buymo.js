@@ -11,7 +11,7 @@
      送信は type:"contact" として既存ハンドラに格納されます
      （GAS側の改修は不要。詳細は message にまとめて送信）。
      ======================================================= */
-  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbw5sELZSA7TOkZjB67J4_0CEidTEbre4AkKwU502ti9XCErxARtn7bSWcmWcPH5xopByw/exec';
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxxKYQWRKLvjmfwvShuHwHokTx6tyOXFDTQnY7g5p3lDIi9MgyeZksWl8nQ-3uF2W4djQ/exec';
 
   /* ---- 0. 年式・都道府県の動的生成 ---- */
   var yearSel = document.getElementById('f-year');
