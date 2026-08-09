@@ -108,8 +108,9 @@
         var staleTag = isStale(c) ? '<span class="kb-stale">滞留' + daysSince(c.date) + '日</span>' : '';
         var claimBadge = hasActiveClaim ? '<span class="kb-claim">⚠️' + HQ.esc(c.claimStatus) + '</span>' : '';
         var saleBadge = needsSale ? '<span class="kb-sale-alert">🚨売却未申請</span>' : '';
+        var carBadge = (c.car && (c.car.maker || c.car.model || c.car.year)) ? '<span class="kb-car">📋車両情報</span>' : '';
         card.innerHTML = '<div class="kb-card-top"><span class="kb-id">' + c.id + '</span>' +
-          (c.genre ? '<span class="kb-tag">' + HQ.esc(c.genre) + '</span>' : '') + staleTag + claimBadge + saleBadge + hist + '</div>' +
+          (c.genre ? '<span class="kb-tag">' + HQ.esc(c.genre) + '</span>' : '') + staleTag + claimBadge + saleBadge + carBadge + hist + '</div>' +
           '<div class="kb-name">' + HQ.esc(c.name || '') + '</div>' +
           '<div class="kb-meta">' + (c.date ? '<span class="kb-date">📅' + HQ.esc(c.date) + '</span>' : '') + HQ.esc(c.assignee || '担当未定') + (c.amount ? '・' + HQ.yen(c.amount) : '') + '</div>' +
           (c.memo ? '<div class="kb-memo">' + HQ.esc(c.memo) + '</div>' : '');
@@ -355,6 +356,11 @@
           '<label class="cp-full">メモ<textarea id="cpMemo" rows="2"></textarea></label>' +
           '<label>クレーム対応<select id="cpClaim"><option value="なし">— なし —</option><option value="受付中">⚠️ 受付中</option><option value="対応中">🔧 対応中</option><option value="解決済み">✅ 解決済み</option></select></label>' +
         '</div>' +
+        '<div class="cp-vehicle-area" id="cpVehicleArea" style="display:none;">' +
+          '<h3>🚗 お客様入力の車両情報（マイページ）<span class="cp-vehicle-at" id="cpVehicleAt"></span></h3>' +
+          '<div class="cp-vehicle-grid" id="cpVehicleGrid"></div>' +
+          '<div class="cp-vehicle-photos" id="cpVehiclePhotos"></div>' +
+        '</div>' +
         '<div class="cp-btn-row">' +
           '<button class="cp-save" id="cpSave">保存する</button>' +
           '<button class="cp-delete" id="cpDelete" style="display:none;">🗑 案件を削除</button>' +
@@ -495,6 +501,7 @@
     document.getElementById('cpClaim').value = c.claimStatus || 'なし';
     renderTimeline(c);
     renderFollowups(c);
+    renderVehicle(c);
     /* 売却管理セクション */
     var dr = document.getElementById('cpSaleDirect'), ar = document.getElementById('cpSaleAuction');
     if (dr) dr.checked = c.saleMethod === '直販';
@@ -506,6 +513,32 @@
     var rf = document.getElementById('cpReListFee'); if (rf) rf.value = c.reListFee || '';
     var rl = document.getElementById('cpReListed'); if (rl) rl.checked = !!c.reListed;
     updateSaleCalc();
+  }
+  function renderVehicle(c) {
+    var area = document.getElementById('cpVehicleArea'); if (!area) return;
+    var car = c.car || null;
+    var photos = c.carPhotos || [];
+    var has = car && (car.maker || car.model || car.year || car.mileage || car.condition || car.pref || car.memo);
+    if (!has && !photos.length) { area.style.display = 'none'; return; }
+    car = car || {};
+    var at = document.getElementById('cpVehicleAt'); if (at) at.textContent = c.carInputAt ? '（' + c.carInputAt + ' 入力）' : '';
+    var rows = [
+      ['メーカー', car.maker], ['車種', car.model], ['年式', car.year], ['走行距離', car.mileage ? (car.mileage + ' km') : ''],
+      ['状態', car.condition], ['所在', car.pref], ['連絡先', car.tel],
+      ['修復歴', car.repair], ['水没歴', car.flood], ['メーター改ざん', car.meter],
+      ['購入経路', car.buypath], ['他社見積(何社目)', car.shopcnt], ['希望売却時期', car.sellwhen]
+    ].filter(function (r) { return r[1] != null && String(r[1]).trim() !== ''; });
+    var grid = document.getElementById('cpVehicleGrid');
+    if (grid) grid.innerHTML = rows.map(function (r) {
+      return '<div class="cp-vehicle-row"><span class="cp-vehicle-k">' + HQ.esc(r[0]) + '</span><span class="cp-vehicle-v">' + HQ.esc(r[1]) + '</span></div>';
+    }).join('') + (car.memo ? '<div class="cp-vehicle-memo"><span class="cp-vehicle-k">お客様メモ</span><div>' + HQ.esc(car.memo) + '</div></div>' : '');
+    var ph = document.getElementById('cpVehiclePhotos');
+    if (ph) ph.innerHTML = photos.length
+      ? '<div class="cp-vehicle-photos-head">📷 写真 ' + photos.length + '枚</div>' + photos.map(function (u, i) {
+          return '<a href="' + HQ.esc(u) + '" target="_blank" rel="noopener" class="cp-vehicle-photo">写真' + (i + 1) + '</a>';
+        }).join('')
+      : '';
+    area.style.display = '';
   }
   function renderTimeline(c) {
     var tl = document.getElementById('cpTimeline');
