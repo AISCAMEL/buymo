@@ -281,15 +281,29 @@
   }
   function mdFormat(text) {
     var s = esc(text);
+    // 表の区切り行（|---|---|）は除去
+    s = s.replace(/^\s*\|?[\s:\-|]+\|[\s:\-|]*$/gm, '');
+    // 見出し（#, ##, ###…）→ 太字行
+    s = s.replace(/^\s{0,3}#{1,6}\s*(.+?)\s*#*$/gm, '<strong>$1</strong>');
+    // 箇条書き（- / * / ・）→ ・
+    s = s.replace(/^\s*[-*]\s+/gm, '・');
+    // マークダウンリンク [表示](URL) → 一時退避（後段の二重リンク化を防ぐ）
+    var links = [];
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, function (m, t, u) {
+      links.push('<a href="' + u + '" target="_blank" rel="noopener">' + t + '</a>');
+      return '\u0000L' + (links.length - 1) + '\u0000';
+    });
     // **bold**
     s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // URL → link
+    // 素のURL → リンク
     s = s.replace(/(https?:\/\/[^\s<>]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
     // メールアドレス → mailto
     s = s.replace(/([\w.-]+@[\w.-]+\.[\w]{2,})/g, '<a href="mailto:$1">$1</a>');
     // #form / #chat / #faq / #features / #company / #genres / #sim → 内部リンク
     s = s.replace(/#(form|chat|faq|features|company|genres|sim|top)\b/g,
       '<a href="#$1" data-cbot-anchor="$1">#$1</a>');
+    // 退避したリンクを復元
+    s = s.replace(/\u0000L(\d+)\u0000/g, function (m, i) { return links[+i]; });
     // 改行
     s = s.replace(/\n/g, '<br>');
     return s;
