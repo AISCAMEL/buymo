@@ -36,6 +36,7 @@ var MEMBER_CASE_SHEET = 'マイページ案件';         // NEW: マイページ
 var TEST_SHEET_NAME   = 'テスト送信';              // NEW: 管理者テスト送信の隔離先
 var NOTICE_SHEET_NAME = 'お知らせ';                // NEW: 本部→加盟店 お知らせ
 var COMMUNITY_SHEET_NAME = 'コミュニティ';         // NEW: 加盟店コミュニティ（共有）
+var MATERIAL_SHEET_NAME  = '教材資料';             // NEW: アカデミーPDF資料＋解説（共有）
 var SALE_SHEET_NAME   = '売却申請';               // NEW: 加盟店→本部 売却申請
 var NOTIFY_EMAIL      = 'kaitori@buymo.me';      // 管理者通知先
 var FROM_NAME         = 'BUYMO 買取事業部';
@@ -221,6 +222,7 @@ function doGet(e) {
     if (action === 'cases')  return jsonOut(getCases());
     if (action === 'notices') return jsonOut(getNoticesData());                      // NEW: 本部→加盟店 お知らせ配信
     if (action === 'community') return jsonOut(getCommunityData());                   // NEW: 加盟店コミュニティ（共有）
+    if (action === 'materials') return jsonOut(getMaterialsData());                    // NEW: アカデミーPDF資料（共有）
     if (action === 'sales')  return jsonOut(getSaleApplications());                    // NEW: 売却申請一覧（本部用）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
@@ -258,6 +260,8 @@ function doPost(e) {
     if (data.type === 'buymo_case_decision') return jsonOut(handleCaseDecision(data)); // NEW: 売却する/しない
     if (data.type === 'notice')           return jsonOut(saveNotice(data));        // NEW: お知らせ登録
     if (data.type === 'notice_delete')    return jsonOut(deleteNoticeData(data.id)); // NEW: お知らせ削除
+    if (data.type === 'material')         return jsonOut(saveMaterial(data));         // NEW: PDF資料 登録
+    if (data.type === 'material_delete')  return jsonOut(deleteMaterialData(data.id)); // NEW: PDF資料 削除
     if (data.type === 'community')        return jsonOut(saveCommunityPost(data));  // NEW: コミュニティ投稿
     if (data.type === 'community_like')   return jsonOut(likeCommunityPost(data.id)); // NEW: いいね
     if (data.type === 'sale_apply')       return jsonOut(handleSaleApplication(data)); // NEW: 加盟店→本部 売却申請
@@ -1444,6 +1448,68 @@ function saveNotice(data) {
 // お知らせ削除
 function deleteNoticeData(id) {
   var sheet = getNoticeSheet();
+  var last = sheet.getLastRow();
+  if (last < 2) return { ok: true };
+  var ids = sheet.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]) === String(id)) { sheet.deleteRow(i + 2); return { ok: true, deleted: true }; }
+  }
+  return { ok: true };
+}
+
+/* ============================================================
+   アカデミー PDF資料＋解説（共有：スプレッドシート「教材資料」）
+   列: [ID, 日時, カテゴリ, タイトル, 解説, PDF_URL]
+   ============================================================ */
+function getMaterialSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(MATERIAL_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(MATERIAL_SHEET_NAME);
+    sheet.appendRow(['ID', '日時', 'カテゴリ', 'タイトル', '解説', 'PDF_URL']);
+    sheet.getRange(1, 1, 1, 6).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+// 資料一覧（新しい順）
+function getMaterialsData() {
+  try {
+    var sheet = getMaterialSheet();
+    var last = sheet.getLastRow();
+    if (last < 2) return [];
+    var vals = sheet.getRange(2, 1, last - 1, 6).getValues();
+    var out = [];
+    for (var i = 0; i < vals.length; i++) {
+      var r = vals[i];
+      if (!r[0]) continue;
+      out.push({ id: String(r[0]), date: String(r[1] || ''), cat: String(r[2] || ''), t: String(r[3] || ''), b: String(r[4] || ''), url: String(r[5] || '') });
+    }
+    out.reverse();
+    return out;
+  } catch (e) { return []; }
+}
+// 資料登録（同一IDは上書き）
+function saveMaterial(data) {
+  var sheet = getMaterialSheet();
+  var id = String(data.id || ('M-' + new Date().getTime()));
+  var d = new Date();
+  function p(n) { return ('0' + n).slice(-2); }
+  var date = String(data.date || (d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate())));
+  var row = [id, date, String(data.cat || '資料'), String(data.title || ''), String(data.body || ''), String(data.url || '')];
+  var last = sheet.getLastRow();
+  if (last >= 2) {
+    var ids = sheet.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === id) { sheet.getRange(i + 2, 1, 1, 6).setValues([row]); return { ok: true, id: id, updated: true }; }
+    }
+  }
+  sheet.appendRow(row);
+  return { ok: true, id: id };
+}
+// 資料削除
+function deleteMaterialData(id) {
+  var sheet = getMaterialSheet();
   var last = sheet.getLastRow();
   if (last < 2) return { ok: true };
   var ids = sheet.getRange(2, 1, last - 1, 1).getValues();
