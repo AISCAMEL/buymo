@@ -37,6 +37,7 @@ var TEST_SHEET_NAME   = 'テスト送信';              // NEW: 管理者テス�
 var NOTICE_SHEET_NAME = 'お知らせ';                // NEW: 本部→加盟店 お知らせ
 var COMMUNITY_SHEET_NAME = 'コミュニティ';         // NEW: 加盟店コミュニティ（共有）
 var MATERIAL_SHEET_NAME  = '教材資料';             // NEW: アカデミーPDF資料＋解説（共有）
+var PARTNER_SHEET_NAME   = '加盟店アカウント';      // NEW: 加盟店ログイン（メール/パスワード/状態）
 var SALE_SHEET_NAME   = '売却申請';               // NEW: 加盟店→本部 売却申請
 var NOTIFY_EMAIL      = 'kaitori@buymo.me';      // 管理者通知先
 var FROM_NAME         = 'BUYMO 買取事業部';
@@ -226,6 +227,8 @@ function doGet(e) {
     if (action === 'sales')  return jsonOut(getSaleApplications());                    // NEW: 売却申請一覧（本部用）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
+    if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
+    if (action === 'partners') return jsonOut(getPartners()); // NEW: 加盟店アカウント一覧（本部）
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
     if (action === 'ping')   return jsonp(p.callback, { v: 8, features: ['case_photo'] }); // #4 機能検出
@@ -262,6 +265,11 @@ function doPost(e) {
     if (data.type === 'notice_delete')    return jsonOut(deleteNoticeData(data.id)); // NEW: お知らせ削除
     if (data.type === 'material')         return jsonOut(saveMaterial(data));         // NEW: PDF資料 登録
     if (data.type === 'material_delete')  return jsonOut(deleteMaterialData(data.id)); // NEW: PDF資料 削除
+    if (data.type === 'partner_add')      return jsonOut(partnerAdd(data));           // NEW: 加盟店 新規追加＋パスワード発行メール
+    if (data.type === 'partner_withdraw') return jsonOut(partnerSetStatus(data.email, '退会')); // NEW: 退会（ログイン不可）
+    if (data.type === 'partner_restore')  return jsonOut(partnerSetStatus(data.email, '稼働中')); // NEW: 復活
+    if (data.type === 'partner_reissue')  return jsonOut(partnerReissue(data.email));  // NEW: パスワード再発行＋メール
+    if (data.type === 'partner_setpw')    return jsonOut(partnerSetPw(data.email, data.pw)); // NEW: 本部が手動でパスワード設定
     if (data.type === 'community')        return jsonOut(saveCommunityPost(data));  // NEW: コミュニティ投稿
     if (data.type === 'community_like')   return jsonOut(likeCommunityPost(data.id)); // NEW: いいね
     if (data.type === 'sale_apply')       return jsonOut(handleSaleApplication(data)); // NEW: 加盟店→本部 売却申請
@@ -1517,6 +1525,144 @@ function deleteMaterialData(id) {
     if (String(ids[i][0]) === String(id)) { sheet.deleteRow(i + 2); return { ok: true, deleted: true }; }
   }
   return { ok: true };
+}
+
+/* ============================================================
+   加盟店アカウント（新規追加・退会・パスワード管理）
+   Sheet「加盟店アカウント」列: [メール, 店舗名, パスワード, ステータス, 登録日時, 最終更新]
+   ※ 静的許可リスト（auth.js の STAFF_PARTNER）とは別に、本部が随時追加する加盟店。
+   ============================================================ */
+function getPartnerSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(PARTNER_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(PARTNER_SHEET_NAME);
+    sheet.appendRow(['メール', '店舗名', 'パスワード', 'ステータス', '登録日時', '最終更新']);
+    sheet.getRange(1, 1, 1, 6).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+function genPassword() {
+  var chars = 'abcdefghijkmnpqrstuvwxyz23456789'; // 紛らわしい文字を除外
+  var s = '';
+  for (var i = 0; i < 8; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+  return s;
+}
+function partnerFindRow(sheet, email) {
+  var e = String(email || '').trim().toLowerCase();
+  if (!e) return -1;
+  var last = sheet.getLastRow();
+  if (last < 2) return -1;
+  var vals = sheet.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    if (String(vals[i][0] || '').trim().toLowerCase() === e) return i + 2;
+  }
+  return -1;
+}
+// 加盟店ログイン検証（メール＋パスワード）
+function partnerLogin(email, pw) {
+  try {
+    var sheet = getPartnerSheet();
+    var row = partnerFindRow(sheet, email);
+    if (row < 0) return { ok: false, reason: 'notfound' };
+    var r = sheet.getRange(row, 1, 1, 6).getValues()[0];
+    var status = String(r[3] || '');
+    if (status === '退会') return { ok: false, reason: 'withdrawn' };
+    if (String(r[2] || '') !== String(pw || '')) return { ok: false, reason: 'badpw' };
+    return { ok: true, store: String(r[1] || ''), email: String(r[0] || '') };
+  } catch (e) { return { ok: false, reason: 'error', message: e.message }; }
+}
+// 加盟店アカウント一覧（本部管理用）
+function getPartners() {
+  try {
+    var sheet = getPartnerSheet();
+    var last = sheet.getLastRow();
+    if (last < 2) return [];
+    var vals = sheet.getRange(2, 1, last - 1, 6).getValues();
+    var out = [];
+    for (var i = 0; i < vals.length; i++) {
+      if (!vals[i][0]) continue;
+      out.push({ email: String(vals[i][0]), store: String(vals[i][1] || ''), pw: String(vals[i][2] || ''),
+        status: String(vals[i][3] || '稼働中'), created: String(vals[i][4] || ''), updated: String(vals[i][5] || '') });
+    }
+    return out;
+  } catch (e) { return []; }
+}
+// 新規追加＋初期パスワード発行＋案内メール
+function partnerAdd(data) {
+  var email = String(data.email || '').trim();
+  var store = String(data.store || '').trim();
+  if (!email) return { ok: false, message: 'メール必須' };
+  var sheet = getPartnerSheet();
+  var row = partnerFindRow(sheet, email);
+  var pw = String(data.pw || '').trim() || genPassword();
+  var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm');
+  if (row > 0) {
+    // 既存なら店名・パスワード更新＋稼働中に
+    sheet.getRange(row, 2).setValue(store);
+    sheet.getRange(row, 3).setValue(pw);
+    sheet.getRange(row, 4).setValue('稼働中');
+    sheet.getRange(row, 6).setValue(ts);
+  } else {
+    sheet.appendRow([email, store, pw, '稼働中', ts, ts]);
+  }
+  sendPartnerWelcome(email, store, pw);
+  return { ok: true, email: email, store: store, pw: pw };
+}
+// 退会/復活
+function partnerSetStatus(email, status) {
+  var sheet = getPartnerSheet();
+  var row = partnerFindRow(sheet, email);
+  if (row < 0) return { ok: false, message: 'not found' };
+  sheet.getRange(row, 4).setValue(status);
+  sheet.getRange(row, 6).setValue(Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'));
+  return { ok: true, email: email, status: status };
+}
+// パスワード再発行＋メール
+function partnerReissue(email) {
+  var sheet = getPartnerSheet();
+  var row = partnerFindRow(sheet, email);
+  if (row < 0) return { ok: false, message: 'not found' };
+  var pw = genPassword();
+  var store = String(sheet.getRange(row, 2).getValue() || '');
+  sheet.getRange(row, 3).setValue(pw);
+  sheet.getRange(row, 6).setValue(Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'));
+  sendPartnerWelcome(email, store, pw, true);
+  return { ok: true, email: email, pw: pw };
+}
+// 本部が手動でパスワード設定
+function partnerSetPw(email, pw) {
+  var sheet = getPartnerSheet();
+  var row = partnerFindRow(sheet, email);
+  if (row < 0) return { ok: false, message: 'not found' };
+  sheet.getRange(row, 3).setValue(String(pw || ''));
+  sheet.getRange(row, 6).setValue(Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'));
+  return { ok: true };
+}
+// 加盟店へログイン案内メール
+function sendPartnerWelcome(email, store, pw, isReissue) {
+  try {
+    var subject = isReissue ? '【BUYMO加盟店】パスワード再発行のお知らせ' : '【BUYMO加盟店】アカウント発行のお知らせ';
+    var body =
+'━━━━━━━━━━━━━━━━━━━━━━\n  BUYMO 加盟店システム\n━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+(store ? (store + ' 御中\n\n') : '') +
+(isReissue ? 'パスワードを再発行しました。\n\n' : 'BUYMO加盟店システムのアカウントを発行しました。\n以下からログインしてください。\n\n') +
+'■ ログインURL\n  https://buymo.me/portal-login.html\n\n' +
+'■ ログイン情報\n  メールアドレス： ' + email + '\n  パスワード：     ' + pw + '\n\n' +
+'■ 使い方\n' +
+'  1. 上記URLを開く\n' +
+'  2. メールアドレスとパスワードを入力\n' +
+'  3. 「加盟店でログイン」を押す\n\n' +
+'ログイン後にできること：\n' +
+'  ・案件ボード（担当案件の管理・売却申請）\n' +
+'  ・アカデミー（研修動画・PDF資料）\n' +
+'  ・トークスクリプト／コミュニティ／書類発行\n\n' +
+'※パスワードは第三者に知られないよう管理してください。\n' +
+'※ご不明点は本部（' + REPLY_TO + '）までご連絡ください。\n\n' +
+'BUYMO 本部（運営：合同会社アイズ）\n✉ ' + REPLY_TO + '\n';
+    MailApp.sendEmail({ to: email, subject: subject, body: body, name: FROM_NAME, replyTo: REPLY_TO });
+  } catch (e) { Logger.log('sendPartnerWelcome: ' + e.message); }
 }
 
 /* ============================================================
