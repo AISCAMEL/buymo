@@ -94,12 +94,69 @@
         </div>
       </div>
     </div>
+
+    <!-- PDF資料＋解説の登録（加盟店アカデミーに表示） -->
+    <div class="hqa-section">
+      <h2>📚 PDF資料・解説の登録</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">登録すると加盟店アカデミーの「PDF資料・解説」に表示されます。PDFはGoogleドライブ等で共有リンク（閲覧可）を取得して貼り付けてください。</p>
+      <div class="hqa-new-course" id="newMatForm">
+        <input id="matCat" type="text" placeholder="カテゴリ（例：査定／書類／販促）" />
+        <input id="matTitle" type="text" class="full" placeholder="資料タイトル（例：査定チェックシート2026年版）" />
+        <input id="matUrl" type="text" class="full" placeholder="PDFのURL（https://... 例：Googleドライブの共有リンク）" />
+        <textarea id="matDesc" class="full" placeholder="解説（この資料の使い方・ポイントなど）"></textarea>
+        <div class="full" style="display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-primary hqa-btn-add" id="btnAddMat">資料を登録</button>
+          <span id="matMsg" style="font-size:13px;color:#0F766E;"></span>
+        </div>
+      </div>
+      <div id="matList" style="margin-top:16px;"></div>
+    </div>
   </div>
 </main>
 
 <script src="assets/js/academy.js"></script>
 <script src="assets/js/hq-common.js"></script>
 <script src="assets/js/hq-academy.js" defer></script>
+<script>
+(function () {
+  var listEl = document.getElementById('matList');
+  var msg = document.getElementById('matMsg');
+  function esc(s){ return HQ.esc(s); }
+  function render(list) {
+    if (!list || !list.length) { listEl.innerHTML = '<p style="font-size:13px;color:#999;">登録済みの資料はありません。</p>'; return; }
+    listEl.innerHTML = '<table class="hq-table" style="width:100%;border-collapse:collapse;font-size:13px;">' +
+      '<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #eee;">カテゴリ</th><th style="text-align:left;padding:8px;border-bottom:2px solid #eee;">タイトル</th><th style="padding:8px;border-bottom:2px solid #eee;">PDF</th><th style="padding:8px;border-bottom:2px solid #eee;">操作</th></tr></thead><tbody>' +
+      list.map(function (m) {
+        return '<tr><td style="padding:8px;border-bottom:1px solid #f0f0f0;">' + esc(m.cat||'') + '</td>' +
+          '<td style="padding:8px;border-bottom:1px solid #f0f0f0;">' + esc(m.t||'') + '<br><span style="color:#999;font-size:11px;">' + esc(m.b||'').slice(0,40) + '</span></td>' +
+          '<td style="padding:8px;border-bottom:1px solid #f0f0f0;text-align:center;">' + (m.url?'<a href="'+esc(m.url)+'" target="_blank" rel="noopener">開く</a>':'—') + '</td>' +
+          '<td style="padding:8px;border-bottom:1px solid #f0f0f0;text-align:center;"><button class="mat-del" data-id="'+esc(m.id)+'" style="border:1px solid #C0392B;color:#C0392B;background:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;">削除</button></td></tr>';
+      }).join('') + '</tbody></table>';
+    listEl.querySelectorAll('.mat-del').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!confirm('この資料を削除しますか？')) return;
+        HQ.deleteMaterial(b.getAttribute('data-id'));
+        b.closest('tr').remove();
+      });
+    });
+  }
+  function load() { HQ.loadMaterials(function (list) { render(list); }); }
+  var btn = document.getElementById('btnAddMat');
+  if (btn) btn.addEventListener('click', function () {
+    var title = document.getElementById('matTitle').value.trim();
+    var url = document.getElementById('matUrl').value.trim();
+    if (!title) { alert('タイトルを入力してください'); return; }
+    var m = { id: 'M-' + Date.now(), cat: document.getElementById('matCat').value.trim() || '資料',
+      t: title, b: document.getElementById('matDesc').value.trim(), url: url,
+      date: (function(){ var d=new Date(); function p(n){return('0'+n).slice(-2);} return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate()); })() };
+    HQ.addMaterial(m);
+    if (msg) { msg.textContent = '登録しました ✓'; setTimeout(function(){ msg.textContent=''; }, 2000); }
+    document.getElementById('matTitle').value=''; document.getElementById('matUrl').value=''; document.getElementById('matDesc').value=''; document.getElementById('matCat').value='';
+    setTimeout(load, 800);
+  });
+  load();
+})();
+</script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

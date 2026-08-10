@@ -10,6 +10,19 @@
 <link rel="stylesheet" href="assets/css/buymo.css?v=19" />
 <link rel="stylesheet" href="assets/css/board.css" />
 <link rel="stylesheet" href="assets/css/academy.css" />
+<style>
+.mat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px;}
+.mat-card{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;gap:8px;}
+.mat-card-head{display:flex;align-items:center;gap:8px;}
+.mat-cat{background:#eef4f3;color:#0F766E;font-size:11px;font-weight:900;border-radius:6px;padding:2px 8px;}
+.mat-title{font-weight:900;font-size:15px;color:var(--navy);}
+.mat-body{font-size:13px;color:#555;line-height:1.7;flex:1;white-space:pre-wrap;}
+.mat-open{align-self:flex-start;background:#0F766E;color:#fff;text-decoration:none;font-weight:700;font-size:13px;border-radius:8px;padding:8px 16px;}
+.mat-open:hover{filter:brightness(1.1);}
+.mat-date{font-size:11px;color:#999;}
+.mat-empty{color:#999;font-size:13px;grid-column:1/-1;}
+@media (max-width:767px){.mat-grid{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
 <script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
@@ -41,6 +54,10 @@
     <h2 class="ac-h2">研修コース</h2>
     <div class="ac-grid" id="academyGrid"></div>
 
+    <h2 class="ac-h2">📚 PDF資料・解説</h2>
+    <p class="portal-sub" style="margin-top:-6px;">本部が登録した資料（PDF）と解説です。クリックでPDFを開けます。</p>
+    <div class="mat-grid" id="materialGrid"><p class="mat-empty">読み込み中…</p></div>
+
     <h2 class="ac-h2">資料・サポート</h2>
     <div class="ac-links">
       <a href="appraisal.html">📗 車の査定マニュアル</a>
@@ -58,6 +75,24 @@
 <script src="assets/js/academy.js"></script>
 <script>Academy.renderHub();</script>
 <script src="assets/js/hq-common.js"></script>
+<script>
+(function () {
+  var grid = document.getElementById('materialGrid'); if (!grid) return;
+  HQ.loadMaterials(function (list) {
+    if (!list || !list.length) { grid.innerHTML = '<p class="mat-empty">まだ資料は登録されていません。</p>'; return; }
+    grid.innerHTML = list.map(function (m) {
+      var url = HQ.esc(m.url || '');
+      var btn = url ? '<a class="mat-open" href="' + url + '" target="_blank" rel="noopener">📄 PDFを開く</a>' : '';
+      return '<div class="mat-card">' +
+        '<div class="mat-card-head"><span class="mat-cat">' + HQ.esc(m.cat || '資料') + '</span><span class="mat-date">' + HQ.esc(m.date || '') + '</span></div>' +
+        '<div class="mat-title">' + HQ.esc(m.t || '') + '</div>' +
+        (m.b ? '<div class="mat-body">' + HQ.esc(m.b) + '</div>' : '') +
+        btn +
+        '</div>';
+    }).join('');
+  });
+})();
+</script>
 <script src="assets/js/notices.js"></script>
 <script>window.BUYMO_BOT_MODE='partner';</script>
 <script src="assets/js/chatbot.js" defer></script>

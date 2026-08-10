@@ -146,6 +146,26 @@ window.HQ = (function () {
   function addNotice(n) { var a = getNotices(); a.unshift(n); saveNotices(a); if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'notice', token: authToken(), id: n.id, title: n.t, body: n.b, level: n.lv, date: n.date }) }).catch(function () {}); }
   function deleteNotice(id) { saveNotices(getNotices().filter(function (n) { return n.id !== id; })); if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'notice_delete', token: authToken(), id: id }) }).catch(function () {}); }
 
+  /* アカデミー PDF資料＋解説（共有：GAS「教材資料」シート） */
+  function loadMaterials(cb) {
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=materials')
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && d.length) ? d : []); })
+        .catch(function () { cb(null); });
+    } else { cb(null); }
+  }
+  function addMaterial(m) {
+    if (!ENDPOINT) return;
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'material', token: authToken(), id: m.id, cat: m.cat, title: m.t, body: m.b, url: m.url, date: m.date }) }).catch(function () {});
+  }
+  function deleteMaterial(id) {
+    if (!ENDPOINT) return;
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'material_delete', token: authToken(), id: id }) }).catch(function () {});
+  }
+
   /* 加盟店コミュニティ（共有：GAS「コミュニティ」シート） */
   function loadCommunity(cb) {
     if (ENDPOINT) {
@@ -203,6 +223,7 @@ window.HQ = (function () {
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
+    loadMaterials: loadMaterials, addMaterial: addMaterial, deleteMaterial: deleteMaterial,
     yen: yen, esc: esc, stageIdx: stageIdx, nav: nav
   };
 })();
