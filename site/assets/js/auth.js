@@ -41,18 +41,49 @@ window.AUTH = (function () {
   function partnerStoreOf(email) { return STAFF_PARTNER[String(email || '').trim().toLowerCase()] || ''; }
 
   // 本部/加盟店ログイン（メール許可リストで判定。サーバー不要）
+  // JSONP（GASからログイン結果を受け取る）
+  function jsonp(url, cb) {
+    var name = '__buymo_cb_' + Math.random().toString(36).slice(2);
+    var s = document.createElement('script');
+    var done = false;
+    window[name] = function (data) { done = true; try { delete window[name]; } catch (e) { window[name] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); cb(data); };
+    s.onerror = function () { if (!done) { done = true; try { delete window[name]; } catch (e) {} if (s.parentNode) s.parentNode.removeChild(s); cb(null); } };
+    s.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + name;
+    (document.body || document.documentElement).appendChild(s);
+    setTimeout(function () { if (!done) { s.onerror(); } }, 12000);
+  }
+  function setSession(eff, email, store) {
+    set({ token: 'staff-' + Math.random().toString(36).slice(2), role: eff, name: email, email: email, store: store || '', exp: now() + TTL });
+    try { localStorage.setItem('buymo_role', eff); localStorage.setItem('buymo_who', store || ''); } catch (e) {}
+  }
+
+  // 本部/加盟店ログイン
+  //  1) 本部（STAFF_HQ）＝メールのみ  2) 既存テスト加盟店（STAFF_PARTNER）＝メールのみ
+  //  3) それ以外＝GAS「加盟店アカウント」でメール＋パスワード検証（退会はブロック）
   function login(email, pw, r, cb) {
     email = (email || '').trim();
+    pw = (pw || '').trim();
     if (!email) { cb(false, 'メールアドレスを入力してください'); return; }
     var role = staffRoleOf(email);
-    if (!role) { cb(false, '登録されていないメールアドレスです。本部にご確認ください。'); return; }
-    if (r === 'hq' && role !== 'hq') { cb(false, '本部権限がありません。「加盟店でログイン」をご利用ください。'); return; }
-    var eff = (r === 'partner' && role === 'hq') ? 'partner' : role; // 本部は加盟店ページも閲覧可
-    var store = (eff === 'partner') ? partnerStoreOf(email) : ''; // 加盟店＝自分の店名
-    set({ token: 'staff-' + Math.random().toString(36).slice(2), role: eff, name: email, email: email, store: store, exp: now() + TTL });
-    // 案件ボード(board.js)が参照する値を設定（自店のみ表示に使用）
-    try { localStorage.setItem('buymo_role', eff); localStorage.setItem('buymo_who', store); } catch (e) {}
-    cb(true);
+    if (role) {
+      if (r === 'hq' && role !== 'hq') { cb(false, '本部権限がありません。「加盟店でログイン」をご利用ください。'); return; }
+      var eff = (r === 'partner' && role === 'hq') ? 'partner' : role; // 本部は加盟店ページも閲覧可
+      setSession(eff, email, (eff === 'partner') ? partnerStoreOf(email) : '');
+      cb(true); return;
+    }
+    // GAS管理の加盟店アカウント（メール＋パスワード）
+    if (r === 'hq') { cb(false, '本部権限がありません。「加盟店でログイン」をご利用ください。'); return; }
+    if (!ENDPOINT) { cb(false, '登録されていないメールアドレスです。本部にご確認ください。'); return; }
+    if (!pw) { cb(false, 'パスワードを入力してください（本部発行のパスワード）。'); return; }
+    jsonp(ENDPOINT + '?action=partner_login&email=' + encodeURIComponent(email) + '&pw=' + encodeURIComponent(pw), function (res) {
+      if (res && res.ok) { setSession('partner', email, res.store || ''); cb(true); return; }
+      var reason = res && res.reason;
+      var msg = reason === 'withdrawn' ? 'このアカウントは退会済みのためログインできません。本部にご確認ください。'
+        : reason === 'badpw' ? 'パスワードが違います。もう一度お試しください。'
+        : reason === 'notfound' ? '登録されていないメールアドレスです。本部にご確認ください。'
+        : '接続できませんでした。通信環境をご確認のうえ、再度お試しください。';
+      cb(false, msg);
+    });
   }
 
   function logout() {

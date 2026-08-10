@@ -166,6 +166,27 @@ window.HQ = (function () {
       body: JSON.stringify({ type: 'material_delete', token: authToken(), id: id }) }).catch(function () {});
   }
 
+  /* 加盟店アカウント管理（本部）：GAS「加盟店アカウント」シート */
+  function loadPartners(cb) {
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=partners')
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && d.length) ? d : []); })
+        .catch(function () { cb(null); });
+    } else { cb(null); }
+  }
+  function partnerAction(type, payload) {
+    if (!ENDPOINT) return;
+    var body = { type: type, token: authToken() };
+    for (var k in payload) body[k] = payload[k];
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }).catch(function () {});
+  }
+  function addPartner(email, store, pw) { partnerAction('partner_add', { email: email, store: store, pw: pw || '' }); }
+  function withdrawPartner(email) { partnerAction('partner_withdraw', { email: email }); }
+  function restorePartner(email) { partnerAction('partner_restore', { email: email }); }
+  function reissuePartner(email) { partnerAction('partner_reissue', { email: email }); }
+  function setPartnerPw(email, pw) { partnerAction('partner_setpw', { email: email, pw: pw }); }
+
   /* 加盟店コミュニティ（共有：GAS「コミュニティ」シート） */
   function loadCommunity(cb) {
     if (ENDPOINT) {
@@ -224,6 +245,7 @@ window.HQ = (function () {
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
     loadMaterials: loadMaterials, addMaterial: addMaterial, deleteMaterial: deleteMaterial,
+    loadPartners: loadPartners, addPartner: addPartner, withdrawPartner: withdrawPartner, restorePartner: restorePartner, reissuePartner: reissuePartner, setPartnerPw: setPartnerPw,
     yen: yen, esc: esc, stageIdx: stageIdx, nav: nav
   };
 })();

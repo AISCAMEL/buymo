@@ -42,11 +42,99 @@
     </div>
 
     <div class="store-grid" id="storeGrid"></div>
+
+    <!-- 加盟店ログインアカウント（メール＋パスワード発行・退会管理） -->
+    <div class="pa-section">
+      <h2 class="pa-h2">🔐 加盟店ログインアカウント（発行・退会）</h2>
+      <p class="pa-note">新規追加すると、加盟店のメール宛に<strong>ログインURL・使い方・初期パスワード</strong>が自動送信されます。退会にするとログインできなくなります。</p>
+      <div class="pa-form">
+        <input id="paEmail" type="email" placeholder="加盟店メールアドレス（必須）" />
+        <input id="paStore" type="text" placeholder="店舗名（例：白河店）" />
+        <input id="paPw" type="text" placeholder="初期パスワード（空欄で自動生成）" />
+        <button id="paAdd" class="btn btn-primary" type="button">追加してメール発行</button>
+        <span id="paMsg" class="pa-msg"></span>
+      </div>
+      <div class="hq-table-wrap">
+        <table class="pa-table" id="paTable">
+          <thead><tr><th>メール</th><th>店舗名</th><th>パスワード</th><th>状態</th><th>操作</th></tr></thead>
+          <tbody id="paBody"><tr><td colspan="5" class="pa-empty">読み込み中…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </main>
 
+<style>
+.pa-section{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:22px 24px;margin-top:20px;}
+.pa-h2{font-size:16px;font-weight:900;color:var(--navy);margin-bottom:8px;}
+.pa-note{font-size:13px;color:#666;margin-bottom:14px;line-height:1.6;}
+.pa-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.pa-form input{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;font-family:inherit;}
+.pa-form #paEmail{min-width:240px;}
+.pa-msg{font-size:13px;color:#0F766E;font-weight:700;}
+.pa-table{width:100%;border-collapse:collapse;font-size:13px;}
+.pa-table th,.pa-table td{padding:9px 12px;border-bottom:1px solid #eef1f6;text-align:left;}
+.pa-table thead th{background:#f4f6fa;color:#555;font-weight:700;}
+.pa-pw{font-family:monospace;background:#f4f6fa;border-radius:6px;padding:2px 8px;}
+.pa-badge{font-size:11px;font-weight:900;border-radius:6px;padding:2px 8px;}
+.pa-badge.on{background:#E8F7EC;color:#15803d;}
+.pa-badge.off{background:#FDE8E8;color:#C0392B;}
+.pa-act{border:1px solid #ccc;background:#fff;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px;}
+.pa-act.warn{border-color:#C0392B;color:#C0392B;}
+.pa-act.on{border-color:#15803d;color:#15803d;}
+.pa-empty{color:#999;text-align:center;}
+</style>
+
 <script src="assets/js/hq-common.js"></script>
 <script src="assets/js/hq-stores.js" defer></script>
+<script>
+(function () {
+  var body = document.getElementById('paBody'), msg = document.getElementById('paMsg');
+  function esc(s){ return HQ.esc(s); }
+  function flash(t){ if(msg){ msg.textContent=t; setTimeout(function(){msg.textContent='';},2500);} }
+  function row(p) {
+    var active = p.status !== '退会';
+    return '<tr>' +
+      '<td>' + esc(p.email) + '</td>' +
+      '<td>' + esc(p.store||'') + '</td>' +
+      '<td><span class="pa-pw">' + esc(p.pw||'') + '</span></td>' +
+      '<td><span class="pa-badge ' + (active?'on':'off') + '">' + (active?'稼働中':'退会') + '</span></td>' +
+      '<td>' +
+        '<button class="pa-act" data-act="reissue" data-email="'+esc(p.email)+'">パスワード再発行</button>' +
+        (active
+          ? '<button class="pa-act warn" data-act="withdraw" data-email="'+esc(p.email)+'">退会</button>'
+          : '<button class="pa-act on" data-act="restore" data-email="'+esc(p.email)+'">復活</button>') +
+      '</td></tr>';
+  }
+  function load() {
+    HQ.loadPartners(function (list) {
+      if (!list || !list.length) { body.innerHTML = '<tr><td colspan="5" class="pa-empty">まだアカウントはありません。</td></tr>'; return; }
+      body.innerHTML = list.map(row).join('');
+      body.querySelectorAll('.pa-act').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var email = b.getAttribute('data-email'), act = b.getAttribute('data-act');
+          if (act === 'withdraw') { if(!confirm(email+' を退会にします（ログイン不可）。よろしいですか？'))return; HQ.withdrawPartner(email); flash('退会にしました'); }
+          else if (act === 'restore') { HQ.restorePartner(email); flash('復活しました'); }
+          else if (act === 'reissue') { if(!confirm(email+' のパスワードを再発行し、メール送信します。よろしいですか？'))return; HQ.reissuePartner(email); flash('再発行しました（メール送信）'); }
+          setTimeout(load, 900);
+        });
+      });
+    });
+  }
+  var add = document.getElementById('paAdd');
+  if (add) add.addEventListener('click', function () {
+    var email = document.getElementById('paEmail').value.trim();
+    var store = document.getElementById('paStore').value.trim();
+    var pw = document.getElementById('paPw').value.trim();
+    if (!email) { alert('メールアドレスを入力してください'); return; }
+    HQ.addPartner(email, store, pw);
+    flash('追加しました（案内メール送信）');
+    document.getElementById('paEmail').value=''; document.getElementById('paStore').value=''; document.getElementById('paPw').value='';
+    setTimeout(load, 1200);
+  });
+  load();
+})();
+</script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
