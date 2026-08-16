@@ -314,7 +314,7 @@ function genrePage(g) {
 <body>
 ${header(rel, 'genre')}
 <main>
-  <section class="page-hero area-hero" aria-labelledby="page-title">
+  <section class="page-hero area-hero" aria-labelledby="page-title" style="--hero-bg:url('${rel}assets/img/genre-hero/${g.slug}.jpg')">
     <div class="container">
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="${rel}index.html#top">ホーム</a><span aria-hidden="true">›</span><a href="${rel}genre/">買取ジャンル</a><span aria-hidden="true">›</span><span>${esc(g.name)}</span></nav>
       <p class="hero-lead">${esc(g.icon)} ${esc(catchFor(g))}</p>

@@ -14,6 +14,12 @@
   background:linear-gradient(90deg,rgba(10,30,28,.82) 0%,rgba(10,30,28,.65) 55%,rgba(10,30,28,.25) 100%);
 }
 .page-hero .container{position:relative;z-index:2;}
+/* ジャンル別ヒーロー背景写真：--hero-bg があれば表示。未設定/画像なしなら従来のグリーンのまま */
+.page-hero::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  background-image:var(--hero-bg,none);
+  background-size:cover;background-position:center right;
+}
 .breadcrumb{font-size:13px;color:#777;margin-bottom:16px;}
 .breadcrumb a{color:var(--green-mid);}
 .breadcrumb span{margin:0 8px;}
