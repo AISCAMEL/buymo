@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>コンテンツマニュアル｜BUYMO 本部</title>
+<meta name="description" content="BUYMOサイトのコンテンツ（コラム／エリアLP／ジャンルLP／お知らせ／アカデミー資料／販促物）の作り方・入稿手順・トンマナ・SEOルールをまとめた制作マニュアル。本部・制作担当限定。" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=19" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+<link rel="stylesheet" href="assets/css/partner-doc.css" />
+<style>
+  .cm-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--gray);border:1px solid var(--border);border-radius:6px;padding:1px 6px;color:var(--navy);}
+  .cm-ng{color:#b91c1c;font-weight:800;}
+  .cm-ok{color:#047857;font-weight:800;}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+
+<div class="apr-conf">🔒 本部・制作担当限定｜コンテンツ制作の手順書です。無断複製・転載・第三者提供を禁じます。</div>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">コンテンツマニュアル</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <span class="portal-role" id="roleLabel">本部</span>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="apr-head">
+      <h1>コンテンツマニュアル<span class="tag">カーメル 制作チーム用</span></h1>
+      <p>BUYMOサイトの<strong>コラム記事・エリアLP・ジャンルLP・お知らせ・アカデミー資料・販促物</strong>を、<strong>誰が作っても同じ品質</strong>になるようにまとめた制作・入稿マニュアルです。書き方（トンマナ・NG表現）、SEOルール、入稿画面の使い方、公開の反映のしくみ、公開前チェックまでを1ページに集約しています。</p>
+    </div>
+
+    <div class="apr-grid">
+      <aside class="apr-side">
+        <nav class="apr-nav">
+          <a href="#map" class="active">🗺️ コンテンツ全体像</a>
+          <a href="#column">✏️ コラム記事の作り方</a>
+          <a href="#template">📄 記事テンプレート</a>
+          <a href="#tone">🗣️ 書き方・トンマナ</a>
+          <a href="#ng">🚫 NG表現・法務</a>
+          <a href="#seo">🔍 SEOルール</a>
+          <a href="#lp">🏙️ エリアLP・ジャンルLP</a>
+          <a href="#notice">📢 お知らせ・アカデミー資料</a>
+          <a href="#flow">🚀 公開フロー</a>
+          <a href="#check">✅ 公開前チェック</a>
+          <a href="hq-column.html" class="link-out">→ コラム投稿画面</a>
+          <a href="hq-academy.html" class="link-out">→ アカデミー管理</a>
+        </nav>
+      </aside>
+
+      <div>
+
+        <!-- ── 全体像 ── -->
+        <section class="panel" id="map">
+          <div class="panel-head"><h3>🗺️ コンテンツ全体像（何を・どこで作るか）</h3></div>
+          <div class="panel-body">
+            <p>BUYMOのコンテンツは<strong>「管理画面から入れるもの（即時反映）」</strong>と<strong>「リポジトリのHTMLを編集するもの（デプロイで反映）」</strong>の2系統があります。まずここで自分の担当がどちらかを確認してください。</p>
+            <table class="apr-table" style="margin-top:12px;">
+              <tr><th>コンテンツ</th><th>作る場所</th><th>公開先</th><th>反映</th></tr>
+              <tr>
+                <td><b>コラム記事</b></td>
+                <td><a href="hq-column.html">コラム投稿</a></td>
+                <td><a href="column/" target="_blank" rel="noopener">/column/</a></td>
+                <td>即時</td>
+              </tr>
+              <tr>
+                <td><b>お知らせ</b></td>
+                <td><a href="hq-notices.html">お知らせ管理</a></td>
+                <td>本部・加盟店の各画面</td>
+                <td>即時</td>
+              </tr>
+              <tr>
+                <td><b>アカデミー教材・PDF資料</b></td>
+                <td><a href="hq-academy.html">アカデミー管理</a></td>
+                <td><a href="partner-academy.html">加盟店アカデミー</a></td>
+                <td>即時</td>
+              </tr>
+              <tr>
+                <td><b>エリアLP（47都道府県）</b></td>
+                <td><span class="cm-code">tools/gen-area.js</span> ＋ データ編集</td>
+                <td><a href="area/">/area/</a></td>
+                <td>生成＋デプロイ</td>
+              </tr>
+              <tr>
+                <td><b>ジャンルLP</b></td>
+                <td><span class="cm-code">assets/js/genres.js</span> ＋ <span class="cm-code">tools/gen-genre.js</span></td>
+                <td><a href="genre/">/genre/</a></td>
+                <td>生成＋デプロイ</td>
+              </tr>
+              <tr>
+                <td><b>外部LP原稿（LPtools）</b></td>
+                <td><span class="cm-code">embed/LP原稿_*.md</span></td>
+                <td>LPtools側のLP</td>
+                <td>転記時</td>
+              </tr>
+              <tr>
+                <td><b>販促物・トークスクリプト</b></td>
+                <td><a href="partner-promo.html">販促ツール</a>／<a href="partner-scripts.html">スクリプト</a></td>
+                <td>加盟店ポータル</td>
+                <td>デプロイ</td>
+              </tr>
+            </table>
+            <div class="alert alert-info" style="margin-top:16px;">迷ったら<strong>コラムから</strong>。コラムは管理画面だけで完結し、公開ボタンで <span class="cm-code">/column/</span> に即時反映されます。エンジニア対応は不要です。</div>
+          </div>
+        </section>
+
+        <!-- ── コラム ── -->
+        <section class="panel" id="column">
+          <div class="panel-head"><h3>✏️ コラム記事の作り方</h3><span class="badge-status">管理画面で完結</span></div>
+          <div class="panel-body">
+            <div class="flow" style="grid-template-columns:repeat(4,1fr);">
+              <div class="step"><div class="n">1</div><h4>ネタ決め</h4><p>1記事＝1キーワード。<br>読者の悩みから逆算</p></div>
+              <div class="step"><div class="n">2</div><h4>構成を作る</h4><p>下のテンプレに<br>見出しを埋める</p></div>
+              <div class="step"><div class="n">3</div><h4>入稿・プレビュー</h4><p>コラム投稿画面で<br>👁プレビュー確認</p></div>
+              <div class="step"><div class="n">4</div><h4>公開</h4><p>チェックリスト後<br>「公開」で送信</p></div>
+            </div>
+
+            <h4 style="margin:20px 0 8px;font-size:15px;color:var(--navy);">入力項目と決まりごと</h4>
+            <table class="apr-table">
+              <tr><th>タイトル<span style="color:#e53e3e;">*</span></th><td><b>30〜32文字目安</b>。狙うキーワードを<b>前半</b>に入れる。数字を入れると開かれやすい（例：<span class="cm-code">プリウスを高く売る5つのコツ</span>）</td></tr>
+              <tr><th>カテゴリ</th><td>売り方／査定／廃車／手続き／ジャンル／相場／お役立ち／未分類 から1つ。<b>迷ったら「お役立ち」</b>。一覧ページの絞り込みに使われます</td></tr>
+              <tr><th>投稿者</th><td>原則 <b>BUYMO編集部</b>（個人名は出さない）</td></tr>
+              <tr><th>タグ</th><td>カンマ区切りで<b>3〜5個</b>。車種名・状態・地域など（例：<span class="cm-code">プリウス,高額査定,売り方</span>）</td></tr>
+              <tr><th>本文<span style="color:#e53e3e;">*</span></th><td><b>1,500〜3,000文字</b>目安。<b>HTMLタグがそのまま反映されます</b>（<span class="cm-code">&lt;h2&gt;</span> <span class="cm-code">&lt;p&gt;</span> <span class="cm-code">&lt;ul&gt;&lt;li&gt;</span> <span class="cm-code">&lt;strong&gt;</span> 程度に留める）。<b>記事内に &lt;h1&gt; は書かない</b>（タイトルがH1になるため）</td></tr>
+              <tr><th>公開設定</th><td><b>公開</b>＝即時に <span class="cm-code">/column/</span> へ／<b>下書き</b>＝保存のみ。迷ったらまず下書き</td></tr>
+            </table>
+
+            <div class="alert alert-warn" style="margin-top:16px;">⚠️ <b>重複タイトルの自動検出</b>：似たタイトルが既にあると警告が出ます。<b>まずは既存記事の加筆・更新を検討</b>してください。それでも別記事として出す場合のみ「重複を認識の上、強制的に投稿する」にチェックします（同テーマの記事が増えるとSEO上お互いの評価を食い合います）。</div>
+            <div class="alert alert-info" style="margin-top:10px;">投稿後は必ず <a href="column/" target="_blank" rel="noopener">/column/</a> を開いて<b>実ページの表示崩れ・改行・リンク</b>を確認してください。修正は「📋 投稿一覧」から行います。</div>
+          </div>
+        </section>
+
+        <!-- ── テンプレート ── -->
+        <section class="panel" id="template">
+          <div class="panel-head"><h3>📄 記事テンプレート（コピーして使う）</h3></div>
+          <div class="panel-body">
+            <p>本文欄にそのまま貼って、<b>［　］の中を差し替える</b>だけで1本書けます。型は3種類。</p>
+
+            <div class="copy-box">
+              <div class="cb-head"><strong>① 悩み解決型（例：ローン中の車を売りたい）</strong><button class="copy-btn" type="button">コピー</button></div>
+<pre>&lt;p&gt;［読者の悩みを1文で言い換える］とお困りではありませんか。結論から言うと［結論］です。この記事では［得られること］を、買取の現場目線で解説します。&lt;/p&gt;
+
+&lt;h2&gt;［悩み］が起きる理由&lt;/h2&gt;
+&lt;p&gt;［背景・仕組みを2〜3文］&lt;/p&gt;
+
+&lt;h2&gt;結論：［いちばん伝えたい答え］&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;［ポイント1］&lt;/li&gt;
+  &lt;li&gt;［ポイント2］&lt;/li&gt;
+  &lt;li&gt;［ポイント3］&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;手順（やることリスト）&lt;/h2&gt;
+&lt;p&gt;［1. …／2. …／3. … を短文で］&lt;/p&gt;
+
+&lt;h2&gt;注意点・よくある失敗&lt;/h2&gt;
+&lt;p&gt;［トラブル例と回避策］&lt;/p&gt;
+
+&lt;h2&gt;よくある質問&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Q. ［質問］&lt;/strong&gt;&lt;br&gt;A. ［回答］&lt;/p&gt;
+
+&lt;h2&gt;まとめ&lt;/h2&gt;
+&lt;p&gt;［要点の再確認］。BUYMOでは無料査定を受け付けています。査定・出張・手続き代行はすべて無料です。まずはお気軽にご相談ください。&lt;/p&gt;</pre>
+            </div>
+
+            <div class="copy-box">
+              <div class="cb-head"><strong>② 車種・ジャンル型（例：ハイエースの買取相場）</strong><button class="copy-btn" type="button">コピー</button></div>
+<pre>&lt;p&gt;［車種／ジャンル］は［人気の理由］から、中古市場で需要が安定しています。ここでは［車種］を売るときに押さえたいポイントをまとめます。&lt;/p&gt;
+
+&lt;h2&gt;［車種］が高く評価される理由&lt;/h2&gt;
+&lt;p&gt;［需要・流通の背景］&lt;/p&gt;
+
+&lt;h2&gt;査定でチェックされるポイント&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;年式・走行距離：［目安］&lt;/li&gt;
+  &lt;li&gt;グレード・装備：［人気装備］&lt;/li&gt;
+  &lt;li&gt;状態：［傷・修復歴の扱い］&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;高く売るためのコツ&lt;/h2&gt;
+&lt;p&gt;［清掃・書類・売却時期など］&lt;/p&gt;
+
+&lt;h2&gt;こんな状態でも買取できます&lt;/h2&gt;
+&lt;p&gt;事故車・不動車・過走行・ローン中の車もご相談いただけます。&lt;/p&gt;
+
+&lt;h2&gt;まとめ&lt;/h2&gt;
+&lt;p&gt;［要点］。実際の金額は車両ごとに異なるため、無料査定でご確認ください。&lt;/p&gt;</pre>
+            </div>
+
+            <div class="copy-box">
+              <div class="cb-head"><strong>③ 手続き解説型（例：廃車の必要書類）</strong><button class="copy-btn" type="button">コピー</button></div>
+<pre>&lt;p&gt;［手続き名］は、必要書類さえそろえば難しくありません。この記事では［手続き名］の流れと必要書類を、はじめての方向けに整理します。&lt;/p&gt;
+
+&lt;h2&gt;［手続き名］とは&lt;/h2&gt;
+&lt;p&gt;［定義を1〜2文］&lt;/p&gt;
+
+&lt;h2&gt;必要書類&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;［書類1］：［どこで入手］&lt;/li&gt;
+  &lt;li&gt;［書類2］：［注意点］&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;手続きの流れ&lt;/h2&gt;
+&lt;p&gt;［STEP1〜4を短文で］&lt;/p&gt;
+
+&lt;h2&gt;つまずきやすいポイント&lt;/h2&gt;
+&lt;p&gt;［所有権解除・書類紛失など］&lt;/p&gt;
+
+&lt;h2&gt;まとめ&lt;/h2&gt;
+&lt;p&gt;BUYMOでは［手続き名］の代行に対応しています。書類の準備からご相談ください。&lt;/p&gt;</pre>
+            </div>
+
+            <div class="alert alert-info">テンプレの見出しは<b>増減してOK</b>ですが、「結論を先に→理由→手順→注意点→まとめ」の順序は崩さないでください。読者は結論を探して読んでいます。</div>
+          </div>
+        </section>
+
+        <!-- ── トンマナ ── -->
+        <section class="panel" id="tone">
+          <div class="panel-head"><h3>🗣️ 書き方・トンマナ</h3></div>
+          <div class="panel-body">
+            <ul class="opt-list">
+              <li><span>文体は「です・ます」で統一</span><b>敬体のみ</b></li>
+              <li><span>一人称は「BUYMO」／署名は「BUYMO編集部」</span><b>個人名は出さない</b></li>
+              <li><span>お客様のことは「お客様」（ユーザー・客はNG）</span><b>呼称統一</b></li>
+              <li><span>1文は60文字以内。長い文は2つに割る</span><b>スマホで読める長さ</b></li>
+              <li><span>2〜4文ごとに改段落、3スクロールに1つ見出し</span><b>余白を作る</b></li>
+              <li><span>専門用語は初出でかみ砕く（例：抹消登録＝車を使わなくする手続き）</span><b>初心者基準</b></li>
+              <li><span>数字は半角、金額は「¥」ではなく「〇〇万円」表記</span><b>本文中の統一</b></li>
+              <li><span>不安を煽らない。事実→対処法の順で書く</span><b>誠実なトーン</b></li>
+            </ul>
+            <h4 style="margin:18px 0 8px;font-size:15px;color:var(--navy);">用語の統一</h4>
+            <table class="apr-table">
+              <tr><th>使う</th><td>買取／査定／無料出張査定／手数料0円／名義変更／廃車手続き／加盟店／お客様</td></tr>
+              <tr><th>使わない</th><td>買い取り（送り仮名ゆれ）／見積り（記事では「査定」に統一）／ユーザー／弊社（→BUYMO）</td></tr>
+            </table>
+            <div class="alert alert-ok" style="margin-top:16px;">BUYMOの訴求軸は<strong>「高価買取・手数料0円・無料出張査定・3営業日以内の入金・事故車/不動車/ローン中もOK」</strong>。どの記事でも最後にこの軸へ着地させます。</div>
+          </div>
+        </section>
+
+        <!-- ── NG表現 ── -->
+        <section class="panel" id="ng">
+          <div class="panel-head"><h3>🚫 NG表現・法務チェック</h3><span class="badge-status">必読</span></div>
+          <div class="panel-body">
+            <div class="alert alert-danger">景品表示法上、<b>断定・最上級・根拠のない保証</b>は使えません。判断に迷う表現は<b>公開前に本部へ確認</b>してください。</div>
+            <table class="apr-table" style="margin-top:14px;">
+              <tr><th>区分</th><th>NG例</th><th>言い換え</th></tr>
+              <tr>
+                <td><span class="cm-ng">最上級</span></td>
+                <td>業界No.1／日本一／どこよりも高い</td>
+                <td>高価買取に力を入れています</td>
+              </tr>
+              <tr>
+                <td><span class="cm-ng">断定・保証</span></td>
+                <td>必ず〇〇円／最高額保証／絶対に損しません</td>
+                <td>車両により異なります。無料査定でご確認ください</td>
+              </tr>
+              <tr>
+                <td><span class="cm-ng">誇大</span></td>
+                <td>他社より必ず10万円高い／今だけ限定</td>
+                <td>他社様の査定額もぜひ比較してください</td>
+              </tr>
+              <tr>
+                <td><span class="cm-ng">実績の断定</span></td>
+                <td>買取実績（金額を実例として断定）</td>
+                <td>金額表の近くに<b>「※ 掲載の実績は買取イメージです。」</b>を必ず添える</td>
+              </tr>
+              <tr>
+                <td><span class="cm-ng">相場の断定</span></td>
+                <td>2026年の相場は〇〇万円です</td>
+                <td>〇〇万円前後が目安です（時期・状態により変動します）</td>
+              </tr>
+            </table>
+            <ul class="opt-list" style="margin-top:14px;">
+              <li><span>他社名を挙げた比較・批判はしない</span><b>比較は自社の事実のみ</b></li>
+              <li><span>他サイトの文章・画像の転載はしない（引用は出典明記＋最小限）</span><b>著作権</b></li>
+              <li><span>お客様の実名・車両ナンバー・書類画像を載せない</span><b>個人情報</b></li>
+              <li><span>古物営業法・許可番号の記載は本部管理の表記をそのまま使う</span><b>改変禁止</b></li>
+              <li><span>税・法制度の記述は最新の公的情報を確認してから書く</span><b>年度で変わる</b></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ── SEO ── -->
+        <section class="panel" id="seo">
+          <div class="panel-head"><h3>🔍 SEOルール</h3></div>
+          <div class="panel-body">
+            <ul class="opt-list">
+              <li><span><b>1ページ1キーワード</b>。同じキーワードで2本作らない</span><b>共食い防止</b></li>
+              <li><span>タイトルは<b>30〜32文字</b>、キーワードを前半に</span><b>検索結果で切れない</b></li>
+              <li><span>meta description は<b>90〜120文字</b>、キーワード＋ベネフィット</span><b>クリック率</b></li>
+              <li><span><b>H1は1ページに1つだけ</b>。以降はH2→H3の順で飛ばさない</span><b>構造</b></li>
+              <li><span>関連する記事・ジャンルLP・エリアLPへ<b>内部リンクを2〜3本</b></span><b>回遊と評価</b></li>
+              <li><span>画像には必ず <span class="cm-code">alt</span> を入れる（装飾画像は空alt）</span><b>アクセシビリティ</b></li>
+              <li><span>公開URL（スラッグ）は英数字。日本語URLは使わない</span><b>共有時に壊れない</b></li>
+            </ul>
+            <h4 style="margin:18px 0 8px;font-size:15px;color:var(--navy);">HTMLページを触ったら自動チェックを回す</h4>
+            <p>エリアLP・ジャンルLPなど<b>リポジトリのHTMLを編集した場合</b>は、<span class="cm-code">site/</span> ディレクトリで次を実行します。</p>
+            <div class="copy-box">
+              <div class="cb-head"><strong>公開前の自動チェック（site/ で実行）</strong><button class="copy-btn" type="button">コピー</button></div>
+<pre>node tools/seo-check.js     # title/canonical/description/H1/OGP/JSON-LD/title重複
+node tools/check-links.js   # 内部リンク・画像・アンカー(#id)の切れ確認
+node tools/launch-check.js  # 公開前の総合チェック</pre>
+            </div>
+            <div class="alert alert-info"><span class="cm-code">seo-check.js</span> の必須チェック対象は <span class="cm-code">buymo.html</span>／<span class="cm-code">genre/**</span>／<span class="cm-code">area/**</span> です（管理画面系は <span class="cm-code">noindex</span> のため対象外）。JSON-LD の構文チェックは全ページに走ります。</div>
+          </div>
+        </section>
+
+        <!-- ── LP ── -->
+        <section class="panel" id="lp">
+          <div class="panel-head"><h3>🏙️ エリアLP・ジャンルLP</h3><span class="badge-status">生成スクリプト</span></div>
+          <div class="panel-body">
+            <p>エリアLP（47都道府県）とジャンルLPは<b>手書きせず、データ＋ジェネレーターで生成</b>します。1ページだけ手で直すと、次の生成で上書きされます。</p>
+            <table class="apr-table" style="margin-top:12px;">
+              <tr><th>エリアLP</th><td>データは <span class="cm-code">tools/gen-area.js</span> 内の都道府県データ。編集後に <span class="cm-code">node tools/gen-area.js</span> を <span class="cm-code">site/</span> で実行 → <span class="cm-code">area/&lt;slug&gt;/index.html</span> とハブ・<span class="cm-code">sitemap.xml</span> が再生成されます</td></tr>
+              <tr><th>ジャンルLP</th><td>一覧の元データは <span class="cm-code">assets/js/genres.js</span>。<span class="cm-code">node tools/gen-genre.js</span> で <span class="cm-code">genre/</span> を再生成</td></tr>
+              <tr><th>公開/準備中の切替</th><td><span class="cm-code">genres.js</span> の各ジャンルに <span class="cm-code">url:'/genre/haisha/'</span>・<span class="cm-code">status:'live'</span> を設定すると、全ページのナビ・カード・フッターのリンクが一斉に有効化。未公開は <span class="cm-code">status:'coming'</span></td></tr>
+              <tr><th>絶対URLで出す</th><td><span class="cm-code">SITE_URL=https://buymo.me node tools/gen-area.js</span> のように環境変数を付けると canonical / sitemap / robots が絶対URLになります</td></tr>
+              <tr><th>外部LP（LPtools）</th><td>原稿は <span class="cm-code">embed/LP原稿_*.md</span>。ブロック構成のまま上から転記します。ヘッダー・フッターは <span class="cm-code">embed/BUYMO_共通ヘッダーフッター_LPtools.html</span> を貼れば本体と見た目が揃います</td></tr>
+            </table>
+            <div class="alert alert-warn" style="margin-top:16px;">生成されたページを直接編集しないこと。<b>直すのはデータかテンプレート</b>で、必ず再生成してから公開します。</div>
+          </div>
+        </section>
+
+        <!-- ── お知らせ・資料 ── -->
+        <section class="panel" id="notice">
+          <div class="panel-head"><h3>📢 お知らせ・アカデミー資料</h3><span class="badge-status">管理画面で完結</span></div>
+          <div class="panel-body">
+            <table class="apr-table">
+              <tr><th>お知らせ</th><td><a href="hq-notices.html">お知らせ管理</a>から配信。<b>件名は20文字以内</b>、本文は結論→対応期限→問い合わせ先の順。加盟店の各画面に即時表示されます</td></tr>
+              <tr><th>PDF資料・解説</th><td><a href="hq-academy.html">アカデミー管理</a>の「📚 PDF資料・解説の登録」で、<b>カテゴリ／タイトル／PDFのURL／解説</b>を登録。<a href="partner-academy.html">加盟店アカデミー</a>に一覧表示されます</td></tr>
+              <tr><th>PDFのURL</th><td>Googleドライブ等の<b>共有リンク（リンクを知っている全員が閲覧可）</b>を使用。社内限定のままだと加盟店側で開けません。<b>公開範囲は登録前に必ず確認</b></td></tr>
+              <tr><th>解説文</th><td>「この資料は何のためか」「いつ使うか」を2〜3文。ファイル名の説明で終わらせない</td></tr>
+              <tr><th>研修コース</th><td>コースID（英数字）・タイトル・説明を登録し、レッスンにYouTube埋め込みURL（<span class="cm-code">https://www.youtube.com/embed/XXXX</span>）を設定</td></tr>
+            </table>
+            <div class="alert alert-warn" style="margin-top:16px;">加盟店向け資料は<b>限定公開が前提</b>です。顧客に配る販促物と、加盟店限定の実務資料を混在させないでください。</div>
+          </div>
+        </section>
+
+        <!-- ── 公開フロー ── -->
+        <section class="panel" id="flow">
+          <div class="panel-head"><h3>🚀 公開フロー（反映のしくみ）</h3></div>
+          <div class="panel-body">
+            <h4 style="margin:0 0 8px;font-size:15px;color:var(--navy);">A. 管理画面から入れるコンテンツ</h4>
+            <div class="flow" style="grid-template-columns:repeat(3,1fr);">
+              <div class="step"><div class="n">1</div><h4>管理画面で入力</h4><p>コラム／お知らせ／資料</p></div>
+              <div class="step"><div class="n">2</div><h4>保存・公開</h4><p>バックエンドに保存</p></div>
+              <div class="step"><div class="n">3</div><h4>即時反映</h4><p>公開ページに表示</p></div>
+            </div>
+            <h4 style="margin:20px 0 8px;font-size:15px;color:var(--navy);">B. リポジトリのHTMLを編集するコンテンツ</h4>
+            <div class="flow" style="grid-template-columns:repeat(4,1fr);">
+              <div class="step"><div class="n">1</div><h4>ブランチで編集</h4><p>生成が必要なら<br>スクリプト実行</p></div>
+              <div class="step"><div class="n">2</div><h4>自動チェック</h4><p>seo-check /<br>check-links</p></div>
+              <div class="step"><div class="n">3</div><h4>mainへマージ</h4><p>レビュー後</p></div>
+              <div class="step"><div class="n">4</div><h4>自動デプロイ</h4><p>GitHub Actionsが<br>本番へ差分反映</p></div>
+            </div>
+            <div class="alert alert-info" style="margin-top:16px;"><b>main にマージされた時点で本番に出ます。</b>下書き段階のページを main に入れないでください。公開前のものは <span class="cm-code">noindex</span> を付けるか、ブランチに留めます。</div>
+            <div class="alert alert-warn" style="margin-top:10px;">新しいページを追加したら、<b>導線（ナビ・カード・フッター・sitemap）も同時に</b>追加します。リンクされていないページは誰にも見つかりません。</div>
+          </div>
+        </section>
+
+        <!-- ── チェックリスト ── -->
+        <section class="panel" id="check">
+          <div class="panel-head"><h3>✅ 公開前チェックリスト</h3></div>
+          <div class="panel-body">
+            <h4 style="margin:0 0 8px;font-size:15px;color:var(--navy);">共通</h4>
+            <ul class="chk">
+              <li><b>誤字脱字・表記ゆれ</b>を確認した（買取／査定／お客様）</li>
+              <li><b>NG表現</b>（No.1・必ず・保証・断定）が無い</li>
+              <li>金額・実績に<b>「※ イメージです」</b>等の注記がある</li>
+              <li><b>個人情報・他社名・転載素材</b>が含まれていない</li>
+              <li>連絡先・URL・電話番号が<b>最新で正しい</b></li>
+              <li><b>スマホ表示</b>で崩れていない（文字が詰まっていない）</li>
+            </ul>
+            <h4 style="margin:18px 0 8px;font-size:15px;color:var(--navy);">コラム記事</h4>
+            <ul class="chk">
+              <li>タイトルにキーワードが入り、<b>30〜32文字</b>に収まっている</li>
+              <li><b>重複タイトル警告</b>が出ていない（出た場合は既存記事の更新を検討した）</li>
+              <li>本文に <b>&lt;h1&gt; を書いていない</b>／見出しがH2→H3の順</li>
+              <li><b>内部リンク2〜3本</b>を入れた</li>
+              <li>👁プレビューで<b>タグ崩れ・改行</b>を確認した</li>
+              <li>公開後に <b>/column/ の実ページ</b>を開いて確認した</li>
+            </ul>
+            <h4 style="margin:18px 0 8px;font-size:15px;color:var(--navy);">HTMLページ（LP等）</h4>
+            <ul class="chk">
+              <li><span class="cm-code">node tools/seo-check.js</span> がエラー0</li>
+              <li><span class="cm-code">node tools/check-links.js</span> がエラー0</li>
+              <li>title・canonical・description・OGPが設定されている</li>
+              <li>生成ページを手編集していない（データ側を直して再生成した）</li>
+              <li>ナビ・フッター・sitemap への<b>導線を追加</b>した</li>
+            </ul>
+            <div class="alert alert-ok" style="margin-top:16px;">判断に迷ったら公開せず本部に確認。<b>出してから直すより、出す前に聞くほうが早い</b>です。</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js"></script>
+<script>HQ.nav('');</script>
+<script>
+  // 目次：スクロールに応じて現在地をハイライト
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.apr-nav a[href^="#"]'));
+    var secs = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+    function onScroll() {
+      var y = window.scrollY + 120, cur = 0;
+      secs.forEach(function (s, i) { if (s && s.offsetTop <= y) cur = i; });
+      links.forEach(function (a, i) { a.classList.toggle('active', i === cur); });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  // コピー用テンプレ：各ボタンで同じボックス内の <pre> をコピー
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var box = btn.closest('.copy-box');
+      var pre = box ? box.querySelector('pre') : null;
+      if (!pre) return;
+      var text = pre.innerText;
+      var done = function () {
+        var old = btn.textContent;
+        btn.textContent = '✓ コピー済み'; btn.classList.add('done');
+        setTimeout(function () { btn.textContent = old; btn.classList.remove('done'); }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+  });
+  function fallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+</script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>
