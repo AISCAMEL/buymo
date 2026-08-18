@@ -43,7 +43,7 @@
       type: 'buymo_chat_log',
       sessionId: sessionId,
       status: status || '進行中',
-      messages: history.slice(-40)
+      messages: history.slice(-200)
     });
   }
 
@@ -480,6 +480,7 @@
   // 「担当者に相談」ボタンは “会話が進んでも解決しない時だけ” 表示する
   var userMsgCount = 0;   // ユーザー発言数
   var fallbackCount = 0;  // AIが答えられなかった回数
+  var humanMode = false;  // 担当者(人)が対応中＝AIは黙り、発言はSlackへ転送
   var MSG_THRESHOLD = 5;      // これ以上やりとりが続いたら提示
   var FALLBACK_THRESHOLD = 2; // AIがこの回数答えられなかったら提示
   function revealHandoff(reason) {
@@ -499,6 +500,14 @@
     userMsgCount++;
     input.value = '';
     chips.style.display = 'none';
+
+    // ★ 担当者対応中（Slack双方向）: AIは応答せず、発言をSlackスレッドへ転送し履歴を保存
+    if (humanMode) {
+      fireAndForget({ type: 'buymo_chat_user_msg', sessionId: sessionId || '', text: text.slice(0, 1000) });
+      sendChatLog('担当対応中');
+      resetIdleTimer();
+      return;
+    }
 
     // ① お客様が明示的に「人に繋いでほしい」と言った時だけ即表示
     var hitHuman = HUMAN_KW.some(function (k) { return text.indexOf(k) >= 0; });
@@ -761,7 +770,7 @@
         // sendBeacon が使えれば non-blocking で確実に送信
         var payload = JSON.stringify({
           type: 'buymo_chat_log', sessionId: sessionId,
-          status: '中断(離脱)', messages: history.slice(-40)
+          status: '中断(離脱)', messages: history.slice(-200)
         });
         if (navigator.sendBeacon) {
           navigator.sendBeacon(GAS, new Blob([payload], { type: 'text/plain;charset=utf-8' }));
@@ -852,7 +861,8 @@
           messages: history.slice(-20)
         });
         if (biz) {
-          addMsg('bot', '担当者におつなぎしています。少々お待ちください。\n\nこのチャット画面のまま、担当者からのご返信をお待ちいただけます。');
+          humanMode = true;  // 以降お客様の発言はSlackスレッドへ転送（AIは黙る）
+          addMsg('bot', '担当者におつなぎしました。ここから先は担当者が直接ご返信します。\n\nこのチャット画面にそのままご返信いただけます（メッセージは担当者に届きます）。');
           startHandoffPolling();  // 担当者の返信をポーリング取得
         } else {
           addMsg('bot', '受け付けました。翌営業日（平日10:00〜）に担当者よりご連絡いたします。\n\nそれまでの間も、AIがお答えできますのでお気軽にどうぞ。');
@@ -877,6 +887,9 @@
             if (r.ts && r.ts > lastReplyTs) {
               lastReplyTs = r.ts;
               addMsg('bot', '👤 ' + (r.by || '担当者') + '：\n' + r.text);
+              // 担当者の返信も履歴に残し、スプレッドへ全文保存
+              history.push({ role: 'assistant', content: '[担当者' + (r.by ? '・' + r.by : '') + '] ' + r.text });
+              sendChatLog('担当対応中');
             }
           });
         }
