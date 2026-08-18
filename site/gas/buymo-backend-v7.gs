@@ -259,6 +259,7 @@ function doPost(e) {
     if (data.type === 'buymo_case_new')   return jsonOut(handleMemberCaseNew(data));
     if (data.type === 'buymo_chat_start') return jsonOut(handleChatStart(data));  // NEW
     if (data.type === 'buymo_chat_log')   return jsonOut(handleChatLog(data));    // NEW
+    if (data.type === 'buymo_chat_user_msg') return jsonOut(handleChatUserMsg(data)); // NEW(Phase6双方向): お客様発言→Slackスレッド
     if (data.type === 'buymo_chat_handoff') return jsonOut(handleChatHandoff(data));  // NEW (Phase 5)
     if (data.type === 'buymo_case_decision') return jsonOut(handleCaseDecision(data)); // NEW: 売却する/しない
     if (data.type === 'notice')           return jsonOut(saveNotice(data));        // NEW: お知らせ登録
@@ -282,8 +283,10 @@ function doPost(e) {
 
 /* ============================================================
    ⑬ NEW: チャット開始通知 + 履歴保存
-   Sheet「チャット」列:
-     [開始日時, セッションID, 氏名, メール, 電話, ページURL, User-Agent, ステータス, 履歴]
+   Sheet「チャット」= セッション索引（1セッション1行）:
+     [開始日時, セッションID, 氏名, メール, 電話, ページURL, User-Agent, ステータス, 最新発言, 最終更新]
+   Sheet「会話ログ」= 1発言1行（見やすい詳細ログ）:
+     [日時, セッションID, 氏名, 発言者, 本文]
    ============================================================ */
 var CHAT_SHEET_NAME = 'チャット';
 
@@ -292,7 +295,7 @@ function getChatSheet() {
   var sheet = ss.getSheetByName(CHAT_SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(CHAT_SHEET_NAME);
-    sheet.appendRow(['開始日時','セッションID','氏名','メール','電話','ページURL','User-Agent','ステータス','履歴','最終更新']);
+    sheet.appendRow(['開始日時','セッションID','氏名','メール','電話','ページURL','User-Agent','ステータス','最新発言','最終更新']);
     sheet.getRange(1, 1, 1, 10).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
     sheet.setFrozenRows(1);
     sheet.setColumnWidth(9, 480);
@@ -335,31 +338,84 @@ function handleChatStart(data) {
   return { status: 'ok', sessionId: sid };
 }
 
+/* 会話ログ（1発言=1行の見やすいシート）
+   列: [日時, セッションID, 氏名, 発言者, 本文] */
+var CHAT_LOG_SHEET_NAME = '会話ログ';
+function getChatLogSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(CHAT_LOG_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(CHAT_LOG_SHEET_NAME);
+    sheet.appendRow(['日時', 'セッションID', '氏名', '発言者', '本文']);
+    sheet.getRange(1, 1, 1, 5).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+    sheet.setColumnWidth(1, 150); sheet.setColumnWidth(2, 150);
+    sheet.setColumnWidth(3, 120); sheet.setColumnWidth(4, 110); sheet.setColumnWidth(5, 560);
+  }
+  return sheet;
+}
+// 1メッセージの発言者と本文を判定（お客様 / AI / 担当者(名前)）
+function chatSpeaker(m) {
+  var c = String((m && m.content) || '');
+  if (m && m.role === 'user') return { who: 'お客様', body: c };
+  var mt = c.match(/^\[担当者(?:・([^\]]+))?\]\s*/);
+  if (mt) return { who: '担当者' + (mt[1] ? '（' + mt[1] + '）' : ''), body: c.replace(/^\[担当者(?:・[^\]]+)?\]\s*/, '') };
+  return { who: 'AI', body: c };
+}
+
 function handleChatLog(data) {
   var sid = String(data.sessionId || '');
   if (!sid) return { status: 'error', message: 'sessionId required' };
   var messages = Array.isArray(data.messages) ? data.messages : [];
-  var transcript = messages.map(function (m) {
-    var role = (m && m.role === 'user') ? 'ユーザー' : 'AI';
-    return '[' + role + '] ' + String(m && m.content || '').slice(0, 500);
-  }).join('\n───────\n');
   var status = String(data.status || '進行中');
   var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
 
+  // 「最新発言」を1行プレビュー化（索引シートを見やすく保つ）
+  var lastMsg = messages.length ? messages[messages.length - 1] : null;
+  var preview = '';
+  if (lastMsg) {
+    var sp = chatSpeaker(lastMsg);
+    preview = (sp.who + '：' + sp.body).replace(/\s+/g, ' ').slice(0, 60);
+  }
+
+  // ① 索引シート「チャット」：1セッション1行（氏名・状態・最新発言のみ）
+  var name = '';
   try {
     var sheet = getChatSheet();
     var rows = sheet.getDataRange().getValues();
+    var found = false;
     for (var i = 1; i < rows.length; i++) {
       if (rows[i][1] === sid) {
+        name = String(rows[i][2] || '');
         sheet.getRange(i + 1, 8).setValue(status);
-        sheet.getRange(i + 1, 9).setValue(transcript);
+        sheet.getRange(i + 1, 9).setValue(preview);   // 全文ではなく最新発言のみ
         sheet.getRange(i + 1, 10).setValue(ts);
-        return { status: 'ok' };
+        found = true;
+        break;
       }
     }
-    // 該当セッションなし → 新規追加
-    sheet.appendRow([ts, sid, '', '', '', '', '', status, transcript, ts]);
-  } catch (e) { Logger.log('handleChatLog: ' + e.message); }
+    if (!found) sheet.appendRow([ts, sid, '', '', '', '', '', status, preview, ts]);
+  } catch (e) { Logger.log('handleChatLog index: ' + e.message); }
+
+  // ② 会話ログシート：まだ書き込んでいない発言だけを1行ずつ追記（重複防止）
+  try {
+    var logSheet = getChatLogSheet();
+    var logged = 0;
+    var lr = logSheet.getLastRow();
+    if (lr > 1) {
+      var sidCol = logSheet.getRange(2, 2, lr - 1, 1).getValues();
+      for (var j = 0; j < sidCol.length; j++) { if (String(sidCol[j][0]) === sid) logged++; }
+    }
+    if (messages.length > logged) {
+      var toAppend = messages.slice(logged).map(function (m) {
+        var sp = chatSpeaker(m);
+        return [ts, sid, name, sp.who, sp.body.slice(0, 2000)];
+      });
+      if (toAppend.length) {
+        logSheet.getRange(logSheet.getLastRow() + 1, 1, toAppend.length, 5).setValues(toAppend);
+      }
+    }
+  } catch (e) { Logger.log('handleChatLog log: ' + e.message); }
 
   return { status: 'ok' };
 }
@@ -502,8 +558,25 @@ function handleChatHandoff(data) {
    ・担当者はそのSlackスレッドに返信
    ・ブラウザが action=chatreplies をポーリングし、GASが
      conversations.replies を Bot Token で読み、担当者の返信のみ返す
+   ・お客様の発言は buymo_chat_user_msg で同じスレッドへ転送（往復完結）
    ============================================================ */
 var CHAT_THREAD_SHEET = 'チャットスレッド';
+
+// お客様の発言を該当セッションのSlackスレッドへ転送（担当者対応中のみ）
+function handleChatUserMsg(data) {
+  var sid  = String(data.sessionId || '');
+  var text = String(data.text || '').slice(0, 2000);
+  if (!sid || !text) return { status: 'error', message: 'sessionId and text required' };
+  try {
+    var th = lookupChatThread(sid);
+    if (th && th.ts) {
+      slackBotPost('🙋 お客様：\n' + text, th.ts);
+      return { status: 'ok', posted: true };
+    }
+  } catch (e) { Logger.log('handleChatUserMsg: ' + e.message); }
+  // スレッド未確立（営業時間外など）→ 転送先なし。履歴はブラウザ側の chat_log で保存される
+  return { status: 'ok', posted: false };
+}
 
 function slackBotPost(text, threadTs) {
   var token = getProp('SLACK_BOT_TOKEN');
