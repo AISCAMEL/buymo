@@ -6,7 +6,7 @@
    ============================================================ */
 (function () {
   'use strict';
-  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbw1ccE2LLDDXBO0NQFunlFSM5fEd3tXlH62upLexy-6NQtjPvq4CYRrGJ8L5rqzng2AwA/exec';
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
   var STAGES = ['新規受付', '査定中', '査定額提示', '商談中', '契約', '入金待ち', '完了'];
   var EKEY = 'buymo_member_email', NKEY = 'buymo_member_name';
   var CKEY = 'buymo_member_cases'; // ローカル保存の新規案件 { email: [ ...cases ] }
