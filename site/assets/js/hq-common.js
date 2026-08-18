@@ -6,7 +6,7 @@
    ============================================================ */
 window.HQ = (function () {
   'use strict';
-  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbw1ccE2LLDDXBO0NQFunlFSM5fEd3tXlH62upLexy-6NQtjPvq4CYRrGJ8L5rqzng2AwA/exec';
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
   var STAGES = ['新規受付', '査定中', '商談中', '後追い', '契約', '入金待ち', '完了', '失注'];
   var WON = ['契約', '入金待ち', '完了'];
   var CKEY = 'buymo_cases', SKEY = 'buymo_stores';

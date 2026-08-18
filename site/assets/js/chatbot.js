@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var GAS  = 'https://script.google.com/macros/s/AKfycbw1ccE2LLDDXBO0NQFunlFSM5fEd3tXlH62upLexy-6NQtjPvq4CYRrGJ8L5rqzng2AwA/exec';
+  var GAS  = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
   var MODE = (window.BUYMO_BOT_MODE === 'partner') ? 'partner' : 'user';
   var history = [];
   var STORAGE_KEY = 'buymoBotHistory';
