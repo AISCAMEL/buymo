@@ -382,19 +382,31 @@ function handleChatLog(data) {
   var name = '';
   try {
     var sheet = getChatSheet();
+    ensureChatCaseCol(sheet);              // 「案件ID」列(11)を用意
     var rows = sheet.getDataRange().getValues();
-    var found = false;
+    var found = false, matchRow = -1, cEmail = '', cPhone = '', existingCaseId = '';
     for (var i = 1; i < rows.length; i++) {
       if (rows[i][1] === sid) {
         name = String(rows[i][2] || '');
+        cEmail = String(rows[i][3] || '');
+        cPhone = String(rows[i][4] || '');
+        existingCaseId = String(rows[i][10] || '');
         sheet.getRange(i + 1, 8).setValue(status);
         sheet.getRange(i + 1, 9).setValue(preview);   // 全文ではなく最新発言のみ
         sheet.getRange(i + 1, 10).setValue(ts);
         found = true;
+        matchRow = i + 1;
         break;
       }
     }
     if (!found) sheet.appendRow([ts, sid, '', '', '', '', '', status, preview, ts]);
+    // 1発言以上の見込み客を案件ボードへ反映（会話履歴を案件メモへ転記）
+    if (found) {
+      try {
+        var caseId = mergeChatIntoCase(name, cEmail, cPhone, messages, existingCaseId);
+        if (caseId && caseId !== existingCaseId) sheet.getRange(matchRow, 11).setValue(caseId);
+      } catch (e2) { Logger.log('mergeChatIntoCase call: ' + e2.message); }
+    }
   } catch (e) { Logger.log('handleChatLog index: ' + e.message); }
 
   // ② 会話ログシート：まだ書き込んでいない発言だけを1行ずつ追記（重複防止）
@@ -418,6 +430,73 @@ function handleChatLog(data) {
   } catch (e) { Logger.log('handleChatLog log: ' + e.message); }
 
   return { status: 'ok' };
+}
+
+// チャットシートに「案件ID」列(11列目)が無ければ追加
+function ensureChatCaseCol(sheet) {
+  try {
+    var head = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 10)).getValues()[0];
+    if (head.indexOf('案件ID') < 0) {
+      sheet.getRange(1, 11).setValue('案件ID')
+        .setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    }
+  } catch (e) { Logger.log('ensureChatCaseCol: ' + e.message); }
+}
+
+/* チャットの見込み客（名前＋メール入力済み・1発言以上）を案件ボードに反映。
+   会話履歴を案件メモに転記する。
+   ・既に紐づけ済み → その案件メモのチャット履歴ブロックを更新
+   ・同一メールの未完了案件があれば合流（初回問い合わせに転記）
+   ・無ければ新規案件（流入元「チャット」）を作成
+   戻り値: 紐づけた案件ID（対象外なら ''） */
+function mergeChatIntoCase(name, email, phone, messages, existingCaseId) {
+  email = String(email || '').trim();
+  if (!email) return '';                 // 連絡先メール必須
+  if (isTestEmail(email)) return '';     // 管理者テストは除外
+  var userMsgs = 0;
+  for (var k = 0; k < messages.length; k++) { if (messages[k] && messages[k].role === 'user') userMsgs++; }
+  if (userMsgs < 1) return '';           // 1発言以上のみ案件化
+
+  // messages から会話履歴テキストを生成（話者ラベル付き）
+  var transcript = messages.map(function (m) {
+    var sp = chatSpeaker(m);
+    return sp.who + '：' + String(sp.body || '').slice(0, 500);
+  }).join('\n');
+
+  var sheet = getCaseSheet();
+  var chatBlock = '=== チャット履歴 ===\n' + String(transcript || '').slice(0, 4000);
+  var target = email.toLowerCase();
+  var rows = sheet.getDataRange().getValues();
+
+  function writeMemoBlock(rowIdx) {
+    var memo = String(rows[rowIdx][9] || '');
+    var cleaned = memo.replace(/=== チャット履歴 ===[\s\S]*$/, '').replace(/\s+$/, '');
+    sheet.getRange(rowIdx + 1, 10).setValue((cleaned ? cleaned + '\n' : '') + chatBlock);
+  }
+
+  // 既に紐づけ済みの案件があれば、その案件のメモを更新
+  if (existingCaseId) {
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === existingCaseId) { writeMemoBlock(i); return existingCaseId; }
+    }
+    // 案件が見つからない（削除済み等）→ 下で作り直す
+  }
+
+  // 同一メールの最古の未完了案件に合流（初回問い合わせに転記）
+  for (var j = 1; j < rows.length; j++) {
+    if (String(rows[j][4] || '').toLowerCase() !== target) continue;
+    var st = String(rows[j][7] || '');
+    if (st === '完了' || st === '失注' || st === '見送り') continue;
+    writeMemoBlock(j);
+    if (!rows[j][3] && phone) sheet.getRange(j + 1, 4).setValue(phone); // 電話空なら補完
+    return String(rows[j][0] || '');
+  }
+
+  // 一致なし → 新規案件を作成（流入元「チャット」）
+  var ts = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+  var id = nextCaseId();
+  sheet.appendRow([id, ts, name || '', phone || '', email, '', '', '新規受付', 0, chatBlock, 'チャット']);
+  return id;
 }
 
 
