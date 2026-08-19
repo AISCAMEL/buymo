@@ -226,7 +226,7 @@ function doGet(e) {
     if (action === 'materials') return jsonOut(getMaterialsData());                    // NEW: アカデミーPDF資料（共有）
     if (action === 'sales')  return jsonOut(getSaleApplications());                    // NEW: 売却申請一覧（本部用）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
-    if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '')); // NEW: ログイン可否判定
+    if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
     if (action === 'partners') return jsonOut(getPartners()); // NEW: 加盟店アカウント一覧（本部）
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
@@ -1514,51 +1514,101 @@ function winbackBody(name, n) {
 
 // ログイン可否判定: そのメールで問い合わせ/案件/リードが1件でもあれば許可
 // (査定のお申し込みが無い第三者のログインを防ぐ)
-function authCheck(email) {
+// 電話番号の下4桁だけを取り出す
+function last4Digits(s) {
+  var d = String(s || '').replace(/\D/g, '');
+  return d.length >= 4 ? d.slice(-4) : d;
+}
+// 指定メールに紐づく登録電話番号を各シートから集める
+function collectPhonesForEmail(email) {
+  var e = String(email || '').trim().toLowerCase();
+  var phones = [];
+  if (!e) return phones;
+  try {
+    var ss = getSS();
+    var specs = [
+      { name: CASE_SHEET_NAME,   emailH: 'メール', phoneH: '電話' },
+      { name: MEMBER_CASE_SHEET, emailH: 'メール', phoneH: '電話番号' },
+      { name: SHEET_NAME,        emailH: 'メール', phoneH: '電話' }
+    ];
+    specs.forEach(function (sp) {
+      var sh = ss.getSheetByName(sp.name);
+      if (!sh) return;
+      var last = sh.getLastRow();
+      if (last < 2) return;
+      var head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+      var ec = head.indexOf(sp.emailH), pc = head.indexOf(sp.phoneH);
+      if (ec < 0 || pc < 0) return;
+      var rows = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+      rows.forEach(function (r) {
+        if (String(r[ec] || '').trim().toLowerCase() === e) {
+          var ph = String(r[pc] || '');
+          if (ph) phones.push(ph);
+        }
+      });
+    });
+  } catch (er) { Logger.log('collectPhonesForEmail: ' + er.message); }
+  return phones;
+}
+
+// ログイン可否判定
+//  ID = メールアドレス / パスワード = 登録携帯番号の下4桁
+//  ・該当メールの申込レコードが無ければ not_found
+//  ・登録電話がある場合は下4桁一致を必須（不一致= badpw / 未入力= need_pw）
+//  ・電話未登録のレコードは照合不能のためメール確認のみで許可（ロックアウト回避）
+function authCheck(email, pw) {
   var e = String(email || '').trim().toLowerCase();
   if (!e) return { ok: false, reason: 'no_email' };
   // 管理者テストメールは常に許可（動作確認用）
   if (isTestEmail(e)) return { ok: true, test: true };
+
+  var hasRecord = false;
   try {
     // 統合案件（案件 + マイページ案件）を確認
-    if (getMyCases(email).length > 0) return { ok: true };
-    // リードシート（問い合わせ受付）も確認
+    if (getMyCases(email).length > 0) hasRecord = true;
     var ss = getSS();
-    var lead = ss.getSheetByName(LEAD_SHEET_NAME);
-    if (lead) {
-      var last = lead.getLastRow();
-      if (last >= 2) {
+    // リードシート（問い合わせ受付）
+    if (!hasRecord) {
+      var lead = ss.getSheetByName(LEAD_SHEET_NAME);
+      if (lead && lead.getLastRow() >= 2) {
         var head = lead.getRange(1, 1, 1, lead.getLastColumn()).getValues()[0];
         var col = head.indexOf('メール');
         if (col >= 0) {
-          var vals = lead.getRange(2, col + 1, last - 1, 1).getValues();
+          var vals = lead.getRange(2, col + 1, lead.getLastRow() - 1, 1).getValues();
           for (var i = 0; i < vals.length; i++) {
-            if (String(vals[i][0] || '').trim().toLowerCase() === e) return { ok: true };
+            if (String(vals[i][0] || '').trim().toLowerCase() === e) { hasRecord = true; break; }
           }
         }
       }
     }
-    // 問い合わせシートも確認
-    var cont = ss.getSheetByName(SHEET_NAME);
-    if (cont) {
-      var last2 = cont.getLastRow();
-      if (last2 >= 2) {
+    // 問い合わせシート
+    if (!hasRecord) {
+      var cont = ss.getSheetByName(SHEET_NAME);
+      if (cont && cont.getLastRow() >= 2) {
         var head2 = cont.getRange(1, 1, 1, cont.getLastColumn()).getValues()[0];
         var col2 = head2.indexOf('メール');
         if (col2 >= 0) {
-          var vals2 = cont.getRange(2, col2 + 1, last2 - 1, 1).getValues();
+          var vals2 = cont.getRange(2, col2 + 1, cont.getLastRow() - 1, 1).getValues();
           for (var j = 0; j < vals2.length; j++) {
-            if (String(vals2[j][0] || '').trim().toLowerCase() === e) return { ok: true };
+            if (String(vals2[j][0] || '').trim().toLowerCase() === e) { hasRecord = true; break; }
           }
         }
       }
     }
   } catch (err) {
-    // 判定でエラーが出た場合は安全側に倒さず、ログを残して許可（UX優先・シート障害時のロックアウト回避）
+    // シート障害等でのロックアウト回避（UX優先）
     Logger.log('authCheck error: ' + err.message);
     return { ok: true, degraded: true };
   }
-  return { ok: false, reason: 'not_found' };
+  if (!hasRecord) return { ok: false, reason: 'not_found' };
+
+  // パスワード（登録携帯 下4桁）照合
+  var pin = last4Digits(pw);
+  var pins = collectPhonesForEmail(email).map(last4Digits).filter(function (p) { return p && p.length === 4; });
+  if (pins.length === 0) return { ok: true, nophone: true }; // 電話未登録 → 照合不能なので許可
+  if (!pin || pin.length < 4) return { ok: false, reason: 'need_pw' };
+  if (pins.indexOf(pin) >= 0) return { ok: true };
+  return { ok: false, reason: 'badpw' };
 }
 
 /* ============================================================
