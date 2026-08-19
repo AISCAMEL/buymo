@@ -99,6 +99,8 @@
   function show(email) {
     loginView.style.display = 'none';
     dashView.style.display = 'block';
+    var lo = document.getElementById('memberLogout');
+    if (lo) lo.style.display = 'inline-block';   // ログイン中はログアウトを表示
     var name = localStorage.getItem(NKEY) || '';
     document.getElementById('memberName').textContent = (name || email) + ' 様';
     document.getElementById('memberEmail').textContent = email;
