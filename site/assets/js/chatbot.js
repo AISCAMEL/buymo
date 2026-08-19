@@ -15,6 +15,8 @@
   // 事前ゲート（連絡先収集）用
   var CONTACT_KEY = 'buymoBotContact';   // { name, email, phone }
   var SESSION_KEY = 'buymoBotSession';   // sessionId (per browser session)
+  var HUMAN_KEY   = 'buymoBotHuman';     // 担当者対応中フラグ（リロードでも維持）
+  var LASTREPLY_KEY = 'buymoBotLastReply'; // 既読の担当者返信ts（再表示防止）
   var contactInfo = null;
   var sessionId   = '';
   try {
@@ -447,6 +449,7 @@
       done = true;
       clearTimeout(timer);
       try { delete window[cbName]; } catch(e) {}
+      try { if (s && s.parentNode) s.parentNode.removeChild(s); } catch(e) {} // JSONPノードを毎回除去（DOM蓄積防止）
       cb(answer || null);
     }
 
@@ -480,7 +483,8 @@
   // 「担当者に相談」ボタンは “会話が進んでも解決しない時だけ” 表示する
   var userMsgCount = 0;   // ユーザー発言数
   var fallbackCount = 0;  // AIが答えられなかった回数
-  var humanMode = false;  // 担当者(人)が対応中＝AIは黙り、発言はSlackへ転送
+  // 担当者(人)が対応中＝AIは黙り、発言はSlackへ転送。リロードでも維持する
+  var humanMode = (function () { try { return sessionStorage.getItem(HUMAN_KEY) === '1'; } catch (e) { return false; } })();
   var MSG_THRESHOLD = 5;      // これ以上やりとりが続いたら提示
   var FALLBACK_THRESHOLD = 2; // AIがこの回数答えられなかったら提示
   function revealHandoff(reason) {
@@ -657,11 +661,17 @@
       }
       contactInfo = { name: name, email: email, phone: phone };
       sessionId   = newSessionId();
+      // 新しい会話はAIモードから開始（前回の担当者対応状態を持ち越さない）
+      humanMode = false;
+      if (handoffPollTimer) { clearInterval(handoffPollTimer); handoffPollTimer = null; }
       try {
         // セッション単位で保持（永続化しない＝次回セッションでは再度ゲート表示）
         sessionStorage.setItem(CONTACT_KEY, JSON.stringify(contactInfo));
         sessionStorage.setItem(SESSION_KEY, sessionId);
+        sessionStorage.removeItem(HUMAN_KEY);
+        sessionStorage.removeItem(LASTREPLY_KEY);
       } catch (er) {}
+      lastReplyTs = 0;
       // GAS へ即通知 (fire-and-forget)
       fireAndForget({
         type: 'buymo_chat_start',
@@ -696,6 +706,8 @@
         try { sessionStorage.setItem(SESSION_KEY, sessionId); } catch (e) {}
       }
       if (!log.children.length) setMode(MODE);
+      // 担当者対応中のまま再訪／リロードした場合はポーリングを再開
+      if (humanMode && sessionId) startHandoffPolling();
       setTimeout(function(){ input.focus(); }, 100);
     }
     hideHint();
@@ -707,6 +719,8 @@
     panel.hidden = true;
     root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'false');
     clearIdleTimer();
+    // 閉じている間はポーリング停止（再開は openPanel で）
+    if (handoffPollTimer) { clearInterval(handoffPollTimer); handoffPollTimer = null; }
   }
   // パネル内の #アンカーやCTAを押したら、パネル閉じて対象要素へスクロール
   panel.addEventListener('click', function (e) {
@@ -862,6 +876,7 @@
         });
         if (biz) {
           humanMode = true;  // 以降お客様の発言はSlackスレッドへ転送（AIは黙る）
+          try { sessionStorage.setItem(HUMAN_KEY, '1'); } catch (e) {} // リロードでも維持
           addMsg('bot', '担当者におつなぎしました。ここから先は担当者が直接ご返信します。\n\nこのチャット画面にそのままご返信いただけます（メッセージは担当者に届きます）。');
           startHandoffPolling();  // 担当者の返信をポーリング取得
         } else {
@@ -873,7 +888,8 @@
   }
 
   // 担当者(Slack)からの返信を取得して画面に表示するポーリング（Phase 6）
-  var handoffPollTimer = null, lastReplyTs = 0;
+  var handoffPollTimer = null;
+  var lastReplyTs = (function () { try { return parseFloat(sessionStorage.getItem(LASTREPLY_KEY) || '0') || 0; } catch (e) { return 0; } })();
   function startHandoffPolling() {
     if (handoffPollTimer) return;
     var POLL_MS = 5000;
@@ -886,6 +902,7 @@
           res.replies.forEach(function (r) {
             if (r.ts && r.ts > lastReplyTs) {
               lastReplyTs = r.ts;
+              try { sessionStorage.setItem(LASTREPLY_KEY, String(lastReplyTs)); } catch (e) {} // 既読位置を保持
               addMsg('bot', '👤 ' + (r.by || '担当者') + '：\n' + r.text);
               // 担当者の返信も履歴に残し、スプレッドへ全文保存
               history.push({ role: 'assistant', content: '[担当者' + (r.by ? '・' + r.by : '') + '] ' + r.text });
@@ -903,11 +920,10 @@
     }, POLL_MS);
   }
 
-  // Escキーで閉じる
+  // Escキーで閉じる（履歴保存・タイマー停止も行うため closePanel を通す）
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape' && !panel.hidden) {
-      panel.hidden = true;
-      root.querySelector('.cbot-launch').setAttribute('aria-expanded', 'false');
+      closePanel();
     }
   });
 

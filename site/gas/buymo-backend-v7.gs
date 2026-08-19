@@ -274,6 +274,8 @@ function doPost(e) {
     if (data.type === 'community')        return jsonOut(saveCommunityPost(data));  // NEW: コミュニティ投稿
     if (data.type === 'community_like')   return jsonOut(likeCommunityPost(data.id)); // NEW: いいね
     if (data.type === 'sale_apply')       return jsonOut(handleSaleApplication(data)); // NEW: 加盟店→本部 売却申請
+    if (data.type === 'followup')         return jsonOut(handleFollowup(data));       // NEW: 案件の後追い履歴（お問い合わせ処理に誤流入させない）
+    if (data.type === 'store')            return jsonOut(handleStore(data));          // NEW: 店舗レジストリ保存（同上）
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -1825,6 +1827,61 @@ function getSaleSheet() {
     sheet.setFrozenRows(1);
   }
   return sheet;
+}
+
+/* ============================================================
+   案件の後追い履歴（hq-common postFollowup）
+   Sheet「後追い履歴」列: [記録日時, 実施日時, 案件ID, フォローID, テンプレ, メッセージ]
+   ※ ハンドラが無いと handleContact に誤流入し、空の案件やSlack通知が発生するため専用化
+   ============================================================ */
+var FOLLOWUP_SHEET_NAME = '後追い履歴';
+function handleFollowup(data) {
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName(FOLLOWUP_SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(FOLLOWUP_SHEET_NAME);
+      sheet.appendRow(['記録日時', '実施日時', '案件ID', 'フォローID', 'テンプレ', 'メッセージ']);
+      sheet.getRange(1, 1, 1, 6).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+      sheet.setFrozenRows(1);
+    }
+    var now = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+    sheet.appendRow([now, String(data.at || ''), String(data.caseId || ''), String(data.fuId || ''),
+      String(data.template || ''), String(data.msg || '').slice(0, 2000)]);
+    return { status: 'ok' };
+  } catch (e) { Logger.log('handleFollowup: ' + e.message); return { status: 'error', message: e.message }; }
+}
+
+/* ============================================================
+   店舗レジストリ（hq-common postStore）— 店舗名でupsert
+   Sheet「店舗」列: [店舗名, エリア, 電話, メール, Slack, ステータス, 更新日時]
+   ============================================================ */
+var STORE_SHEET_NAME = '店舗';
+function handleStore(data) {
+  try {
+    var ss = getSS();
+    var sheet = ss.getSheetByName(STORE_SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(STORE_SHEET_NAME);
+      sheet.appendRow(['店舗名', 'エリア', '電話', 'メール', 'Slack', 'ステータス', '更新日時']);
+      sheet.getRange(1, 1, 1, 7).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+      sheet.setFrozenRows(1);
+    }
+    var name = String(data.name || '').trim();
+    if (!name) return { status: 'error', message: 'name required' };
+    var now = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+    var row = [name, String(data.area || ''), String(data.tel || ''), String(data.email || ''),
+      String(data.slack || ''), String(data.status || ''), now];
+    var last = sheet.getLastRow();
+    if (last >= 2) {
+      var names = sheet.getRange(2, 1, last - 1, 1).getValues();
+      for (var i = 0; i < names.length; i++) {
+        if (String(names[i][0]).trim() === name) { sheet.getRange(i + 2, 1, 1, 7).setValues([row]); return { status: 'ok', updated: true }; }
+      }
+    }
+    sheet.appendRow(row);
+    return { status: 'ok' };
+  } catch (e) { Logger.log('handleStore: ' + e.message); return { status: 'error', message: e.message }; }
 }
 
 // 加盟店からの売却申請を記録し、本部へメール通知
