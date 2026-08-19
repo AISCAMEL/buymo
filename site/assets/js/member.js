@@ -365,30 +365,28 @@
     } catch (e) {}
   }
 
-  // 申込済みメールか確認（JSONP）。ENDPOINT未設定時は素通り（デモ）
-  function authCheck(email, cb) {
+  // ログイン可否確認（JSONP）。ID=メール / PW=携帯下4桁。ENDPOINT未設定時は素通り（デモ）
+  function authCheck(email, pw, cb) {
     if (!ENDPOINT) { cb({ ok: true, demo: true }); return; }
     var done = false;
     var cbName = '__authcb_' + Date.now();
+    var s = null;
+    function fin(res) {
+      if (done) return; done = true;
+      clearTimeout(timer);
+      try { delete window[cbName]; } catch (e) {}
+      try { if (s && s.parentNode) s.parentNode.removeChild(s); } catch (e) {}
+      cb(res);
+    }
     var timer = setTimeout(function () {
-      if (done) return; done = true;
-      try { delete window[cbName]; } catch (e) {}
       // タイムアウト時は安全側でなく素通り（シート障害等でのロックアウト回避）
-      cb({ ok: true, degraded: true });
+      fin({ ok: true, degraded: true });
     }, 8000);
-    window[cbName] = function (res) {
-      if (done) return; done = true;
-      clearTimeout(timer);
-      try { delete window[cbName]; } catch (e) {}
-      cb(res || { ok: false });
-    };
-    var s = document.createElement('script');
-    s.src = ENDPOINT + '?action=authcheck&email=' + encodeURIComponent(email) + '&callback=' + cbName;
-    s.onerror = function () {
-      if (done) return; done = true;
-      clearTimeout(timer);
-      cb({ ok: true, degraded: true });
-    };
+    window[cbName] = function (res) { fin(res || { ok: false }); };
+    s = document.createElement('script');
+    s.src = ENDPOINT + '?action=authcheck&email=' + encodeURIComponent(email) +
+            '&pw=' + encodeURIComponent(pw || '') + '&callback=' + cbName;
+    s.onerror = function () { fin({ ok: true, degraded: true }); };
     document.body.appendChild(s);
   }
 
@@ -399,20 +397,31 @@
       e.preventDefault();
       var email = document.getElementById('mEmail').value.trim();
       var name = document.getElementById('mName').value.trim();
+      var passEl = document.getElementById('mPass');
+      var pw = passEl ? passEl.value.replace(/\D/g, '') : '';
       var errEl = document.getElementById('mErr');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         errEl.textContent = 'メールアドレスを正しく入力してください';
+        return;
+      }
+      if (pw.length !== 4) {
+        errEl.textContent = 'パスワード（ご登録の携帯番号 下4桁）を入力してください';
+        if (passEl) passEl.focus();
         return;
       }
       var btn = f.querySelector('button[type="submit"]');
       var btnText = btn ? btn.textContent : '';
       if (btn) { btn.disabled = true; btn.textContent = '確認しています…'; }
       errEl.textContent = '';
-      authCheck(email, function (res) {
+      authCheck(email, pw, function (res) {
         if (btn) { btn.disabled = false; btn.textContent = btnText; }
         if (res && res.ok) {
           try { localStorage.setItem(EKEY, email); if (name) localStorage.setItem(NKEY, name); } catch (e2) {}
           show(email);
+        } else if (res && (res.reason === 'badpw' || res.reason === 'need_pw')) {
+          errEl.innerHTML = 'パスワード（ご登録の携帯番号 下4桁）が一致しません。<br>' +
+            'お申し込み時にご登録いただいた携帯番号の下4桁をご確認ください。';
+          if (passEl) { passEl.value = ''; passEl.focus(); }
         } else {
           errEl.innerHTML = 'このメールアドレスでの査定のお申し込みが確認できませんでした。<br>' +
             'お申し込みがまだの方は、先に<a href="index.html#form">お問い合わせフォーム</a>からお申し込みください。<br>' +
