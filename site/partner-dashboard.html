@@ -134,7 +134,7 @@
   var STAGES = ['新規受付','査定中','商談中','契約','入金待ち','完了'];
 
   // ウェルカムメッセージ
-  var sess = (window.AUTH && AUTH.session) ? AUTH.session() : null;
+  var sess = (window.AUTH && AUTH.get) ? AUTH.get() : null;
   var storeName = sess ? (sess.name || sess.email || '加盟店') : '加盟店';
   document.getElementById('welcomeMsg').textContent = storeName + ' ダッシュボード';
   document.getElementById('storeLabel').textContent = storeName;
@@ -198,7 +198,7 @@
         '<span class="p-saved" id="saved-' + HQ.esc(c.id) + '">保存</span></td>' +
         '<td>' + (c.amount ? (Number(c.amount)||0).toLocaleString() : '—') + '</td>' +
         '<td style="max-width:180px;font-size:12px;color:var(--text-sub)">' + HQ.esc((c.memo||'').slice(0,60)) + '</td>' +
-        '<td><a href="hq-leads.html" style="font-size:12px;color:var(--green);font-weight:700;">詳細</a></td>' +
+        '<td><a href="hq.html?role=partner" style="font-size:12px;color:var(--green);font-weight:700;">詳細</a></td>' +
         '</tr>';
     }).join('');
 

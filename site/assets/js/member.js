@@ -287,22 +287,38 @@
 
   /* ---- 意思決定の送信 ---- */
   function submitDecision(caseId, decision, reason) {
+    // 二重送信防止：この案件の意思決定ボタンを即無効化
+    var blk = null;
+    try { blk = document.querySelector('.mp-decide[data-caseid="' + caseId + '"]'); } catch (e) {}
+    if (blk) blk.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+
     var email = '';
     try { email = localStorage.getItem(EKEY) || ''; } catch (e) {}
     var payload = { type: 'buymo_case_decision', caseId: caseId, email: email, decision: decision, reason: reason || '' };
-    if (ENDPOINT) {
-      fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) }).catch(function () {});
-    }
     if (window.BuymoGA) window.BuymoGA.track('case_decision', { decision: decision });
-    // 楽観的にUI更新
-    if (decision === 'sell') {
-      alert('売却するを承りました。担当より手続きのご案内をいたします。');
-    } else if (decision === 'renegotiate') {
-      alert('再査定のご相談を承りました。担当より改めてご連絡いたします。');
-    } else {
-      alert('ご回答ありがとうございました。またのご利用をお待ちしております。');
+
+    function okMsg() {
+      if (decision === 'sell') {
+        alert('売却するを承りました。担当より手続きのご案内をいたします。');
+      } else if (decision === 'renegotiate') {
+        alert('再査定のご相談を承りました。担当より改めてご連絡いたします。');
+      } else {
+        alert('ご回答ありがとうございました。またのご利用をお待ちしております。');
+      }
+      setTimeout(function () { loadCases(email); }, 600);
     }
-    setTimeout(function () { loadCases(email); }, 600);
+    function failMsg() {
+      alert('送信に失敗しました。通信環境をご確認のうえ、もう一度お試しください。');
+      if (blk) blk.querySelectorAll('button').forEach(function (x) { x.disabled = false; });
+    }
+
+    if (ENDPOINT) {
+      fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) })
+        .then(function () { okMsg(); })
+        .catch(function () { failMsg(); });
+    } else {
+      okMsg();
+    }
   }
 
   /* ---- 見送り理由モーダル ---- */
@@ -321,7 +337,8 @@
   var saved = '';
   try { saved = localStorage.getItem(EKEY) || ''; } catch (e) {}
   var pe = qp().get('email');
-  if (pe) { try { localStorage.setItem(EKEY, pe); } catch (e) {} saved = pe; }
+  // ?email= は自動ログインさせず、メール欄へのプリフィルのみ（他人のメールで案件を閲覧されるのを防ぐ）
+  if (pe) { try { var _meq = document.getElementById('mEmail'); if (_meq && !_meq.value) _meq.value = pe; } catch (e) {} }
 
   // ログイン画面：トップで入力済みなら name/email をプリフィル
   (function prefillLogin() {

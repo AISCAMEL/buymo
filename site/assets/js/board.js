@@ -7,8 +7,23 @@
   'use strict';
   var STAGES = HQ.STAGES;
   var qs = new URLSearchParams(location.search);
-  var role = qs.get('role') || localStorage.getItem('buymo_role') || 'hq';
-  var who = qs.get('who') || localStorage.getItem('buymo_who') || '';
+  // 表示ロールは「ログイン中のセッション」から決める（URLの ?role= による昇格を防ぐ）
+  var sess = (window.AUTH && AUTH.get) ? AUTH.get() : null;
+  var sessRole = sess ? sess.role : null;
+  var role, who;
+  if (sessRole === 'partner') {
+    // 加盟店：自店の担当案件のみ。URLでの role/who 変更は不可
+    role = 'partner';
+    who = (sess && sess.store) || localStorage.getItem('buymo_who') || '';
+  } else if (sessRole === 'hq') {
+    // 本部：全件。加盟店プレビュー表示と who 絞り込みのみ許可
+    role = qs.get('role') || 'hq';
+    who = qs.get('who') || '';
+  } else {
+    // セッション不明（デモ/直開き）は従来動作
+    role = qs.get('role') || localStorage.getItem('buymo_role') || 'hq';
+    who = qs.get('who') || localStorage.getItem('buymo_who') || '';
+  }
   var cases = [];
 
   var roleLabel = { hq: '本部', partner: '加盟店', member: '会員' }[role] || '本部';
