@@ -108,8 +108,8 @@ function prefPage(p, i) {
   const canonical = SITE_URL ? `${SITE_URL}/area/${p.slug}/` : `./`; // 自己参照（/area/<slug>/ から相対）
   const bcHome = SITE_URL ? `${SITE_URL}/` : `../../`;
   const bcArea = SITE_URL ? `${SITE_URL}/area/` : `../`;
-  const title = `${p.name}の車買取ならBUYMO｜${p.name}全域対応・高価買取・無料出張査定`;
-  const desc = `${p.name}で車の買取・査定ならBUYMO。${cityText}など${p.name}全域へ無料出張査定。事故車・不動車・古い車もOK。手数料無料・3営業日以内に入金で愛車を高価買取します。`;
+  const title = `${p.name}の車買取ならBUYMO｜${p.name}全域対応・高価買取・写真査定でネット完結`;
+  const desc = `${p.name}で車の買取・査定ならBUYMO。${cityText}など${p.name}全域オンライン完結で査定。事故車・不動車・古い車もOK。手数料無料・3営業日以内に入金で愛車を高価買取します。`;
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -133,7 +133,7 @@ function prefPage(p, i) {
 <link rel="stylesheet" href="${rel}assets/css/buymo.css" />
 <link rel="stylesheet" href="${rel}assets/css/buymo-area.css" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${esc(p.name)}対応","description":"${esc(p.name)}の車買取・査定。高価買取・無料出張査定・全域対応。","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"kaitori@buymo.me","areaServed":{"@type":"State","name":"${esc(p.name)}"},"address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"若葉台1丁目31-11"},"openingHours":"Mo-Fr 08:00-17:00"}
+{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${esc(p.name)}対応","description":"${esc(p.name)}の車買取・査定。高価買取・写真査定でネット完結・全域対応。","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"kaitori@buymo.me","areaServed":{"@type":"State","name":"${esc(p.name)}"},"address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"若葉台1丁目31-11"},"openingHours":"Mo-Fr 08:00-17:00"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"${bcHome}"},{"@type":"ListItem","position":2,"name":"対応エリア","item":"${bcArea}"},{"@type":"ListItem","position":3,"name":"${esc(p.name)}","item":"${esc(canonical)}"}]}
@@ -147,7 +147,7 @@ ${header(rel, 'area')}
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="${rel}index.html#top">ホーム</a><span aria-hidden="true">›</span><a href="${rel}area/">対応エリア</a><span aria-hidden="true">›</span><span>${esc(p.name)}</span></nav>
       <p class="hero-lead">${esc(p.region)}・${esc(p.name)}の車買取</p>
       <h1 id="page-title">${esc(p.name)}の車買取・査定は<span class="hl">BUYMO</span></h1>
-      <p class="page-lead">${esc(cityText)}をはじめ${esc(p.name)}全域に無料出張査定。事故車・不動車・古い車もOK。手数料0円・3営業日以内に入金で、あなたの愛車を1円でも高く買取します。</p>
+      <p class="page-lead">${esc(cityText)}をはじめ${esc(p.name)}全域に写真査定でネット完結。事故車・不動車・古い車もOK。手数料0円・3営業日以内に入金で、あなたの愛車を1円でも高く買取します。</p>
       <div class="area-cta">
         <a href="${rel}buymo-contact.html?pref=${encodeURIComponent(p.name)}" class="btn btn-primary btn-lg">無料査定を依頼</a>
         <a href="#chat" class="btn btn-tel">💬 チャットで査定</a>
@@ -158,7 +158,7 @@ ${header(rel, 'area')}
   <section class="area-intro" aria-labelledby="intro-title">
     <div class="container">
       <h2 id="intro-title" class="section-title">${esc(p.name)}での買取の特徴</h2>
-      <p class="lead-text">BUYMOは${esc(p.region)}・${esc(p.name)}にお住まいの方に向けて、ご自宅まで伺う無料の出張査定を行っています。来店不要・面倒な手続きはすべて無料代行。独自の販売ルートで中間コストを抑え、${esc(p.name)}エリアでも相場より高い査定をめざします。${esc(c[0])}・${esc(c[1])}など主要都市はもちろん、郊外・周辺地域もお気軽にご相談ください。</p>
+      <p class="lead-text">BUYMOは${esc(p.region)}・${esc(p.name)}にお住まいの方に向けて、写真を送るだけで完結するオンライン査定を行っています。来店不要・面倒な手続きはすべて無料代行。独自の販売ルートで中間コストを抑え、${esc(p.name)}エリアでも相場より高い査定をめざします。${esc(c[0])}・${esc(c[1])}など主要都市はもちろん、郊外・周辺地域もお気軽にご相談ください。</p>
     </div>
   </section>
 
@@ -174,10 +174,10 @@ ${header(rel, 'area')}
     <div class="container">
       <h2 id="reasons-title" class="section-title">${esc(p.name)}でBUYMOが選ばれる理由</h2>
       <div class="grid grid-3 reason-grid">
-        <article class="card reason-card"><div class="card-ico" aria-hidden="true">🚗</div><h3>出張査定無料</h3><p>${esc(p.name)}全域、ご指定の場所まで無料で出張。来店不要です。</p></article>
+        <article class="card reason-card"><div class="card-ico" aria-hidden="true">🚗</div><h3>写真査定でネット完結</h3><p>${esc(p.name)}全域はもちろん全国どこでもオンライン完結。来店・訪問不要です。</p></article>
         <article class="card reason-card"><div class="card-ico" aria-hidden="true">💰</div><h3>高価買取</h3><p>独自ルートで無駄を省き、${esc(p.name)}でも相場より高い査定を。</p></article>
         <article class="card reason-card"><div class="card-ico" aria-hidden="true">⚡</div><h3>丁寧・確実に入金</h3><p>書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。</p></article>
-        <article class="card reason-card"><div class="card-ico" aria-hidden="true">🆓</div><h3>手数料無料</h3><p>査定料・出張費・名義変更などの手続き代行料は一切無料。</p></article>
+        <article class="card reason-card"><div class="card-ico" aria-hidden="true">🆓</div><h3>手数料無料</h3><p>査定料・名義変更などの手続き代行料は一切無料。</p></article>
         <article class="card reason-card"><div class="card-ico" aria-hidden="true">🚧</div><h3>事故車・不動車OK</h3><p>他社で断られた車も買取可能。まずはご相談を。</p></article>
         <article class="card reason-card"><div class="card-ico" aria-hidden="true">💳</div><h3>契約後すぐ入金</h3><p>ご契約後スピーディにお振込み。お待たせしません。</p></article>
       </div>
@@ -197,8 +197,8 @@ ${header(rel, 'area')}
       <div class="faq-main">
         <h2 id="faq-title" class="section-title">${esc(p.name)}の車買取 よくある質問</h2>
         <div class="accordion">
-          <div class="acc-item"><button class="acc-q" aria-expanded="false">${esc(p.name)}のどこまで出張査定に来てくれますか？<span class="acc-toggle" aria-hidden="true">▼</span></button><div class="acc-a"><p>${esc(cityText)}など${esc(p.name)}全域に無料出張いたします。郊外や周辺地域も対応可能ですので、まずはお問い合わせください。</p></div></div>
-          <div class="acc-item"><button class="acc-q" aria-expanded="false">査定や出張に費用はかかりますか？<span class="acc-toggle" aria-hidden="true">▼</span></button><div class="acc-a"><p>査定料・出張費・手続き代行料などの手数料は一切いただきません。完全無料です。</p></div></div>
+          <div class="acc-item"><button class="acc-q" aria-expanded="false">${esc(p.name)}の対応エリアはどこまでですか？<span class="acc-toggle" aria-hidden="true">▼</span></button><div class="acc-a"><p>${esc(cityText)}など${esc(p.name)}全域はもちろん全国どこでもオンラインで対応します。郊外や周辺地域も対応可能ですので、まずはお問い合わせください。</p></div></div>
+          <div class="acc-item"><button class="acc-q" aria-expanded="false">査定に費用はかかりますか？<span class="acc-toggle" aria-hidden="true">▼</span></button><div class="acc-a"><p>査定料・手続き代行料などの手数料は一切いただきません。完全無料です。</p></div></div>
           <div class="acc-item"><button class="acc-q" aria-expanded="false">事故車や動かない車も${esc(p.name)}で買い取ってもらえますか？<span class="acc-toggle" aria-hidden="true">▼</span></button><div class="acc-a"><p>はい。修復歴のある車・不動車・水没車なども買取可能です。他社で断られた車もご相談ください。</p></div></div>
           <div class="acc-item"><button class="acc-q" aria-expanded="false">買取金額はいつ振り込まれますか？<span class="acc-toggle" aria-hidden="true">▼</span></button><div class="acc-a"><p>ご契約と必要書類の確認後、最短即日〜数営業日でご指定の口座へお振込みします。</p></div></div>
         </div>
@@ -251,7 +251,7 @@ function hubPage() {
   }).join('\n');
   const canonical = SITE_URL ? `${SITE_URL}/area/` : './'; // 自己参照（/area/ から相対）
   const title = '対応エリア一覧｜全国47都道府県の車買取ならBUYMO';
-  const desc = '車買取のBUYMOは全国47都道府県に対応。北海道から沖縄まで、お住まいの都道府県を選んで無料出張査定をご依頼ください。事故車・不動車もOK・手数料無料・3営業日以内に入金。';
+  const desc = '車買取のBUYMOは全国47都道府県に対応。北海道から沖縄まで、お住まいの都道府県を選んでオンライン査定をご依頼ください。事故車・不動車もOK・手数料無料・3営業日以内に入金。';
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -279,7 +279,7 @@ ${header(rel, 'area')}
     <div class="container">
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="${rel}index.html#top">ホーム</a><span aria-hidden="true">›</span><span>対応エリア</span></nav>
       <h1 id="page-title">全国47都道府県の<span class="hl">車買取</span>対応エリア</h1>
-      <p class="page-lead">北海道から沖縄まで、BUYMOは全国対応。お住まいの都道府県をお選びください。各エリアへ無料で出張査定に伺います。</p>
+      <p class="page-lead">北海道から沖縄まで、BUYMOは全国対応。お住まいの都道府県をお選びください。各エリアともオンライン完結で査定します。</p>
     </div>
   </section>
   <section class="area-list-section">

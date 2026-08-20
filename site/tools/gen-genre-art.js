@@ -34,7 +34,7 @@ function banner(g) {
   <circle cx="150" cy="330" r="90" fill="#ffffff" opacity="0.05"/>
   <text x="120" y="232" font-size="150" text-anchor="middle">${g.icon}</text>
   <text x="250" y="170" font-size="66" font-weight="900" fill="#ffffff" font-family="'Noto Sans JP',sans-serif">${esc(g.name)}</text>
-  <text x="252" y="228" font-size="28" font-weight="700" fill="#ffffff" opacity="0.92" font-family="'Noto Sans JP',sans-serif">BUYMO｜高価買取・無料出張査定・3営業日以内に入金</text>
+  <text x="252" y="228" font-size="28" font-weight="700" fill="#ffffff" opacity="0.92" font-family="'Noto Sans JP',sans-serif">BUYMO｜高価買取・写真査定でネット完結・3営業日以内に入金</text>
   <rect x="252" y="252" width="150" height="6" rx="3" fill="#FFD700"/>
 </svg>
 `;
