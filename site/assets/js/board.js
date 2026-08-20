@@ -381,7 +381,7 @@
           '<button class="cp-delete" id="cpDelete" style="display:none;">🗑 案件を削除</button>' +
         '</div>' +
         '<div class="cp-hist-area"><h3>対応履歴</h3>' +
-          '<div class="cp-note-add"><input id="cpNote" placeholder="対応メモを記録（例：電話で出張日程を調整）"><button id="cpNoteBtn">記録</button></div>' +
+          '<div class="cp-note-add"><input id="cpNote" placeholder="対応メモを記録（例：電話で引取り日程を調整）"><button id="cpNoteBtn">記録</button></div>' +
           '<ol class="cp-timeline" id="cpTimeline"></ol>' +
         '</div>' +
         '<div class="cp-fu-area">' +
