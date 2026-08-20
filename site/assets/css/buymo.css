@@ -219,9 +219,13 @@ img{max-width:100%;display:block;}
 .compare-table .no{color:#d1d5db;font-weight:900;font-size:18px;}
 .compare-table tbody tr:last-child th,.compare-table tbody tr:last-child td{border-bottom:none;}
 .compare-note{text-align:center;color:#aaa;font-size:13px;margin-top:16px;}
+/* 3列比較（BUYMO / 一般買取店 / ディーラー下取り）用 */
+.compare-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.compare-table tbody th{width:25%;}
 @media (max-width:767px){
   .compare{padding:48px 0;}
   .compare-table th,.compare-table td{padding:12px 8px;font-size:13px;}
+  .compare-table{min-width:600px;}
 }
 
 /* 追従CTAバー */
