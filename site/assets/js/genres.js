@@ -23,30 +23,30 @@
     ]},
     { cat: '人気車種で買取', icon: '⭐', catIco: 'cat-popular.png', items: [
       { name: 'ハイエース買取',     slug: 'hiace',       icon: '🚐', desc: '商用・キャンパーで需要大。ハイエースは高値が付きやすい。' },
-      { name: 'ランドクルーザー買取', slug: 'landcruiser', icon: '🚙', desc: 'ランクルは国内外で人気。年式不問で高価買取。' },
-      { name: 'アルファード買取',   slug: 'alphard',     icon: '🚐', desc: '高級ミニバンの代表格。グレード・装備を高評価。' },
-      { name: 'プリウス買取',       slug: 'prius',       icon: '🔋', desc: '定番ハイブリッド。台数が多くても安定査定。' },
-      { name: 'ジムニー買取',       slug: 'jimny',       icon: '🚙', desc: '高い人気で値落ちしにくい。旧型ジムニーも歓迎。' },
+      { name: 'ランドクルーザー買取', slug: 'landcruiser', icon: '🏔️', desc: 'ランクルは国内外で人気。年式不問で高価買取。' },
+      { name: 'アルファード買取',   slug: 'alphard',     icon: '👑', desc: '高級ミニバンの代表格。グレード・装備を高評価。' },
+      { name: 'プリウス買取',       slug: 'prius',       icon: '🌱', desc: '定番ハイブリッド。台数が多くても安定査定。' },
+      { name: 'ジムニー買取',       slug: 'jimny',       icon: '🧭', desc: '高い人気で値落ちしにくい。旧型ジムニーも歓迎。' },
       { name: '軽トラ買取',         slug: 'keitora',     icon: '🛻', desc: '軽トラック・農用車も需要安定。過走行でもOK。' }
     ]},
     { cat: 'タイプ・区分で買取', icon: '🚗', catIco: 'cat-type.png', items: [
-      { name: '軽自動車買取',        slug: 'kei',    icon: '🚐', desc: '人気の軽自動車を高価買取。ターボ・スライドドアも。' },
+      { name: '軽自動車買取',        slug: 'kei',    icon: '🚗', desc: '人気の軽自動車を高価買取。ターボ・スライドドアも。' },
       { name: 'SUV買取',            slug: 'suv',    icon: '🚙', desc: '需要の高いSUVを好条件で。' },
-      { name: 'ミニバン買取',        slug: 'minivan',icon: '🚐', desc: 'ファミリー需要のミニバンを高評価。' },
+      { name: 'ミニバン買取',        slug: 'minivan',icon: '👪', desc: 'ファミリー需要のミニバンを高評価。' },
       { name: 'セダン買取',          slug: 'sedan',  icon: '🚘', desc: '定番セダンも安定買取。' },
-      { name: 'トラック・商用車買取', slug: 'truck',  icon: '🚚', desc: 'トラック・バン・商用車、法人まとめ売却も。' },
-      { name: '輸入車買取',          slug: 'import', icon: '🚗', desc: 'ベンツ・BMW・アウディなど外車を専門ルートで高価買取。' },
-      { name: '高級車買取',          slug: 'luxury', icon: '🏎️', desc: 'ブランド価値を正しく評価。高級車・スポーツカーも。' },
-      { name: 'EV・ハイブリッド買取', slug: 'ev',     icon: '🔋', desc: 'バッテリー状態も加味して適正査定。' }
+      { name: 'トラック・商用車買取', slug: 'truck',  icon: '🚛', desc: 'トラック・バン・商用車、法人まとめ売却も。' },
+      { name: '輸入車買取',          slug: 'import', icon: '🌍', desc: 'ベンツ・BMW・アウディなど外車を専門ルートで高価買取。' },
+      { name: '高級車買取',          slug: 'luxury', icon: '💎', desc: 'ブランド価値を正しく評価。高級車・スポーツカーも。' },
+      { name: 'EV・ハイブリッド買取', slug: 'ev',     icon: '⚡', desc: 'バッテリー状態も加味して適正査定。' }
     ]},
     { cat: '旧車・希少車で買取', icon: '🏁', catIco: 'cat-classic.png', items: [
-      { name: '旧車買取',           slug: 'kyusha', icon: '🏁', desc: '旧車・クラシックカーは希少価値で高評価。不動でもOK。' },
-      { name: '絶版・ネオクラ買取', slug: 'zeppan', icon: '📻', desc: '絶版車・ネオクラシックも専門ルートで買取。' }
+      { name: '旧車買取',           slug: 'kyusha', icon: '🕰️', desc: '旧車・クラシックカーは希少価値で高評価。不動でもOK。' },
+      { name: '絶版・ネオクラ買取', slug: 'zeppan', icon: '🏆', desc: '絶版車・ネオクラシックも専門ルートで買取。' }
     ]},
     { cat: 'パーツ・用品買取', icon: '🔩', catIco: 'cat-parts.png', items: [
-      { name: 'アルミホイール買取', slug: 'wheel',  icon: '🛞', desc: '社外・純正アルミホイールを単体でも買取。タイヤ付きも。' },
+      { name: 'アルミホイール買取', slug: 'wheel',  icon: '⚙️', desc: '社外・純正アルミホイールを単体でも買取。タイヤ付きも。' },
       { name: 'タイヤ買取',         slug: 'tire',   icon: '🛞', desc: '夏・スタッドレス、ホイールセットも査定。' },
-      { name: 'カー用品・パーツ買取', slug: 'parts', icon: '📟', desc: 'カーナビ・エアロ・マフラー等のパーツも買取。' }
+      { name: 'カー用品・パーツ買取', slug: 'parts', icon: '🧰', desc: 'カーナビ・エアロ・マフラー等のパーツも買取。' }
     ]}
   ];
 
