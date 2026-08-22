@@ -219,7 +219,8 @@ window.HQ = (function () {
       ['board', '案件ボード', 'hq.html?role=partner'],
       ['academy', 'アカデミー', 'partner-academy.html'],
       ['scripts', 'スクリプト', 'partner-scripts.html'],
-      ['community', 'コミュニティ', 'partner-community.html']
+      ['community', 'コミュニティ', 'partner-community.html'],
+      ['guide', '使い方', 'partner-guide.html']
     ] : [
       ['dashboard', 'ダッシュボード', 'hq-dashboard.html'],
       ['board', '案件ボード', 'hq.html?role=hq'],
@@ -230,7 +231,8 @@ window.HQ = (function () {
       ['academy', 'アカデミー管理', 'hq-academy.html'],
       ['community', 'コミュニティ', 'partner-community.html'],
       ['report', '営業レポート', 'report.html'],
-      ['documents', '書類発行', 'hq-documents.html']
+      ['documents', '書類発行', 'hq-documents.html'],
+      ['guide', '使い方', 'partner-guide.html']
     ];
     el.innerHTML = items.map(function (it) {
       return '<a href="' + it[2] + '"' + (it[0] === active ? ' aria-current="page"' : '') + '>' + it[1] + '</a>';

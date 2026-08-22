@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>システムの使い方｜BUYMO 加盟店</title>
+<meta name="description" content="BUYMO 加盟店向け システム操作マニュアル。ログイン・案件ボードの見方・査定額の入力・売却申請・アカデミー・チャットの使い方をまとめた画面操作ガイド。加盟店限定。" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=20" />
+<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+<link rel="stylesheet" href="assets/css/partner-doc.css" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+
+<div class="apr-conf">🔒 加盟店限定｜システム操作マニュアルです。無断複製・転載・第三者提供を禁じます。</div>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <span class="portal-title">加盟店</span>
+    <nav class="portal-nav">
+      <a href="hq.html?role=partner">案件ボード</a>
+      <a href="partner-academy.html">アカデミー</a>
+      <a href="partner-scripts.html">スクリプト</a>
+      <a href="partner-community.html">コミュニティ</a>
+      <a href="partner-guide.html" aria-current="page">使い方</a>
+    </nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="apr-head">
+      <h1>システムの使い方<span class="tag">加盟店 画面操作ガイド</span></h1>
+      <p>BUYMO加盟店システムの<strong>画面の操作方法</strong>をまとめたマニュアルです。ログインから、案件対応・査定額の入力・売却申請までの一連の流れを、この1ページで確認できます。<br>※ 実際の<strong>業務のやり方</strong>（査定基準・出品実務）は <a href="appraisal.html">車の査定マニュアル</a>／<a href="manual.html">出品実務マニュアル</a> を参照してください。</p>
+    </div>
+
+    <div class="apr-grid">
+      <aside class="apr-side">
+        <nav class="apr-nav">
+          <a href="#login" class="active">🔑 ログイン</a>
+          <a href="#board">📋 案件ボードの見方</a>
+          <a href="#case">🗂 案件の対応</a>
+          <a href="#sale">💰 売却申請（手数料計算）</a>
+          <a href="#academy">🎓 アカデミー・資料</a>
+          <a href="#chat">💬 チャット／コミュニティ</a>
+          <a href="#faq">❓ 困ったとき</a>
+        </nav>
+      </aside>
+
+      <div>
+        <section class="panel" id="login">
+          <div class="panel-head"><h3>🔑 ログイン</h3></div>
+          <div class="panel-body">
+            <div class="flow" style="grid-template-columns:repeat(3,1fr);">
+              <div class="step"><div class="n">1</div><h4>ログインページを開く</h4><p>buymo.me/portal-login.html</p></div>
+              <div class="step"><div class="n">2</div><h4>メール＋パスワード</h4><p>本部発行の案内メールに記載</p></div>
+              <div class="step"><div class="n">3</div><h4>「加盟店でログイン」</h4><p>案件ボードが開きます</p></div>
+            </div>
+            <ul class="opt-list" style="margin-top:16px;">
+              <li><span>ログインURL</span><b>buymo.me/portal-login.html</b></li>
+              <li><span>ID</span><b>本部から届いたメールアドレス</b></li>
+              <li><span>パスワード</span><b>案内メール記載の初期パスワード</b></li>
+            </ul>
+            <div class="alert alert-info" style="margin-top:16px;">パスワードを忘れた／届いていない場合は本部（kaitori@buymo.me）へご連絡ください。本部側で再発行できます。退会手続き後はログインできません。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="board">
+          <div class="panel-head"><h3>📋 案件ボードの見方</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">ログイン後の<strong>案件ボード（hq.html?role=partner）</strong>には、あなたの店舗に割り当てられた案件がステージ別のカード（看板）で並びます。カードをクリックすると右側に詳細が開きます。</p>
+            <table class="apr-table">
+              <tr><th>ステージ</th><td>新規受付 → 査定中 → 査定額提示 → 商談中 → 契約 → 入金待ち → 完了。ドラッグまたは詳細パネルで変更できます</td></tr>
+              <tr><th>🚗 車両情報バッジ</th><td>お客様がマイページで車両情報を入力すると、カードに表示され詳細に転記されます。これを見て査定します</td></tr>
+              <tr><th>🔴 赤アラート</th><td>売却済みなのに売却申請が未提出の案件に表示されます。早めに申請してください</td></tr>
+              <tr><th>詳細パネル</th><td>お客様情報・車両情報・写真・メモ・チャット履歴を確認。査定額や担当メモもここで入力します</td></tr>
+            </table>
+            <div class="alert alert-ok" style="margin-top:16px;">お客様がAIチャットで会話した内容も「=== チャット履歴 ===」として案件メモに転記されます。査定前に目を通すと状況がつかめます。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="case">
+          <div class="panel-head"><h3>🗂 案件の対応（査定の流れ）</h3></div>
+          <div class="panel-body">
+            <div class="flow" style="grid-template-columns:repeat(4,1fr);">
+              <div class="step"><div class="n">1</div><h4>内容確認</h4><p>車両情報・写真・履歴を見る</p></div>
+              <div class="step"><div class="n">2</div><h4>査定額を入力</h4><p>詳細パネルの金額欄に記入</p></div>
+              <div class="step"><div class="n">3</div><h4>ステージ更新</h4><p>「査定額提示」へ進める</p></div>
+              <div class="step"><div class="n">4</div><h4>商談・成約</h4><p>お客様の回答に応じて対応</p></div>
+            </div>
+            <ul class="opt-list" style="margin-top:16px;">
+              <li><span>査定額の入力</span><b>詳細パネルの金額欄</b></li>
+              <li><span>対応記録（メモ）</span><b>詳細パネルのメモ欄に追記</b></li>
+              <li><span>担当の割り当て</span><b>本部が店舗を割り当て</b></li>
+              <li><span>不要な案件の削除</span><b>削除は本部のみ可能</b></li>
+            </ul>
+            <div class="alert alert-info" style="margin-top:16px;">査定額を入れて「査定額提示」にすると、お客様へ確認メールが自動送信され、マイページで「売却する／しない」を回答できるようになります。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="sale">
+          <div class="panel-head"><h3>💰 売却申請（手数料の自動計算）</h3></div>
+          <div class="panel-body">
+            <p style="margin-bottom:12px;">車を売却したら、<strong>案件の詳細パネルから「売却申請」</strong>を行います。売却方法を選ぶと本部手数料と加盟店の取り分が自動計算されます。<strong>売却方法の選択は加盟店のみ</strong>が行えます。</p>
+            <table class="apr-table">
+              <tr><th>① 買取金額</th><td>お客様から買い取った金額を入力</td></tr>
+              <tr><th>② 精算書金額</th><td>実際に精算書に出た金額（落札額）を入力</td></tr>
+              <tr><th>③ 差引き</th><td>①と②の差が自動表示（＝粗利の元）</td></tr>
+              <tr><th>直販（自社）</th><td>本部手数料は一律 30,000円（税抜）</td></tr>
+              <tr><th>オークション</th><td>出品代行10,000円＋成約手数料（粗利×5%）＋陸送費＋クレーム＋再出品を合算</td></tr>
+            </table>
+            <div class="alert alert-warn" style="margin-top:16px;">売却したら<strong>必ず売却申請を提出</strong>してください。未提出の案件はボードに🔴赤アラートが出て、本部にもアラームメールが届きます。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="academy">
+          <div class="panel-head"><h3>🎓 アカデミー・PDF資料</h3></div>
+          <div class="panel-body">
+            <ul class="opt-list">
+              <li><span>研修動画</span><b>アカデミーで視聴</b></li>
+              <li><span>PDF資料・解説</span><b>アカデミー内「📚PDF資料」</b></li>
+              <li><span>トークスクリプト</span><b>スクリプトのページ</b></li>
+              <li><span>買取の流れ・必要書類</span><b>チェックリスト</b></li>
+            </ul>
+            <div class="alert alert-ok" style="margin-top:16px;">本部が新しいPDF資料を登録すると、アカデミーの「📚PDF資料・解説」に自動で表示されます。定期的に確認してください。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="chat">
+          <div class="panel-head"><h3>💬 チャット／コミュニティ</h3></div>
+          <div class="panel-body">
+            <ul class="opt-list">
+              <li><span>加盟店AIサポート</span><b>画面右下のチャット</b></li>
+              <li><span>操作や運営の疑問</span><b>チャットで質問（該当ページのリンクを案内）</b></li>
+              <li><span>他店との情報交換</span><b>コミュニティに投稿・いいね</b></li>
+              <li><span>本部への相談</span><b>kaitori@buymo.me</b></li>
+            </ul>
+            <div class="alert alert-info" style="margin-top:16px;">チャットで解決しない・範囲外の内容は、本部（kaitori@buymo.me）へお問い合わせください。</div>
+          </div>
+        </section>
+
+        <section class="panel" id="faq">
+          <div class="panel-head"><h3>❓ 困ったとき</h3></div>
+          <div class="panel-body">
+            <table class="apr-table">
+              <tr><th>ログインできない</th><td>メール／パスワードを確認。退会済みは不可。再発行は本部へ</td></tr>
+              <tr><th>案件が表示されない</th><td>店舗への割り当て前かもしれません。本部にご確認ください</td></tr>
+              <tr><th>査定額が保存されない</th><td>通信環境を確認し、再度入力。改善しなければ本部へ</td></tr>
+              <tr><th>売却申請の金額が合わない</th><td>買取金額・精算書金額の入力を確認。諸経費（陸送等）も入力</td></tr>
+            </table>
+            <div class="alert alert-warn" style="margin-top:16px;">解決しない場合は、画面のスクリーンショットを添えて本部（kaitori@buymo.me）へご連絡ください。</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
