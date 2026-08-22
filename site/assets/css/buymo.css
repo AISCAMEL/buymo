@@ -11,6 +11,10 @@
   --green-bg:#F0FDFA;
   --orange:#0F766E;
   --orange-dark:#115E59;
+  /* 差し色：イエロー（緑ベースのアクセント。黄地の上は濃緑文字） */
+  --accent:#FFC93C;
+  --accent-dark:#F0B015;
+  --on-accent:#1C3030;
   --navy:#0F172A;
   --cream:#F8FAFC;
   --gray:#F1F5F9;
@@ -98,12 +102,12 @@ img{max-width:100%;display:block;}
   text-align:center;letter-spacing:.02em;font-family:var(--f-body);
 }
 .btn-primary{
-  background:var(--green);color:#fff;
-  box-shadow:0 4px 20px rgba(15,118,110,.28);
+  background:var(--accent);color:var(--on-accent);
+  box-shadow:0 4px 20px rgba(240,176,21,.32);
 }
 .btn-primary:hover{
-  background:var(--green-dark);transform:translateY(-2px);
-  box-shadow:0 8px 28px rgba(15,118,110,.38);
+  background:var(--accent-dark);transform:translateY(-2px);
+  box-shadow:0 8px 28px rgba(240,176,21,.42);
 }
 .btn-lg{width:260px;height:62px;font-size:18px;}
 .btn-block{width:100%;}
@@ -163,7 +167,7 @@ img{max-width:100%;display:block;}
   margin:0 0 24px;color:#fff;letter-spacing:-.02em;
 }
 .hero .hl{
-  background:linear-gradient(transparent 55%,rgba(45,212,191,.55) 55%);
+  background:linear-gradient(transparent 55%,rgba(255,201,60,.85) 55%);
   padding:0 4px;
 }
 .hero-sub{
@@ -176,7 +180,7 @@ img{max-width:100%;display:block;}
   color:#fff;font-weight:700;font-size:13px;
   padding:6px 18px;border-radius:100px;
 }
-.hero-badges li::before{content:"✓ ";color:var(--green-light);font-weight:900;}
+.hero-badges li::before{content:"✓ ";color:var(--accent);font-weight:900;}
 .hero-img-main{display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center right;border-radius:0;position:absolute;inset:0;}
 .hero-img-mascot{display:none;}
 .hero-img-cars{display:none;}
