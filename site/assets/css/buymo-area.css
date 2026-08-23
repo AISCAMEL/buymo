@@ -6,7 +6,9 @@
 /* ---- ページヘッダー共通 ---- */
 .page-hero{
   background:var(--green-dark);
-  padding:48px 0 56px;
+  min-height:420px;
+  display:flex;align-items:center;
+  padding:64px 0;
   position:relative;overflow:hidden;
 }
 .page-hero::after{
@@ -95,5 +97,6 @@
 }
 /* モバイルはさらに読みやすく */
 @media (max-width:767px){
-  .page-hero::after{background:linear-gradient(180deg,rgba(10,30,28,.55) 0%,rgba(10,30,28,.85) 100%);}
+  .page-hero{min-height:340px;padding:48px 0;}
+  .page-hero::after{background:linear-gradient(180deg,rgba(11,59,64,.55) 0%,rgba(11,59,64,.85) 100%);}
 }
