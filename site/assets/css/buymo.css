@@ -3,30 +3,34 @@
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&display=swap');
 :root{
-  --green:#0F766E;
-  --green-dark:#115E59;
-  --green-mid:#0D9488;
-  --green-light:#2DD4BF;
-  --green-pale:#CCFBF1;
-  --green-bg:#F0FDFA;
-  --orange:#0F766E;
-  --orange-dark:#115E59;
-  /* 差し色：イエロー（緑ベースのアクセント。黄地の上は濃緑文字） */
-  --accent:#FFC93C;
-  --accent-dark:#F0B015;
-  --on-accent:#1C3030;
+  /* 青緑(teal)ベース */
+  --green:#0E7C86;
+  --green-dark:#0E5A61;
+  --green-mid:#12A0AB;
+  --green-light:#5BC8D0;
+  --green-pale:#D5F0F2;
+  --green-bg:#EEFAFB;
+  --green-deep:#0B3B40;
+  --orange:#0E7C86;
+  --orange-dark:#0E5A61;
+  /* 差し色：珊瑚(coral)。珊瑚地の上は白文字 */
+  --accent:#FF6B6B;
+  --accent-dark:#E8484B;
+  --accent-wash:#FFE8E6;
+  --on-accent:#FFFFFF;
   --navy:#0F172A;
-  --cream:#F8FAFC;
-  --gray:#F1F5F9;
-  --border:#E2E8F0;
-  --text:#0F172A;
-  --text-sub:#64748B;
+  --cream:#FBFAF7;
+  --gray:#F3F7F7;
+  --border:#E4ECEC;
+  --text:#15302F;
+  --text-sub:#4E6664;
   --white:#FFFFFF;
-  --radius:12px;
-  --radius-sm:8px;
-  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --shadow-md:0 4px 16px rgba(0,0,0,.08);
-  --shadow-hover:0 8px 28px rgba(15,118,110,.16);
+  /* やわらかい角丸・影（モダン／見応えのある印象） */
+  --radius:22px;
+  --radius-sm:14px;
+  --shadow:0 2px 10px rgba(11,59,64,.06);
+  --shadow-md:0 14px 36px rgba(11,59,64,.10);
+  --shadow-hover:0 22px 52px rgba(11,59,64,.16);
   --max:1200px;
   --f-body:'Outfit','Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif;
 }
@@ -65,8 +69,8 @@ img{max-width:100%;display:block;}
 }
 .section-title strong{color:var(--green);}
 .section-title::after{
-  content:"";display:block;width:36px;height:4px;
-  background:var(--green);border-radius:2px;
+  content:"";display:block;width:44px;height:5px;
+  background:var(--accent);border-radius:3px;
   margin:16px auto 0;
 }
 .section-note{text-align:center;font-size:13px;color:#aaa;margin:-32px auto 36px;max-width:760px;}
@@ -103,11 +107,11 @@ img{max-width:100%;display:block;}
 }
 .btn-primary{
   background:var(--accent);color:var(--on-accent);
-  box-shadow:0 4px 20px rgba(240,176,21,.32);
+  box-shadow:0 10px 26px rgba(232,72,75,.34);
 }
 .btn-primary:hover{
   background:var(--accent-dark);transform:translateY(-2px);
-  box-shadow:0 8px 28px rgba(240,176,21,.42);
+  box-shadow:0 16px 34px rgba(232,72,75,.42);
 }
 .btn-lg{width:260px;height:62px;font-size:18px;}
 .btn-block{width:100%;}
@@ -145,12 +149,12 @@ img{max-width:100%;display:block;}
 .hero{
   position:relative;overflow:hidden;min-height:640px;
   display:flex;align-items:center;
-  background:linear-gradient(135deg,#0F766E 0%,#0D9488 100%);
+  background:linear-gradient(135deg,var(--green) 0%,var(--green-deep) 100%);
 }
 .hero-bg-img{display:none;}
 .hero::after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(90deg,rgba(10,30,28,.72) 0%,rgba(10,30,28,.50) 55%,rgba(10,30,28,.10) 100%);
+  background:linear-gradient(90deg,rgba(11,59,64,.74) 0%,rgba(11,59,64,.48) 52%,rgba(11,59,64,.08) 100%);
   z-index:1;
 }
 /* hero-art は .hero 直下に配置し、フルブリード背景として機能させる */
@@ -167,7 +171,7 @@ img{max-width:100%;display:block;}
   margin:0 0 24px;color:#fff;letter-spacing:-.02em;
 }
 .hero .hl{
-  background:linear-gradient(transparent 55%,rgba(255,201,60,.85) 55%);
+  background:linear-gradient(transparent 55%,rgba(255,107,107,.85) 55%);
   padding:0 4px;
 }
 .hero-sub{
@@ -218,7 +222,7 @@ img{max-width:100%;display:block;}
 .compare-table thead th{background:var(--text);color:#fff;font-size:14px;}
 .compare-table thead th.col-buymo{background:var(--green);font-size:16px;}
 .compare-table tbody th{background:var(--white);text-align:left;font-weight:700;font-size:14px;width:34%;color:var(--text);}
-.compare-table td.col-buymo{background:#F0FDFA;font-weight:700;}
+.compare-table td.col-buymo{background:var(--accent-wash);color:var(--accent-dark);font-weight:700;}
 .compare-table .yes{color:var(--green);font-weight:900;font-size:18px;}
 .compare-table .no{color:#d1d5db;font-weight:900;font-size:18px;}
 .compare-table tbody tr:last-child th,.compare-table tbody tr:last-child td{border-bottom:none;}
@@ -1070,3 +1074,26 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
   .site-header{position:static;box-shadow:none;}
   a{text-decoration:none;color:inherit;}
 }
+
+/* ============================================================
+   モダン刷新 追記ブロック（青緑×珊瑚）— 既存要素にのみ適用
+   ============================================================ */
+/* 比較表：角丸＋やわらか影、BUYMO列を珊瑚で強調 */
+.compare-table{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md);border:1px solid var(--border);}
+.compare-table thead th{background:var(--green-deep);}
+.compare-table thead th.col-buymo{background:var(--green);}
+
+/* 数字バンド：深い青緑パネル＋珊瑚アクセント（トップの stats-band） */
+.stats-band{
+  background:var(--green-deep);border-bottom:none;color:#EAF4F3;
+  max-width:var(--max);margin:0 auto;border-radius:var(--radius);
+  box-shadow:var(--shadow-md);position:relative;z-index:3;transform:translateY(-30px);
+}
+.stats-band .stat-b .num{color:#fff;}
+.stats-band .stat-b .num small{color:var(--accent);}
+.stats-band .stat-b p{color:rgba(234,244,243,.72);}
+.stats-band .stat-b{border-right-color:rgba(255,255,255,.14);}
+
+/* 特長カード：2枚目・4枚目のアイコンを珊瑚で差し色 */
+.feature-card:nth-child(2) .card-ico,
+.feature-card:nth-child(4) .card-ico{background:var(--accent-wash);color:var(--accent-dark);}
