@@ -147,7 +147,7 @@ img{max-width:100%;display:block;}
 
 /* ============ ヒーロー ============ */
 .hero{
-  position:relative;overflow:hidden;min-height:640px;
+  position:relative;overflow:hidden;min-height:720px;
   display:flex;align-items:center;
   background:linear-gradient(135deg,var(--green) 0%,var(--green-deep) 100%);
 }
@@ -1025,8 +1025,8 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
   .header-tel{order:2;}
 
   .section-title{font-size:24px;margin-bottom:28px;}
-  .hero{min-height:560px;}
-  .hero::after{background:linear-gradient(180deg,rgba(10,30,28,.55) 0%,rgba(10,30,28,.75) 100%);}
+  .hero{min-height:620px;}
+  .hero::after{background:linear-gradient(180deg,rgba(11,59,64,.55) 0%,rgba(11,59,64,.78) 100%);}
   .hero-img-main{object-position:center center;}
   .hero-inner{text-align:center;padding:64px 0;}
   .hero-copy{max-width:100%;}
