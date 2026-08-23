@@ -1,0 +1,100 @@
+/* ============================================================
+   BUYMO ホーム専用 モダン上書き — 青緑 × 珊瑚 (Teal × Coral)
+   index.html のみで buymo.css の後に読み込む。他ページは無影響。
+   ============================================================ */
+:root{
+  /* --- 青緑ベース --- */
+  --green:#0E7C86;
+  --green-dark:#0E5A61;
+  --green-mid:#12A0AB;
+  --green-light:#5BC8D0;
+  --green-pale:#D5F0F2;
+  --green-bg:#EEFAFB;
+  --green-deep:#0B3B40;
+  --orange:#0E7C86;
+  --orange-dark:#0E5A61;
+  /* --- 差し色：珊瑚（コーラル）。珊瑚地の上は白文字 --- */
+  --accent:#FF6B6B;
+  --accent-dark:#E8484B;
+  --accent-wash:#FFE8E6;
+  --on-accent:#FFFFFF;
+  /* --- 面・地色 --- */
+  --cream:#FBFAF7;
+  --gray:#F3F7F7;
+  --border:#E4ECEC;
+  --text:#15302F;
+  --text-sub:#4E6664;
+  /* --- やわらかい角丸・影（見応えのあるモダン印象） --- */
+  --radius:22px;
+  --radius-sm:14px;
+  --shadow:0 2px 10px rgba(11,59,64,.06);
+  --shadow-md:0 14px 36px rgba(11,59,64,.10);
+  --shadow-hover:0 22px 52px rgba(11,59,64,.16);
+}
+
+body{background:var(--cream);}
+
+/* ---- セクション見出し：珊瑚アンダーライン ---- */
+.section-title strong{color:var(--green);}
+.section-title::after{background:var(--accent);width:44px;height:5px;border-radius:3px;}
+.eyebrow{background:var(--green-pale);color:var(--green-dark);}
+
+/* ---- ボタン：珊瑚プライマリ ---- */
+.btn{border-radius:999px;}
+.btn-primary{
+  background:var(--accent);color:#fff;
+  box-shadow:0 10px 26px rgba(232,72,75,.34);
+}
+.btn-primary:hover{
+  background:var(--accent-dark);
+  box-shadow:0 16px 34px rgba(232,72,75,.42);
+}
+.btn-outline{color:var(--green);border-color:var(--green);}
+
+/* ---- カード：大きめ角丸・やわらかい影 ---- */
+.card{border-radius:var(--radius);box-shadow:var(--shadow);border-color:var(--border);}
+.card:hover{box-shadow:var(--shadow-hover);border-color:var(--green-light);}
+.card-ico{background:var(--green-bg);color:var(--green);border-radius:16px;}
+.feature-card:nth-child(2) .card-ico,
+.feature-card:nth-child(4) .card-ico{background:var(--accent-wash);color:var(--accent-dark);}
+
+/* ---- ヒーロー：写真を活かしたレイヤー表現 ---- */
+.hero{background:linear-gradient(135deg,var(--green) 0%,var(--green-deep) 100%);}
+.hero::after{
+  background:linear-gradient(90deg,rgba(11,59,64,.74) 0%,rgba(11,59,64,.48) 52%,rgba(11,59,64,.08) 100%);
+}
+.hero-lead{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.42);}
+.hero .hl{
+  background:linear-gradient(transparent 55%,rgba(255,107,107,.85) 55%);
+}
+.hero-badges li::before{content:"✓ ";color:var(--accent);font-weight:900;}
+
+/* ---- 数字バンド：深い青緑のパネル ---- */
+.stats-band{
+  background:var(--green-deep);border-bottom:none;color:#EAF4F3;
+  margin:0 auto;max-width:var(--max);border-radius:var(--radius);
+  box-shadow:var(--shadow-md);position:relative;z-index:3;
+  transform:translateY(-30px);
+}
+.stats-band .container{padding:14px 24px;}
+.stat-b{border-right-color:rgba(255,255,255,.14);padding:30px 20px;}
+.stat-b .num{color:#fff;}
+.stat-b .num small{color:var(--accent);}
+.stat-b p{color:rgba(234,244,243,.72);}
+
+/* ---- 比較表：BUYMO列を珊瑚ウォッシュで強調 ---- */
+.compare-table{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md);border:1px solid var(--border);}
+.compare-table thead th{background:var(--green-deep);}
+.compare-table thead th.col-buymo{background:var(--green);}
+.compare-table td.col-buymo{background:var(--accent-wash);color:var(--accent-dark);}
+.compare-table .yes{color:var(--green);}
+
+/* ---- フロー・保証・比較などのブロックをやわらかく ---- */
+.flow-steps>li:not(.flow-arrow){border-radius:var(--radius-sm);box-shadow:var(--shadow);border-color:var(--border);}
+.flow-map{border-radius:var(--radius);background:var(--green-bg);}
+.flow-arrow{color:var(--green-light);}
+.guarantee{background:var(--green);}
+.targets{background:var(--gray);}
+
+/* ---- セクション背景の地色をやわらかく統一 ---- */
+.features,.reasons,.flow{background:var(--cream);}
