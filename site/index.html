@@ -29,7 +29,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=24" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=25" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -286,7 +286,7 @@
         </ol>
       </div>
       <div class="flow-map reveal" aria-hidden="true">
-        <div class="map-emoji">🗾</div>
+        <div class="flow-map-num">47<small>都道府県</small></div>
         <p>全国エリア対応</p>
       </div>
     </div>
@@ -656,40 +656,18 @@
     <div class="container">
       <h2 id="area-title" class="section-title">サービスエリア</h2>
       <div class="jp-map-wrap">
-        <svg class="jp-map" viewBox="0 0 480 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="jp-map-title">
-          <title id="jp-map-title">BUYMO 全国47都道府県対応マップ</title>
-          <!-- Hokkaido -->
-          <path d="M340,50 Q378,45 410,70 Q428,105 418,150 Q400,175 368,178 Q332,170 315,140 Q305,105 320,72 Z" fill="#0F766E" opacity="0.9"/>
-          <!-- Honshu (main body) -->
-          <path d="M120,240 Q160,215 210,205 Q265,195 315,205 Q355,215 358,240 Q345,262 305,272 Q265,282 225,290 Q188,300 155,315 Q125,325 108,315 Q95,295 100,270 Q108,250 120,240 Z" fill="#0F766E" opacity="0.9"/>
-          <!-- Shikoku -->
-          <path d="M195,325 Q220,318 240,330 Q248,347 235,358 Q210,362 190,352 Q182,338 195,325 Z" fill="#0F766E" opacity="0.9"/>
-          <!-- Kyushu -->
-          <path d="M110,340 Q135,330 155,340 Q168,360 162,385 Q150,405 125,408 Q100,402 92,380 Q90,358 110,340 Z" fill="#0F766E" opacity="0.9"/>
-          <!-- Okinawa inset -->
-          <rect x="20" y="378" width="80" height="66" fill="none" stroke="#0F766E" stroke-width="1" stroke-dasharray="3 3" opacity="0.4" rx="4"/>
-          <ellipse cx="52" cy="405" rx="16" ry="6" fill="#0F766E" opacity="0.9"/>
-          <ellipse cx="78" cy="418" rx="6" ry="3" fill="#0F766E" opacity="0.9"/>
-          <text x="60" y="440" text-anchor="middle" font-size="10" fill="#64748B" font-weight="700" font-family="'Noto Sans JP',sans-serif">沖縄</text>
-
-          <!-- Service pins (major cities) -->
-          <circle cx="378" cy="110" r="8" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
-          <circle cx="378" cy="110" r="14" fill="#2DD4BF" opacity="0.3"><animate attributeName="r" values="8;20;8" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="2.4s" repeatCount="indefinite"/></circle>
-          <circle cx="310" cy="222" r="7" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
-          <circle cx="288" cy="255" r="9" fill="#0F766E" stroke="#fff" stroke-width="2.5"/>
-          <circle cx="288" cy="255" r="16" fill="#0F766E" opacity="0.25"><animate attributeName="r" values="9;22;9" dur="2.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="2.6s" repeatCount="indefinite"/></circle>
-          <circle cx="240" cy="270" r="7" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
-          <circle cx="205" cy="278" r="8" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
-          <circle cx="165" cy="290" r="6" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
-          <circle cx="130" cy="358" r="7" fill="#2DD4BF" stroke="#fff" stroke-width="2"/>
-          <circle cx="52" cy="405" r="5" fill="#2DD4BF" stroke="#fff" stroke-width="1.5"/>
-        </svg>
+        <div class="coverage-panel" role="img" aria-label="全国47都道府県すべてに対応">
+          <div class="coverage-badge">
+            <span class="coverage-num">47</span>
+            <span class="coverage-unit">都道府県</span>
+          </div>
+          <p class="coverage-lead">北海道から沖縄まで<br><strong>全国すべて写真査定でネット完結</strong></p>
+          <ul class="coverage-regions" aria-hidden="true">
+            <li>北海道・東北</li><li>関東</li><li>中部</li><li>近畿</li><li>中国・四国</li><li>九州・沖縄</li>
+          </ul>
+        </div>
         <div class="jp-map-caption"><strong>全国 47 都道府県</strong>すべて写真査定でネット完結に対応</div>
       </div>
-      <ul class="area-legend">
-        <li><span class="legend-dot on"></span>対応エリア</li>
-        <li><span class="legend-dot off"></span>準備中エリア</li>
-      </ul>
       <p class="area-note">全国47都道府県に対応。お住まいの地域を選んで写真査定でネット完結をご依頼ください。</p>
       <ul class="area-chips">
         <li><a href="area/hokkaido/">北海道</a></li>
@@ -717,7 +695,7 @@
     <div class="container company-inner">
       <h2 id="company-title" class="section-title">会社情報</h2>
       <div class="grid grid-2 company-grid">
-        <div class="company-photo reveal"><img src="assets/img/buymo/company-office.jpg" alt="オフィスの外観" loading="lazy" /></div>
+        <div class="company-photo reveal"><img src="assets/img/buymo/operator.jpg" alt="お客様対応スタッフ（オペレーター）" loading="lazy" onerror="this.onerror=null;this.src='assets/img/buymo/company-office.jpg';" /></div>
         <dl class="company-dl reveal">
           <dt>サービス名</dt><dd>BUYMO（バイモ）</dd>
           <dt>買取センター</dt><dd>〒971-8138 福島県いわき市若葉台1丁目31-11</dd>

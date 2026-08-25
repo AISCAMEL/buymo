@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=24" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=25" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -194,7 +194,7 @@
         </ol>
       </div>
       <div class="flow-map reveal" aria-hidden="true">
-        <div class="map-emoji">🗾</div>
+        <div class="flow-map-num">47<small>都道府県</small></div>
         <p>全国エリア対応</p>
       </div>
     </div>
@@ -444,16 +444,18 @@
   <section class="area" aria-labelledby="area-title">
     <div class="container">
       <h2 id="area-title" class="section-title">サービスエリア</h2>
-      <div class="area-map">
-        <div class="map-emoji big" aria-hidden="true">🗾</div>
-        <ul class="map-pins" aria-hidden="true">
-          <li>📍</li><li>📍</li><li>📍</li><li>📍</li><li>📍</li>
-        </ul>
+      <div class="jp-map-wrap">
+        <div class="coverage-panel" role="img" aria-label="全国47都道府県すべてに対応">
+          <div class="coverage-badge">
+            <span class="coverage-num">47</span>
+            <span class="coverage-unit">都道府県</span>
+          </div>
+          <p class="coverage-lead">北海道から沖縄まで<br><strong>全国すべて写真査定でネット完結</strong></p>
+          <ul class="coverage-regions" aria-hidden="true">
+            <li>北海道・東北</li><li>関東</li><li>中部</li><li>近畿</li><li>中国・四国</li><li>九州・沖縄</li>
+          </ul>
+        </div>
       </div>
-      <ul class="area-legend">
-        <li><span class="legend-dot on"></span>対応エリア</li>
-        <li><span class="legend-dot off"></span>準備中エリア</li>
-      </ul>
       <p class="area-note">全国47都道府県に対応。お住まいの地域を選んで写真査定でネット完結をご依頼ください。</p>
       <ul class="area-chips">
         <li><a href="area/hokkaido/">北海道</a></li>

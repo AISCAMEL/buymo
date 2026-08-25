@@ -1097,3 +1097,23 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 /* 特長カード：2枚目・4枚目のアイコンを珊瑚で差し色 */
 .feature-card:nth-child(2) .card-ico,
 .feature-card:nth-child(4) .card-ico{background:var(--accent-wash);color:var(--accent-dark);}
+
+/* ============================================================
+   流れ「全国対応」数字カード ＆ サービスエリア カバレッジパネル
+   （旧・絵文字/崩れSVGの置き換え）
+   ============================================================ */
+.flow-map-num{font-family:var(--f-body);font-weight:900;font-size:64px;line-height:1;color:var(--green);letter-spacing:-.02em;}
+.flow-map-num small{display:block;font-size:15px;color:var(--accent-dark);font-weight:800;margin-top:6px;letter-spacing:.05em;}
+
+.coverage-panel{max-width:560px;margin:0 auto;background:linear-gradient(135deg,var(--green) 0%,var(--green-deep) 100%);border-radius:var(--radius);padding:44px 32px;text-align:center;color:#fff;box-shadow:var(--shadow-md);}
+.coverage-badge{display:inline-flex;align-items:baseline;gap:10px;}
+.coverage-num{font-family:var(--f-body);font-weight:900;font-size:110px;line-height:.9;color:#fff;letter-spacing:-.03em;}
+.coverage-unit{font-size:24px;font-weight:800;color:var(--accent);}
+.coverage-lead{margin:16px 0 0;font-size:16px;color:rgba(255,255,255,.9);line-height:1.7;}
+.coverage-lead strong{color:#fff;}
+.coverage-regions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:22px 0 0;padding:0;list-style:none;}
+.coverage-regions li{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;color:#fff;}
+@media (max-width:767px){
+  .coverage-num{font-size:84px;}
+  .coverage-panel{padding:34px 22px;}
+}
