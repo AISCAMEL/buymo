@@ -617,10 +617,10 @@
       }
     }
     window.addEventListener('scroll', maybeShowHint, { passive: true });
-    // スクロールが起きない短いページ用フォールバック（20秒後）
+    // ★ ページ表示から数秒後に自動でポップアップ表示（スクロール前でも出す）
     setTimeout(function () {
       if (!hintShown) { hintShown = true; showHint(); }
-    }, 20000);
+    }, 5000);
   }
 
   /* ---------- 事前ゲート (連絡先入力) 制御 ---------- */
@@ -706,8 +706,8 @@
         try { sessionStorage.setItem(SESSION_KEY, sessionId); } catch (e) {}
       }
       if (!log.children.length) setMode(MODE);
-      // 担当者対応中のまま再訪／リロードした場合はポーリングを再開
-      if (humanMode && sessionId) startHandoffPolling();
+      // チャット開始時から担当者の割込み（Slack返信）を常時監視
+      if (sessionId) startHandoffPolling();
       setTimeout(function(){ input.focus(); }, 100);
     }
     hideHint();
@@ -903,6 +903,12 @@
             if (r.ts && r.ts > lastReplyTs) {
               lastReplyTs = r.ts;
               try { sessionStorage.setItem(LASTREPLY_KEY, String(lastReplyTs)); } catch (e) {} // 既読位置を保持
+              // ★ 担当者がSlackから割込み → 以降はAIを停止し担当者対応へ自動切替
+              if (!humanMode) {
+                humanMode = true;
+                try { sessionStorage.setItem(HUMAN_KEY, '1'); } catch (e) {}
+                addMsg('bot', '👤 担当者が対応します。このままご返信ください。');
+              }
               addMsg('bot', '👤 ' + (r.by || '担当者') + '：\n' + r.text);
               // 担当者の返信も履歴に残し、スプレッドへ全文保存
               history.push({ role: 'assistant', content: '[担当者' + (r.by ? '・' + r.by : '') + '] ' + r.text });
