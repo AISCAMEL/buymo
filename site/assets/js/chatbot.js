@@ -509,6 +509,8 @@
     if (humanMode) {
       fireAndForget({ type: 'buymo_chat_user_msg', sessionId: sessionId || '', text: text.slice(0, 1000) });
       sendChatLog('担当対応中');
+      // 「反応なし」に見えないよう、必ず送信確認を表示する
+      addMsg('bot', '📨 担当者にお伝えしました。順次このチャットにご返信いたします。少々お待ちください🙇');
       resetIdleTimer();
       return;
     }
