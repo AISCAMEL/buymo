@@ -78,11 +78,33 @@
         '<td><select class="js-store">' + storeOptions(c.assignee) + '</select></td>' +
         '<td><select class="js-stage stage-sel s' + HQ.stageIdx(c.stage) + '">' + stageOptions(c.stage) + '</select></td>' +
         '<td>' + (c.amount ? HQ.yen(c.amount) : '—') + '</td>' +
+        '<td><button type="button" class="js-reissue lead-reissue-btn" data-email="' + HQ.esc(c.email || '') + '" data-name="' + HQ.esc(c.name || '') + '"' + (c.email ? '' : ' disabled title="メール未登録"') + '>再PW発行</button></td>' +
         '</tr>';
     }).join('');
   }
 
   function findCase(id) { for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i]; return null; }
+
+  // 再パスワード発行（本部→GASへ member_reissue をPOST → ユーザーへ新PWメール）
+  document.getElementById('rows').addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-reissue'); if (!btn) return;
+    var email = btn.getAttribute('data-email') || '';
+    var name  = btn.getAttribute('data-name') || '';
+    if (!email) { alert('この案件にはメールアドレスが登録されていません。'); return; }
+    if (!confirm(name + '（' + email + '）に新しいパスワードを発行してメール送信します。よろしいですか？')) return;
+    btn.disabled = true; var orig = btn.textContent; btn.textContent = '送信中…';
+    if (!HQ.ENDPOINT) { alert('GAS未接続のため送信できません。'); btn.disabled = false; btn.textContent = orig; return; }
+    fetch(HQ.ENDPOINT, {
+      method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'member_reissue', email: email })
+    }).then(function () {
+      btn.textContent = '送信済 ✓';
+      setTimeout(function () { btn.disabled = false; btn.textContent = orig; }, 4000);
+    }).catch(function () {
+      alert('送信に失敗しました。時間をおいて再度お試しください。');
+      btn.disabled = false; btn.textContent = orig;
+    });
+  });
 
   document.getElementById('rows').addEventListener('change', function (e) {
     var tr = e.target.closest('tr'); if (!tr) return;
