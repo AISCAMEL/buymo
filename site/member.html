@@ -212,7 +212,7 @@
     <div id="memberLogin">
       <div class="mp-card">
         <h1>査定状況の確認</h1>
-        <p class="mp-lead">お申し込み時にご登録の<strong>メールアドレス（ID）</strong>と<strong>携帯番号の下4桁（パスワード）</strong>で、査定状況・買取の進捗をご確認いただけます。</p>
+        <p class="mp-lead">お申し込み後にお送りするメールに記載の<strong>メールアドレス（ID）</strong>と<strong>パスワード</strong>で、査定状況・買取の進捗をご確認いただけます。</p>
         <form id="memberForm" novalidate>
           <div class="mp-field">
             <label for="mName">お名前（任意）</label>
@@ -223,13 +223,13 @@
             <input type="email" id="mEmail" placeholder="例：example@buymo.me" autocomplete="username" required />
           </div>
           <div class="mp-field">
-            <label for="mPass">パスワード（ご登録の携帯番号 下4桁）</label>
-            <input type="text" id="mPass" inputmode="numeric" autocomplete="current-password" maxlength="4" pattern="[0-9]*" placeholder="例：1234" required />
+            <label for="mPass">パスワード（メールに記載）</label>
+            <input type="text" id="mPass" autocomplete="current-password" maxlength="20" placeholder="メールに記載のパスワード" required />
           </div>
           <p class="mp-err" id="mErr"></p>
           <button type="submit" class="btn btn-primary btn-block btn-lg">ログインして確認する</button>
           <p class="mp-login-note">※ 査定のお申し込みがまだの方は、先に<a href="index.html#form">お問い合わせフォーム</a>からお申し込みください。</p>
-          <p class="mp-login-note">🔑 パスワードは<strong>ご登録の携帯番号の下4桁</strong>です。使い方がわからない方は<a href="member-guide.html">マイページの使い方ガイド</a>をご覧ください。</p>
+          <p class="mp-login-note">🔑 パスワードは<strong>お申し込み後にお送りするメール</strong>に記載しています（以前にお申し込みの方は携帯番号の下4桁）。お忘れの場合は<a href="mailto:kaitori@buymo.me?subject=パスワード再発行のお願い">こちら</a>から再発行いたします。</p>
         </form>
       </div>
     </div>
