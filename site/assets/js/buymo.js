@@ -546,6 +546,22 @@
         photos = photoFiles.map(function(p){ return { name:p.name, data:p.data, type:p.type }; });
       }
 
+      // 加盟店募集ページからの申込は専用タイプで送る（顧客向け査定メールと分離）
+      var isPartner = /buymo-partner/.test(window.location.pathname);
+      if (isPartner) {
+        return {
+          type: 'partner_apply',
+          source: source,
+          storeName: get('f-company'),
+          name: get('f-name'),
+          email: get('f-email'),
+          phone: get('f-tel'),
+          prefecture: get('f-pref'),
+          inquiryType: get('f-type'),
+          message: get('f-message')
+        };
+      }
+
       return {
         type: 'buymo_lead',
         source: source,
@@ -617,9 +633,16 @@
       } catch (e) {}
       if (window.BuymoGA) BuymoGA.track('generate_lead', { genre: payload.genre || '', source: payload.source || '' });
       sendLead(payload).then(function () {
+        form.reset();
+        // 加盟店募集の申込は査定用サンクスへ遷移せず、その場で完了表示
+        if (payload.type === 'partner_apply') {
+          note.textContent = '送信しました。ありがとうございます。担当より3営業日以内にご連絡し、資料をお送りします。';
+          note.className = 'form-note ok';
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
         note.textContent = '送信しました。ありがとうございます。ページを移動します…';
         note.className = 'form-note ok';
-        form.reset();
         // 送信完了（サンクス）ページへ遷移。来訪元ジャンルと写真枚数を引き継ぐ。
         var q = payload.genre ? ('?genre=' + encodeURIComponent(payload.genre)) : '';
         if (photoFiles.length > 0) q += (q ? '&' : '?') + 'photos=' + photoFiles.length;
