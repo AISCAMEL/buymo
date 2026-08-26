@@ -131,3 +131,29 @@
   display:grid;place-items:center;text-align:center;box-shadow:var(--shadow-md);}
 .yt-soon .play{font-size:60px;opacity:.9;}
 .yt-soon p{margin:8px 0 0;font-weight:700;}
+
+/* ---- 副業比較表 ---- */
+.pl-cmp-scroll{overflow-x:auto;margin-top:8px;}
+.pl-cmp{border-collapse:separate;border-spacing:0;width:100%;min-width:640px;background:#fff;
+  border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow-md);}
+.pl-cmp th,.pl-cmp td{padding:14px 16px;text-align:center;border-bottom:1px solid var(--border);font-size:14px;}
+.pl-cmp thead th{background:var(--green-deep);color:#fff;font-weight:800;}
+.pl-cmp thead th.hl-col{background:var(--green);}
+.pl-cmp tbody th{text-align:left;background:var(--gray);font-weight:800;color:var(--text);white-space:nowrap;}
+.pl-cmp td.hl-col{background:var(--accent-wash);color:var(--accent-dark);font-weight:800;}
+.pl-cmp tr:last-child th,.pl-cmp tr:last-child td{border-bottom:0;}
+.pl-cmp .o{color:var(--green);font-weight:900;}
+.pl-cmp .x{color:#c85b5b;font-weight:900;}
+
+/* ---- 収益の考え方 ---- */
+.pl-formula{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;
+  background:#fff;border:1px solid var(--border);border-radius:18px;padding:24px 20px;box-shadow:var(--shadow);text-align:center;}
+.pl-formula .fx{background:var(--green-bg);border-radius:12px;padding:12px 16px;font-weight:800;color:var(--green-dark);min-width:120px;}
+.pl-formula .op{font-size:24px;font-weight:900;color:var(--green-light);}
+.pl-formula .fx small{display:block;font-weight:600;color:var(--text-sub);font-size:11px;margin-top:2px;}
+.pl-model-tbl{width:100%;border-collapse:separate;border-spacing:0;margin-top:16px;background:#fff;
+  border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.pl-model-tbl th,.pl-model-tbl td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:center;font-size:14px;}
+.pl-model-tbl thead th{background:var(--green-pale);color:var(--green-dark);font-weight:800;}
+.pl-model-tbl tbody th{background:var(--gray);font-weight:800;}
+.pl-model-tbl tr:last-child th,.pl-model-tbl tr:last-child td{border-bottom:0;}
