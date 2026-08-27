@@ -30,7 +30,7 @@
   font-size:16px;font-family:inherit;color:var(--text);resize:vertical;min-height:120px;
   transition:border-color .2s,box-shadow .2s;
 }
-.quote-form textarea:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(255,107,53,.12);}
+.quote-form textarea:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(46,144,250,.12);}
 .quote-form textarea.invalid{border-color:#e53935;background:#fff6f6;}
 .field-check label{display:flex;align-items:center;gap:8px;font-weight:500;font-size:14px;}
 .field-check input{width:18px;height:18px;height:auto;accent-color:var(--green-mid);}
