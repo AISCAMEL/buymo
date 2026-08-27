@@ -253,8 +253,8 @@
       fallbackCTA: [CTA_FORM]
     },
     partner: {
-      title: '加盟店AIサポート',
-      greetTop: 'BUYMO加盟店向けAIサポートです。運営・査定・システムの疑問にお答えします。',
+      title: '加盟店サポート',
+      greetTop: 'BUYMO加盟店サポートです。運営・査定・システムの疑問にお答えします。',
       chips: ['出品の流れは？', 'システムの使い方', '加盟したい', '集客は？'],
       rules: [
         { k: ['加盟','開業','費用','始め','応募'],      a: '加盟のご相談は本部まで直接お問い合わせください。費用・条件はプランにより異なります。' },
@@ -321,12 +321,12 @@
   root.innerHTML =
     '<div class="cbot-hint" id="cbotHint" hidden aria-hidden="true">' +
       '<button class="cbot-hint-x" aria-label="閉じる">×</button>' +
-      '<span class="cbot-hint-text">何かご用はありますか？</span>' +
+      '<span class="cbot-hint-text">「いくらで売れる?」お気軽にどうぞ😊</span>' +
     '</div>' +
-    '<button class="cbot-launch" aria-label="AIチャットを開く" aria-expanded="false">' +
+    '<button class="cbot-launch" aria-label="チャットで相談する" aria-expanded="false">' +
       '<img class="cbot-launch-img" src="' + chatIconSrc + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">' +
       '<span class="cbot-launch-ico" style="display:none">💬</span>' +
-      '<span class="cbot-launch-badge" aria-hidden="true">AI</span>' +
+      '<span class="cbot-launch-badge" aria-hidden="true">24h</span>' +
       '<span class="cbot-launch-pulse" aria-hidden="true"></span>' +
     '</button>' +
     '<div class="cbot-panel" hidden role="dialog" aria-label="BUYMOチャットサポート">' +
@@ -334,7 +334,7 @@
         '<img class="cbot-avatar" src="' + mascotSrc + '" alt="" onerror="this.style.display=\'none\'">' +
         '<div class="cbot-head-text">' +
           '<span class="cbot-title"></span>' +
-          '<span class="cbot-status"><span class="cbot-dot"></span>オンライン・AI応答</span>' +
+          '<span class="cbot-status"><span class="cbot-dot"></span>オンライン・24時間受付</span>' +
         '</div>' +
         '<button class="cbot-x" aria-label="閉じる">×</button>' +
       '</div>' +
@@ -847,10 +847,10 @@
              '<button type="button" class="cbot-idle-btn" data-hd="no">キャンセル</button>' +
            '</div>')
         : ('現在は営業時間外です（対応：平日10:00〜19:00）。<br>' +
-           '<small>いまはAIが引き続きお答えします。担当者への引き継ぎをご希望の場合は、内容を記録し翌営業日にご連絡します。</small>' +
+           '<small>いまは、このチャットで引き続きお答えします。担当者への引き継ぎをご希望の場合は、内容を記録し翌営業日にご連絡します。</small>' +
            '<div class="cbot-idle-actions">' +
              '<button type="button" class="cbot-idle-btn primary" data-hd="yes">翌営業日の連絡を希望</button>' +
-             '<button type="button" class="cbot-idle-btn" data-hd="no">AIに続けて質問する</button>' +
+             '<button type="button" class="cbot-idle-btn" data-hd="no">このまま質問を続ける</button>' +
            '</div>');
       confirmWrap.appendChild(m);
       log.appendChild(confirmWrap);
@@ -882,7 +882,7 @@
           addMsg('bot', '担当者におつなぎしました。ここから先は担当者が直接ご返信します。\n\nこのチャット画面にそのままご返信いただけます（メッセージは担当者に届きます）。');
           startHandoffPolling();  // 担当者の返信をポーリング取得
         } else {
-          addMsg('bot', '受け付けました。翌営業日（平日10:00〜）に担当者よりご連絡いたします。\n\nそれまでの間も、AIがお答えできますのでお気軽にどうぞ。');
+          addMsg('bot', '受け付けました。翌営業日（平日10:00〜）に担当者よりご連絡いたします。\n\nそれまでの間も、このチャットでお答えできますのでお気軽にどうぞ。');
         }
         if (window.BuymoGA) window.BuymoGA.track('chat_handoff', { session: sessionId, biz: biz });
       });
