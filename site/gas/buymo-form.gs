@@ -197,7 +197,7 @@ name + ' 様\n\n' +
 'BUYMO ｜ https://buymo.me/\n' +
 'マイページ ｜ ' + MEMBER_PAGE_URL + '\n' +
 '✉  ' + REPLY_TO + '\n' +
-'〒971-8138 福島県いわき市若葉台1丁目31-11\n' +
+'〒979-0204 福島県いわき市四倉町細谷字大町1番\n' +
 '───────────────────\n';
 
   try {
@@ -445,7 +445,7 @@ function handleMemberCaseNew(data) {
 'BUYMO ｜ https://buymo.me/\n' +
 'マイページ ｜ ' + MEMBER_PAGE_URL + '\n' +
 '✉  ' + REPLY_TO + '\n' +
-'〒971-8138 福島県いわき市若葉台1丁目31-11\n' +
+'〒979-0204 福島県いわき市四倉町細谷字大町1番\n' +
 '───────────────────\n';
     MailApp.sendEmail({
       to:      email,

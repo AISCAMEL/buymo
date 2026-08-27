@@ -342,7 +342,7 @@
       '<h1>清算書</h1>' +
       '<div class="meta">発行日：' + ds(now) + '　支払期限：' + ds(due) + '（1週間以内）</div>' +
       '<table>' + trs + '</table>' +
-      '<div class="footer">BUYMO ／ 合同会社アイズ　〒971-8138 福島県いわき市若葉台1丁目31-11<br>お支払いは期限内にお振込みします。</div>' +
+      '<div class="footer">BUYMO ／ 合同会社アイズ　〒979-0204 福島県いわき市四倉町細谷字大町1番<br>お支払いは期限内にお振込みします。</div>' +
       '<p style="text-align:center;margin-top:24px;" class="no-print"><button onclick="window.print()" style="padding:10px 32px;font-size:14px;cursor:pointer;border:none;background:#0e1b33;color:#fff;border-radius:8px;">印刷する</button></p>' +
       '</body></html>';
     var win = window.open('', '_blank', 'width=720,height=620');

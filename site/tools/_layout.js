@@ -36,7 +36,7 @@ function footer(rel) {
     <div class="footer-col">
       <a href="${rel}index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
       <p class="footer-company">合同会社アイズ</p>
-      <p>〒971-8138<br>福島県いわき市若葉台1丁目31-11</p>
+      <p>〒979-0204<br>福島県いわき市四倉町細谷字大町1番</p>
       <p>✉️ kaitori@buymo.me</p>
     </div>
     <nav class="footer-col" aria-label="サイトマップ"><h3>サイトマップ</h3><ul class="footer-links">
