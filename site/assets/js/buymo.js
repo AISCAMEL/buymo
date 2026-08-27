@@ -159,10 +159,14 @@
         var iconHtml = isImg
           ? '<img src="' + r.icon + '" alt="' + r.name + '" class="result-photo">'
           : '<div class="result-img" aria-hidden="true">' + r.icon + '</div>';
+        var vsHtml = r.vs
+          ? '<p class="result-vs">他社より<b>+' + r.vs + '<span>万円</span></b>高く買取</p>'
+          : '';
         return '<article class="card result-card reveal">' +
           iconHtml +
           '<h3>' + r.name + '</h3>' +
           '<p class="result-year">' + r.year + '</p>' +
+          vsHtml +
           '<p class="result-price">' + yen(r.price) + '</p>' +
           '<p class="result-area">📍' + r.area + '</p>' +
           '</article>';
