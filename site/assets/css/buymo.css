@@ -3,34 +3,34 @@
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;900&display=swap');
 :root{
-  /* 青緑(teal)ベース */
-  --green:#0E7C86;
-  --green-dark:#0E5A61;
-  --green-mid:#12A0AB;
-  --green-light:#5BC8D0;
-  --green-pale:#D5F0F2;
-  --green-bg:#EEFAFB;
-  --green-deep:#0B3B40;
-  --orange:#0E7C86;
-  --orange-dark:#0E5A61;
-  /* 差し色：珊瑚(coral)。珊瑚地の上は白文字 */
-  --accent:#FF6B6B;
-  --accent-dark:#E8484B;
-  --accent-wash:#FFE8E6;
+  /* C案：ミニマル・信頼（ネイビー × ブルー） */
+  --green:#1E3A5F;
+  --green-dark:#14294A;
+  --green-mid:#2A5388;
+  --green-light:#8FB3DE;
+  --green-pale:#E7F0FA;
+  --green-bg:#F5F9FF;
+  --green-deep:#0F2440;
+  --orange:#1E3A5F;
+  --orange-dark:#14294A;
+  /* 差し色：ブルー。青地の上は白文字 */
+  --accent:#2E90FA;
+  --accent-dark:#1B74D6;
+  --accent-wash:#E7F1FE;
   --on-accent:#FFFFFF;
   --navy:#0F172A;
-  --cream:#FBFAF7;
-  --gray:#F3F7F7;
-  --border:#E4ECEC;
-  --text:#15302F;
-  --text-sub:#4E6664;
+  --cream:#FFFFFF;
+  --gray:#F5F7FA;
+  --border:#EAECF0;
+  --text:#101828;
+  --text-sub:#667085;
   --white:#FFFFFF;
-  /* やわらかい角丸・影（モダン／見応えのある印象） */
-  --radius:22px;
-  --radius-sm:14px;
-  --shadow:0 2px 10px rgba(11,59,64,.06);
-  --shadow-md:0 14px 36px rgba(11,59,64,.10);
-  --shadow-hover:0 22px 52px rgba(11,59,64,.16);
+  /* ミニマル：控えめな角丸・軽い影 */
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 1px 3px rgba(16,24,40,.06);
+  --shadow-md:0 8px 24px rgba(16,24,40,.08);
+  --shadow-hover:0 14px 34px rgba(16,24,40,.12);
   --max:1200px;
   --f-body:'Outfit','Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif;
 }
@@ -107,11 +107,11 @@ img{max-width:100%;display:block;}
 }
 .btn-primary{
   background:var(--accent);color:var(--on-accent);
-  box-shadow:0 10px 26px rgba(232,72,75,.34);
+  box-shadow:0 8px 22px rgba(46,144,250,.30);
 }
 .btn-primary:hover{
   background:var(--accent-dark);transform:translateY(-2px);
-  box-shadow:0 16px 34px rgba(232,72,75,.42);
+  box-shadow:0 14px 30px rgba(46,144,250,.38);
 }
 .btn-lg{width:260px;height:62px;font-size:18px;}
 .btn-block{width:100%;}
@@ -154,7 +154,7 @@ img{max-width:100%;display:block;}
 .hero-bg-img{display:none;}
 .hero::after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(90deg,rgba(11,59,64,.74) 0%,rgba(11,59,64,.48) 52%,rgba(11,59,64,.08) 100%);
+  background:linear-gradient(90deg,rgba(15,36,64,.72) 0%,rgba(15,36,64,.45) 52%,rgba(15,36,64,.06) 100%);
   z-index:1;
 }
 /* hero-art は .hero 直下に配置し、フルブリード背景として機能させる */
@@ -171,7 +171,7 @@ img{max-width:100%;display:block;}
   margin:0 0 24px;color:#fff;letter-spacing:-.02em;
 }
 .hero .hl{
-  background:linear-gradient(transparent 55%,rgba(255,107,107,.85) 55%);
+  background:linear-gradient(transparent 58%,rgba(46,144,250,.22) 58%);
   padding:0 4px;
 }
 .hero-sub{
@@ -1026,7 +1026,7 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 
   .section-title{font-size:24px;margin-bottom:28px;}
   .hero{min-height:680px;}
-  .hero::after{background:linear-gradient(180deg,rgba(11,59,64,.55) 0%,rgba(11,59,64,.78) 100%);}
+  .hero::after{background:linear-gradient(180deg,rgba(15,36,64,.55) 0%,rgba(15,36,64,.80) 100%);}
   .hero-img-main{object-position:center center;}
   .hero-inner{text-align:center;padding:64px 0;}
   .hero-copy{max-width:100%;}
