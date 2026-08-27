@@ -302,7 +302,7 @@ function genrePage(g) {
 <link rel="stylesheet" href="${rel}assets/css/buymo.css" />
 <link rel="stylesheet" href="${rel}assets/css/buymo-area.css" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${jstr(g.name)}","description":"${jstr(g.desc)}","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"kaitori@buymo.me","address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"若葉台1丁目31-11"},"openingHours":"Mo-Fr 08:00-17:00"}
+{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${jstr(g.name)}","description":"${jstr(g.desc)}","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"kaitori@buymo.me","address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"四倉町細谷字大町1番"},"openingHours":"Mo-Fr 08:00-17:00"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"${bcHome}"},{"@type":"ListItem","position":2,"name":"買取ジャンル","item":"${bcGenre}"},{"@type":"ListItem","position":3,"name":"${jstr(g.name)}","item":"${esc(canonical)}"}]}
@@ -457,7 +457,7 @@ function crossPage(g, p) {
 <link rel="stylesheet" href="${rel}assets/css/buymo.css" />
 <link rel="stylesheet" href="${rel}assets/css/buymo-area.css" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${jstr(p.name)}の${jstr(g.name)}","description":"${jstr(p.name)}の${jstr(g.name)}。${jstr(g.desc)}","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"kaitori@buymo.me","areaServed":{"@type":"State","name":"${jstr(p.name)}"},"address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"若葉台1丁目31-11"},"openingHours":"Mo-Fr 08:00-17:00"}
+{"@context":"https://schema.org","@type":"AutoDealer","name":"BUYMO（合同会社アイズ） ${jstr(p.name)}の${jstr(g.name)}","description":"${jstr(p.name)}の${jstr(g.name)}。${jstr(g.desc)}","url":"${esc(canonical)}","telephone":"+81-50-1722-3365","email":"kaitori@buymo.me","areaServed":{"@type":"State","name":"${jstr(p.name)}"},"address":{"@type":"PostalAddress","addressCountry":"JP","addressRegion":"福島県","addressLocality":"いわき市","streetAddress":"四倉町細谷字大町1番"},"openingHours":"Mo-Fr 08:00-17:00"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"${bcHome}"},{"@type":"ListItem","position":2,"name":"買取ジャンル","item":"${bcGenre}"},{"@type":"ListItem","position":3,"name":"${jstr(g.name)}","item":"${bcSelf}"},{"@type":"ListItem","position":4,"name":"${jstr(p.name)}","item":"${esc(canonical)}"}]}

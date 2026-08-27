@@ -209,7 +209,7 @@
         '<tr><td class="label">申請状況</td><td>' + (c.saleApplied ? '申請済み ' + esc(c.saleAppliedAt || '') : '未申請') + '</td></tr>' +
         rowsHtml +
         '</table>' +
-        '<p class="note" style="margin-top:6mm;">BUYMO ／ 合同会社アイズ　〒971-8138 福島県いわき市若葉台1丁目31-11<br>お支払いは期限内にお振込みいたします。</p>';
+        '<p class="note" style="margin-top:6mm;">BUYMO ／ 合同会社アイズ　〒979-0204 福島県いわき市四倉町細谷字大町1番<br>お支払いは期限内にお振込みいたします。</p>';
     } else {
       return '<h1>清 算 書</h1><p style="text-align:center;margin-top:20mm;color:#888;">案件IDを選択し、案件詳細パネルで売却方法を設定してください。</p>';
     }
