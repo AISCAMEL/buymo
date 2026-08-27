@@ -140,10 +140,17 @@
       var hasDemo = voices.some(function (v) { return v._demo; });
       if (voicesNote) voicesNote.hidden = !hasDemo;
       voiceTrack.innerHTML = voices.map(function (v) {
-        return '<article class="card voice-card">' +
-          '<div class="voice-head">' + avatarHtml(v.avatar, v.name) + '<div><p class="voice-name">' + v.name + '</p><p class="voice-meta">' + v.meta + '</p></div></div>' +
-          '<p class="stars" aria-label="5段階評価で' + (v.stars || 5) + '">' + stars(v.stars) + '</p>' +
-          '<p class="voice-body">' + v.body + '</p>' +
+        var isImg = v.avatar && (v.avatar.indexOf('/') !== -1 || v.avatar.indexOf('http') === 0);
+        var photo = isImg
+          ? '<img src="' + v.avatar + '" alt="' + v.name + '" loading="lazy">'
+          : '<div class="voice-emoji" aria-hidden="true">' + (v.avatar || '🙂') + '</div>';
+        return '<article class="voice-card">' +
+          '<div class="voice-photo">' + photo + '<span class="voice-badge">お客様の声</span></div>' +
+          '<div class="voice-content">' +
+            '<p class="stars" aria-label="5段階評価で' + (v.stars || 5) + '">' + stars(v.stars) + '</p>' +
+            '<blockquote class="voice-body">' + v.body + '</blockquote>' +
+            '<p class="voice-name">' + v.name + '<span class="voice-meta">' + v.meta + '</span></p>' +
+          '</div>' +
           '</article>';
       }).join('');
     }
@@ -159,16 +166,19 @@
         var iconHtml = isImg
           ? '<img src="' + r.icon + '" alt="' + r.name + '" class="result-photo">'
           : '<div class="result-img" aria-hidden="true">' + r.icon + '</div>';
-        var vsHtml = r.vs
-          ? '<p class="result-vs">他社より<b>+' + r.vs + '<span>万円</span></b>高く買取</p>'
+        var media = isImg
+          ? '<img src="' + r.icon + '" alt="' + r.name + '" class="result-photo" loading="lazy">'
+          : '<div class="result-emoji" aria-hidden="true">' + r.icon + '</div>';
+        var vsBar = r.vs
+          ? '<div class="result-vsbar"><span class="rv-t">他社より</span><span class="rv-n">+' + r.vs + '<i>万円</i></span><span class="rv-b">高く買取</span></div>'
           : '';
-        return '<article class="card result-card reveal">' +
-          iconHtml +
-          '<h3>' + r.name + '</h3>' +
-          '<p class="result-year">' + r.year + '</p>' +
-          vsHtml +
-          '<p class="result-price">' + yen(r.price) + '</p>' +
-          '<p class="result-area">📍' + r.area + '</p>' +
+        return '<article class="result-card reveal">' +
+          '<div class="result-media">' + media + vsBar + '</div>' +
+          '<div class="result-info">' +
+            '<h3>' + r.name + '</h3>' +
+            '<p class="result-sub">' + r.year + '　📍' + r.area + '</p>' +
+            '<p class="result-price">' + yen(r.price) + '</p>' +
+          '</div>' +
           '</article>';
       }).join('');
       // 動的追加した .reveal 要素も Intersection Observer に登録する
@@ -187,10 +197,7 @@
     var index = 0, timer = null;
 
     function perView() {
-      var w = window.innerWidth;
-      if (w <= 767) return 1;
-      if (w <= 991) return 2;
-      return 3;
+      return 1; /* 大判スライダー：1枚ずつ表示 */
     }
     function pages() {
       return Math.max(1, cards.length - perView() + 1);
