@@ -78,7 +78,10 @@
         '<td><select class="js-store">' + storeOptions(c.assignee) + '</select></td>' +
         '<td><select class="js-stage stage-sel s' + HQ.stageIdx(c.stage) + '">' + stageOptions(c.stage) + '</select></td>' +
         '<td>' + (c.amount ? HQ.yen(c.amount) : '—') + '</td>' +
-        '<td><button type="button" class="js-reissue lead-reissue-btn" data-email="' + HQ.esc(c.email || '') + '" data-name="' + HQ.esc(c.name || '') + '"' + (c.email ? '' : ' disabled title="メール未登録"') + '>再PW発行</button></td>' +
+        '<td><div class="lead-ops">' +
+          '<button type="button" class="js-reissue lead-reissue-btn" data-email="' + HQ.esc(c.email || '') + '" data-name="' + HQ.esc(c.name || '') + '"' + (c.email ? '' : ' disabled title="メール未登録"') + '>再PW発行</button>' +
+          '<button type="button" class="js-release lead-release-btn" data-email="' + HQ.esc(c.email || '') + '" data-name="' + HQ.esc(c.name || '') + '"' + (c.email ? '' : ' disabled title="メール未登録"') + '>重複解除</button>' +
+        '</div></td>' +
         '</tr>';
     }).join('');
   }
@@ -102,6 +105,27 @@
       setTimeout(function () { btn.disabled = false; btn.textContent = orig; }, 4000);
     }).catch(function () {
       alert('送信に失敗しました。時間をおいて再度お試しください。');
+      btn.disabled = false; btn.textContent = orig;
+    });
+  });
+
+  // 重複解除（本部→GASへ member_release をPOST → そのメールの会員アカウントを削除し再登録可能に）
+  document.getElementById('rows').addEventListener('click', function (e) {
+    var btn = e.target.closest('.js-release'); if (!btn) return;
+    var email = btn.getAttribute('data-email') || '';
+    var name  = btn.getAttribute('data-name') || '';
+    if (!email) { alert('この案件にはメールアドレスが登録されていません。'); return; }
+    if (!confirm('【重複解除】' + name + '（' + email + '）の会員アカウントをリセットします。\n次回の申込で新しいパスワードが発行されます。よろしいですか？')) return;
+    btn.disabled = true; var orig = btn.textContent; btn.textContent = '解除中…';
+    if (!HQ.ENDPOINT) { alert('GAS未接続のため送信できません。'); btn.disabled = false; btn.textContent = orig; return; }
+    fetch(HQ.ENDPOINT, {
+      method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'member_release', email: email })
+    }).then(function () {
+      btn.textContent = '解除済 ✓';
+      setTimeout(function () { btn.disabled = false; btn.textContent = orig; }, 4000);
+    }).catch(function () {
+      alert('解除に失敗しました。時間をおいて再度お試しください。');
       btn.disabled = false; btn.textContent = orig;
     });
   });
