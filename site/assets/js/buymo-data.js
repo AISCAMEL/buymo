@@ -101,20 +101,20 @@ var BUYMO_VOICES = [
 ];
 
 var BUYMO_RESULTS = [
-  { _demo: true, icon: 'assets/img/buymo/result-1.jpg',  name: 'トヨタ プリウス',         year: '2019年式', price: 1680000, area: '東京都'  },
-  { _demo: true, icon: 'assets/img/buymo/result-2.jpg',  name: 'トヨタ ハリアー',         year: '2020年式', price: 2850000, area: '神奈川県' },
-  { _demo: true, icon: 'assets/img/buymo/result-3.jpg',  name: 'ホンダ N-BOX',           year: '2021年式', price: 1280000, area: '大阪府'  },
-  { _demo: true, icon: 'assets/img/buymo/result-4.jpg',  name: 'マツダ CX-5',            year: '2019年式', price: 1920000, area: '愛知県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-5.jpg',  name: 'スズキ ジムニー',         year: '2020年式', price: 2250000, area: '福岡県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-6.jpg',  name: 'トヨタ ランドクルーザー', year: '2016年式', price: 4200000, area: '北海道'  },
-  { _demo: true, icon: 'assets/img/buymo/result-7.jpg',  name: 'トヨタ アルファード',     year: '2018年式', price: 2780000, area: '埼玉県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-8.jpg',  name: 'ホンダ フィット',         year: '2018年式', price:  820000, area: '福島県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-9.jpg',  name: '日産 ノート e-POWER',     year: '2020年式', price: 1080000, area: '宮城県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-10.jpg', name: 'スバル レヴォーグ',       year: '2019年式', price: 1750000, area: '千葉県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-11.jpg', name: '日産 フェアレディZ',      year: '2018年式', price: 3200000, area: '大阪府'  },
-  { _demo: true, icon: 'assets/img/buymo/result-12.jpg', name: 'ホンダ ヴェゼル',         year: '2021年式', price: 1580000, area: '静岡県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-13.jpg', name: 'マツダ ロードスター',     year: '2019年式', price: 2100000, area: '広島県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-14.jpg', name: '三菱 アウトランダーPHEV', year: '2020年式', price: 1980000, area: '栃木県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-15.jpg', name: 'ダイハツ タント',         year: '2020年式', price:  720000, area: '岡山県'  },
-  { _demo: true, icon: 'assets/img/buymo/result-16.jpg', name: 'トヨタ ヤリスクロス',     year: '2022年式', price: 1850000, area: '京都府'  }
+  { _demo: true, icon: 'assets/img/buymo/result-1.jpg', vs: 12,  name: 'トヨタ プリウス',         year: '2019年式', price: 1680000, area: '東京都'  },
+  { _demo: true, icon: 'assets/img/buymo/result-2.jpg', vs: 19,  name: 'トヨタ ハリアー',         year: '2020年式', price: 2850000, area: '神奈川県' },
+  { _demo: true, icon: 'assets/img/buymo/result-3.jpg', vs: 9,  name: 'ホンダ N-BOX',           year: '2021年式', price: 1280000, area: '大阪府'  },
+  { _demo: true, icon: 'assets/img/buymo/result-4.jpg', vs: 17,  name: 'マツダ CX-5',            year: '2019年式', price: 1920000, area: '愛知県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-5.jpg', vs: 15,  name: 'スズキ ジムニー',         year: '2020年式', price: 2250000, area: '福岡県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-6.jpg', vs: 38,  name: 'トヨタ ランドクルーザー', year: '2016年式', price: 4200000, area: '北海道'  },
+  { _demo: true, icon: 'assets/img/buymo/result-7.jpg', vs: 24,  name: 'トヨタ アルファード',     year: '2018年式', price: 2780000, area: '埼玉県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-8.jpg', vs: 7,  name: 'ホンダ フィット',         year: '2018年式', price:  820000, area: '福島県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-9.jpg', vs: 11,  name: '日産 ノート e-POWER',     year: '2020年式', price: 1080000, area: '宮城県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-10.jpg', vs: 21, name: 'スバル レヴォーグ',       year: '2019年式', price: 1750000, area: '千葉県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-11.jpg', vs: 29, name: '日産 フェアレディZ',      year: '2018年式', price: 3200000, area: '大阪府'  },
+  { _demo: true, icon: 'assets/img/buymo/result-12.jpg', vs: 14, name: 'ホンダ ヴェゼル',         year: '2021年式', price: 1580000, area: '静岡県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-13.jpg', vs: 18, name: 'マツダ ロードスター',     year: '2019年式', price: 2100000, area: '広島県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-14.jpg', vs: 16, name: '三菱 アウトランダーPHEV', year: '2020年式', price: 1980000, area: '栃木県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-15.jpg', vs: 8, name: 'ダイハツ タント',         year: '2020年式', price:  720000, area: '岡山県'  },
+  { _demo: true, icon: 'assets/img/buymo/result-16.jpg', vs: 20, name: 'トヨタ ヤリスクロス',     year: '2022年式', price: 1850000, area: '京都府'  }
 ];

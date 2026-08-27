@@ -1117,3 +1117,10 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
   .coverage-num{font-size:84px;}
   .coverage-panel{padding:34px 22px;}
 }
+
+/* 買取実績カード「他社より+○○万円」バッジ */
+.result-vs{display:inline-block;margin:8px auto 4px;background:var(--accent-wash,#E7F1FE);
+  color:var(--accent-dark,#1B74D6);font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;
+  line-height:1.3;}
+.result-vs b{font-size:17px;font-weight:900;letter-spacing:-.02em;}
+.result-vs b span{font-size:11px;margin-left:1px;}
