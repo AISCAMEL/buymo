@@ -193,6 +193,19 @@
 
   .mp-pw-gate{margin-top:16px;padding:14px 16px;border-radius:10px;background:#FEF3C7;border:1.5px solid #F59E0B;font-size:13px;color:#92400E;font-weight:700;text-align:center;line-height:1.6;}
   .mp-pw-gate strong{color:#B45309;}
+
+  /* 必要書類チェックリスト */
+  .mp-docs{margin-top:24px;background:#fff;border:1px solid var(--border,#EAECF0);border-radius:14px;padding:22px 24px;box-shadow:0 1px 3px rgba(16,24,40,.06);}
+  .mp-docs-head h2{font-size:18px;font-weight:900;color:var(--green,#1E3A5F);margin:0 0 4px;}
+  .mp-docs-head p{font-size:13px;color:var(--text-sub,#667085);margin:0 0 16px;}
+  .mp-docs-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .mp-docs-col{background:var(--green-bg,#F5F9FF);border:1px solid var(--border,#EAECF0);border-radius:12px;padding:14px 16px;}
+  .mp-docs-col h3{font-size:14px;font-weight:800;color:var(--green,#1E3A5F);margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border,#EAECF0);}
+  .mp-docs-col label{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text,#101828);padding:6px 0;cursor:pointer;line-height:1.5;}
+  .mp-docs-col input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--accent,#2E90FA);flex:none;cursor:pointer;}
+  .mp-docs-col input:checked + span{color:var(--text-sub,#667085);text-decoration:line-through;}
+  .mp-docs-note{font-size:12px;color:var(--text-sub,#667085);margin:14px 0 0;line-height:1.7;}
+  @media(max-width:640px){.mp-docs-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -473,6 +486,39 @@
       <div id="caseAlert"></div>
       <div id="caseSummary"></div>
       <div id="caseList"></div>
+
+      <!-- 必要書類チェックリスト -->
+      <section class="mp-docs" id="mpDocs">
+        <div class="mp-docs-head">
+          <h2>📑 売却に必要な書類チェックリスト</h2>
+          <p>成約後のお手続きに必要な書類です。今のうちにご準備いただくとスムーズです（チェックはこの端末に保存されます）。</p>
+        </div>
+        <div class="mp-docs-grid">
+          <div class="mp-docs-col">
+            <h3>普通車</h3>
+            <label><input type="checkbox" data-doc="n1"><span>自動車検査証（車検証）</span></label>
+            <label><input type="checkbox" data-doc="n2"><span>自賠責保険証明書</span></label>
+            <label><input type="checkbox" data-doc="n3"><span>印鑑登録証明書（発行3か月以内）</span></label>
+            <label><input type="checkbox" data-doc="n4"><span>実印</span></label>
+            <label><input type="checkbox" data-doc="n5"><span>自動車税納税証明書</span></label>
+            <label><input type="checkbox" data-doc="n6"><span>リサイクル券</span></label>
+          </div>
+          <div class="mp-docs-col">
+            <h3>軽自動車</h3>
+            <label><input type="checkbox" data-doc="k1"><span>自動車検査証（車検証）</span></label>
+            <label><input type="checkbox" data-doc="k2"><span>自賠責保険証明書</span></label>
+            <label><input type="checkbox" data-doc="k3"><span>認印（実印・印鑑証明は不要）</span></label>
+            <label><input type="checkbox" data-doc="k4"><span>軽自動車税納税証明書</span></label>
+            <label><input type="checkbox" data-doc="k5"><span>リサイクル券</span></label>
+          </div>
+        </div>
+        <p class="mp-docs-note">
+          ※ <strong>売買契約書・委任状・譲渡証明書</strong>は当社で作成し、ご案内します（お客様のご準備は不要です）。<br>
+          ※ ローンが残っている場合は所有権解除の手続きをご案内します。書類の紛失時も再発行をサポートします。<br>
+          ※ ご不明点は <a href="mailto:kaitori@buymo.me?subject=必要書類について">kaitori@buymo.me</a> までお気軽に。
+        </p>
+      </section>
+
       <div class="mp-actions">
         <a href="index.html#top" class="btn btn-outline">トップページに戻る</a>
       </div>
@@ -545,5 +591,25 @@
 
 <script src="assets/js/member.js?v=21" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
+<script>
+/* 必要書類チェックリストの状態を端末に保存 */
+(function(){
+  var KEY = 'buymoDocChecklist';
+  var boxes = document.querySelectorAll('#mpDocs input[type=checkbox]');
+  if (!boxes.length) return;
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e){}
+  boxes.forEach(function(b){
+    var k = b.getAttribute('data-doc');
+    if (saved[k]) b.checked = true;
+    b.addEventListener('change', function(){
+      try {
+        var cur = JSON.parse(localStorage.getItem(KEY) || '{}') || {};
+        cur[k] = b.checked; localStorage.setItem(KEY, JSON.stringify(cur));
+      } catch(e){}
+    });
+  });
+})();
+</script>
 </body>
 </html>
