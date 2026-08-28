@@ -30,7 +30,7 @@
 /* ---- エリアヒーロー ---- */
 .area-hero .hero-lead{font-size:16px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:6px;}
 .area-hero h1{font-size:38px;font-weight:900;line-height:1.3;margin-bottom:14px;color:#fff;}
-.area-hero .hl{background:linear-gradient(transparent 58%,rgba(46,144,250,.22) 58%);padding:0 4px;}
+.area-hero .hl{background:linear-gradient(transparent 58%,rgba(20,184,166,.22) 58%);padding:0 4px;}
 .area-hero .page-lead{color:rgba(255,255,255,.85);}
 .area-hero .breadcrumb{color:rgba(255,255,255,.65);}
 .area-hero .breadcrumb a{color:rgba(255,255,255,.85);}
