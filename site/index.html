@@ -29,7 +29,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=31" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=32" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -171,30 +171,24 @@
 
 <main>
 
-  <!-- ============ ヒーロー（写真査定カード型） ============ -->
-  <section class="hero2" aria-labelledby="hero-title">
-    <div class="container hero2-grid">
-      <div class="hero2-copy reveal">
-        <span class="hero2-eyebrow">📷 写真査定でネット完結・全国47都道府県</span>
-        <h1 id="hero-title">愛車を、<span class="hl">写真だけ</span>で<br>かんたん売却。</h1>
-        <p class="hero-sub hero2-sub">出張査定なし・しつこい電話なし。スマホで写真を送るだけ。<br>無料引取り＆手数料0円、最短3営業日でお振込みします。</p>
-        <div class="hero2-cta">
+  <!-- ============ ヒーロー（シミュレーター先行） ============ -->
+  <section class="hero3" aria-labelledby="hero-title">
+    <div class="container hero3-grid">
+      <div class="hero3-copy reveal">
+        <span class="hero3-eyebrow">🔢 まずは今の相場をチェック</span>
+        <h1 id="hero-title">まずは30秒で、<br><span class="hl">今の買取額</span>を知る。</h1>
+        <p class="hero3-sub">車種・年式・走行・状態を選ぶだけ。おおよその買取額がその場で分かります。<br>もちろん無料・しつこい電話なし・全国47都道府県対応。</p>
+        <ul class="hero3-chips">
+          <li>手数料0円</li><li>無料引取り</li><li>最短3営業日入金</li><li>写真査定でネット完結</li>
+        </ul>
+        <div class="hero3-cta">
           <a href="#form" class="btn btn-primary btn-lg">写真で無料査定<span aria-hidden="true"> →</span></a>
-          <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn btn-outline btn-lg">📞 電話で相談</a>
+          <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn btn-outline-w btn-lg">📞 電話で相談</a>
         </div>
-        <p class="cta-micro">＼ 完全無料・かんたん入力 ／</p>
       </div>
-      <div class="hero2-card reveal" aria-hidden="true">
-        <span class="hero2-badge-step">STEP 写真査定</span>
-        <span class="hero2-badge-photo">📷 お客様アップロード写真</span>
-        <div class="hero2-photo" style="background-image:url('assets/img/buymo/hero-assess.jpg?v=1')"></div>
-        <div class="hero2-scrim"></div>
-        <div class="hero2-panel">
-          <div class="hero2-row"><span class="h2n">1</span><span class="h2l">車種・年式</span><span class="h2bar"><i style="width:100%"></i></span></div>
-          <div class="hero2-row"><span class="h2n">2</span><span class="h2l">状態チェック</span><span class="h2bar"><i style="width:82%"></i></span></div>
-          <div class="hero2-row"><span class="h2n">3</span><span class="h2l">相場照合</span><span class="h2bar"><i style="width:64%"></i></span></div>
-          <div class="hero2-quote"><small>写真査定 概算</small><b>¥1,760,000</b></div>
-        </div>
+      <div class="hero3-sim reveal">
+        <p class="hero3-sim-cap">🔢 30秒 かんたん査定シミュレーション<span>選ぶだけで概算がすぐ分かります</span></p>
+        <div id="buymoSim"></div>
       </div>
     </div>
   </section>
@@ -206,16 +200,6 @@
       <div class="stat-b"><span class="num">0<small>円</small></span><p>手数料</p></div>
       <div class="stat-b"><span class="num">写真<small>だけ</small></span><p>査定方法</p></div>
       <div class="stat-b"><span class="num">47<small>都道府県</small></span><p>全国対応</p></div>
-    </div>
-  </section>
-
-  <!-- ============ かんたん査定シミュレーター ============ -->
-  <section class="sim-section" id="sim" aria-labelledby="sim-title">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">SIMULATION</span></div>
-      <h2 id="sim-title" class="section-title">30秒でかんたん査定シミュレーション</h2>
-      <p class="sim-lead">車種クラス・年式・走行距離・状態を選ぶだけ。今のおおよその買取額がすぐ分かります。</p>
-      <div id="buymoSim"></div>
     </div>
   </section>
 

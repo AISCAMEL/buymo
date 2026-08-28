@@ -1221,3 +1221,27 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .hero2-quote small{font-size:11.5px;color:#B9CDE8;font-weight:700;}
 .hero2-quote b{font-size:26px;font-weight:900;color:#fff;}
 @media(max-width:900px){.hero2-grid{grid-template-columns:1fr;gap:28px;}.hero2-card{min-height:340px;}}
+
+/* =========================================================
+   トップ ヒーロー：シミュレーター先行 hero3 ※index専用
+   ========================================================= */
+.hero3{background:linear-gradient(180deg,var(--green-deep,#0A4A44),var(--green-dark,#0B5A54));padding:52px 0 48px;}
+.hero3-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:40px;align-items:center;}
+.hero3-copy{color:#fff;}
+.hero3-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;color:#EAFBF7;
+  background:rgba(255,255,255,.14);padding:7px 14px;border-radius:999px;}
+.hero3-copy h1{font-size:clamp(28px,4.6vw,44px);font-weight:900;line-height:1.2;margin:16px 0 12px;color:#fff;letter-spacing:-.01em;}
+.hero3-copy h1 .hl{position:relative;white-space:nowrap;}
+.hero3-copy h1 .hl::after{content:"";position:absolute;left:-2px;right:-2px;bottom:.08em;height:.34em;
+  background:linear-gradient(90deg,var(--accent,#14B8A6),#7FE0D3);opacity:.5;border-radius:4px;z-index:-1;}
+.hero3-sub{font-size:15.5px;color:#CDEBE6;max-width:29em;}
+.hero3-chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:0;}
+.hero3-chips li{font-size:12px;font-weight:700;color:#EAFBF7;background:rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;}
+.hero3-chips li::before{content:"✓ ";color:#7FE0D3;font-weight:900;}
+.hero3-cta{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
+.btn-outline-w{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.55);}
+.btn-outline-w:hover{background:rgba(255,255,255,.12);}
+.hero3-sim-cap{color:#fff;font-weight:800;font-size:14px;margin:0 0 10px;display:flex;flex-direction:column;}
+.hero3-sim-cap span{font-size:11.5px;font-weight:600;color:#AFD8D1;margin-top:2px;}
+.hero3 .bsim{max-width:none;margin:0;}
+@media(max-width:860px){.hero3-grid{grid-template-columns:1fr;gap:26px;}}
