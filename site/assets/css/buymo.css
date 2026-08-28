@@ -1178,3 +1178,46 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .member-cta-actions .cta-mascot{display:block;width:200px;max-width:60%;height:auto;margin:0 auto 8px;
   filter:drop-shadow(0 12px 22px rgba(20,41,74,.28));}
 @media(max-width:767px){.member-cta-actions .cta-mascot{width:150px;}}
+
+/* =========================================================
+   トップ ヒーロー（写真査定カード型）hero2 ※index専用
+   ========================================================= */
+.hero2{position:relative;padding:56px 0 40px;
+  background:radial-gradient(1100px 520px at 92% -10%, var(--green-pale,#E7F0FA), transparent 60%),
+             linear-gradient(180deg, #fff, var(--green-bg,#F5F9FF));}
+.hero2-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:44px;align-items:center;}
+.hero2-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;
+  color:var(--accent-dark,#1B74D6);background:var(--accent-wash,#E7F1FE);padding:7px 14px;border-radius:999px;letter-spacing:.03em;}
+.hero2 h1{font-size:clamp(30px,5vw,50px);line-height:1.18;font-weight:900;color:var(--green,#1E3A5F);
+  margin:18px 0 14px;letter-spacing:-.01em;}
+.hero2 h1 .hl{position:relative;white-space:nowrap;}
+.hero2 h1 .hl::after{content:"";position:absolute;left:-2px;right:-2px;bottom:.08em;height:.34em;
+  background:linear-gradient(90deg,var(--accent,#2E90FA),#7FD0FF);opacity:.28;border-radius:4px;z-index:-1;}
+.hero2-sub{font-size:16px;color:var(--text-sub,#5A6B84);max-width:32em;margin:0 0 4px;}
+.hero2-cta{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
+.hero2-cta .btn-outline{background:#fff;color:var(--green,#1E3A5F);border:1.5px solid var(--border,#EAECF0);}
+.hero2-cta .btn-outline:hover{border-color:var(--accent,#2E90FA);color:var(--accent-dark,#1B74D6);}
+.hero2 .cta-micro{margin-top:12px;font-size:12.5px;color:var(--text-sub,#5A6B84);font-weight:700;}
+
+.hero2-card{position:relative;border-radius:22px;overflow:hidden;min-height:440px;display:flex;align-items:flex-end;
+  background:linear-gradient(160deg,#2f4d70,#17273e);box-shadow:0 20px 50px rgba(20,41,74,.18);}
+.hero2-photo{position:absolute;inset:0;background-size:cover;background-position:center;}
+.hero2-scrim{position:absolute;left:0;right:0;bottom:0;height:230px;z-index:1;
+  background:linear-gradient(180deg,transparent,rgba(9,18,33,.86));}
+.hero2-badge-step{position:absolute;top:16px;left:16px;z-index:3;background:var(--green,#1E3A5F);color:#fff;
+  font-size:11px;font-weight:800;letter-spacing:.08em;padding:6px 13px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+.hero2-badge-photo{position:absolute;top:16px;right:16px;z-index:3;background:rgba(255,255,255,.92);color:var(--green,#1E3A5F);
+  font-size:11px;font-weight:800;padding:5px 11px;border-radius:8px;}
+.hero2-panel{position:relative;z-index:2;width:100%;margin:14px;padding:15px 16px 16px;border-radius:16px;
+  background:rgba(17,28,49,.55);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.16);}
+.hero2-row{display:flex;align-items:center;gap:10px;font-size:12.5px;color:#EAF2FF;margin-bottom:8px;}
+.hero2-row .h2n{width:20px;height:20px;border-radius:50%;background:rgba(46,144,250,.28);color:#BFE0FF;
+  display:grid;place-items:center;font-size:12px;font-weight:900;flex:none;}
+.hero2-row .h2l{width:78px;flex:none;font-weight:700;}
+.hero2-row .h2bar{flex:1;height:7px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden;}
+.hero2-row .h2bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent,#2E90FA),#7FD0FF);border-radius:99px;}
+.hero2-quote{margin-top:6px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.hero2-quote small{font-size:11.5px;color:#B9CDE8;font-weight:700;}
+.hero2-quote b{font-size:26px;font-weight:900;color:#fff;}
+@media(max-width:900px){.hero2-grid{grid-template-columns:1fr;gap:28px;}.hero2-card{min-height:340px;}}

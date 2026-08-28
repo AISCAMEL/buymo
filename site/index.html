@@ -29,7 +29,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=29" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=30" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -171,27 +171,30 @@
 
 <main>
 
-  <!-- ============ ヒーロー ============ -->
-  <section class="hero" aria-labelledby="hero-title">
-    <!-- hero-art は .hero 直下に配置してフルブリード背景として機能させる -->
-    <div class="hero-art" aria-hidden="true">
-      <picture>
-        <source media="(max-width:640px)" type="image/webp" srcset="assets/img/buymo/hero-photo-mobile.webp?v=4" />
-        <source media="(max-width:640px)" srcset="assets/img/buymo/hero-photo-mobile.jpg?v=4" />
-        <source type="image/webp" srcset="assets/img/buymo/hero-photo.webp?v=4" />
-        <img class="hero-img-main" src="assets/img/buymo/hero-photo.jpg?v=4" alt="" width="2000" height="1116" loading="eager" fetchpriority="high" />
-      </picture>
-    </div>
-    <div class="container hero-inner">
-      <div class="hero-copy reveal">
-        <p class="hero-lead">車買取に、新しいスタイル。</p>
-        <h1 id="hero-title">自宅から<span class="hl">写真を送るだけ</span></h1>
-        <p class="hero-sub">オンラインで売却。手間なし、かんたん。<br>しつこい電話なし・書類は郵送でOK・全国47都道府県対応。</p>
-        <a href="#form" class="btn btn-primary btn-lg">写真で無料査定<span aria-hidden="true">›</span></a>
+  <!-- ============ ヒーロー（写真査定カード型） ============ -->
+  <section class="hero2" aria-labelledby="hero-title">
+    <div class="container hero2-grid">
+      <div class="hero2-copy reveal">
+        <span class="hero2-eyebrow">📷 写真査定でネット完結・全国47都道府県</span>
+        <h1 id="hero-title">愛車を、<span class="hl">写真だけ</span>で<br>かんたん売却。</h1>
+        <p class="hero-sub hero2-sub">出張査定なし・しつこい電話なし。スマホで写真を送るだけ。<br>無料引取り＆手数料0円、最短3営業日でお振込みします。</p>
+        <div class="hero2-cta">
+          <a href="#form" class="btn btn-primary btn-lg">写真で無料査定<span aria-hidden="true"> →</span></a>
+          <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn btn-outline btn-lg">📞 電話で相談</a>
+        </div>
         <p class="cta-micro">＼ 完全無料・かんたん入力 ／</p>
-        <ul class="hero-badges">
-          <li>写真査定OK</li><li>電話なし</li><li>全国対応</li>
-        </ul>
+      </div>
+      <div class="hero2-card reveal" aria-hidden="true">
+        <span class="hero2-badge-step">STEP 写真査定</span>
+        <span class="hero2-badge-photo">📷 お客様アップロード写真</span>
+        <div class="hero2-photo" style="background-image:url('assets/img/buymo/hero-assess.jpg?v=1')"></div>
+        <div class="hero2-scrim"></div>
+        <div class="hero2-panel">
+          <div class="hero2-row"><span class="h2n">1</span><span class="h2l">車種・年式</span><span class="h2bar"><i style="width:100%"></i></span></div>
+          <div class="hero2-row"><span class="h2n">2</span><span class="h2l">状態チェック</span><span class="h2bar"><i style="width:82%"></i></span></div>
+          <div class="hero2-row"><span class="h2n">3</span><span class="h2l">相場照合</span><span class="h2bar"><i style="width:64%"></i></span></div>
+          <div class="hero2-quote"><small>写真査定 概算</small><b>¥1,760,000</b></div>
+        </div>
       </div>
     </div>
   </section>
