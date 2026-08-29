@@ -136,15 +136,28 @@
       <!-- カテゴリフィルター -->
       <div class="col-filter" id="catFilter" role="group" aria-label="カテゴリで絞り込む">
         <button class="col-filter-btn active" data-cat="">すべて</button>
+        <button class="col-filter-btn" data-cat="相場">相場</button>
+        <button class="col-filter-btn" data-cat="事故車">事故車</button>
+        <button class="col-filter-btn" data-cat="手続き">手続き</button>
+        <button class="col-filter-btn" data-cat="タイミング">タイミング</button>
+        <button class="col-filter-btn" data-cat="ネット完結">ネット完結</button>
+        <button class="col-filter-btn" data-cat="軽自動車">軽自動車</button>
       </div>
 
       <!-- 記事グリッド -->
       <div id="colGrid" aria-live="polite" aria-label="記事一覧">
-        <div class="col-loading"><div class="col-spinner" role="status" aria-label="読み込み中"></div></div>
+        <div class="col-grid">
+<article class="col-card" data-cat="相場"><div class="col-card-img"><span aria-hidden="true">📝</span></div><div class="col-card-body"><div class="col-card-meta"><span class="col-cat">相場</span><time class="col-date" datetime="2026-08-28">2026.08.28</time></div><h2 class="col-card-title">車買取相場の調べ方｜年式・走行距離でいくら変わるかを解説</h2><p class="col-excerpt">相場の調べ方3つと、年式・走行距離で価格がどう変わるか、高く売るコツまで解説します。</p></div><div class="col-card-footer"><a class="col-read-more" href="soba.html">続きを読む</a></div></article>
+<article class="col-card" data-cat="事故車"><div class="col-card-img"><span aria-hidden="true">📝</span></div><div class="col-card-body"><div class="col-card-meta"><span class="col-cat">事故車</span><time class="col-date" datetime="2026-08-28">2026.08.28</time></div><h2 class="col-card-title">事故車・不動車の買取相場と、廃車にせず売る方法を徹底解説</h2><p class="col-excerpt">事故車・不動車でも売れる。相場の目安と、廃車費用をかけずに売る手順・注意点を解説。</p></div><div class="col-card-footer"><a class="col-read-more" href="jiko.html">続きを読む</a></div></article>
+<article class="col-card" data-cat="手続き"><div class="col-card-img"><span aria-hidden="true">📝</span></div><div class="col-card-body"><div class="col-card-meta"><span class="col-cat">手続き</span><time class="col-date" datetime="2026-08-28">2026.08.28</time></div><h2 class="col-card-title">車売却の必要書類チェックリスト｜名義変更まで完全ガイド</h2><p class="col-excerpt">普通車・軽自動車別の必要書類を一覧化。名義変更・自動車税の還付金まで迷わないガイド。</p></div><div class="col-card-footer"><a class="col-read-more" href="shorui.html">続きを読む</a></div></article>
+<article class="col-card" data-cat="タイミング"><div class="col-card-img"><span aria-hidden="true">📝</span></div><div class="col-card-body"><div class="col-card-meta"><span class="col-cat">タイミング</span><time class="col-date" datetime="2026-08-28">2026.08.28</time></div><h2 class="col-card-title">車を高く売るタイミングとは？損しない売却時期を月別に解説</h2><p class="col-excerpt">需要が高まる月、車検・年式・走行距離の節目など、高く売れるタイミングを解説します。</p></div><div class="col-card-footer"><a class="col-read-more" href="timing.html">続きを読む</a></div></article>
+<article class="col-card" data-cat="ネット完結"><div class="col-card-img"><span aria-hidden="true">📝</span></div><div class="col-card-body"><div class="col-card-meta"><span class="col-cat">ネット完結</span><time class="col-date" datetime="2026-08-28">2026.08.28</time></div><h2 class="col-card-title">ネット完結の車買取は安全？流れ・メリット・注意点をわかりやすく</h2><p class="col-excerpt">写真査定の仕組みと流れ、メリット・注意点、失敗しない業者の選び方を解説します。</p></div><div class="col-card-footer"><a class="col-read-more" href="net.html">続きを読む</a></div></article>
+<article class="col-card" data-cat="軽自動車"><div class="col-card-img"><span aria-hidden="true">📝</span></div><div class="col-card-body"><div class="col-card-meta"><span class="col-cat">軽自動車</span><time class="col-date" datetime="2026-08-28">2026.08.28</time></div><h2 class="col-card-title">軽トラの買取相場はいくら？年式・走行距離別の目安と高く売るコツ</h2><p class="col-excerpt">農業・商用で人気の軽トラの相場を年式・走行別に。高く売るコツと注意点も紹介。</p></div><div class="col-card-footer"><a class="col-read-more" href="keitora.html">続きを読む</a></div></article>
+        </div>
       </div>
 
       <!-- ページネーション -->
-      <div class="col-pager" id="colPager" aria-label="ページ切り替え" style="display:none;">
+      <div class="col-pager" id="colPager" aria-label="ページ切り替え" hidden style="display:none;">
         <button id="prevBtn" disabled aria-label="前のページ">← 前へ</button>
         <span class="col-pager-info" id="pagerInfo"></span>
         <button id="nextBtn" disabled aria-label="次のページ">次へ →</button>
@@ -215,99 +228,17 @@
 <script src="../assets/js/buymo.js?v=2" defer></script>
 
 <script>
-(function () {
+(function(){
   'use strict';
-  var GAS = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
-  var currentPage = 1;
-  var currentCat  = '';
-  var totalPages  = 1;
-
-  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  function renderCards(items) {
-    var grid = document.getElementById('colGrid');
-    if (!items || items.length === 0) {
-      grid.innerHTML = '<div class="col-empty"><p style="font-size:40px">📝</p><p>まだ記事がありません</p></div>';
-      return;
-    }
-    grid.innerHTML = '<div class="col-grid">' + items.map(function (c) {
-      return '<article class="col-card">' +
-        '<div class="col-card-img"><span aria-hidden="true">🚗</span></div>' +
-        '<div class="col-card-body">' +
-          '<div class="col-card-meta">' +
-            '<span class="col-cat">' + esc(c.category || '未分類') + '</span>' +
-            '<time class="col-date" datetime="' + esc(c.date) + '">' + esc(c.date) + '</time>' +
-          '</div>' +
-          '<h2 class="col-card-title">' + esc(c.title) + '</h2>' +
-          '<p class="col-excerpt">' + esc(c.excerpt) + '</p>' +
-        '</div>' +
-        '<div class="col-card-footer">' +
-          '<a class="col-read-more" href="detail.html?id=' + encodeURIComponent(c.slug || c.id) + '">続きを読む</a>' +
-        '</div>' +
-        '</article>';
-    }).join('') + '</div>';
-  }
-
-  function renderCats(cats) {
-    var filter = document.getElementById('catFilter');
-    var existing = filter.querySelectorAll('[data-cat]:not([data-cat=""])');
-    existing.forEach(function (el) { el.remove(); });
-    cats.forEach(function (cat) {
-      var btn = document.createElement('button');
-      btn.className = 'col-filter-btn';
-      btn.dataset.cat = cat;
-      btn.textContent = cat;
-      filter.appendChild(btn);
-    });
-  }
-
-  function updatePager(page, pages) {
-    var pager   = document.getElementById('colPager');
-    var info    = document.getElementById('pagerInfo');
-    var prevBtn = document.getElementById('prevBtn');
-    var nextBtn = document.getElementById('nextBtn');
-    if (pages <= 1) { pager.style.display = 'none'; return; }
-    pager.style.display = '';
-    info.textContent = page + ' / ' + pages + ' ページ';
-    prevBtn.disabled = page <= 1;
-    nextBtn.disabled = page >= pages;
-  }
-
-  function load(page, cat) {
-    var grid = document.getElementById('colGrid');
-    grid.innerHTML = '<div class="col-loading"><div class="col-spinner" role="status" aria-label="読み込み中"></div></div>';
-    var url = GAS + '?action=list&limit=12&page=' + page + (cat ? '&cat=' + encodeURIComponent(cat) : '');
-    fetch(url)
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        totalPages = d.pages || 1;
-        renderCards(d.items || []);
-        if (cat === '' && page === 1 && d.categories) renderCats(d.categories);
-        updatePager(d.page || 1, totalPages);
-      })
-      .catch(function () {
-        grid.innerHTML = '<div class="col-empty"><p>記事の読み込みに失敗しました。しばらく後にお試しください。</p></div>';
-      });
-  }
-
-  document.getElementById('catFilter').addEventListener('click', function (e) {
-    var btn = e.target.closest('.col-filter-btn');
-    if (!btn) return;
-    document.querySelectorAll('.col-filter-btn').forEach(function (b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    currentCat  = btn.dataset.cat || '';
-    currentPage = 1;
-    load(currentPage, currentCat);
+  var filter=document.getElementById('catFilter');
+  var cards=Array.prototype.slice.call(document.querySelectorAll('#colGrid .col-card'));
+  filter.addEventListener('click',function(e){
+    var b=e.target.closest('.col-filter-btn'); if(!b) return;
+    filter.querySelectorAll('.col-filter-btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    var cat=b.getAttribute('data-cat')||'';
+    cards.forEach(function(c){ c.style.display=(!cat||c.getAttribute('data-cat')===cat)?'':'none'; });
   });
-
-  document.getElementById('prevBtn').addEventListener('click', function () {
-    if (currentPage > 1) { currentPage--; load(currentPage, currentCat); window.scrollTo(0,0); }
-  });
-  document.getElementById('nextBtn').addEventListener('click', function () {
-    if (currentPage < totalPages) { currentPage++; load(currentPage, currentCat); window.scrollTo(0,0); }
-  });
-
-  load(1, '');
 })();
 </script>
 </body>
