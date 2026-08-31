@@ -123,8 +123,8 @@ img{max-width:100%;display:block;}
 /* ============ ヘッダー ============ */
 .site-header{
   position:sticky;top:0;z-index:100;
-  background:rgba(255,255,255,.95);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  /* スクロール高速化：backdrop-filter(blur)は毎フレーム再描画で重いため不透明背景に変更 */
+  background:#ffffff;
   border-bottom:1px solid var(--border);
 }
 .header-inner{height:72px;display:flex;align-items:center;gap:24px;}

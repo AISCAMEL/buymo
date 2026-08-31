@@ -7,14 +7,14 @@
 <meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=36" />
-<link rel="stylesheet" href="assets/css/board.css" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=3" />
 </head>
 <body>
 <script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
 <header class="portal-header">
   <div class="container">
-    <a href="portal-login.html" class="logo"><span aria-hidden="true">🐮</span> BUYMO</a>
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
     <span class="portal-title">本部</span>
     <nav class="portal-nav" id="hqNav"></nav>
     <a href="portal-login.html" class="portal-logout">ログアウト</a>
@@ -33,10 +33,15 @@
     <div class="add-bar">
       <form id="addStore">
         <input class="ac-name" id="sName" type="text" placeholder="店名（必須）" />
+        <input id="sManager" type="text" placeholder="担当者名" />
         <input id="sArea" type="text" placeholder="エリア（例：福島県いわき市）" />
         <input id="sTel" type="text" placeholder="連絡先電話" />
         <input id="sEmail" type="email" placeholder="通知メール" />
-        <input id="sSlack" type="url" placeholder="Slack Webhook URL（任意）" style="min-width:260px;" />
+        <input id="sSlack" type="url" placeholder="Slack Webhook URL（任意）" style="min-width:220px;" />
+        <label class="af-date">加盟日<input id="sJoin" type="date" /></label>
+        <label class="af-date">契約期限<input id="sExpire" type="date" /></label>
+        <input id="sRenewal" type="text" placeholder="更新（例：自動更新／要更新）" />
+        <input id="sPenalty" type="text" placeholder="ペナルティ（例：0件）" />
         <button type="submit" class="btn btn-primary">加盟店を追加</button>
       </form>
     </div>
@@ -86,7 +91,7 @@
 </style>
 
 <script src="assets/js/hq-common.js"></script>
-<script src="assets/js/hq-stores.js" defer></script>
+<script src="assets/js/hq-stores.js?v=2" defer></script>
 <script>
 (function () {
   var body = document.getElementById('paBody'), msg = document.getElementById('paMsg');
