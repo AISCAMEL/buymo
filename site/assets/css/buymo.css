@@ -1154,13 +1154,15 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 /* =========================================================
    新トップ組み替え：買取事例＝画像主役の横スライダー
    ========================================================= */
-.results .result-grid{display:flex !important;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;
+/* スライダー化はトップの画像主役カード（.result-media を含む）だけに限定。
+   ジャンルページの「買取価格の目安」(.result-photo の3枚) は通常の中央グリッドのまま。 */
+.results .result-grid:has(.result-media){display:flex !important;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;
   grid-template-columns:none !important;padding:6px 2px 18px;scrollbar-width:none;}
-.results .result-grid::-webkit-scrollbar{display:none;}
-.result-card{flex:0 0 300px;scroll-snap-align:start;text-align:left !important;padding:0 !important;
+.results .result-grid:has(.result-media)::-webkit-scrollbar{display:none;}
+.result-grid:has(.result-media) .result-card{flex:0 0 300px;scroll-snap-align:start;text-align:left !important;padding:0 !important;
   background:var(--cream,#fff);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
   box-shadow:var(--shadow);}
-.result-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+.result-grid:has(.result-media) .result-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
 .result-media{position:relative;aspect-ratio:4/3;background:var(--green-pale);}
 .result-media .result-photo{width:100%;height:100%;object-fit:cover;margin:0 !important;border-radius:0 !important;}
 .result-emoji{width:100%;height:100%;display:grid;place-items:center;font-size:64px;}
