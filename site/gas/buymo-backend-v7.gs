@@ -2222,14 +2222,19 @@ function getOrCreateFolder(parentId, name) {
 }
 function savePhotosToDrive(photos, label) {
   if (!photos || photos.length === 0) return [];
+  // すべて親フォルダ1つ（BUYMO査定写真）に集約。日付で分けず、
+  // 1申込＝「名前_日付_時刻」フォルダにまとめる（探しやすい・重複しない）
   var root  = getOrCreateFolder(null, DRIVE_FOLDER_NAME);
-  var today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd');
-  var day   = getOrCreateFolder(root.getId(), today);
-  var sub   = getOrCreateFolder(day.getId(), label || 'noname');
+  var stamp = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd_HH-mm');
+  var who   = String(label || 'noname').replace(/[\/\\:\*\?\"\<\>\|]/g, '_');
+  var folderName = who + '_' + stamp;                 // 例: 山田太郎_2026-08-31_15-30
+  var sub   = getOrCreateFolder(root.getId(), folderName);
   var urls  = [];
   photos.forEach(function (p, i) {
     try {
-      var blob = Utilities.newBlob(Utilities.base64Decode(p.data), p.type || 'image/jpeg', (i + 1) + '_' + (p.name || 'photo.jpg'));
+      // ファイル名にも 名前_日時_連番 を付与（フォルダ外に出しても分かる）
+      var fname = who + '_' + stamp + '_' + (i + 1) + '_' + (p.name || 'photo.jpg');
+      var blob = Utilities.newBlob(Utilities.base64Decode(p.data), p.type || 'image/jpeg', fname);
       var file = sub.createFile(blob);
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       urls.push(file.getUrl());
