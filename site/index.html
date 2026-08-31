@@ -29,7 +29,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=32" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=33" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -203,6 +203,32 @@
     </div>
   </section>
 
+  <!-- ============ キャンペーンバナー（3つの約束） ============ -->
+  <section class="campaign" aria-labelledby="campaign-title">
+    <div class="container">
+      <div class="eyebrow-wrap"><span class="eyebrow">CAMPAIGN</span></div>
+      <h2 id="campaign-title" class="section-title">BUYMOの3つの約束</h2>
+      <div class="banners">
+        <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="cban line">
+          <img class="cban-img" src="assets/img/buymo/banner-line.jpg" alt="" loading="lazy" onerror="this.remove()" />
+          <span class="cban-t">LINEで相談</span>
+          <span class="cban-s">友だち追加で、かんたん査定・ご相談。写真もそのまま送れます。</span>
+        </a>
+        <a href="#form" class="cban speed">
+          <span class="cban-badge">手数料0円</span>
+          <img class="cban-img" src="assets/img/buymo/banner-speed.jpg" alt="" loading="lazy" onerror="this.remove()" />
+          <span class="cban-t">スピード入金</span>
+          <span class="cban-s">書類・車両を確認後、3営業日以内に確実にお振込みします。</span>
+        </a>
+        <a href="area/" class="cban nation">
+          <img class="cban-img" src="assets/img/buymo/banner-nationwide.jpg" alt="" loading="lazy" onerror="this.remove()" />
+          <span class="cban-t">全国出張査定</span>
+          <span class="cban-s">北海道から沖縄まで、全国47都道府県に対応しています。</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 今月の買取実績ティッカー ============ -->
   <section class="buy-ticker-section" aria-labelledby="buy-ticker-heading">
     <div class="container">
@@ -227,25 +253,25 @@
       <div class="grid grid-4 feature-grid">
         <article class="card feature-card reveal">
           <span class="badge-num">1</span>
-          <div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/icon-photo.jpg" alt="" /></div>
+          <div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7l1.5-2.5h3L15 7"/><circle cx="12" cy="13.5" r="3.2"/></svg></div>
           <h3>写真だけで査定</h3>
           <p>スマホで撮った写真を送るだけ。スタッフが来宅する必要はありません。</p>
         </article>
         <article class="card feature-card reveal">
           <span class="badge-num">2</span>
-          <div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/icon-nocall.jpg" alt="" /></div>
+          <div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h3l1.6 4-2 1.5a12 12 0 005.4 5.4l1.5-2 4 1.6V19a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/><path d="M20.5 3.5l-17 17"/></svg></div>
           <h3>しつこい電話なし</h3>
           <p>査定結果はメールでご連絡。お断りの際もしつこいお電話は一切しません。</p>
         </article>
         <article class="card feature-card reveal">
           <span class="badge-num">3</span>
-          <div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/icon-japan.jpg" alt="" /></div>
+          <div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
           <h3>全国47都道府県対応</h3>
           <p>北海道から沖縄まで、全国どこにお住まいでも対応いたします。</p>
         </article>
         <article class="card feature-card reveal">
           <span class="badge-num">4</span>
-          <div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/icon-free.jpg" alt="" /></div>
+          <div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12l2.4 2.4 4.6-5"/></svg></div>
           <h3>手数料はいただきません</h3>
           <p>査定料・手続き代行費・その他すべての手数料が完全無料です。</p>
         </article>
@@ -317,12 +343,12 @@
       <div class="eyebrow-wrap"><span class="eyebrow">REASON</span></div>
       <h2 id="reasons-title" class="section-title">BUYMOが選ばれる理由</h2>
       <div class="grid grid-3 reason-grid">
-        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/reason-nationwide.png" alt="" /></div><h3>全国対応</h3><p>全国どこでも対応可能。お近くのスタッフが伺います。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/reason-fast.png" alt="" /></div><h3>丁寧・確実に入金</h3><p>書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/reason-highprice.png" alt="" /></div><h3>高価買取</h3><p>独自ルートで無駄を省き、相場より高い査定を実現。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/reason-free.png" alt="" /></div><h3>手数料無料</h3><p>査定料・手続き代行料など各種手数料は一切無料。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/reason-photo.png" alt="" /></div><h3>写真査定でネット完結</h3><p>スマホで写真を送るだけ。来店・訪問なしで査定完了。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><img src="assets/img/buymo/reason-secure-pay.png" alt="" /></div><h3>丁寧確認・確実入金</h3><p>書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。</p></article>
+        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0114 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div><h3>全国対応</h3><p>全国どこでも対応可能。お近くのスタッフが伺います。</p></article>
+        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>丁寧・確実に入金</h3><p>書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。</p></article>
+        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></div><h3>高価買取</h3><p>独自ルートで無駄を省き、相場より高い査定を実現。</p></article>
+        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12l2.4 2.4 4.6-5"/></svg></div><h3>手数料無料</h3><p>査定料・手続き代行料など各種手数料は一切無料。</p></article>
+        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M9.5 6h5M10 11h4M12 18h.01"/></svg></div><h3>写真査定でネット完結</h3><p>スマホで写真を送るだけ。来店・訪問なしで査定完了。</p></article>
+        <article class="card reason-card reveal"><div class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 2.5h8l4 4V21.5H6z"/><path d="M14 2.5v4h4"/><path d="M9 14l2 2 4-4"/></svg></div><h3>丁寧確認・確実入金</h3><p>書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。</p></article>
       </div>
       <div class="section-mascot sm-price" aria-hidden="true">🐮</div>
     </div>
