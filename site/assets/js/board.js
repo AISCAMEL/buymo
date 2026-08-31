@@ -124,8 +124,9 @@
         var claimBadge = hasActiveClaim ? '<span class="kb-claim">⚠️' + HQ.esc(c.claimStatus) + '</span>' : '';
         var saleBadge = needsSale ? '<span class="kb-sale-alert">🚨売却未申請</span>' : '';
         var carBadge = (c.car && (c.car.maker || c.car.model || c.car.year)) ? '<span class="kb-car">📋車両情報</span>' : '';
+        var photoBadge = (c.carPhotos && c.carPhotos.length) ? '<span class="kb-photo">📷' + c.carPhotos.length + '枚</span>' : '';
         card.innerHTML = '<div class="kb-card-top"><span class="kb-id">' + c.id + '</span>' +
-          (c.genre ? '<span class="kb-tag">' + HQ.esc(c.genre) + '</span>' : '') + staleTag + claimBadge + saleBadge + carBadge + hist + '</div>' +
+          (c.genre ? '<span class="kb-tag">' + HQ.esc(c.genre) + '</span>' : '') + staleTag + claimBadge + saleBadge + carBadge + photoBadge + hist + '</div>' +
           '<div class="kb-name">' + HQ.esc(c.name || '') + '</div>' +
           '<div class="kb-meta">' + (c.date ? '<span class="kb-date">📅' + HQ.esc(c.date) + '</span>' : '') + HQ.esc(c.assignee || '担当未定') + (c.amount ? '・' + HQ.yen(c.amount) : '') + '</div>' +
           (c.memo ? '<div class="kb-memo">' + HQ.esc(c.memo) + '</div>' : '');
