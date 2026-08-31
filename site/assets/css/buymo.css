@@ -1303,3 +1303,26 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .cban .cban-badge{position:absolute;top:14px;left:14px;z-index:2;
   background:var(--gold);color:var(--on-gold);font-weight:900;font-size:12px;padding:5px 12px;border-radius:999px;}
 @media(max-width:760px){.campaign .banners{grid-template-columns:1fr;}}
+
+/* ============================================================
+   配色バランス：案2 — ティール＋ネイビー＋ゴールドの3色で引き締め
+   ============================================================ */
+:root{--navy:#14425f;--navy-dark:#0d2f45;}
+
+/* 統一アイコン：偶数番をネイビーに（ティールと交互で色に緩急） */
+.feature-card:nth-child(even) .card-ico,
+.reason-card:nth-child(even) .card-ico{
+  background:linear-gradient(145deg,var(--navy),var(--navy-dark));
+  box-shadow:0 10px 20px rgba(20,66,95,.28);
+}
+
+/* 数字バッジ：ゴールドで一点アクセント（濃い文字で可読性確保） */
+.badge-num{background:var(--gold);color:var(--on-gold);}
+
+/* キャンペーンバナー：teal / navy / teal→navy（LINEはティール寄り） */
+.cban.line{background:linear-gradient(135deg,var(--green),var(--green-dark));}
+.cban.speed{background:linear-gradient(135deg,var(--navy),var(--navy-dark));}
+.cban.nation{background:linear-gradient(135deg,var(--green-dark),var(--navy));}
+
+/* 会員バッジ：ネイビーで信頼感 */
+.member-badge{background:var(--navy);color:#fff;}
