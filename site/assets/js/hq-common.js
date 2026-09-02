@@ -66,6 +66,26 @@ window.HQ = (function () {
       body: JSON.stringify({ type: 'case_delete', token: authToken(), id: id }) }).catch(function () {});
   }
   function authToken() { return (window.AUTH && AUTH.token) ? AUTH.token() : ''; }
+
+  /* ===== 紹介手数料（リード引き受け 1件¥1,000）=====
+     加盟店が案件を引き受けたら1件分を記録。localStorageで即時管理し、
+     GAS接続時は type:'referral_fee' も送信（サーバー側で月末請求に集計）。 */
+  function loadReferrals() { try { return JSON.parse(localStorage.getItem('buymo_referrals')) || []; } catch (e) { return []; } }
+  function saveReferrals(a) { try { localStorage.setItem('buymo_referrals', JSON.stringify(a)); } catch (e) {} }
+  function getReferrals(partner) { var a = loadReferrals(); return partner ? a.filter(function (r) { return r.partner === partner; }) : a; }
+  function addReferral(partner, caseId, amount) {
+    var a = loadReferrals();
+    if (a.some(function (r) { return String(r.caseId) === String(caseId); })) return false; // 1案件1回
+    var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+    var rec = { partner: partner || '', caseId: caseId, amount: Number(amount) || 1000,
+      date: d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()),
+      month: d.getFullYear() + '-' + p(d.getMonth() + 1) };
+    a.push(rec); saveReferrals(a);
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'referral_fee', token: authToken(), partner: rec.partner, caseId: caseId, amount: rec.amount, date: rec.date }) }).catch(function () {});
+    return true;
+  }
+
   function postCase(c) {
     if (!ENDPOINT) return;
     fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -226,6 +246,7 @@ window.HQ = (function () {
     var r = (window.AUTH && AUTH.role) ? AUTH.role() : null;
     var items = (r === 'partner') ? [
       ['board', '案件ボード', 'hq.html?role=partner'],
+      ['leadmarket', '案件マーケット', 'partner-leads.html'],
       ['sales', '売上・請求', 'partner-sales.html'],
       ['info', '現場サポート', 'partner-info.html'],
       ['downloads', 'ダウンロード', 'partner-downloads.html'],
@@ -255,6 +276,7 @@ window.HQ = (function () {
   return {
     ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON,
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
+    addReferral: addReferral, getReferrals: getReferrals,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,

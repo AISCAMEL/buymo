@@ -224,9 +224,11 @@
     var sales = salesFor().filter(function (r) { return yearOf(r.at) === y; });
     var exps = getExpenses().filter(function (v) { return yearOf(v.date) === y; });
     var invs = getInvoices().filter(function (v) { return yearOf(v.date) === y; });
+    var refs = HQ.getReferrals(who).filter(function (r) { return yearOf(r.date) === y; });
     var sumNet = sales.reduce(function (a, r) { return a + (Number(r.partnerNet) || 0); }, 0);
     var sumSale = sales.reduce(function (a, r) { return a + (Number(r.salePrice) || 0); }, 0);
-    var sumExp = exps.reduce(function (a, v) { return a + (Number(v.amount) || 0); }, 0);
+    var sumRef = refs.reduce(function (a, r) { return a + (Number(r.amount) || 0); }, 0);
+    var sumExp = exps.reduce(function (a, v) { return a + (Number(v.amount) || 0); }, 0) + sumRef;
     var rows = [];
     rows.push(['BUYMO 確定申告用データ', (who || (isHQ ? '本部' : '')), y + '年']);
     rows.push([]);
@@ -243,6 +245,7 @@
     rows.push(['【経費 明細】']);
     rows.push(['日付', '区分', '金額', '案件ID', 'メモ']);
     exps.forEach(function (v) { rows.push([v.date, v.cat, v.amount, v.caseId || '', v.memo || '']); });
+    refs.forEach(function (r) { rows.push([r.date, '紹介手数料', r.amount, r.caseId || '', 'リード引き受け（本部）']); });
     rows.push([]);
     rows.push(['【請求書 明細】']);
     rows.push(['日付', '種別', '件名', '金額', '支払期日', '状態']);
@@ -250,9 +253,22 @@
     dl('buymo-kakutei-' + y, rows);
   });
 
+  /* ================= 紹介手数料（当月バナー） ================= */
+  function renderRefBanner() {
+    var m = (new Date()).getFullYear() + '-' + ('0' + ((new Date()).getMonth() + 1)).slice(-2);
+    var refs = HQ.getReferrals(who).filter(function (r) { return r.month === m; });
+    var fee = refs.reduce(function (a, r) { return a + (Number(r.amount) || 0); }, 0);
+    var el = document.getElementById('refBanner');
+    if (!el) return;
+    el.innerHTML = refs.length
+      ? '<div style="background:#FFF7E6;border:1px solid #F0C675;border-radius:12px;padding:14px 18px;margin-bottom:22px;font-size:13px;color:#8a5a00;line-height:1.7;">🤝 今月の紹介手数料（リード引き受け）：<b>' + refs.length + '件・' + yen(fee) + '</b> — 月末に本部よりまとめてご請求されます（案件マーケットからの引き受け分）。</div>'
+      : '';
+  }
+
   /* ================= 初期化 ================= */
   renderExp();
   renderInv();
+  renderRefBanner();
   refreshTaxYears();
   HQ.loadSales(function (list) { allSales = list || []; renderSales(); refreshTaxYears(); });
 })();
