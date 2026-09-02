@@ -226,6 +226,7 @@ window.HQ = (function () {
       ['board', '案件ボード', 'hq.html?role=hq'],
       ['leads', 'リード', 'hq-leads.html'],
       ['stores', '加盟店', 'hq-stores.html'],
+      ['payments', '支払い管理', 'hq-payments.html'],
       ['notices', 'お知らせ', 'hq-notices.html'],
       ['column', 'コラム', 'hq-column.html'],
       ['academy', 'アカデミー管理', 'hq-academy.html'],
