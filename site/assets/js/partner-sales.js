@@ -205,8 +205,54 @@
     dl('buymo-expenses', rows);
   });
 
+  /* ================= 確定申告用 一括ダウンロード ================= */
+  function yearOf(d) { var m = String(d || '').match(/(\d{4})/); return m ? m[1] : ''; }
+  function refreshTaxYears() {
+    var yrs = {};
+    salesFor().forEach(function (r) { var y = yearOf(r.at); if (y) yrs[y] = 1; });
+    getExpenses().forEach(function (v) { var y = yearOf(v.date); if (y) yrs[y] = 1; });
+    getInvoices().forEach(function (v) { var y = yearOf(v.date); if (y) yrs[y] = 1; });
+    yrs[String(new Date().getFullYear())] = 1;
+    var list = Object.keys(yrs).sort().reverse();
+    var sel = document.getElementById('taxYear');
+    var cur = sel.value;
+    sel.innerHTML = list.map(function (y) { return '<option value="' + y + '">' + y + '年</option>'; }).join('');
+    if (cur && list.indexOf(cur) >= 0) sel.value = cur;
+  }
+  document.getElementById('btnTax').addEventListener('click', function () {
+    var y = document.getElementById('taxYear').value;
+    var sales = salesFor().filter(function (r) { return yearOf(r.at) === y; });
+    var exps = getExpenses().filter(function (v) { return yearOf(v.date) === y; });
+    var invs = getInvoices().filter(function (v) { return yearOf(v.date) === y; });
+    var sumNet = sales.reduce(function (a, r) { return a + (Number(r.partnerNet) || 0); }, 0);
+    var sumSale = sales.reduce(function (a, r) { return a + (Number(r.salePrice) || 0); }, 0);
+    var sumExp = exps.reduce(function (a, v) { return a + (Number(v.amount) || 0); }, 0);
+    var rows = [];
+    rows.push(['BUYMO 確定申告用データ', (who || (isHQ ? '本部' : '')), y + '年']);
+    rows.push([]);
+    rows.push(['【収支サマリー】']);
+    rows.push(['売却額 合計', sumSale]);
+    rows.push(['加盟店 受取額 合計（収入）', sumNet]);
+    rows.push(['経費 合計', sumExp]);
+    rows.push(['差引（受取−経費）', sumNet - sumExp]);
+    rows.push([]);
+    rows.push(['【販売（売却申請）明細】']);
+    rows.push(['申請日', '案件ID', 'お名前', '売却方法', '売却額', '粗利', '本部手数料', '受取額', '状態']);
+    sales.forEach(function (r) { rows.push([r.at, r.id, r.name, r.method, r.salePrice, r.profit, r.hqFee, r.partnerNet, r.status]); });
+    rows.push([]);
+    rows.push(['【経費 明細】']);
+    rows.push(['日付', '区分', '金額', '案件ID', 'メモ']);
+    exps.forEach(function (v) { rows.push([v.date, v.cat, v.amount, v.caseId || '', v.memo || '']); });
+    rows.push([]);
+    rows.push(['【請求書 明細】']);
+    rows.push(['日付', '種別', '件名', '金額', '支払期日', '状態']);
+    invs.forEach(function (v) { rows.push([v.date, v.type, v.title, v.amount, v.due || '', v.status]); });
+    dl('buymo-kakutei-' + y, rows);
+  });
+
   /* ================= 初期化 ================= */
   renderExp();
   renderInv();
-  HQ.loadSales(function (list) { allSales = list || []; renderSales(); });
+  refreshTaxYears();
+  HQ.loadSales(function (list) { allSales = list || []; renderSales(); refreshTaxYears(); });
 })();
