@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>加盟店 支払い・積立管理｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=3" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>加盟店 支払い・積立管理</h1>
+      <button id="btnCsv" class="btn btn-primary btn-csv" type="button">⬇ CSV出力</button>
+      <img class="page-mascot" src="assets/img/buymo/58_電卓円建て計算ポーズ.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
+    </div>
+    <p class="portal-sub">加盟店ごとの入金履歴・毎月の積立・契約残高を管理。途中解約時の一括請求額もすぐに算出できます。</p>
+
+    <!-- 全加盟店サマリー -->
+    <div class="pay-overview-wrap">
+      <table class="pay-overview" id="ovTable">
+        <thead>
+          <tr>
+            <th>加盟店</th><th>加盟日</th><th>月額</th><th>契約</th>
+            <th class="num">契約総額</th><th class="num">既払い</th><th class="num">残額</th><th>進捗</th>
+          </tr>
+        </thead>
+        <tbody id="ovBody"></tbody>
+      </table>
+    </div>
+
+    <!-- 選択中の加盟店 詳細 -->
+    <div class="pay-detail" id="detail" hidden>
+      <div class="pd-head">
+        <h2 id="pdName">—</h2>
+        <select id="storeSel" class="pd-sel"></select>
+      </div>
+
+      <!-- 契約設定 -->
+      <div class="pd-card">
+        <h3>契約設定</h3>
+        <div class="pd-fields">
+          <label>加盟日<input type="date" id="cJoin" /></label>
+          <label>契約年数（年）<input type="number" id="cYears" min="1" max="30" step="1" /></label>
+          <label>月額積立（円）<input type="number" id="cMonthly" min="0" step="1000" /></label>
+          <label>契約満了日<input type="text" id="cExpire" readonly class="ro" /></label>
+        </div>
+      </div>
+
+      <!-- サマリー -->
+      <div class="pd-summary" id="summary"></div>
+
+      <!-- 解約シミュレーション -->
+      <div class="pd-card cancel-sim">
+        <h3>途中解約シミュレーション（一括請求額）</h3>
+        <div class="pd-fields">
+          <label>解約予定日<input type="date" id="cancelDate" /></label>
+        </div>
+        <div class="cancel-result" id="cancelResult"></div>
+      </div>
+
+      <!-- 入金履歴 -->
+      <div class="pd-card">
+        <h3>入金履歴</h3>
+        <form class="pay-add" id="payAdd">
+          <label>入金日<input type="date" id="pDate" required /></label>
+          <label>金額（円）<input type="number" id="pAmount" min="0" step="1000" placeholder="30000" required /></label>
+          <label>メモ<input type="text" id="pMemo" placeholder="銀行振込 など" /></label>
+          <button type="submit" class="btn btn-primary">入金を記録</button>
+        </form>
+        <div class="hq-table-wrap">
+          <table class="pay-table" id="payTable">
+            <thead><tr><th>入金日</th><th class="num">金額</th><th class="num">累計</th><th>メモ</th><th>操作</th></tr></thead>
+            <tbody id="payBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+.pay-overview-wrap{overflow-x:auto;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:6px;margin-bottom:22px;}
+.pay-overview{width:100%;border-collapse:collapse;font-size:13.5px;min-width:720px;}
+.pay-overview th,.pay-overview td{padding:11px 12px;border-bottom:1px solid #eef1f6;text-align:left;white-space:nowrap;}
+.pay-overview thead th{background:#f4f6fa;color:#555;font-weight:700;}
+.pay-overview th.num,.pay-overview td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.pay-overview tbody tr{cursor:pointer;}
+.pay-overview tbody tr:hover{background:#f1fbf9;}
+.pay-overview tbody tr.sel{background:#DCF5F1;}
+.ov-bar{display:inline-block;width:90px;height:8px;border-radius:6px;background:#eef1f6;overflow:hidden;vertical-align:middle;margin-right:6px;}
+.ov-bar span{display:block;height:100%;background:var(--green,#0F766E);}
+.ov-remain{color:#C0392B;font-weight:900;}
+
+.pd-head{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+.pd-head h2{font-size:20px;font-weight:900;color:var(--navy,#14425f);margin:0;}
+.pd-sel{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;font-family:inherit;margin-left:auto;}
+.pd-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:18px;}
+.pd-card h3{font-size:15px;font-weight:900;color:var(--navy,#14425f);margin:0 0 14px;}
+.pd-fields{display:flex;flex-wrap:wrap;gap:12px 16px;}
+.pd-fields label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#666;font-weight:700;}
+.pd-fields input{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;font-family:inherit;min-width:150px;}
+.pd-fields input.ro{background:#f4f6fa;color:#333;}
+
+.pd-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+@media(max-width:760px){.pd-summary{grid-template-columns:1fr 1fr;}}
+.sum-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:16px 18px;}
+.sum-card .lbl{font-size:11.5px;color:#888;font-weight:700;}
+.sum-card .val{font-size:24px;font-weight:900;color:var(--navy,#14425f);margin-top:4px;font-variant-numeric:tabular-nums;}
+.sum-card.paid .val{color:var(--green,#0F766E);}
+.sum-card.remain .val{color:#C0392B;}
+.sum-card .sub{font-size:11px;color:#999;margin-top:2px;}
+.sum-progress{grid-column:1/-1;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:14px 18px;}
+.sum-progress .pbar{height:14px;border-radius:8px;background:#eef1f6;overflow:hidden;margin-top:8px;}
+.sum-progress .pbar span{display:block;height:100%;background:linear-gradient(90deg,var(--green,#0F766E),var(--accent,#14B8A6));}
+.sum-progress .pmeta{display:flex;justify-content:space-between;font-size:12px;color:#666;font-weight:700;margin-top:6px;}
+
+.cancel-sim .cancel-result{margin-top:12px;}
+.cancel-box{background:#FDF3F2;border:1px solid #f3c9c4;border-radius:12px;padding:16px 18px;}
+.cancel-box .big{font-size:30px;font-weight:900;color:#C0392B;font-variant-numeric:tabular-nums;}
+.cancel-box .desc{font-size:12.5px;color:#7a4c48;margin-top:6px;line-height:1.7;}
+
+.pay-add{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end;margin-bottom:16px;}
+.pay-add label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#666;font-weight:700;}
+.pay-add input{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;font-family:inherit;}
+.pay-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+.pay-table th,.pay-table td{padding:9px 12px;border-bottom:1px solid #eef1f6;text-align:left;}
+.pay-table thead th{background:#f4f6fa;color:#555;font-weight:700;}
+.pay-table th.num,.pay-table td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.pay-del{border:1px solid #C0392B;color:#C0392B;background:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;}
+.pay-empty{color:#999;text-align:center;padding:14px;}
+.hq-table-wrap{overflow-x:auto;}
+</style>
+
+<script src="assets/js/hq-common.js"></script>
+<script src="assets/js/hq-payments.js?v=1" defer></script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>
