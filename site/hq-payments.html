@@ -74,6 +74,25 @@
         <div class="cancel-result" id="cancelResult"></div>
       </div>
 
+      <!-- 加盟店契約書 発行 -->
+      <div class="pd-card agreement">
+        <h3>加盟店契約書の発行</h3>
+        <p class="ag-note">契約開始日・契約年数・月額・中途解約の残存一括請求などを自動で条項に反映します。以下は契約書に載る補足項目です（未入力可）。</p>
+        <div class="pd-fields">
+          <label>加盟店 住所<input id="aAddr" placeholder="〒000-0000 ○○県○○市…" /></label>
+          <label>加盟店 代表者名<input id="aRep" placeholder="例：山田 太郎" /></label>
+          <label>加盟金（初期費用・円）<input id="aInitFee" type="number" min="0" step="10000" placeholder="0" /></label>
+          <label>更新条件<input id="aRenewal" placeholder="1年ごとに自動更新" /></label>
+          <label>別途違約金<input id="aPenalty" placeholder="なし／月額の◯ヶ月分 等" /></label>
+          <label>合意管轄裁判所<input id="aCourt" placeholder="福島地方裁判所いわき支部" /></label>
+          <label>支払期日（毎月）<input id="aPayday" placeholder="末日" /></label>
+        </div>
+        <div class="doc-btns" style="margin-top:14px;">
+          <button class="btn btn-primary" id="btnAgreement" type="button">📄 加盟店契約書をA4で発行・印刷</button>
+        </div>
+        <p class="ag-warn">※ 本書は雛形です。実運用前に弁護士等の専門家によるリーガルチェックを推奨します。</p>
+      </div>
+
       <!-- 入金履歴 -->
       <div class="pd-card">
         <h3>入金履歴</h3>
@@ -145,10 +164,12 @@
 .pay-del{border:1px solid #C0392B;color:#C0392B;background:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;}
 .pay-empty{color:#999;text-align:center;padding:14px;}
 .hq-table-wrap{overflow-x:auto;}
+.agreement .ag-note{font-size:12.5px;color:#666;margin:0 0 14px;line-height:1.7;}
+.agreement .ag-warn{font-size:11.5px;color:#C0392B;margin-top:10px;}
 </style>
 
 <script src="assets/js/hq-common.js"></script>
-<script src="assets/js/hq-payments.js?v=1" defer></script>
+<script src="assets/js/hq-payments.js?v=2" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
