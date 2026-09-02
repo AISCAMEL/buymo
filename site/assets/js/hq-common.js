@@ -45,6 +45,15 @@ window.HQ = (function () {
   }
   function getCasesLS() { return readLS(CKEY, seedCases); }
   function saveCases(arr) { try { localStorage.setItem(CKEY, JSON.stringify(arr)); } catch (e) {} }
+  /* 売却申請（清算）履歴を GAS「売却申請」シートから取得。未接続時は空配列。 */
+  function loadSales(cb) {
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=sales')
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb(Array.isArray(d) ? d : []); })
+        .catch(function () { cb([]); });
+    } else { cb([]); }
+  }
   function upsertCase(c) {
     var arr = getCasesLS();
     var i = -1, k; for (k = 0; k < arr.length; k++) if (arr[k].id === c.id) { i = k; break; }
@@ -217,6 +226,8 @@ window.HQ = (function () {
     var r = (window.AUTH && AUTH.role) ? AUTH.role() : null;
     var items = (r === 'partner') ? [
       ['board', '案件ボード', 'hq.html?role=partner'],
+      ['sales', '売上・請求', 'partner-sales.html'],
+      ['downloads', 'ダウンロード', 'partner-downloads.html'],
       ['academy', 'アカデミー', 'partner-academy.html'],
       ['scripts', 'スクリプト', 'partner-scripts.html'],
       ['community', 'コミュニティ', 'partner-community.html'],
@@ -242,7 +253,7 @@ window.HQ = (function () {
 
   return {
     ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON,
-    loadCases: loadCases, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
+    loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
