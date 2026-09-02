@@ -33,6 +33,18 @@
     <!-- 集計サマリー -->
     <div class="ps-kpis" id="kpis"></div>
 
+    <!-- 確定申告用 一括ダウンロード -->
+    <section class="ps-sec ps-tax">
+      <div class="ps-sec-head">
+        <h2>📊 確定申告用データ（一括ダウンロード）</h2>
+        <div class="ps-actions">
+          <select id="taxYear" aria-label="対象年"></select>
+          <button id="btnTax" class="btn btn-primary btn-sm" type="button">⬇ 一括ダウンロード</button>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:#666;margin:0;line-height:1.7;">選択した年の「販売（売却申請）・経費・請求書」の明細と収支サマリーを、1つのCSVにまとめて出力します。会計ソフトの取込みや税理士への提出にご利用ください。</p>
+    </section>
+
     <!-- 販売履歴（本部への売却申請・清算） -->
     <section class="ps-sec">
       <div class="ps-sec-head">
@@ -147,8 +159,8 @@
 .ps-invadd input,.ps-invadd select{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 12px;font-size:14px;font-family:inherit;}
 </style>
 
-<script src="assets/js/hq-common.js?v=2"></script>
-<script src="assets/js/partner-sales.js?v=1" defer></script>
+<script src="assets/js/hq-common.js?v=3"></script>
+<script src="assets/js/partner-sales.js?v=2" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

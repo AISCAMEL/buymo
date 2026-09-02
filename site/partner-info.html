@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>現場サポート（会場・陸送・困ったとき）｜BUYMO 加盟店</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=4" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">加盟店</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>現場サポート</h1>
+      <img class="page-mascot" src="assets/img/buymo/16_電話対応鍵渡しポーズ.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
+    </div>
+    <p class="portal-sub">オークション会場・提携陸送の情報と、困ったときの連絡先・対処をまとめています。</p>
+
+    <!-- クイックリンク -->
+    <div class="pi-quick">
+      <a href="#auction">🏁 オークション会場</a>
+      <a href="#shipping">🚚 提携陸送</a>
+      <a href="#help">🆘 困ったとき</a>
+    </div>
+
+    <!-- オークション会場情報 -->
+    <section class="pi-sec" id="auction">
+      <h2>🏁 オークション会場情報</h2>
+      <p class="pi-note">主要な自動車オークション会場の一覧です。出品・仕入れの参考にご利用ください（開催日・詳細は各会場の最新情報をご確認ください）。</p>
+      <div class="hq-table-wrap">
+        <table class="pi-table" id="auctionTable">
+          <thead><tr><th>会場名</th><th>系列・特徴</th><th>主なエリア</th><th>備考</th></tr></thead>
+          <tbody id="auctionBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 提携陸送情報 -->
+    <section class="pi-sec" id="shipping">
+      <h2>🚚 提携陸送情報</h2>
+      <p class="pi-note">BUYMO提携の陸送・輸送先です。手配は本部経由でも承ります。最新の料金・空き状況は本部（kaitori@buymo.me）へご確認ください。</p>
+      <div class="hq-table-wrap">
+        <table class="pi-table" id="shipTable">
+          <thead><tr><th>提携先</th><th>対応エリア</th><th>目安料金</th><th>連絡・備考</th></tr></thead>
+          <tbody id="shipBody"></tbody>
+        </table>
+      </div>
+      <p class="pi-mini">※ 掲載は一例です。実際の提携先・料金は本部が管理しています。追加・変更のご要望は本部までご連絡ください。</p>
+    </section>
+
+    <!-- 困ったとき -->
+    <section class="pi-sec" id="help">
+      <h2>🆘 困ったとき</h2>
+      <div class="pi-help-grid">
+        <div class="pi-help-card urgent">
+          <h3>まずはここへ（本部サポート）</h3>
+          <ul>
+            <li>📧 メール：<a href="mailto:kaitori@buymo.me">kaitori@buymo.me</a></li>
+            <li>💬 チャット：BUYMOサイト右下のチャットから相談</li>
+            <li>🕒 受付：平日 10:00〜19:00（メールは24時間受付）</li>
+          </ul>
+        </div>
+        <div class="pi-help-card">
+          <h3>よくある困りごと</h3>
+          <ul class="pi-faq">
+            <li><b>査定額の付け方が分からない</b><br>アカデミー〈買取知識〉とトークスクリプトを確認。判断に迷う車両は本部へ写真を添えて相談。</li>
+            <li><b>書類が揃わない・名義が複雑</b><br>ダウンロードセンターの委任状・譲渡証明書を活用。特殊ケースは本部へ。</li>
+            <li><b>売却先・陸送の手配で迷う</b><br>上のオークション会場・提携陸送を参照。手配代行は本部へ依頼可。</li>
+            <li><b>クレーム・トラブルが発生した</b><br>一人で抱えず、速やかに本部へ連絡。対応方針を一緒に決めます。</li>
+            <li><b>売却申請・清算の入力方法</b><br>案件ボードから売却方法を選び申請。清算内訳は「売上・請求」で確認できます。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pi-cta">
+        <a href="hq.html?role=partner" class="btn btn-primary">案件ボードを開く</a>
+        <a href="partner-academy.html" class="btn btn-outline" style="border:1.5px solid var(--green);color:var(--green);">アカデミーで学ぶ</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<style>
+.pi-quick{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.pi-quick a{background:#fff;border:1px solid #dbe8e5;border-radius:30px;padding:9px 18px;font-size:13.5px;font-weight:800;color:var(--navy,#14425f);text-decoration:none;box-shadow:var(--shadow);}
+.pi-quick a:hover{background:var(--green,#0F766E);color:#fff;border-color:var(--green,#0F766E);}
+.pi-sec{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:22px 24px;margin-bottom:20px;scroll-margin-top:80px;}
+.pi-sec h2{font-size:17px;font-weight:900;color:var(--navy,#14425f);margin:0 0 8px;}
+.pi-note{font-size:12.5px;color:#666;margin:0 0 14px;line-height:1.7;}
+.pi-mini{font-size:11.5px;color:#999;margin:10px 0 0;}
+.hq-table-wrap{overflow-x:auto;}
+.pi-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px;}
+.pi-table th,.pi-table td{padding:10px 12px;border-bottom:1px solid #eef1f6;text-align:left;vertical-align:top;}
+.pi-table thead th{background:#f4f6fa;color:#555;font-weight:700;white-space:nowrap;}
+.pi-table td b{color:var(--navy,#14425f);}
+.pi-help-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;}
+@media(max-width:760px){.pi-help-grid{grid-template-columns:1fr;}}
+.pi-help-card{border:1px solid #eef1f6;border-radius:12px;padding:16px 18px;}
+.pi-help-card.urgent{background:#F1FBF9;border-color:#cbe8e2;}
+.pi-help-card h3{font-size:14.5px;font-weight:900;color:var(--navy,#14425f);margin:0 0 10px;}
+.pi-help-card ul{margin:0;padding:0;list-style:none;font-size:13px;line-height:1.9;}
+.pi-faq li{padding:8px 0;border-bottom:1px dashed #e5eae8;color:#555;}
+.pi-faq li:last-child{border-bottom:none;}
+.pi-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+</style>
+
+<script src="assets/js/hq-common.js?v=3"></script>
+<script>
+(function () {
+  HQ.nav('info');
+  var esc = HQ.esc;
+  // オークション会場（主要会場の一般情報）
+  var AUCTIONS = [
+    ['USS', '国内最大手・全国ネットワーク', '全国（東京/名古屋ほか多数）', '出品台数が多く相場の基準になりやすい'],
+    ['TAA（トヨタオートオークション）', 'トヨタ系', '全国（関東/中部/近畿ほか）', 'トヨタ車・上物が集まりやすい'],
+    ['JU（中販連）', '中古自動車販売協会連合会', '各都道府県のJU会場', '地域密着・小回りが利く'],
+    ['ARAI（アライ）', '独立系大手', '関東（ベイオーク等）', '外車・高級車の取扱いも'],
+    ['CAA（中央自動車オークション）', '独立系', '中部・東北ほか', '幅広い車種'],
+    ['NAA（オートオークション）', 'ホンダ系', '全国', 'ホンダ車が集まりやすい'],
+    ['JAA（ジャパン・オートオークション）', '独立系', '関東ほか', '成約率が高め']
+  ];
+  document.getElementById('auctionBody').innerHTML = AUCTIONS.map(function (r) {
+    return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[3]) + '</td></tr>';
+  }).join('');
+
+  // 提携陸送（サンプル。実データは本部管理）
+  var SHIPPERS = [
+    ['（提携陸送A）', '全国', '要見積り', '本部経由で手配可'],
+    ['（提携陸送B）', '東北・関東', '要見積り', '近距離に強み'],
+    ['（自社引取り）', '福島県内', '無料〜', 'いわき近郊は当社対応']
+  ];
+  document.getElementById('shipBody').innerHTML = SHIPPERS.map(function (r) {
+    return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[3]) + '</td></tr>';
+  }).join('');
+})();
+</script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>

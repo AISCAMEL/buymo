@@ -227,6 +227,7 @@ window.HQ = (function () {
     var items = (r === 'partner') ? [
       ['board', '案件ボード', 'hq.html?role=partner'],
       ['sales', '売上・請求', 'partner-sales.html'],
+      ['info', '現場サポート', 'partner-info.html'],
       ['downloads', 'ダウンロード', 'partner-downloads.html'],
       ['academy', 'アカデミー', 'partner-academy.html'],
       ['scripts', 'スクリプト', 'partner-scripts.html'],
