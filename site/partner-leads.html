@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>案件マーケット｜BUYMO 加盟店</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=4" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title" id="portalTitle">加盟店</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>案件マーケット</h1>
+      <img class="page-mascot" src="assets/img/buymo/35_指差し募集ポーズ.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
+    </div>
+    <p class="portal-sub" id="scope">お客様からの新着リードです。<b>引き受ける</b>と担当が確定し連絡先が表示されます（紹介手数料 <b>¥1,000／件</b>・月末にまとめてご請求）。</p>
+
+    <div class="lm-kpis" id="kpis"></div>
+
+    <!-- 案件マーケット -->
+    <section class="lm-sec">
+      <div class="lm-sec-head">
+        <h2>🆕 引き受け可能なリード</h2>
+        <span class="lm-hint">🔒 連絡先は引き受け後に表示されます</span>
+      </div>
+      <div class="lm-grid" id="market"><p class="lm-empty">読み込み中…</p></div>
+    </section>
+
+    <!-- 加盟店ランキング -->
+    <section class="lm-sec">
+      <div class="lm-sec-head">
+        <h2>🏆 加盟店ランキング（成約・売上）</h2>
+        <span class="lm-hint">みんな頑張っています。上を目指しましょう！</span>
+      </div>
+      <div class="hq-table-wrap">
+        <table class="lm-rank" id="rankTable">
+          <thead><tr><th>順位</th><th>加盟店</th><th class="num">成約</th><th class="num">進行中</th><th class="num">確定売上</th></tr></thead>
+          <tbody id="rankBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<style>
+.lm-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+@media(max-width:760px){.lm-kpis{grid-template-columns:1fr 1fr;}}
+.lm-kpi{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:16px 18px;}
+.lm-kpi .lbl{font-size:11.5px;color:#888;font-weight:700;}
+.lm-kpi .val{font-size:23px;font-weight:900;color:var(--navy,#14425f);margin-top:4px;font-variant-numeric:tabular-nums;}
+.lm-kpi.hot .val{color:#C0392B;}
+.lm-kpi.rank .val{color:var(--green,#0F766E);}
+.lm-sec{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:20px 22px;margin-bottom:20px;}
+.lm-sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.lm-sec-head h2{font-size:16px;font-weight:900;color:var(--navy,#14425f);margin:0;}
+.lm-hint{font-size:12px;color:#888;font-weight:700;margin-left:auto;}
+.lm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:900px){.lm-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.lm-grid{grid-template-columns:1fr;}}
+.lm-card{border:1px solid #e6ece9;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;position:relative;}
+.lm-card.claimed{border-color:#cbe8e2;background:#F1FBF9;}
+.lm-card .lm-top{display:flex;align-items:center;gap:8px;}
+.lm-id{font-size:11px;font-weight:900;color:#fff;background:var(--navy,#14425f);border-radius:6px;padding:2px 8px;}
+.lm-genre{font-size:11px;font-weight:900;color:var(--green-dark,#0B5A54);background:var(--green-pale,#DCF5F1);border-radius:6px;padding:2px 8px;}
+.lm-date{font-size:11.5px;color:#999;margin-left:auto;}
+.lm-name{font-size:15px;font-weight:900;color:var(--navy,#14425f);}
+.lm-meta{font-size:12.5px;color:#666;line-height:1.7;}
+.lm-locked{font-size:12px;color:#b06a00;background:#fff7e6;border:1px dashed #f0c675;border-radius:8px;padding:7px 10px;}
+.lm-reveal{font-size:12.5px;color:#15803d;background:#e8f7ec;border-radius:8px;padding:8px 10px;line-height:1.7;}
+.lm-btns{display:flex;gap:8px;margin-top:2px;}
+.lm-take{flex:1;background:var(--green,#0F766E);color:#fff;border:none;border-radius:9px;padding:11px;font-weight:900;font-size:13.5px;cursor:pointer;font-family:inherit;}
+.lm-take:hover{background:var(--green-dark,#0B5A54);}
+.lm-pass{background:#fff;border:1px solid #ccc;color:#888;border-radius:9px;padding:11px 14px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;}
+.lm-fee{font-size:11px;color:#888;text-align:center;}
+.lm-empty{color:#999;text-align:center;padding:20px;grid-column:1/-1;}
+.lm-rank{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px;}
+.lm-rank th,.lm-rank td{padding:10px 12px;border-bottom:1px solid #eef1f6;text-align:left;}
+.lm-rank thead th{background:#f4f6fa;color:#555;font-weight:700;}
+.lm-rank th.num,.lm-rank td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.lm-rank tr.me{background:#DCF5F1;font-weight:900;}
+.lm-medal{font-size:15px;}
+</style>
+
+<script src="assets/js/hq-common.js?v=4"></script>
+<script src="assets/js/partner-leads.js?v=1" defer></script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>

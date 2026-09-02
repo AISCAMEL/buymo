@@ -34,6 +34,8 @@
     <div class="pi-quick">
       <a href="#auction">🏁 オークション会場</a>
       <a href="#shipping">🚚 提携陸送</a>
+      <a href="#claim">🛠️ クレーム対応</a>
+      <a href="#logs">🗂️ 過去ログ・事例</a>
       <a href="#help">🆘 困ったとき</a>
     </div>
 
@@ -60,6 +62,60 @@
         </table>
       </div>
       <p class="pi-mini">※ 掲載は一例です。実際の提携先・料金は本部が管理しています。追加・変更のご要望は本部までご連絡ください。</p>
+    </section>
+
+    <!-- クレーム処理マニュアル -->
+    <section class="pi-sec" id="claim">
+      <h2>🛠️ クレーム処理マニュアル</h2>
+      <p class="pi-note">お客様・落札先からのクレームは「早く・正直に・記録する」が原則。一人で抱え込まず、下記フローで対応し、必ず本部へ共有してください。</p>
+
+      <div class="pi-principles">
+        <span>① スピード最優先（初動が命）</span>
+        <span>② 事実確認と謝意（否定から入らない）</span>
+        <span>③ 独断で金銭約束をしない</span>
+        <span>④ すべて記録に残す</span>
+      </div>
+
+      <h3 class="pi-h3">対応フロー（5ステップ）</h3>
+      <ol class="pi-flow">
+        <li><b>受付・傾聴</b>：まずお詫びと傾聴。相手の主張・要望を最後まで聞き、感情的に反論しない。</li>
+        <li><b>事実確認</b>：車両・書類・出品票・写真・やり取り履歴を確認。「いつ・何が・どの状態か」を特定。</li>
+        <li><b>一次回答</b>：その場で結論を出さず「確認して折り返す期限」を提示（例：本日中／翌営業日午前）。金額・返品の約束は独断でしない。</li>
+        <li><b>本部へ共有・方針決定</b>：本部（kaitori@buymo.me）へ状況を報告し、対応方針（返金/減額/引取/謝罪のみ 等）を一緒に決定。</li>
+        <li><b>実行・記録・再発防止</b>：合意内容を実行し、経緯を「過去ログ」に記録。原因を出品票・査定手順に反映して再発防止。</li>
+      </ol>
+
+      <div class="pi-help-grid" style="margin-top:14px;">
+        <div class="pi-help-card" style="background:#F1FBF9;border-color:#cbe8e2;">
+          <h3>やること</h3>
+          <ul class="pi-list-ok">
+            <li>減点・不具合は<b>出品票に正直に記載</b>（クレームの最大の予防）</li>
+            <li>やり取りは<b>日時つきで記録</b>（メール・チャットに残す）</li>
+            <li>迷ったら<b>止めて本部に相談</b></li>
+          </ul>
+        </div>
+        <div class="pi-help-card" style="background:#FDF3F2;border-color:#f3c9c4;">
+          <h3>やってはいけない</h3>
+          <ul class="pi-list-ng">
+            <li>独断での返金・返品・値引きの<b>約束</b></li>
+            <li>「言った/言わない」になる<b>口約束</b></li>
+            <li>放置・連絡遅れ（クレームは<b>時間で悪化</b>）</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 過去ログ・対応事例 -->
+    <section class="pi-sec" id="logs">
+      <h2>🗂️ 過去ログ・対応事例</h2>
+      <p class="pi-note">実際の対応事例です。同じような場面での判断・言い回しの参考にしてください（個人情報は伏せています）。新しい事例は本部が随時追加します。</p>
+      <div class="hq-table-wrap">
+        <table class="pi-table" id="logTable">
+          <thead><tr><th>日付</th><th>区分</th><th>状況</th><th>対応</th><th>結果</th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+      <p class="pi-mini">※ ここは「よくある実例集」です。自店で対応した事例も本部へ共有いただくと、他店の学びになります。</p>
     </section>
 
     <!-- 困ったとき -->
@@ -115,9 +171,17 @@
 .pi-faq li{padding:8px 0;border-bottom:1px dashed #e5eae8;color:#555;}
 .pi-faq li:last-child{border-bottom:none;}
 .pi-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.pi-principles{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;}
+.pi-principles span{background:var(--green-pale,#DCF5F1);color:var(--green-dark,#0B5A54);font-weight:800;font-size:12.5px;padding:7px 13px;border-radius:8px;}
+.pi-h3{font-size:14px;font-weight:900;color:var(--navy,#14425f);margin:6px 0 8px;}
+.pi-flow{margin:0 0 4px;padding-left:20px;font-size:13px;line-height:1.9;color:#444;}
+.pi-flow li{margin-bottom:6px;}
+.pi-flow li b{color:var(--navy,#14425f);}
+.pi-list-ok,.pi-list-ng{margin:0;padding-left:18px;font-size:13px;line-height:1.9;}
+.pi-list-ok li{color:#256a3f;}.pi-list-ng li{color:#9a3b32;}
 </style>
 
-<script src="assets/js/hq-common.js?v=3"></script>
+<script src="assets/js/hq-common.js?v=4"></script>
 <script>
 (function () {
   HQ.nav('info');
@@ -144,6 +208,21 @@
   ];
   document.getElementById('shipBody').innerHTML = SHIPPERS.map(function (r) {
     return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[3]) + '</td></tr>';
+  }).join('');
+
+  // 過去ログ・対応事例（参考）
+  var LOGS = [
+    ['2026/06/12', '出品/異音', '落札後に「エンジンから異音がする」と申告', '出品票の記載と現車状態を確認。軽微な記載漏れがあり本部と協議', '減額で合意。点検項目に「暖機後の異音確認」を追加'],
+    ['2026/05/28', '修復歴', '納車後に修復歴を指摘された', '入庫時写真・板金跡を再確認。査定時の見落としと判明', '本部主導で返金対応。査定チェックリストを是正'],
+    ['2026/05/15', 'メーター', '走行距離の相違をクレーム', 'メーター写真と記録簿を突合。改ざん車と判明', '取引解除・仕入元へ申し入れ。仕入時の履歴確認を徹底'],
+    ['2026/04/30', '装備欠品', 'ナビのSDカード欠品を指摘', '出品時の付属品リストを確認。記載漏れ', '実費相当を減額。付属品チェック表を導入'],
+    ['2026/04/18', '書類遅延', '名義変更書類の到着が遅いと苦情', '郵送状況を追跡し、不足書類を特定して再送手配', '3日で完了。書類チェックの二重確認を運用化'],
+    ['2026/04/03', '入金遅延', 'お客様への入金が遅いとの連絡', '書類確認の遅れが原因。本部と入金予定を即共有', '当日中に入金。受領→入金の期日管理を明確化'],
+    ['2026/03/22', '直販/返品', '個人販売先から「思っていた状態と違う」と返品要望', '現車説明の記録を確認。認識齟齬あり。独断で約束せず本部へ', 'クーリング相当で返品受入。説明時の書面化を徹底'],
+    ['2026/03/10', 'レッカー', '陸送中の小傷を指摘', '陸送業者の受渡し写真で発生箇所を特定', '陸送側の保険で対応。受渡し時の写真撮影を必須化']
+  ];
+  document.getElementById('logBody').innerHTML = LOGS.map(function (r) {
+    return '<tr><td>' + esc(r[0]) + '</td><td><b>' + esc(r[1]) + '</b></td><td>' + esc(r[2]) + '</td><td>' + esc(r[3]) + '</td><td>' + esc(r[4]) + '</td></tr>';
   }).join('');
 })();
 </script>
