@@ -399,3 +399,7 @@
 
 /* ポータル見出しアイコン（絵文字→画像） */
 .sec-ico{width:26px;height:26px;object-fit:contain;vertical-align:-7px;margin-right:8px;flex:0 0 auto;}
+
+/* ダウンロードカードのアイコンを画像対応 */
+.dc-ico img{width:34px;height:34px;object-fit:contain;vertical-align:middle;}
+.dc-ico:has(img){font-size:0;}
