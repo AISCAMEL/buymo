@@ -1181,9 +1181,9 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 
 /* 会員CTAのマスコット（大） */
 .member-cta-actions{position:relative;}
-.member-cta-actions .cta-mascot{display:block;width:200px;max-width:60%;height:auto;margin:0 auto 8px;
+.member-cta-actions .cta-mascot{display:block;width:320px;max-width:88%;height:auto;margin:0 auto 10px;
   filter:drop-shadow(0 12px 22px rgba(20,41,74,.28));}
-@media(max-width:767px){.member-cta-actions .cta-mascot{width:150px;}}
+@media(max-width:767px){.member-cta-actions .cta-mascot{width:240px;}}
 
 /* =========================================================
    トップ ヒーロー（写真査定カード型）hero2 ※index専用
