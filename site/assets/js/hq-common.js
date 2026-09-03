@@ -307,6 +307,52 @@ window.HQ = (function () {
       body: JSON.stringify({ type: 'community_like', token: authToken(), id: id }) }).catch(function () {});
   }
 
+  /* ============================================================
+     店舗ページ内容＆ブログ（加盟店が編集→公開店舗ページに反映）
+     GAS優先で読み、無ければlocalStorage。保存はlocalStorage＋GASへPOST。
+     ============================================================ */
+  function scKey(s) { return 'buymo_storecontent_' + s; }
+  function blogKey(s) { return 'buymo_blog_' + s; }
+  function loadStoreContent(slug, cb) {
+    var local = {}; try { local = JSON.parse(localStorage.getItem(scKey(slug))) || {}; } catch (e) {}
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=storecontent&store=' + encodeURIComponent(slug))
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && (d.intro !== undefined || d.catch !== undefined)) ? d : local); })
+        .catch(function () { cb(local); });
+    } else cb(local);
+  }
+  function saveStoreContent(slug, data) {
+    try { localStorage.setItem(scKey(slug), JSON.stringify(data)); } catch (e) {}
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'store_content', token: authToken(), store: slug, data: data }) }).catch(function () {});
+  }
+  function loadBlog(slug, cb) {
+    var local = []; try { local = JSON.parse(localStorage.getItem(blogKey(slug))) || []; } catch (e) {}
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=blog&store=' + encodeURIComponent(slug))
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && d.length !== undefined) ? d : local); })
+        .catch(function () { cb(local); });
+    } else cb(local);
+  }
+  function addBlog(slug, post) {
+    var a = []; try { a = JSON.parse(localStorage.getItem(blogKey(slug))) || []; } catch (e) {}
+    post.id = post.id || ('b' + Date.now());
+    a.unshift(post);
+    try { localStorage.setItem(blogKey(slug), JSON.stringify(a)); } catch (e) {}
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'blog_post', token: authToken(), store: slug, post: post }) }).catch(function () {});
+    return post;
+  }
+  function deleteBlog(slug, id) {
+    var a = []; try { a = JSON.parse(localStorage.getItem(blogKey(slug))) || []; } catch (e) {}
+    a = a.filter(function (p) { return p.id !== id; });
+    try { localStorage.setItem(blogKey(slug), JSON.stringify(a)); } catch (e) {}
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'blog_delete', token: authToken(), store: slug, id: id }) }).catch(function () {});
+  }
+
   function yen(n) { return '¥' + (Number(n) || 0).toLocaleString('en-US'); }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function stageIdx(s) { var i = STAGES.indexOf(s); return i < 0 ? 0 : i; }
@@ -318,6 +364,7 @@ window.HQ = (function () {
     var items = (r === 'partner') ? [
       ['board', '案件ボード', 'hq.html?role=partner'],
       ['leadmarket', '案件マーケット', 'partner-leads.html'],
+      ['mystore', 'マイ店舗ページ', 'partner-mystore.html'],
       ['sales', '売上・請求', 'partner-sales.html'],
       ['info', '現場サポート', 'partner-info.html'],
       ['downloads', 'ダウンロード', 'partner-downloads.html'],
@@ -353,6 +400,8 @@ window.HQ = (function () {
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
+    loadStoreContent: loadStoreContent, saveStoreContent: saveStoreContent,
+    loadBlog: loadBlog, addBlog: addBlog, deleteBlog: deleteBlog,
     loadMaterials: loadMaterials, addMaterial: addMaterial, deleteMaterial: deleteMaterial,
     loadPartners: loadPartners, addPartner: addPartner, withdrawPartner: withdrawPartner, restorePartner: restorePartner, reissuePartner: reissuePartner, setPartnerPw: setPartnerPw,
     yen: yen, esc: esc, stageIdx: stageIdx, nav: nav

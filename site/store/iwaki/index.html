@@ -92,6 +92,14 @@
   .st-final h2{font-size:24px;font-weight:900;margin:0 0 8px;}
   .st-final p{opacity:.92;margin:0 0 20px;}
   .st-back{display:inline-block;margin-top:10px;color:var(--green-dark,#0B5A54);font-weight:700;font-size:13px;}
+  .st-blog{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  @media(max-width:720px){.st-blog{grid-template-columns:1fr;}}
+  .st-blog-card{background:#fff;border:1px solid #e6ece9;border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(10,61,56,.07);display:flex;flex-direction:column;}
+  .st-blog-card .sbc-img{width:100%;height:170px;object-fit:cover;background:#f1fbf9;display:block;}
+  .st-blog-card .sbc-in{padding:16px 18px;display:flex;flex-direction:column;gap:6px;}
+  .st-blog-card .sbc-date{font-size:11.5px;color:#999;font-weight:700;}
+  .st-blog-card .sbc-ttl{font-size:16px;font-weight:900;color:var(--navy,#14425f);line-height:1.4;}
+  .st-blog-card .sbc-txt{font-size:13px;color:#555;line-height:1.75;white-space:pre-wrap;}
 </style>
 </head>
 <body>
@@ -119,9 +127,9 @@
   <!-- ヒーロー -->
   <section class="st-hero">
     <div class="container">
-      <span class="st-eyebrow">🏬 BUYMO 直営店</span>
+      <span class="st-eyebrow" id="stCatch">🏬 BUYMO 直営店</span>
       <h1>BUYMO <span>福島いわき本店</span><br>地元いわきの車買取なら、おまかせください。</h1>
-      <p>いわき市を中心に福島県全域に対応。写真を送るだけのネット完結査定で、しつこい電話なし・手数料0円・最短即日入金。廃車・事故車・不動車もOKです。</p>
+      <p id="stLead">いわき市を中心に福島県全域に対応。写真を送るだけのネット完結査定で、しつこい電話なし・手数料0円・最短即日入金。廃車・事故車・不動車もOKです。</p>
       <div class="st-cta">
         <a href="../../buymo-contact.html" class="btn-gold">写真で無料査定 →</a>
         <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn-line">📞 LINEで相談</a>
@@ -199,6 +207,15 @@
   </section>
 
   <!-- 最終CTA -->
+  <!-- お店からのお知らせ・ブログ（加盟店が投稿→自動反映） -->
+  <section class="st-sec" id="storeBlogSec" hidden>
+    <div class="container">
+      <h2 class="st-h2">お店からのお知らせ・ブログ</h2>
+      <p class="st-lead">スタッフが最新情報・買取事例・キャンペーンを発信しています。</p>
+      <div class="st-blog" id="storeBlog"></div>
+    </div>
+  </section>
+
   <section class="st-sec alt">
     <div class="container">
       <div class="st-final">
@@ -221,5 +238,32 @@
     <p>Copyright © 2026 合同会社アイズ（BUYMO） All Rights Reserved.</p>
   </div>
 </footer>
+<script>
+(function () {
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
+  var SLUG = 'iwaki';
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  // 加盟店が編集した店舗紹介を上書き
+  fetch(ENDPOINT + '?action=storecontent&store=' + SLUG).then(function (r) { return r.json(); }).then(function (c) {
+    if (!c) return;
+    if (c['catch']) { var e = document.getElementById('stCatch'); if (e) e.textContent = c['catch']; }
+    if (c.intro) { var l = document.getElementById('stLead'); if (l) l.textContent = c.intro; }
+  }).catch(function () {});
+  // ブログを反映（投稿があれば表示）
+  fetch(ENDPOINT + '?action=blog&store=' + SLUG).then(function (r) { return r.json(); }).then(function (list) {
+    if (!list || !list.length) return;
+    var sec = document.getElementById('storeBlogSec'), box = document.getElementById('storeBlog');
+    if (!sec || !box) return;
+    box.innerHTML = list.map(function (p) {
+      return '<article class="st-blog-card">' +
+        (p.image ? '<img class="sbc-img" src="' + esc(p.image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
+        '<div class="sbc-in"><div class="sbc-date">' + esc(p.date || '') + '</div>' +
+        '<div class="sbc-ttl">' + esc(p.title || '') + '</div>' +
+        '<div class="sbc-txt">' + esc(p.body || '') + '</div></div></article>';
+    }).join('');
+    sec.hidden = false;
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>
