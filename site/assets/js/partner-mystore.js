@@ -37,6 +37,14 @@
       line:    $('cLine').value.trim(),
       email:   $('cEmail').value.trim(),
       photo:   $('cPhoto').value.trim(),
+      sns: {
+        instagram: $('sIg').value.trim(),
+        tiktok:    $('sTiktok').value.trim(),
+        x:         $('sX').value.trim(),
+        threads:   $('sThreads').value.trim(),
+        youtube:   $('sYoutube').value.trim(),
+        facebook:  $('sFacebook').value.trim()
+      },
       results: results,
       updated: todayStr()
     };
@@ -54,6 +62,13 @@
     $('cLine').value  = c.line || '';
     $('cEmail').value = c.email || '';
     $('cPhoto').value = c.photo || '';
+    var s = c.sns || {};
+    $('sIg').value      = s.instagram || '';
+    $('sTiktok').value  = s.tiktok || '';
+    $('sX').value       = s.x || '';
+    $('sThreads').value = s.threads || '';
+    $('sYoutube').value = s.youtube || '';
+    $('sFacebook').value = s.facebook || '';
     results = (c.results && c.results.length) ? c.results : [];
     renderResults();
   });
