@@ -354,3 +354,45 @@
 .cal-setup-steps code{background:#fff;border:1px solid #e2e6ee;border-radius:5px;padding:1px 6px;font-size:12px;}
 .cal-setup-sub{color:#6b7280;font-size:12px;}
 .cal-setup-note{margin:14px 0 0;font-size:12px;color:#6b7280;line-height:1.7;}
+
+/* ============================================================
+   本部 収益シミュレーション
+   ============================================================ */
+.rs-wrap{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:22px;}
+@media(max-width:860px){.rs-wrap{grid-template-columns:1fr;}}
+.rs-inputs{display:flex;flex-direction:column;gap:14px;}
+.rs-grp{border:1px solid #eef1f6;border-radius:12px;padding:12px 14px;}
+.rs-grp-t{font-size:12.5px;font-weight:900;color:var(--navy,#14425f);margin-bottom:10px;}
+.rs-grp-fields{display:flex;flex-direction:column;gap:9px;}
+.rs-field{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;color:#555;font-weight:700;}
+.rs-inwrap{display:inline-flex;align-items:center;gap:5px;}
+.rs-inwrap input{width:104px;height:34px;border:1px solid #ddd;border-radius:8px;padding:0 8px;font-size:13.5px;
+  font-family:inherit;text-align:right;font-variant-numeric:tabular-nums;}
+.rs-inwrap input:focus{outline:none;border-color:var(--green,#0F766E);}
+.rs-inwrap i{font-size:11.5px;color:#999;font-style:normal;min-width:14px;}
+.rs-reset{margin-top:2px;align-self:flex-start;background:#fff;border:1px solid #ccc;color:#666;
+  border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+.rs-reset:hover{background:#f7f7f7;}
+
+.rs-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+@media(max-width:760px){.rs-cards{grid-template-columns:1fr 1fr;}}
+.rs-card{background:#f7fbfa;border:1px solid #e6efec;border-radius:12px;padding:14px 16px;}
+.rs-card-l{font-size:11.5px;color:#888;font-weight:700;}
+.rs-card-v{font-size:20px;font-weight:900;color:var(--navy,#14425f);margin-top:4px;font-variant-numeric:tabular-nums;}
+.rs-card.cost .rs-card-v{color:#C0392B;}
+.rs-card.profit{background:#eafaf4;border-color:#bfe9db;}
+.rs-card.profit .rs-card-v{color:var(--green,#0F766E);}
+.rs-card.annual{background:linear-gradient(145deg,#0F766E,#0B5A54);border:none;}
+.rs-card.annual .rs-card-l{color:#cdeee7;}
+.rs-card.annual .rs-card-v{color:#fff;}
+
+.rs-breakdown{background:#fff;border:1px solid #eef1f6;border-radius:12px;padding:14px 16px;}
+.rs-bd-t{font-size:12.5px;font-weight:900;color:var(--navy,#14425f);margin-bottom:10px;}
+.rs-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12.5px;}
+.rs-bar-lbl{flex:0 0 108px;color:#555;font-weight:700;}
+.rs-bar-track{flex:1;height:12px;background:#eef1f6;border-radius:7px;overflow:hidden;}
+.rs-bar-fill{display:block;height:100%;border-radius:7px;}
+.rs-bar-fill.b1{background:#0F766E;} .rs-bar-fill.b2{background:#14B8A6;}
+.rs-bar-fill.b3{background:#F4B740;} .rs-bar-fill.b4{background:#14425f;}
+.rs-bar-val{flex:0 0 96px;text-align:right;font-weight:900;color:#333;font-variant-numeric:tabular-nums;}
+.rs-note{font-size:11.5px;color:#777;line-height:1.7;margin:12px 0 0;}

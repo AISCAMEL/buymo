@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
 <link rel="stylesheet" href="assets/css/buymo.css?v=37" />
-<link rel="stylesheet" href="assets/css/board.css?v=6" />
+<link rel="stylesheet" href="assets/css/board.css?v=7" />
 </head>
 <body>
 <script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
@@ -34,6 +34,12 @@
       <div class="kpi"><div class="kpi-label">入金待ち</div><div class="kpi-num" id="kPay">-</div></div>
       <div class="kpi accent"><div class="kpi-label">確定売上（完了）</div><div class="kpi-num" id="kSales">-</div></div>
     </div>
+
+    <section class="rep-card" style="margin-bottom:18px">
+      <h2>💹 収益シミュレーション</h2>
+      <p class="portal-sub" style="margin:-4px 0 14px;">加盟店手数料・オークション・加盟金・データ（紹介手数料）の収益と、広告費を差し引いた営業利益を試算します。加盟店数・紹介件数は実データから自動反映（数値は自由に変更可）。</p>
+      <div id="revSim"></div>
+    </section>
 
     <div class="hq-2col">
       <section class="rep-card">
@@ -113,6 +119,7 @@
     }).join('');
   });
 </script>
+<script src="assets/js/hq-revsim.js?v=1" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
