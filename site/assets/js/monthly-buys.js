@@ -1,20 +1,29 @@
 /* ============================================================
    BUYMO 今月の買取実績データ（バースクロール用）
-   毎月ここを書き換えるだけで全ページのティッカーが更新されます。
+   ★毎月「自動」で切り替わります（手動更新は不要）★
 
-   フォーマット:
-     { car: '車種・年式', price: '¥金額', area: '都道府県', tag?: '任意ラベル' }
+   仕組み:
+     - 月ラベルは現在日付から自動生成（例：2026年9月の買取実績）
+     - 掲載車種・並び順は「その月固定のシード」で自動抽選
+       → 月が変わると自動で顔ぶれ・順番が変化
+       → 同じ月内はどの端末でも同じ表示（実績表として自然）
+       → プール全24件を月ごとに回すので、時間が経つと全車種が露出
 
-   運用ルール:
-     - 15〜30件が推奨（少なすぎるとループがすぐバレる）
-     - 実額でOK。「参考価格」の表示は month の文言で担保。
-     - 表示順はランダム化されるので、記載順は自由。
+   メンテしたいとき（任意）:
+     - 車種を増やす/差し替える → 下の BUYS 配列を編集するだけ
+     - フォーマット: { car:'車種・年式', price:'¥金額', area:'都道府県', tag?:'ラベル' }
+     - 15件以上あるとループの継ぎ目が目立ちません
    ============================================================ */
 (function () {
   'use strict';
 
-  var MONTH_LABEL = '2026年8月の買取実績';
+  /* --- 月ラベルを現在日付から自動生成 --- */
+  var NOW = new Date();
+  var YEAR = NOW.getFullYear();
+  var MONTH = NOW.getMonth() + 1; // 1-12
+  var MONTH_LABEL = YEAR + '年' + MONTH + '月の買取実績';
 
+  /* --- 買取実績プール（任意で追記・編集可） --- */
   var BUYS = [
     { car: 'アルファード ハイブリッド 2022年式', price: '¥3,850,000', area: '東京都', tag: 'ミニバン' },
     { car: 'ハイエース スーパーGL 2019年式',     price: '¥2,780,000', area: '大阪府', tag: '商用' },
@@ -42,14 +51,43 @@
     { car: 'AUDI A4 2020年式',                   price: '¥2,680,000', area: '愛媛県', tag: '輸入車' }
   ];
 
-  // シャッフル
-  function shuffle(a) {
-    var b = a.slice();
+  /* 1か月に表示する件数（プールより少なくして毎月入れ替わりを出す） */
+  var SHOW = Math.min(20, BUYS.length);
+
+  /* --- 月ごとに固定のシード（year*12+month） --- */
+  var SEED = YEAR * 12 + MONTH;
+
+  /* 決定論的な乱数（mulberry32）: 同じシードなら常に同じ並び */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function seededShuffle(arr, seed) {
+    var rnd = mulberry32(seed);
+    var b = arr.slice();
     for (var i = b.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
+      var j = Math.floor(rnd() * (i + 1));
       var t = b[i]; b[i] = b[j]; b[j] = t;
     }
     return b;
+  }
+
+  /* 月ごとの表示リスト:
+     プール全体を「開始位置を毎月ずらして」回転 → SHOW件を取り出し → 月シードで並べ替え。
+     これで月が変われば顔ぶれ・順番が自動で変わり、長期では全車種が露出する。 */
+  function pickForMonth() {
+    var n = BUYS.length;
+    var start = SEED % n;                 // 毎月ずれる開始位置
+    var window = [];
+    for (var k = 0; k < SHOW; k++) {
+      window.push(BUYS[(start + k) % n]);
+    }
+    return seededShuffle(window, SEED);
   }
 
   function itemHTML(x) {
@@ -70,7 +108,7 @@
     var track = el.querySelector('.buy-ticker-track');
     if (!track) return;
 
-    var list = shuffle(BUYS);
+    var list = pickForMonth();
     var html = list.map(itemHTML).join('');
     // 継ぎ目のない無限ループのため2回分連結
     track.innerHTML = html + html;
