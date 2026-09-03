@@ -1430,3 +1430,9 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .section-mascot.sm-price::after{background-image:url('../img/buymo/buymo-mascot.png');width:170px;height:130px;}
 .section-mascot.sm-cash::after{background-image:url('../img/buymo/mascot-guide.png');}
 .section-mascot.sm-pickup::after{background-image:url('../img/buymo/buymo-mascot.png');width:170px;height:130px;}
+
+/* ============================================================
+   スタッフキャラクター(staff-*)を各所に配置（人＋牛でにぎやかに）
+   ============================================================ */
+.form-mascot::after{background-image:url('../img/buymo/staff-document.png');width:150px;height:210px;}
+.company-mascot::after{background-image:url('../img/buymo/staff-smile.png');width:130px;height:186px;}
