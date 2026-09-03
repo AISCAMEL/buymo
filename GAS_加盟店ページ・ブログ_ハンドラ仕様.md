@@ -21,8 +21,8 @@
 
 - `store` … 店舗スラッグ（例：`iwaki`）。**1店舗＝1行**（同じ store は上書き）。
 - `data` … 店舗紹介の内容一式を **JSON 文字列** で保存します（キャッチコピー／紹介文／営業時間／対応エリア／電話／LINE／メール／店舗写真／**買取実績** など）。
-  - こうしておくと、今後項目が増えても **シートの列を変えずに** そのまま保存・反映できます。
-  - 例：`{"catch":"…","intro":"…","hours":"…","areas":["平","小名浜"],"tel":"0246-…","line":"https://lin.ee/…","email":"iwaki@buymo.me","photo":"…","results":[{"car":"トヨタ アクア","price":"¥720,000","note":"…","date":"2026/08/20","image":""}]}`
+  - こうしておくと、今後項目が増えても **シートの列を変えずに** そのまま保存・反映できます（電話・LINE・メール・SNS・買取実績もこの中に含まれます）。
+  - 例：`{"catch":"…","intro":"…","hours":"…","areas":["平","小名浜"],"tel":"0246-…","line":"https://lin.ee/…","email":"iwaki@buymo.me","photo":"…","sns":{"instagram":"https://instagram.com/…","tiktok":"","x":"https://x.com/…","threads":"","youtube":"","facebook":""},"results":[{"car":"トヨタ アクア","price":"¥720,000","note":"…","date":"2026/08/20","image":""}]}`
 
 ### シート名：`Blog`（ブログ投稿）
 1 行目にヘッダーを作成：

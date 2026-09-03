@@ -53,6 +53,21 @@
           <label>お問い合わせメール<input type="email" id="cEmail" placeholder="例：iwaki@buymo.me" /></label>
           <label>店舗写真URL（任意）<input type="url" id="cPhoto" placeholder="https://…（Drive等の直リンク）" /></label>
         </div>
+
+        <div class="ms-subhead">📱 SNS連携（プロフィールURLを入れると公開ページにボタン表示）</div>
+        <p class="ms-note" style="margin-top:-6px;">各SNSのプロフィール（またはアカウント）URLを貼り付けてください。空欄のSNSは表示されません。いつでも変更できます。</p>
+        <div class="ms-row">
+          <label>Instagram<input type="url" id="sIg" placeholder="例：https://www.instagram.com/xxxx" /></label>
+          <label>TikTok<input type="url" id="sTiktok" placeholder="例：https://www.tiktok.com/@xxxx" /></label>
+        </div>
+        <div class="ms-row">
+          <label>X（旧Twitter）<input type="url" id="sX" placeholder="例：https://x.com/xxxx" /></label>
+          <label>Threads<input type="url" id="sThreads" placeholder="例：https://www.threads.net/@xxxx" /></label>
+        </div>
+        <div class="ms-row">
+          <label>YouTube<input type="url" id="sYoutube" placeholder="例：https://www.youtube.com/@xxxx" /></label>
+          <label>Facebook<input type="url" id="sFacebook" placeholder="例：https://www.facebook.com/xxxx" /></label>
+        </div>
         <button type="submit" class="btn btn-primary">店舗紹介を保存して公開</button>
         <span class="ms-saved" id="cSaved"></span>
       </form>
@@ -130,7 +145,7 @@
 </style>
 
 <script src="assets/js/hq-common.js?v=7"></script>
-<script src="assets/js/partner-mystore.js?v=2" defer></script>
+<script src="assets/js/partner-mystore.js?v=3" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
