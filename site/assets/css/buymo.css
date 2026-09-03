@@ -1388,3 +1388,9 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
   justify-content:center;margin-bottom:14px;border:1px solid rgba(255,255,255,.6);}
 .genre-hero-ico img{width:54px;height:54px;object-fit:contain;display:block;}
 @media(max-width:640px){.genre-hero-ico{width:64px;height:64px;border-radius:16px;}.genre-hero-ico img{width:44px;height:44px;}}
+
+/* 信頼バッジ ストリップ（会社情報） */
+.trust-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:20px 32px;margin:28px 0 6px;}
+.trust-badges figure{margin:0;text-align:center;width:90px;}
+.trust-badges img{width:68px;height:68px;object-fit:contain;}
+.trust-badges figcaption{font-size:11.5px;color:var(--text-sub);font-weight:700;margin-top:5px;}
