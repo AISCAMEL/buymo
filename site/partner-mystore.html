@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>マイ店舗ページ編集｜BUYMO 加盟店</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=7" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">加盟店</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>マイ店舗ページ編集</h1>
+      <img class="page-mascot" src="assets/img/buymo/29_メガホン広報ポーズ.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
+    </div>
+    <p class="portal-sub">あなたの店舗紹介ページ（公開）とブログを編集できます。保存すると <b>公開ページ（/store/○○/）に反映</b>されます。</p>
+
+    <div class="ms-slug" id="slugBar"></div>
+
+    <!-- 店舗紹介の編集 -->
+    <section class="ms-sec">
+      <h2>🏪 店舗紹介ページの編集</h2>
+      <form id="contentForm" class="ms-form">
+        <label>キャッチコピー<input type="text" id="cCatch" maxlength="40" placeholder="例：地元いわきで、まごころ査定。" /></label>
+        <label>紹介文（お店の特徴・あいさつ）<textarea id="cIntro" rows="5" placeholder="お店の紹介文を入力してください。"></textarea></label>
+        <div class="ms-row">
+          <label>営業時間<input type="text" id="cHours" placeholder="例：9:00〜18:00（年中無休）" /></label>
+          <label>電話／LINE等の窓口<input type="text" id="cContact" placeholder="例：LINEで24時間受付" /></label>
+        </div>
+        <div class="ms-row">
+          <label>対応エリア（カンマ区切り）<input type="text" id="cAreas" placeholder="例：平, 小名浜, 四倉, 勿来" /></label>
+          <label>店舗写真URL（任意）<input type="url" id="cPhoto" placeholder="https://…（Drive等の直リンク）" /></label>
+        </div>
+        <button type="submit" class="btn btn-primary">店舗紹介を保存して公開</button>
+        <span class="ms-saved" id="cSaved"></span>
+      </form>
+    </section>
+
+    <!-- ブログ投稿 -->
+    <section class="ms-sec">
+      <h2>📝 ブログを書く</h2>
+      <p class="ms-note">投稿すると、あなたの公開店舗ページ（/store/○○/）の「お店からのお知らせ・ブログ」に自動で表示されます。</p>
+      <form id="blogForm" class="ms-form">
+        <label>タイトル<input type="text" id="bTitle" maxlength="60" required placeholder="例：今週末、買取キャンペーン実施中！" /></label>
+        <label>本文<textarea id="bBody" rows="5" required placeholder="本文を入力してください。"></textarea></label>
+        <div class="ms-row">
+          <label>公開日<input type="date" id="bDate" /></label>
+          <label>画像URL（任意）<input type="url" id="bImage" placeholder="https://…" /></label>
+        </div>
+        <button type="submit" class="btn btn-primary">ブログを投稿</button>
+        <span class="ms-saved" id="bSaved"></span>
+      </form>
+
+      <h3 class="ms-list-title">投稿済みブログ</h3>
+      <div id="blogList" class="ms-blog-list"><p class="ms-empty">まだ投稿はありません。</p></div>
+    </section>
+  </div>
+</main>
+
+<style>
+.ms-slug{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:14px 18px;margin-bottom:18px;font-size:13.5px;color:#555;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;}
+.ms-slug b{color:var(--navy,#14425f);}
+.ms-slug a{color:var(--green,#0F766E);font-weight:800;}
+.ms-sec{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:22px 24px;margin-bottom:20px;}
+.ms-sec h2{font-size:16px;font-weight:900;color:var(--navy,#14425f);margin:0 0 14px;}
+.ms-note{font-size:12.5px;color:#666;margin:0 0 14px;line-height:1.7;}
+.ms-form{display:flex;flex-direction:column;gap:14px;}
+.ms-form label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:#555;font-weight:700;}
+.ms-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:640px){.ms-row{grid-template-columns:1fr;}}
+.ms-form input,.ms-form textarea{border:1px solid #ddd;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;}
+.ms-form input:focus,.ms-form textarea:focus{outline:none;border-color:var(--green,#0F766E);}
+.ms-form .btn{align-self:flex-start;}
+.ms-saved{color:var(--green,#0F766E);font-weight:800;font-size:13px;margin-left:10px;opacity:0;transition:opacity .2s;}
+.ms-saved.show{opacity:1;}
+.ms-list-title{font-size:14px;font-weight:900;color:var(--navy,#14425f);margin:22px 0 10px;}
+.ms-blog-list{display:flex;flex-direction:column;gap:10px;}
+.ms-blog-item{border:1px solid #eef1f6;border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;}
+.ms-blog-item .bi-body{flex:1;}
+.ms-blog-item .bi-date{font-size:11.5px;color:#999;font-weight:700;}
+.ms-blog-item .bi-title{font-size:14.5px;font-weight:900;color:var(--navy,#14425f);margin:2px 0 4px;}
+.ms-blog-item .bi-text{font-size:12.5px;color:#555;line-height:1.6;}
+.ms-blog-del{border:1px solid #C0392B;color:#C0392B;background:#fff;border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto;}
+.ms-empty{color:#999;text-align:center;padding:14px;}
+</style>
+
+<script src="assets/js/hq-common.js?v=7"></script>
+<script src="assets/js/partner-mystore.js?v=1" defer></script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>
