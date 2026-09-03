@@ -1406,3 +1406,17 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .section-mascot.sm-price::after{background-image:url('../img/buymo/person-appraise.png?v=1');}
 .section-mascot.sm-cash::after{background-image:url('../img/buymo/person-handover.png?v=1');}
 .section-mascot.sm-pickup::after{background-image:url('../img/buymo/person-handover.png?v=1');}
+
+/* ============================================================
+   修正：画像アイコンの card-ico は淡色チップに載せる
+   （濃色グラデのチップだと、色付き画像アイコンが暗く見えづらいため）
+   ジャンルページの「選ばれる理由」等の視認性を改善。
+   ============================================================ */
+.card-ico:has(img),
+.feature-card .card-ico:has(img),.reason-card .card-ico:has(img),
+.feature-card:nth-child(even) .card-ico:has(img),.reason-card:nth-child(even) .card-ico:has(img){
+  background:#E8F6F3;border:1px solid #d3ece6;
+  box-shadow:0 8px 18px rgba(15,118,110,.14);
+}
+.card-ico:has(img) img{width:40px;height:40px;object-fit:contain;}
+.feature-card:hover .card-ico:has(img),.reason-card:hover .card-ico:has(img){background:#dcf3ee;}
