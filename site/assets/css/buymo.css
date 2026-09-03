@@ -1394,3 +1394,15 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .trust-badges figure{margin:0;text-align:center;width:90px;}
 .trust-badges img{width:68px;height:68px;object-fit:contain;}
 .trust-badges figcaption{font-size:11.5px;color:var(--text-sub);font-weight:700;margin-top:5px;}
+
+/* ============================================================
+   人物イラスト(person-*)を各セクションの装飾に採用（統一イラストトーン）
+   ============================================================ */
+.faq-mascot::after{background-image:url('../img/buymo/person-support.png?v=1');}
+.form-mascot::after{background-image:url('../img/buymo/person-hero.png?v=1');}
+.company-mascot::after{background-image:url('../img/buymo/person-guide.png?v=1');width:110px;height:110px;}
+.section-mascot::after{background-image:url('../img/buymo/person-support.png?v=1');width:120px;height:120px;}
+.section-mascot.sm-love::after{background-image:url('../img/buymo/person-partner.png?v=1');}
+.section-mascot.sm-price::after{background-image:url('../img/buymo/person-appraise.png?v=1');}
+.section-mascot.sm-cash::after{background-image:url('../img/buymo/person-handover.png?v=1');}
+.section-mascot.sm-pickup::after{background-image:url('../img/buymo/person-handover.png?v=1');}
