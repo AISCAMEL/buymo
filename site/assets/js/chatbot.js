@@ -311,6 +311,19 @@
     return s;
   }
 
+  /* ---------- 専用CSSを自動読み込み（どのページでも起動ボタンが正しく整形される） ---------- */
+  // academy.css を読まないページ（コラム/ジャンル/エリア等）でも確実にスタイルを当てる。
+  (function ensureChatbotCSS() {
+    try {
+      if (document.getElementById('cbot-css')) return;
+      var link = document.createElement('link');
+      link.id = 'cbot-css';
+      link.rel = 'stylesheet';
+      link.href = '/assets/css/chatbot.css?v=1';
+      (document.head || document.documentElement).appendChild(link);
+    } catch (e) { /* noop */ }
+  })();
+
   /* ---------- Build widget ---------- */
   var root = el('div', 'cbot');
   // AIオペレーター(女性)の写真をパネル上部＆起動ボタン両方に使用
