@@ -40,15 +40,44 @@
         <label>紹介文（お店の特徴・あいさつ）<textarea id="cIntro" rows="5" placeholder="お店の紹介文を入力してください。"></textarea></label>
         <div class="ms-row">
           <label>営業時間<input type="text" id="cHours" placeholder="例：9:00〜18:00（年中無休）" /></label>
-          <label>電話／LINE等の窓口<input type="text" id="cContact" placeholder="例：LINEで24時間受付" /></label>
+          <label>対応エリア（カンマ区切り）<input type="text" id="cAreas" placeholder="例：平, 小名浜, 四倉, 勿来" /></label>
+        </div>
+
+        <div class="ms-subhead">📞 お問い合わせ先（いつでも変更できます）</div>
+        <p class="ms-note" style="margin-top:-6px;">ここで設定した電話番号・LINE・メールが、公開店舗ページの「連絡先」やボタンに反映されます。空欄の項目は表示されません。</p>
+        <div class="ms-row">
+          <label>電話番号<input type="tel" id="cTel" placeholder="例：0246-00-0000" /></label>
+          <label>LINE 相談URL<input type="url" id="cLine" placeholder="例：https://lin.ee/xxxxxxx" /></label>
         </div>
         <div class="ms-row">
-          <label>対応エリア（カンマ区切り）<input type="text" id="cAreas" placeholder="例：平, 小名浜, 四倉, 勿来" /></label>
+          <label>お問い合わせメール<input type="email" id="cEmail" placeholder="例：iwaki@buymo.me" /></label>
           <label>店舗写真URL（任意）<input type="url" id="cPhoto" placeholder="https://…（Drive等の直リンク）" /></label>
         </div>
         <button type="submit" class="btn btn-primary">店舗紹介を保存して公開</button>
         <span class="ms-saved" id="cSaved"></span>
       </form>
+    </section>
+
+    <!-- 買取実績 -->
+    <section class="ms-sec">
+      <h2>🚗 買取実績を追加</h2>
+      <p class="ms-note">入力した買取実績は、あなたの公開店舗ページ（/store/○○/）の「買取実績」欄に自動で表示されます。お客様への信頼アップにつながります。</p>
+      <form id="resultForm" class="ms-form">
+        <div class="ms-row">
+          <label>車種・年式<input type="text" id="rCar" maxlength="40" required placeholder="例：トヨタ アクア（2018年式）" /></label>
+          <label>買取額・訴求（任意）<input type="text" id="rPrice" maxlength="40" placeholder="例：¥720,000（他社より+8万円）" /></label>
+        </div>
+        <label>ひとことコメント（任意）<input type="text" id="rNote" maxlength="80" placeholder="例：走行10万kmでも高価買取できました！" /></label>
+        <div class="ms-row">
+          <label>買取日（任意）<input type="date" id="rDate" /></label>
+          <label>画像URL（任意）<input type="url" id="rImage" placeholder="https://…" /></label>
+        </div>
+        <button type="submit" class="btn btn-primary">買取実績を追加</button>
+        <span class="ms-saved" id="rSaved"></span>
+      </form>
+
+      <h3 class="ms-list-title">登録済みの買取実績</h3>
+      <div id="resultList" class="ms-blog-list"><p class="ms-empty">まだ登録はありません。</p></div>
     </section>
 
     <!-- ブログ投稿 -->
@@ -81,6 +110,7 @@
 .ms-note{font-size:12.5px;color:#666;margin:0 0 14px;line-height:1.7;}
 .ms-form{display:flex;flex-direction:column;gap:14px;}
 .ms-form label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:#555;font-weight:700;}
+.ms-subhead{font-size:13px;font-weight:900;color:var(--green-dark,#0B5A54);margin:6px 0 2px;padding-top:8px;border-top:1px dashed #e3ece9;}
 .ms-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:640px){.ms-row{grid-template-columns:1fr;}}
 .ms-form input,.ms-form textarea{border:1px solid #ddd;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;}
@@ -100,7 +130,7 @@
 </style>
 
 <script src="assets/js/hq-common.js?v=7"></script>
-<script src="assets/js/partner-mystore.js?v=1" defer></script>
+<script src="assets/js/partner-mystore.js?v=2" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
