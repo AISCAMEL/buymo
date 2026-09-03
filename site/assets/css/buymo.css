@@ -1347,3 +1347,26 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .coltop-card h3{font-size:15px;font-weight:800;line-height:1.55;color:var(--text);
   margin:8px 16px 18px;}
 @media(max-width:640px){.columns-top{padding:44px 0;}}
+
+/* ============================================================
+   統一イメージアイコン v2（ティール＋ゴールドの2トーン・フラット）
+   .card-ico.ico2 でソフト背景チップ＋画像アイコン（img src）に切替
+   ============================================================ */
+.card-ico.ico2,
+.feature-card .card-ico.ico2,.reason-card .card-ico.ico2,
+.feature-card:nth-child(even) .card-ico.ico2,.reason-card:nth-child(even) .card-ico.ico2{
+  background:#E8F6F3;
+  box-shadow:0 8px 18px rgba(15,118,110,.14);
+  border:1px solid #d3ece6;
+}
+.card-ico.ico2 img{width:40px;height:40px;object-fit:contain;}
+.feature-card:hover .card-ico.ico2,.reason-card:hover .card-ico.ico2{
+  background:#dcf3ee;transform:translateY(-2px);transition:background .2s,transform .2s;
+}
+
+/* 汎用インラインアイコン（見出し・箇条書き・セクションラベル用） */
+.bico{display:inline-block;vertical-align:-6px;width:26px;height:26px;object-fit:contain;}
+.bico-lg{width:34px;height:34px;vertical-align:-9px;}
+.bico-chip{width:52px;height:52px;border-radius:14px;background:#E8F6F3;border:1px solid #d3ece6;
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.bico-chip img{width:30px;height:30px;object-fit:contain;}
