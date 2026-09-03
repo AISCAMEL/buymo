@@ -396,3 +396,6 @@
 .rs-bar-fill.b3{background:#F4B740;} .rs-bar-fill.b4{background:#14425f;}
 .rs-bar-val{flex:0 0 96px;text-align:right;font-weight:900;color:#333;font-variant-numeric:tabular-nums;}
 .rs-note{font-size:11.5px;color:#777;line-height:1.7;margin:12px 0 0;}
+
+/* ポータル見出しアイコン（絵文字→画像） */
+.sec-ico{width:26px;height:26px;object-fit:contain;vertical-align:-7px;margin-right:8px;flex:0 0 auto;}
