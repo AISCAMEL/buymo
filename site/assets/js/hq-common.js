@@ -11,6 +11,20 @@ window.HQ = (function () {
   var WON = ['契約', '入金待ち', '完了'];
   var CKEY = 'buymo_cases', SKEY = 'buymo_stores';
 
+  /* ============================================================
+     ★料金設定（将来ここを書き換えるだけで全画面に反映）★
+     ・franchiseMonthly … 加盟店の月額（積立）標準額
+     ・auctionSystemFee … オークション システム利用料（出品代行）
+     ・directHqFee ……… 直販の本部手数料（一律・税抜）
+     ・auctionRate …… オークション成約手数料（粗利 × 率）
+     ============================================================ */
+  var FEES = {
+    franchiseMonthly: 35000, // 加盟店 月額（積立）標準額
+    auctionSystemFee: 5000,  // オークション システム利用料（出品代行・税込）
+    directHqFee: 30000,      // 直販 本部手数料（一律・税抜）
+    auctionRate: 0.05        // オークション 成約手数料＝粗利 × 5%
+  };
+
   function seedCases() {
     return [
       { id: 'CS-7001', date: '2026/06/27', name: '佐藤 様', tel: '090-1111-2222', email: 'sato@example.com', genre: '廃車', assignee: 'いわき店', stage: '新規受付', amount: 0, memo: '不動車・引取希望' },
@@ -115,10 +129,10 @@ window.HQ = (function () {
     var reListFee = (c && c.reListed) ? (Number(c.reListFee) || 0) : 0;
     var agencyFee = 0, commission = 0, hqFee = 0;
     if (method === '直販') {
-      hqFee = 30000; // 一律（税抜）
+      hqFee = FEES.directHqFee; // 一律（税抜）
     } else if (method === 'オークション') {
-      agencyFee = 10000; // 出品代行（税込）
-      commission = Math.round(Math.max(0, profit) * 0.05); // 成約手数料＝粗利×5%
+      agencyFee = FEES.auctionSystemFee; // システム利用料（出品代行・税込）
+      commission = Math.round(Math.max(0, profit) * FEES.auctionRate); // 成約手数料＝粗利×率
       hqFee = agencyFee + commission + shipping + claimCost + reListFee;
     }
     var partnerNet = profit - hqFee;
@@ -274,7 +288,7 @@ window.HQ = (function () {
   }
 
   return {
-    ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON,
+    ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES,
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     addReferral: addReferral, getReferrals: getReferrals,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,

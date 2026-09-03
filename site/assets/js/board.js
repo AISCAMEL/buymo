@@ -417,8 +417,8 @@
           '<p class="cp-sale-role-note" id="cpSaleRoleNote"></p>' +
           '<div class="cp-sale-status" id="cpSaleStatus"></div>' +
           '<div class="cp-sale-methods">' +
-            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="直販" id="cpSaleDirect"> 直販（自社）<span class="cp-sale-note">本部手数料 一律 ¥30,000（税抜）</span></label>' +
-            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="オークション" id="cpSaleAuction"> オークション<span class="cp-sale-note">出品代行¥10,000＋成約手数料（粗利5%）＋実費</span></label>' +
+            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="直販" id="cpSaleDirect"> 直販（自社）<span class="cp-sale-note">本部手数料 一律 ' + HQ.yen(HQ.FEES.directHqFee) + '（税抜）</span></label>' +
+            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="オークション" id="cpSaleAuction"> オークション<span class="cp-sale-note">システム利用料 ' + HQ.yen(HQ.FEES.auctionSystemFee) + '＋成約手数料（粗利' + Math.round(HQ.FEES.auctionRate * 100) + '%）＋実費</span></label>' +
           '</div>' +
           '<div class="cp-sale-fields">' +
             '<label class="cp-sale-price-l">① 買取金額（仕入れ・円）<input id="cpBuyPrice" type="number" min="0" placeholder="0"></label>' +

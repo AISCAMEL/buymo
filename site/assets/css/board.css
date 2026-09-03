@@ -318,3 +318,23 @@
 .report-head .page-mascot{float:none;margin:0;align-self:flex-end;flex-shrink:0;}
 .btn-csv{width:auto;height:44px;padding:0 22px;display:inline-flex;align-items:center;}
 @media (max-width:480px){.page-mascot{display:none;}}
+
+/* ============================================================
+   案件カード コンパクト化（バッジの縦組み崩れ防止・縮小して見やすく）
+   ・上部バッジ行を折返し可に＋各バッジを nowrap にして「ミ/ニ/バ/ン」縦組みを解消
+   ・ジャンルタグの margin-left:auto を解除（他バッジを潰さない）
+   ・余白/文字を少し詰めて1枚を低背化
+   ============================================================ */
+.kb-card{padding:11px 12px;}
+.kb-card-top{flex-wrap:wrap;gap:4px 6px;margin-bottom:6px;row-gap:4px;}
+.kb-id{white-space:nowrap;}
+.kb-tag{margin-left:0;white-space:nowrap;font-size:10.5px;padding:1px 7px;}
+.kb-stale{white-space:nowrap;}
+.kb-hist{margin-left:0;white-space:nowrap;}
+/* バッジの高さ・文字を統一して詰める */
+.kb-tag,.kb-stale,.kb-claim,.kb-sale-alert,.kb-car,.kb-photo,.kb-hist{
+  font-size:10px;line-height:1.6;padding:1px 6px;flex:0 0 auto;
+}
+.kb-name{font-size:14px;line-height:1.35;margin-top:1px;}
+.kb-meta{font-size:11.5px;line-height:1.5;margin-top:3px;}
+.kb-memo{font-size:11.5px;line-height:1.5;margin-top:6px;padding:6px 8px;}

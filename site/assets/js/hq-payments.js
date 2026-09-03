@@ -19,7 +19,8 @@
   function rec(name) {
     if (!db[name]) {
       var s = stores.filter(function (x) { return x.name === name; })[0] || {};
-      db[name] = { joinDate: s.joinDate || '', years: 5, monthly: 30000, payments: [] };
+      var defMonthly = (window.HQ && HQ.FEES && HQ.FEES.franchiseMonthly) || 35000;
+      db[name] = { joinDate: s.joinDate || '', years: 5, monthly: defMonthly, payments: [] };
     }
     if (!db[name].payments) db[name].payments = [];
     return db[name];

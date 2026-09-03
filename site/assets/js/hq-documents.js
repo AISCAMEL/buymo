@@ -180,7 +180,7 @@
           '<tr><td class="label">① 買取金額（仕入れ）</td><td>' + yen(r.buyP) + '</td></tr>',
           '<tr><td class="label">② 精算書の金額（落札額）</td><td>' + yen(r.saleP) + '</td></tr>',
           '<tr><td class="label" style="background:#f9f0e6;">差引き（粗利）</td><td style="font-weight:700;">' + yen(r.profit) + '</td></tr>',
-          '<tr><td class="label">出品代行手数料（税込）</td><td>' + yen(r.agencyFee) + '</td></tr>',
+          '<tr><td class="label">システム利用料（税込）</td><td>' + yen(r.agencyFee) + '</td></tr>',
           '<tr><td class="label">成約手数料（粗利5%）</td><td>' + yen(r.commission) + '</td></tr>'
         ];
         if (r.shipping) rowsHtml.push('<tr><td class="label">陸送費</td><td>' + yen(r.shipping) + '</td></tr>');
