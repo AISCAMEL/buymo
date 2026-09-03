@@ -1436,3 +1436,23 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
    ============================================================ */
 .form-mascot::after{background-image:url('../img/buymo/staff-document.png');width:150px;height:210px;}
 .company-mascot::after{background-image:url('../img/buymo/staff-smile.png');width:130px;height:186px;}
+
+/* ============================================================
+   トップ：加盟店・店舗案内バンド
+   ============================================================ */
+.store-band{padding:58px 0;}
+.store-band-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:840px;margin:22px auto 0;}
+@media(max-width:700px){.store-band-grid{grid-template-columns:1fr;}}
+.store-band-card,.store-band-more{display:flex;flex-direction:column;gap:8px;padding:24px 26px;border-radius:var(--radius,18px);
+  text-decoration:none;box-shadow:var(--shadow,0 10px 30px rgba(10,61,56,.08));transition:transform .18s ease,box-shadow .18s ease;}
+.store-band-card{background:linear-gradient(135deg,var(--green,#0F766E),var(--green-dark,#0B5A54));color:#fff;}
+.store-band-card:hover,.store-band-more:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover,0 18px 40px rgba(10,61,56,.16));}
+.sbc-pref{align-self:flex-start;background:var(--gold,#F4B740);color:var(--on-gold,#4A3500);font-weight:900;font-size:12px;padding:3px 12px;border-radius:999px;}
+.sbc-name{font-size:20px;font-weight:900;}
+.sbc-meta{font-size:12.5px;opacity:.95;line-height:1.7;}
+.sbc-cta{margin-top:auto;font-weight:800;font-size:14px;}
+.store-band-more{background:#fff;border:1px solid var(--border,#e6ece9);color:var(--text,#1f2937);align-items:center;text-align:center;justify-content:center;gap:10px;}
+.sbm-ico{width:62px;height:62px;border-radius:16px;background:var(--green-bg,#F1FBF9);border:1px solid #d3ece6;display:flex;align-items:center;justify-content:center;}
+.sbm-ico img{width:40px;height:40px;object-fit:contain;}
+.sbm-t{font-size:16px;font-weight:900;color:var(--navy,#14425f);}
+.sbm-d{font-size:12.5px;color:var(--text-sub,#666);line-height:1.7;}
