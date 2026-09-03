@@ -1370,3 +1370,14 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .bico-chip{width:52px;height:52px;border-radius:14px;background:#E8F6F3;border:1px solid #d3ece6;
   display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;}
 .bico-chip img{width:30px;height:30px;object-fit:contain;}
+
+/* ============================================================
+   チャットボット起動ボタン フォールバック（chatbot.css読込前のちらつき防止）
+   ※ 全ページ共通のこのファイルで最低限のサイズ・位置を保証し、
+      オペレーター写真が特大表示になる不具合を防ぐ。詳細は chatbot.css。
+   ============================================================ */
+.cbot{position:fixed;right:24px;bottom:24px;z-index:140;}
+.cbot-launch{position:relative;width:68px;height:68px;border-radius:50%;padding:0;
+  border:3px solid #fff;overflow:visible;cursor:pointer;background:var(--green,#0F766E);}
+.cbot-launch-img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;}
+.cbot-panel[hidden]{display:none!important;}
