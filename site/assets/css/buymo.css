@@ -1420,3 +1420,13 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 }
 .card-ico:has(img) img{width:40px;height:40px;object-fit:contain;}
 .feature-card:hover .card-ico:has(img),.reason-card:hover .card-ico:has(img){background:#dcf3ee;}
+
+/* ============================================================
+   BUYMOキャラクター（牛マスコット）を増やす：セクション装飾を牛に
+   （FAQ/フォーム/会社情報は人物イラストのまま＝人＋牛のバランス）
+   ============================================================ */
+.section-mascot::after{background-image:url('../img/buymo/mascot-guide.png');width:120px;height:150px;}
+.section-mascot.sm-love::after{background-image:url('../img/buymo/mascot-guide.png');}
+.section-mascot.sm-price::after{background-image:url('../img/buymo/buymo-mascot.png');width:170px;height:130px;}
+.section-mascot.sm-cash::after{background-image:url('../img/buymo/mascot-guide.png');}
+.section-mascot.sm-pickup::after{background-image:url('../img/buymo/buymo-mascot.png');width:170px;height:130px;}
