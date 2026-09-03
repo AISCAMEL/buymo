@@ -25,6 +25,63 @@ window.HQ = (function () {
     auctionRate: 0.05        // オークション 成約手数料＝粗利 × 5%
   };
 
+  /* ============================================================
+     ★共有カレンダー（本部・加盟店で同じGoogleカレンダーを表示）★
+     設定方法：
+       1) Googleカレンダーを1つ作成（例：「BUYMO 本部・加盟店 共有」）
+       2) 設定 → 「予定のアクセス権限」で共有範囲を決める
+          ・全加盟店に見せる → 「一般公開して誰でも利用（予定の表示のみ）」
+            もしくは 各加盟店のGoogleアカウントに「予定の表示（すべての詳細）」で共有
+       3) 設定 → 「カレンダーの統合」→「カレンダーID」をコピーして下の id に貼付
+       ※ id が空の間は、画面に設定手順カードが表示されます。
+     ============================================================ */
+  var CALENDAR = {
+    id: '',              // 例: 'abcd1234@group.calendar.google.com'（空だと設定手順を表示）
+    timezone: 'Asia/Tokyo',
+    mode: 'MONTH',       // MONTH / WEEK / AGENDA
+    height: 600
+  };
+
+  function calendarEmbedUrl() {
+    if (!CALENDAR.id) return '';
+    var p = 'src=' + encodeURIComponent(CALENDAR.id) +
+      '&ctz=' + encodeURIComponent(CALENDAR.timezone) +
+      '&mode=' + encodeURIComponent(CALENDAR.mode) +
+      '&showTitle=0&showPrint=0&showTabs=1&showCalendars=0&showTz=0';
+    return 'https://calendar.google.com/calendar/embed?' + p;
+  }
+
+  // 共有カレンダーを指定要素に描画。id未設定なら設定手順を表示。
+  function mountCalendar(elId) {
+    var host = (typeof elId === 'string') ? document.getElementById(elId) : elId;
+    if (!host) return;
+    var url = calendarEmbedUrl();
+    if (url) {
+      var addLink = 'https://calendar.google.com/calendar/u/0/r?cid=' + encodeURIComponent(CALENDAR.id);
+      host.innerHTML =
+        '<div class="cal-embed">' +
+          '<iframe src="' + url + '" title="共有カレンダー" loading="lazy" ' +
+            'style="border:0;width:100%;height:' + CALENDAR.height + 'px;border-radius:12px;"></iframe>' +
+        '</div>' +
+        '<div class="cal-actions">' +
+          '<a class="cal-open" href="' + addLink + '" target="_blank" rel="noopener">＋ Googleカレンダーで予定を追加/開く</a>' +
+        '</div>';
+    } else {
+      host.innerHTML =
+        '<div class="cal-setup">' +
+          '<p class="cal-setup-t">📅 共有カレンダー（本部・加盟店）を表示するには初期設定が必要です</p>' +
+          '<ol class="cal-setup-steps">' +
+            '<li>Googleカレンダーで共有用カレンダーを1つ作成（例：「BUYMO 本部・加盟店 共有」）</li>' +
+            '<li>カレンダー設定 →「予定のアクセス権限」で共有範囲を設定<br>' +
+              '<span class="cal-setup-sub">全加盟店に見せる場合：「一般公開して予定の表示のみ」、または各加盟店のGoogleアカウントへ「予定の表示（すべての詳細）」で共有</span></li>' +
+            '<li>設定 →「カレンダーの統合」→「カレンダーID」をコピー</li>' +
+            '<li><code>assets/js/hq-common.js</code> の <code>CALENDAR.id</code> にIDを貼り付け（1か所）</li>' +
+          '</ol>' +
+          '<p class="cal-setup-note">設定後、本部・加盟店の両ダッシュボードに同じ共有カレンダーが表示されます。本部が予定を追加、加盟店は閲覧（共有設定次第で追加も可）。</p>' +
+        '</div>';
+    }
+  }
+
   function seedCases() {
     return [
       { id: 'CS-7001', date: '2026/06/27', name: '佐藤 様', tel: '090-1111-2222', email: 'sato@example.com', genre: '廃車', assignee: 'いわき店', stage: '新規受付', amount: 0, memo: '不動車・引取希望' },
@@ -288,7 +345,8 @@ window.HQ = (function () {
   }
 
   return {
-    ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES,
+    ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES, CALENDAR: CALENDAR,
+    mountCalendar: mountCalendar, calendarEmbedUrl: calendarEmbedUrl,
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     addReferral: addReferral, getReferrals: getReferrals,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,

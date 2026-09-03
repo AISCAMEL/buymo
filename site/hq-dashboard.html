@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
 <link rel="stylesheet" href="assets/css/buymo.css?v=37" />
-<link rel="stylesheet" href="assets/css/board.css?v=5" />
+<link rel="stylesheet" href="assets/css/board.css?v=6" />
 </head>
 <body>
 <script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
@@ -60,12 +60,19 @@
         </table>
       </div>
     </section>
+
+    <section class="rep-card" style="margin-top:18px">
+      <h2>📅 共有カレンダー（本部・加盟店）</h2>
+      <p class="portal-sub" style="margin:-4px 0 14px;">本部・加盟店で同じ予定（イベント・研修・オークション日程など）を共有できます。</p>
+      <div id="sharedCal"></div>
+    </section>
   </div>
 </main>
 
-<script src="assets/js/hq-common.js?v=5"></script>
+<script src="assets/js/hq-common.js?v=6"></script>
 <script>
   HQ.nav('dashboard');
+  HQ.mountCalendar('sharedCal');
   HQ.loadCases(function (list) {
     var cnt = function (st) { return list.filter(function (c) { return c.stage === st; }).length; };
     var sales = list.filter(function (c) { return c.stage === '完了'; }).reduce(function (s, c) { return s + (Number(c.amount) || 0); }, 0);

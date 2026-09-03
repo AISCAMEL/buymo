@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
 <link rel="stylesheet" href="assets/css/buymo.css?v=37" />
-<link rel="stylesheet" href="assets/css/board.css?v=5" />
+<link rel="stylesheet" href="assets/css/board.css?v=6" />
 <style>
 .partner-welcome{margin-bottom:28px;}
 .partner-welcome h1{font-size:22px;font-weight:900;margin-bottom:4px;}
@@ -124,10 +124,17 @@
       <a href="hq.html?role=partner"><span class="p-quick-ico">🗂️</span>案件ボード</a>
     </div>
 
+    <!-- 共有カレンダー -->
+    <section class="rep-card" style="margin-top:22px">
+      <h2>📅 共有カレンダー（本部・加盟店）</h2>
+      <p class="portal-sub" style="margin:-4px 0 14px;">本部からの予定（研修・オークション日程・キャンペーン等）を共有できます。</p>
+      <div id="sharedCal"></div>
+    </section>
+
   </div>
 </main>
 
-<script src="assets/js/hq-common.js?v=5"></script>
+<script src="assets/js/hq-common.js?v=6"></script>
 <script>
 (function () {
   'use strict';
@@ -143,6 +150,7 @@
     d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日（' + ['日','月','火','水','木','金','土'][d.getDay()] + '）';
 
   HQ.nav('dashboard');
+  HQ.mountCalendar('sharedCal');
 
   // お知らせ（本部が登録したものを共有＝GASから取得）
   (function () {

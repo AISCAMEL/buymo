@@ -338,3 +338,19 @@
 .kb-name{font-size:14px;line-height:1.35;margin-top:1px;}
 .kb-meta{font-size:11.5px;line-height:1.5;margin-top:3px;}
 .kb-memo{font-size:11.5px;line-height:1.5;margin-top:6px;padding:6px 8px;}
+
+/* ============================================================
+   共有カレンダー（本部・加盟店ダッシュボード）
+   ============================================================ */
+.cal-embed{width:100%;overflow:hidden;border-radius:12px;background:#f7fbfa;}
+.cal-embed iframe{display:block;}
+.cal-actions{margin-top:12px;}
+.cal-open{display:inline-flex;align-items:center;gap:6px;background:var(--green,#0F766E);color:#fff;
+  font-weight:800;font-size:13px;padding:9px 16px;border-radius:9px;text-decoration:none;}
+.cal-open:hover{filter:brightness(1.08);}
+.cal-setup{background:#F1FBF9;border:1px dashed #9fd8cf;border-radius:12px;padding:18px 20px;}
+.cal-setup-t{font-weight:900;color:var(--navy,#14425f);margin:0 0 12px;font-size:14.5px;}
+.cal-setup-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:#374151;line-height:1.7;}
+.cal-setup-steps code{background:#fff;border:1px solid #e2e6ee;border-radius:5px;padding:1px 6px;font-size:12px;}
+.cal-setup-sub{color:#6b7280;font-size:12px;}
+.cal-setup-note{margin:14px 0 0;font-size:12px;color:#6b7280;line-height:1.7;}
