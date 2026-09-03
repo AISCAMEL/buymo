@@ -47,7 +47,9 @@
   font-weight:800;border-radius:10px;padding:11px 14px;text-decoration:none;font-size:14px;flex:1;min-width:130px;}
 .st-line:hover{filter:brightness(1.06);}
 .store-recruit{margin-top:26px;background:var(--green-bg,#F1FBF9);border:1px dashed #9fd8cf;border-radius:var(--radius,18px);
-  padding:26px 24px;text-align:center;}
+  padding:26px 24px;text-align:center;position:relative;}
+.store-recruit-staff{position:absolute;right:20px;bottom:0;height:170px;width:auto;pointer-events:none;}
+@media(max-width:640px){.store-recruit-staff{display:none;}}
 .store-recruit h2{font-size:19px;font-weight:900;color:var(--navy,#14425f);margin:0 0 8px;}
 .store-recruit p{font-size:13.5px;color:#555;line-height:1.8;margin:0 0 16px;}
 .store-note{font-size:12px;color:#888;margin:18px 0 0;line-height:1.7;}
@@ -114,6 +116,7 @@
 
       <!-- 加盟店募集 -->
       <div class="store-recruit">
+        <img class="store-recruit-staff" src="../assets/img/buymo/staff-thumbsup.png?v=2" alt="" aria-hidden="true" loading="lazy" />
         <h2>あなたの街の「BUYMO加盟店」を募集中</h2>
         <p>BUYMOは全国で加盟店を拡大しています。在庫を持たない車買取ビジネスを、本部のサポートとシステムで。<br>「地元でBUYMOを開きたい」という方は、下記よりお気軽にお問い合わせください。</p>
         <a href="../buymo-partner.html" class="btn btn-primary btn-lg">加盟店・パートナー募集を見る</a>
