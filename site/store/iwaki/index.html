@@ -92,6 +92,16 @@
   .st-final h2{font-size:24px;font-weight:900;margin:0 0 8px;}
   .st-final p{opacity:.92;margin:0 0 20px;}
   .st-back{display:inline-block;margin-top:10px;color:var(--green-dark,#0B5A54);font-weight:700;font-size:13px;}
+  .st-results{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:840px){.st-results{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){.st-results{grid-template-columns:1fr;}}
+  .st-rcard{background:#fff;border:1px solid #e6ece9;border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(10,61,56,.07);display:flex;flex-direction:column;}
+  .st-rcard .rc-img{width:100%;height:150px;object-fit:cover;background:#f1fbf9;display:block;}
+  .st-rcard .rc-in{padding:14px 16px;display:flex;flex-direction:column;gap:5px;}
+  .st-rcard .rc-date{font-size:11px;color:#999;font-weight:700;}
+  .st-rcard .rc-car{font-size:15px;font-weight:900;color:var(--navy,#14425f);line-height:1.4;}
+  .st-rcard .rc-price{font-size:15px;font-weight:900;color:var(--green,#0F766E);}
+  .st-rcard .rc-note{font-size:12.5px;color:#555;line-height:1.7;}
   .st-blog{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
   @media(max-width:720px){.st-blog{grid-template-columns:1fr;}}
   .st-blog-card{background:#fff;border:1px solid #e6ece9;border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(10,61,56,.07);display:flex;flex-direction:column;}
@@ -130,9 +140,9 @@
       <span class="st-eyebrow" id="stCatch">🏬 BUYMO 直営店</span>
       <h1>BUYMO <span>福島いわき本店</span><br>地元いわきの車買取なら、おまかせください。</h1>
       <p id="stLead">いわき市を中心に福島県全域に対応。写真を送るだけのネット完結査定で、しつこい電話なし・手数料0円・最短即日入金。廃車・事故車・不動車もOKです。</p>
-      <div class="st-cta">
+      <div class="st-cta" id="stHeroCta">
         <a href="../../buymo-contact.html" class="btn-gold">写真で無料査定 →</a>
-        <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn-line">📞 LINEで相談</a>
+        <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn-line" id="stHeroLine">📞 LINEで相談</a>
       </div>
       <div class="st-badges"><span>手数料0円</span><span>無料出張・引取り</span><span>最短即日入金</span><span>全国対応</span></div>
     </div>
@@ -146,7 +156,7 @@
       <dl class="st-info">
         <dt>店舗名</dt><dd>BUYMO 福島いわき本店</dd>
         <dt>所在地</dt><dd>〒971-8138 福島県いわき市若葉台1丁目31-11</dd>
-        <dt>連絡先</dt><dd>✉️ kaitori@buymo.me ／ 📞 LINE相談：<a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener">友だち追加</a></dd>
+        <dt>連絡先</dt><dd id="stContact">✉️ kaitori@buymo.me ／ 📞 LINE相談：<a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener">友だち追加</a></dd>
         <dt>受付</dt><dd>査定はオンラインで24時間受付（年中無休）</dd>
         <dt>事業内容</dt><dd>自動車買取・販売業</dd>
         <dt>古物商許可</dt><dd>福島県公安委員会許可 第25121A010859号</dd>
@@ -166,6 +176,15 @@
         <div class="fc"><div class="ic">💴</div><h3>手数料0円</h3><p>査定料・手続き代行・レッカーまですべて無料。</p></div>
         <div class="fc"><div class="ic">⚡</div><h3>スピード入金</h3><p>書類確認後、最短即日〜3営業日以内に確実にお振込み。</p></div>
       </div>
+    </div>
+  </section>
+
+  <!-- 買取実績（加盟店が登録→自動反映） -->
+  <section class="st-sec" id="storeResultsSec" hidden>
+    <div class="container">
+      <h2 class="st-h2">買取実績</h2>
+      <p class="st-lead">当店で実際にお買い取りした事例です。</p>
+      <div class="st-results" id="storeResults"></div>
     </div>
   </section>
 
@@ -221,9 +240,9 @@
       <div class="st-final">
         <h2>まずは30秒、無料でチェック</h2>
         <p>電話番号の入力は不要。しつこい営業は一切ありません。</p>
-        <div class="st-cta" style="justify-content:center;">
+        <div class="st-cta" id="stFinalCta" style="justify-content:center;">
           <a href="../../buymo-contact.html" class="btn-gold">写真で無料査定 →</a>
-          <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn-line">📞 LINEで相談</a>
+          <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn-line" id="stFinalLine">📞 LINEで相談</a>
         </div>
       </div>
       <p style="text-align:center;"><a href="../../index.html" class="st-back">← BUYMOトップへ戻る</a></p>
@@ -243,11 +262,52 @@
   var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
   var SLUG = 'iwaki';
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function telHref(t) { return 'tel:' + String(t).replace(/[^0-9+]/g, ''); }
   // 加盟店が編集した店舗紹介を上書き
   fetch(ENDPOINT + '?action=storecontent&store=' + SLUG).then(function (r) { return r.json(); }).then(function (c) {
     if (!c) return;
     if (c['catch']) { var e = document.getElementById('stCatch'); if (e) e.textContent = c['catch']; }
     if (c.intro) { var l = document.getElementById('stLead'); if (l) l.textContent = c.intro; }
+
+    // お問い合わせ先（電話・LINE・メール）を反映
+    if (c.tel || c.line || c.email) {
+      var parts = [];
+      if (c.email) parts.push('✉️ <a href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>');
+      if (c.tel)   parts.push('📞 <a href="' + esc(telHref(c.tel)) + '">' + esc(c.tel) + '</a>');
+      if (c.line)  parts.push('💬 LINE相談：<a href="' + esc(c.line) + '" target="_blank" rel="noopener">友だち追加</a>');
+      var dd = document.getElementById('stContact'); if (dd && parts.length) dd.innerHTML = parts.join(' ／ ');
+    }
+    // LINEボタンのリンクを差し替え
+    if (c.line) {
+      ['stHeroLine', 'stFinalLine'].forEach(function (id) { var a = document.getElementById(id); if (a) a.href = c.line; });
+    }
+    // 電話ボタンをCTAに追加
+    if (c.tel) {
+      ['stHeroCta', 'stFinalCta'].forEach(function (id) {
+        var box = document.getElementById(id); if (!box) return;
+        var a = document.createElement('a');
+        a.href = telHref(c.tel); a.className = 'btn-line'; a.textContent = '📞 ' + c.tel;
+        box.appendChild(a);
+      });
+    }
+
+    // 買取実績を反映
+    if (c.results && c.results.length) {
+      var sec = document.getElementById('storeResultsSec'), box = document.getElementById('storeResults');
+      if (sec && box) {
+        box.innerHTML = c.results.map(function (r) {
+          return '<article class="st-rcard">' +
+            (r.image ? '<img class="rc-img" src="' + esc(r.image) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
+            '<div class="rc-in">' +
+              (r.date ? '<div class="rc-date">' + esc(r.date) + '</div>' : '') +
+              '<div class="rc-car">' + esc(r.car || '') + '</div>' +
+              (r.price ? '<div class="rc-price">' + esc(r.price) + '</div>' : '') +
+              (r.note ? '<div class="rc-note">' + esc(r.note) + '</div>' : '') +
+            '</div></article>';
+        }).join('');
+        sec.hidden = false;
+      }
+    }
   }).catch(function () {});
   // ブログを反映（投稿があれば表示）
   fetch(ENDPOINT + '?action=blog&store=' + SLUG).then(function (r) { return r.json(); }).then(function (list) {
