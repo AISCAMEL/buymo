@@ -194,7 +194,7 @@ img{max-width:100%;display:block;}
   color:#fff;font-weight:700;font-size:13px;
   padding:6px 18px;border-radius:100px;
 }
-.hero-badges li::before{content:"✓ ";color:var(--accent);font-weight:900;}
+.hero-badges li::before{content:"✓ ";color:var(--gold);font-weight:900;}
 .hero-img-main{display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:center right;border-radius:0;position:absolute;inset:0;}
 .hero-img-mascot{display:none;}
 .hero-img-cars{display:none;}
@@ -642,7 +642,7 @@ a.genre-tag:hover{background:var(--green);border-color:var(--green);color:#fff;}
 .promise-text h3{font-size:18px;font-weight:900;margin-bottom:10px;}
 .promise-text ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;}
 .promise-text li{padding-left:22px;position:relative;font-size:14px;line-height:1.7;}
-.promise-text li::before{content:'✓';position:absolute;left:0;color:var(--green-pale);font-weight:900;font-size:16px;}
+.promise-text li::before{content:'✓';position:absolute;left:0;color:var(--red);font-weight:900;font-size:16px;}
 .promise-text strong{font-weight:900;}
 @media (max-width:640px){
   .promise-box{flex-direction:column;padding:24px;gap:12px;align-items:center;text-align:center;}
@@ -1245,7 +1245,7 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .hero3-copy h1{font-size:clamp(28px,4.6vw,44px);font-weight:900;line-height:1.2;margin:16px 0 12px;color:#fff;letter-spacing:-.01em;}
 .hero3-copy h1 .hl{position:relative;white-space:nowrap;}
 .hero3-copy h1 .hl::after{content:"";position:absolute;left:-2px;right:-2px;bottom:.08em;height:.34em;
-  background:linear-gradient(90deg,var(--accent,#14B8A6),#7FE0D3);opacity:.5;border-radius:4px;z-index:-1;}
+  background:linear-gradient(90deg,var(--gold),var(--red));opacity:.92;border-radius:4px;z-index:-1;}
 .hero3-sub{font-size:15.5px;color:#CDEBE6;max-width:29em;}
 .hero3-chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:0;}
 .hero3-chips li{font-size:12px;font-weight:700;color:#EAFBF7;background:rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;}
@@ -1309,7 +1309,7 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .cban .cban-t{font-size:21px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.35);line-height:1.25;}
 .cban .cban-s{font-size:12.5px;opacity:.96;margin-top:5px;line-height:1.5;}
 .cban .cban-badge{position:absolute;top:14px;left:14px;z-index:2;
-  background:var(--gold);color:var(--on-gold);font-weight:900;font-size:12px;padding:5px 12px;border-radius:999px;}
+  background:var(--red);color:#fff;font-weight:900;font-size:12px;padding:5px 12px;border-radius:999px;}
 @media(max-width:760px){.campaign .banners{grid-template-columns:1fr;}}
 
 /* ============================================================
