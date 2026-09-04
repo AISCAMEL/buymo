@@ -12,7 +12,7 @@
 .breadcrumb a{color:var(--green-mid);}
 .breadcrumb span{margin:0 8px;}
 .page-hero h1{font-size:40px;font-weight:900;margin-bottom:14px;}
-.page-hero h1::after{content:"";display:block;width:48px;height:3px;background:var(--green-mid);border-radius:2px;margin:14px auto 0;}
+.page-hero h1::after{content:"";display:block;width:64px;height:5px;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:2px;margin:14px auto 0;}
 .page-lead{color:#555;font-size:16px;}
 
 /* ---- 連絡先カード ---- */
