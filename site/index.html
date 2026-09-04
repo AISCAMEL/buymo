@@ -203,6 +203,27 @@
     </div>
   </section>
 
+  <!-- ============ 動画で見るBUYMO ============ -->
+  <section class="top-video" aria-labelledby="tv-title">
+    <div class="container">
+      <div class="eyebrow-wrap"><span class="eyebrow">MOVIE</span></div>
+      <h2 id="tv-title" class="section-title">動画で見るBUYMO</h2>
+      <p class="section-note" style="text-align:center">30秒でわかる、かんたん写真査定。</p>
+      <div class="tv-frame">
+        <video controls preload="metadata" playsinline poster="assets/img/buymo/video-poster.jpg">
+          <source src="assets/video/buymo-top.mp4" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。
+        </video>
+      </div>
+    </div>
+  </section>
+  <style>
+  .top-video{padding:56px 0;background:var(--green-bg,#F1FBF9);}
+  .top-video .section-note{margin-bottom:14px;}
+  .tv-frame{max-width:880px;margin:8px auto 0;border-radius:18px;overflow:hidden;box-shadow:0 16px 40px rgba(10,61,56,.18);background:#000;line-height:0;}
+  .tv-frame video{display:block;width:100%;height:auto;}
+  </style>
+
   <!-- ============ キャンペーンバナー（3つの約束） ============ -->
   <section class="campaign" aria-labelledby="campaign-title">
     <div class="container">
