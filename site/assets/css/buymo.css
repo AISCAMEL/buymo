@@ -9,7 +9,7 @@
   --green-mid:#2A9187;
   --green-light:#7ED6CC;
   --green-pale:#DCF5F1;
-  --green-bg:#F1FBF9;
+  --green-bg:#F6F8F8;
   --green-deep:#0A4A44;
   --orange:#0F766E;
   --orange-dark:#0B5A54;
@@ -35,6 +35,11 @@
   --gold:#F4B740;
   --gold-dark:#D99A1F;
   --on-gold:#4A3500;
+  /* 差し色：赤（アクセント） */
+  --red:#E1352B;
+  --red-dark:#BE2A22;
+  --red-wash:#FCE9E7;
+  --on-red:#FFFFFF;
   --max:1200px;
   --f-body:'Outfit','Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic','Meiryo',sans-serif;
 }
@@ -60,7 +65,7 @@ img{max-width:100%;display:block;}
 /* ---- Section labels + titles ---- */
 .eyebrow{
   display:inline-block;
-  background:var(--green-pale);color:var(--green-dark);
+  background:var(--red-wash);color:var(--red-dark);
   font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
   padding:4px 16px;border-radius:100px;margin-bottom:14px;
 }
@@ -140,7 +145,7 @@ img{max-width:100%;display:block;}
   border-bottom:2px solid transparent;
 }
 .gnav a:hover{color:var(--green);border-bottom-color:var(--green);}
-.header-tel{font-size:20px;font-weight:900;color:var(--green);white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.header-tel{font-size:20px;font-weight:900;color:var(--red);white-space:nowrap;display:flex;align-items:center;gap:6px;}
 .tel-ico{font-size:16px;display:inline-flex;align-items:center;line-height:0;}
 .tel-ico img{width:26px;height:26px;object-fit:cover;display:block;margin-right:8px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.15);}
 .sticky-cta .s-tel img{width:20px;height:20px;object-fit:contain;display:inline-block;vertical-align:middle;margin-right:6px;}
@@ -1259,7 +1264,7 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 
 /* --- 見出し：さらに大きく＋ティール→ゴールドの下線 --- */
 .section-title{font-size:38px;}
-.section-title::after{width:60px;height:5px;background:linear-gradient(90deg,var(--green),var(--gold));}
+.section-title::after{width:72px;height:5px;background:linear-gradient(90deg,var(--green),var(--gold) 60%,var(--red));}
 @media(max-width:640px){.section-title{font-size:26px;}}
 
 /* --- ヒーロー：ラジアルで奥行き＋見出し特大 --- */
