@@ -1,6 +1,13 @@
 DirectoryIndex index.html
 Options -Indexes
 
+# /index.html は / に統一（301・重複URL回避／末尾スラッシュのルートを正規化）
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+  RewriteRule ^index\.html$ / [R=301,L]
+</IfModule>
+
 # 404/403はBUYMOのカスタムページを表示（サーバー既定の素な404を回避）
 ErrorDocument 404 /404.html
 ErrorDocument 403 /404.html
