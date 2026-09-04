@@ -59,8 +59,9 @@
   .st-hero p{opacity:.95;font-size:15px;max-width:34em;}
   .st-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
   .st-cta .btn{width:auto;height:56px;padding:0 26px;font-size:16px;}
-  .st-cta .btn-gold{background:#F4B740;color:#4A3500;border:none;border-radius:100px;display:inline-flex;align-items:center;font-weight:900;font-family:inherit;cursor:pointer;}
+  .st-cta .btn-gold{background:#F4B740;color:#4A3500;border:none;border-radius:100px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-family:inherit;cursor:pointer;height:56px;padding:0 26px;font-size:16px;}
   .st-cta .btn-line{background:#fff;color:var(--green-dark,#0B5A54);border-radius:100px;display:inline-flex;align-items:center;font-weight:900;padding:0 26px;height:56px;}
+  @media(max-width:520px){.st-cta{flex-direction:column;}.st-cta .btn,.st-cta .btn-gold,.st-cta .btn-line{width:100%;}}
   .st-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;}
   .st-badges span{font-size:12.5px;font-weight:800;background:rgba(255,255,255,.13);padding:7px 13px;border-radius:8px;}
   .st-badges span::before{content:"✓ ";color:#F4B740;}
