@@ -203,7 +203,7 @@ ${header(rel, 'area')}
           <div class="acc-item"><button class="acc-q" aria-expanded="false">買取金額はいつ振り込まれますか？<span class="acc-toggle" aria-hidden="true">▼</span></button><div class="acc-a"><p>ご契約と必要書類の確認後、最短即日〜数営業日でご指定の口座へお振込みします。</p></div></div>
         </div>
       </div>
-      <div class="faq-mascot" aria-hidden="true">🐮👉</div>
+      <div class="faq-mascot" aria-hidden="true">🐪👉</div>
     </div>
   </section>
 

@@ -16,7 +16,7 @@ function header(rel, active) {
   ].map(([t, h, a]) => `<li><a href="${h}"${a ? ' aria-current="page"' : ''}>${t}</a></li>`).join('');
   return `<header class="site-header" id="top">
   <div class="container header-inner">
-    <a href="${rel}index.html#top" class="logo" aria-label="BUYMO ホーム"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
+    <a href="${rel}index.html#top" class="logo" aria-label="BUYMO ホーム"><span class="logo-mark" aria-hidden="true">🐪</span><span class="logo-text">BUYMO</span></a>
     <nav class="gnav" id="gnav" aria-label="メインナビゲーション"><ul>${nav}</ul></nav>
     <a href="#chat" class="header-tel" aria-label="メールでお問い合わせ"><span class="tel-ico" aria-hidden="true">✉️</span>チャットで査定</a>
     <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false" aria-controls="gnav"><span></span><span></span><span></span></button>
@@ -34,7 +34,7 @@ function footer(rel) {
   </nav>
   <div class="container grid grid-3 footer-grid">
     <div class="footer-col">
-      <a href="${rel}index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true">🐮</span><span class="logo-text">BUYMO</span></a>
+      <a href="${rel}index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true">🐪</span><span class="logo-text">BUYMO</span></a>
       <p class="footer-company">合同会社アイズ</p>
       <p>〒979-0204<br>福島県いわき市四倉町細谷字大町1番</p>
       <p>✉️ kaitori@buymo.me</p>

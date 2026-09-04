@@ -29,12 +29,13 @@
 <body>
 <div class="nf">
   <div class="nf-card">
-    <!-- SVG: 迷子になった牛のイラスト -->
-    <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" style="width:260px;max-width:100%;margin:0 auto 12px;display:block;" role="img" aria-label="迷子になった牛のイラスト">
+    <!-- SVG: 迷子になったラクダのイラスト -->
+    <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" style="width:260px;max-width:100%;margin:0 auto 12px;display:block;" role="img" aria-label="迷子になったラクダのイラスト">
       <!-- 空 -->
       <rect width="320" height="180" fill="#fffbf5" rx="16"/>
-      <!-- 地面 -->
-      <ellipse cx="160" cy="175" rx="180" ry="40" fill="#d1fae5"/>
+      <!-- 地面（砂丘風） -->
+      <ellipse cx="160" cy="175" rx="180" ry="40" fill="#f3e2b8"/>
+      <ellipse cx="60" cy="176" rx="90" ry="24" fill="#ecd39a" opacity="0.7"/>
       <!-- 道路 -->
       <rect x="130" y="110" width="60" height="70" fill="#e5e7eb" rx="4"/>
       <rect x="156" y="115" width="8" height="12" fill="white" rx="2"/>
@@ -44,43 +45,46 @@
       <text x="246" y="104" text-anchor="middle" font-size="30" font-weight="900" fill="#14B8A6" font-family="sans-serif">?</text>
       <!-- 道標の支柱 -->
       <rect x="242" y="120" width="8" height="45" fill="#9ca3af" rx="2"/>
-      <!-- 牛のボディ -->
-      <ellipse cx="88" cy="128" rx="40" ry="26" fill="white" stroke="#6B7280" stroke-width="2"/>
-      <!-- 牛の脚 -->
-      <rect x="58" y="148" width="8" height="20" fill="white" stroke="#6B7280" stroke-width="1.5" rx="3"/>
-      <rect x="72" y="148" width="8" height="20" fill="white" stroke="#6B7280" stroke-width="1.5" rx="3"/>
-      <rect x="96" y="148" width="8" height="20" fill="white" stroke="#6B7280" stroke-width="1.5" rx="3"/>
-      <rect x="110" y="148" width="8" height="20" fill="white" stroke="#6B7280" stroke-width="1.5" rx="3"/>
-      <!-- 牛のしっぽ -->
-      <path d="M50,124 Q34,112 38,100 Q40,92 48,95" stroke="#6B7280" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <!-- 牛のスポット -->
-      <ellipse cx="84" cy="124" rx="13" ry="9" fill="#1f2937" opacity="0.12"/>
-      <ellipse cx="102" cy="132" rx="8" ry="6" fill="#1f2937" opacity="0.12"/>
-      <!-- 牛の頭 -->
-      <ellipse cx="124" cy="114" rx="20" ry="17" fill="white" stroke="#6B7280" stroke-width="2"/>
-      <!-- 牛の耳 -->
-      <ellipse cx="108" cy="101" rx="6" ry="9" fill="white" stroke="#6B7280" stroke-width="1.5" transform="rotate(-20,108,101)"/>
-      <ellipse cx="140" cy="100" rx="6" ry="9" fill="white" stroke="#6B7280" stroke-width="1.5" transform="rotate(20,140,100)"/>
-      <!-- 牛の目 -->
-      <circle cx="130" cy="110" r="3.5" fill="#1f2937"/>
-      <circle cx="131.5" cy="108.5" r="1" fill="white"/>
-      <!-- 牛の鼻 -->
-      <ellipse cx="136" cy="120" rx="7" ry="5" fill="#fca5a5"/>
-      <circle cx="133.5" cy="120" r="1.5" fill="#e57373"/>
-      <circle cx="138.5" cy="120" r="1.5" fill="#e57373"/>
-      <!-- 牛の角 -->
-      <path d="M114,96 Q108,84 116,82" stroke="#9ca3af" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <path d="M134,95 Q138,83 130,81" stroke="#9ca3af" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- ラクダのしっぽ -->
+      <path d="M44,128 Q33,138 39,152" stroke="#B98246" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="39" cy="153" r="3.5" fill="#8a5a2b"/>
+      <!-- ラクダの脚 -->
+      <rect x="58" y="146" width="8" height="22" fill="#E4B57E" stroke="#B98246" stroke-width="1.5" rx="3"/>
+      <rect x="72" y="146" width="8" height="22" fill="#E4B57E" stroke="#B98246" stroke-width="1.5" rx="3"/>
+      <rect x="96" y="146" width="8" height="22" fill="#E4B57E" stroke="#B98246" stroke-width="1.5" rx="3"/>
+      <rect x="110" y="146" width="8" height="22" fill="#E4B57E" stroke="#B98246" stroke-width="1.5" rx="3"/>
+      <!-- 脚先（ひづめ） -->
+      <rect x="58" y="163" width="8" height="5" fill="#8a5a2b" rx="2"/>
+      <rect x="72" y="163" width="8" height="5" fill="#8a5a2b" rx="2"/>
+      <rect x="96" y="163" width="8" height="5" fill="#8a5a2b" rx="2"/>
+      <rect x="110" y="163" width="8" height="5" fill="#8a5a2b" rx="2"/>
+      <!-- ラクダのボディ -->
+      <ellipse cx="84" cy="136" rx="42" ry="20" fill="#E4B57E" stroke="#B98246" stroke-width="2"/>
+      <!-- こぶ（ラクダの証） -->
+      <path d="M52,132 Q80,96 112,132 Z" fill="#E4B57E" stroke="#B98246" stroke-width="2" stroke-linejoin="round"/>
+      <!-- 首 -->
+      <path d="M104,132 Q120,112 128,90 L140,94 Q134,116 120,138 Z" fill="#E4B57E" stroke="#B98246" stroke-width="2" stroke-linejoin="round"/>
+      <!-- 頭 -->
+      <ellipse cx="136" cy="86" rx="13" ry="10" fill="#E4B57E" stroke="#B98246" stroke-width="2"/>
+      <!-- 口先（マズル） -->
+      <ellipse cx="150" cy="90" rx="9" ry="6.5" fill="#F6E7CB" stroke="#B98246" stroke-width="1.5"/>
+      <!-- 耳 -->
+      <ellipse cx="130" cy="74" rx="4" ry="7" fill="#E4B57E" stroke="#B98246" stroke-width="1.5" transform="rotate(-18,130,74)"/>
+      <!-- 目 -->
+      <circle cx="139" cy="83" r="3" fill="#1f2937"/>
+      <circle cx="140.2" cy="81.8" r="1" fill="white"/>
+      <!-- 鼻の穴 -->
+      <ellipse cx="155" cy="90" rx="1.6" ry="2.2" fill="#B98246"/>
       <!-- 思考バブル（迷子感） -->
-      <circle cx="155" cy="78" r="4" fill="#14B8A6" opacity="0.25"/>
-      <circle cx="163" cy="66" r="6" fill="#14B8A6" opacity="0.35"/>
-      <circle cx="174" cy="54" r="10" fill="#14B8A6" opacity="0.15"/>
-      <text x="174" y="58" text-anchor="middle" font-size="12" fill="#14B8A6" font-family="sans-serif">…</text>
+      <circle cx="158" cy="70" r="4" fill="#14B8A6" opacity="0.25"/>
+      <circle cx="167" cy="58" r="6" fill="#14B8A6" opacity="0.35"/>
+      <circle cx="178" cy="46" r="10" fill="#14B8A6" opacity="0.15"/>
+      <text x="178" y="50" text-anchor="middle" font-size="12" fill="#14B8A6" font-family="sans-serif">…</text>
     </svg>
-    <div class="nf-emoji" aria-hidden="true">🐮💦</div>
+    <div class="nf-emoji" aria-hidden="true">🐪💦</div>
     <h1>404</h1>
     <h2>ページが見つかりませんでした</h2>
-    <p>牛も迷子になることがあります。<br>お探しのページは移動・削除された可能性があります。</p>
+    <p>ラクダも迷子になることがあります。<br>お探しのページは移動・削除された可能性があります。</p>
     <div class="nf-links">
       <a href="/index.html" class="btn btn-primary">トップへ戻る</a>
       <a href="/buymo-contact.html" class="btn btn-tel" style="border:2px solid var(--orange);color:var(--orange);height:52px;display:inline-flex;align-items:center;padding:0 24px;border-radius:30px;">無料査定・お問い合わせ</a>
