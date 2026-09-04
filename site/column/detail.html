@@ -69,17 +69,17 @@
 
 <header class="site-header" id="top">
   <div class="container header-inner">
-    <a href="../index.html#top" class="logo" aria-label="BUYMO ホーム">
+    <a href="/#top" class="logo" aria-label="BUYMO ホーム">
       <span class="logo-mark" aria-hidden="true"><img src="/assets/img/buymo/logo-mark.png?v=2" alt="" /></span>
       <span class="logo-text">BUYMO</span>
     </a>
     <nav class="gnav" id="gnav" aria-label="メインナビゲーション">
       <ul>
-        <li><a href="../index.html#top">ホーム</a></li>
-        <li><a href="../index.html#features">サービス内容</a></li>
+        <li><a href="/#top">ホーム</a></li>
+        <li><a href="/#features">サービス内容</a></li>
         <li><a href="../genre/">買取ジャンル</a></li>
         <li><a href="../area/">エリア一覧</a></li><li><a href="../column/">コラム</a></li>
-        <li><a href="index.html" aria-current="page">コラム</a></li>
+        <li><a href="/" aria-current="page">コラム</a></li>
         <li><a href="../buymo-contact.html">お問い合わせ</a></li>
       </ul>
     </nav>
@@ -95,9 +95,9 @@
 <main>
   <div class="container">
     <nav class="breadcrumb" aria-label="パンくずリスト" style="padding-top:28px;">
-      <a href="../index.html#top">ホーム</a>
+      <a href="/#top">ホーム</a>
       <span aria-hidden="true">›</span>
-      <a href="index.html">コラム</a>
+      <a href="/">コラム</a>
       <span aria-hidden="true">›</span>
       <span id="bcTitle">記事</span>
     </nav>
@@ -128,7 +128,7 @@
   </nav>
   <div class="container grid grid-3 footer-grid">
     <div class="footer-col">
-      <a href="../index.html#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true"><img src="/assets/img/buymo/logo-mark.png?v=2" alt="" /></span><span class="logo-text">BUYMO</span></a>
+      <a href="/#top" class="logo logo-light"><span class="logo-mark" aria-hidden="true"><img src="/assets/img/buymo/logo-mark.png?v=2" alt="" /></span><span class="logo-text">BUYMO</span></a>
       <p class="footer-company">合同会社アイズ</p>
       <p>買取センター</p>
       <p>〒971-8138<br>福島県いわき市若葉台1丁目31-11</p>
@@ -138,11 +138,11 @@
     <nav class="footer-col" aria-label="サイトマップ">
       <h3>サイトマップ</h3>
       <ul class="footer-links"><li><a href="../column/">コラム</a></li>
-        <li><a href="../index.html#company">会社概要</a></li>
+        <li><a href="/#company">会社概要</a></li>
         <li><a href="../privacy.html">プライバシーポリシー</a></li>
         <li><a href="../tokushoho.html">特定商取引法・古物商表記</a></li>
-        <li><a href="../index.html#faq">よくある質問</a></li>
-        <li><a href="index.html">コラム</a></li>
+        <li><a href="/#faq">よくある質問</a></li>
+        <li><a href="/">コラム</a></li>
         <li><a href="../buymo-contact.html">お問い合わせ</a></li>
         <li><a href="../store/">加盟店一覧</a></li>
       </ul>
@@ -179,14 +179,14 @@
   var id = new URLSearchParams(window.location.search).get('id');
   if (!id) {
     document.getElementById('articleWrap').innerHTML =
-      '<div class="article-error"><p>記事が見つかりません。</p><a href="index.html">← コラム一覧へ</a></div>';
+      '<div class="article-error"><p>記事が見つかりません。</p><a href="/">← コラム一覧へ</a></div>';
   } else {
     fetch(GAS + '?action=get&id=' + encodeURIComponent(id))
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.error) {
           document.getElementById('articleWrap').innerHTML =
-            '<div class="article-error"><p>記事が見つかりませんでした。</p><a href="index.html">← コラム一覧へ</a></div>';
+            '<div class="article-error"><p>記事が見つかりませんでした。</p><a href="/">← コラム一覧へ</a></div>';
           return;
         }
 
@@ -211,7 +211,7 @@
             '<div class="article-body">' + (d.body || '') + '</div>' +
             (tags.length ? '<div class="article-tags">' + tags.map(function(t){ return '<span class="article-tag">#' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
             '<nav class="article-nav" aria-label="記事ナビゲーション">' +
-              '<a href="index.html">← コラム一覧へ</a>' +
+              '<a href="/">← コラム一覧へ</a>' +
               '<a href="../buymo-contact.html">無料査定を申し込む →</a>' +
             '</nav>' +
           '</article>';
@@ -220,7 +220,7 @@
       })
       .catch(function () {
         document.getElementById('articleWrap').innerHTML =
-          '<div class="article-error"><p>記事の読み込みに失敗しました。</p><a href="index.html">← コラム一覧へ</a></div>';
+          '<div class="article-error"><p>記事の読み込みに失敗しました。</p><a href="/">← コラム一覧へ</a></div>';
       });
   }
 })();
