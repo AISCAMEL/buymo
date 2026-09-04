@@ -36,6 +36,10 @@
     <section class="ms-sec">
       <h2>🏪 店舗紹介ページの編集</h2>
       <form id="contentForm" class="ms-form">
+        <div class="ms-row">
+          <label>店舗名<input type="text" id="cName" maxlength="40" placeholder="例：BUYMO 福島いわき本店" /></label>
+          <label>所在地（地図に反映）<input type="text" id="cAddress" placeholder="例：〒971-8138 福島県いわき市若葉台1丁目31-11" /></label>
+        </div>
         <label>キャッチコピー<input type="text" id="cCatch" maxlength="40" placeholder="例：地元いわきで、まごころ査定。" /></label>
         <label>紹介文（お店の特徴・あいさつ）<textarea id="cIntro" rows="5" placeholder="お店の紹介文を入力してください。"></textarea></label>
         <div class="ms-row">
@@ -145,7 +149,7 @@
 </style>
 
 <script src="assets/js/hq-common.js?v=7"></script>
-<script src="assets/js/partner-mystore.js?v=3" defer></script>
+<script src="assets/js/partner-mystore.js?v=4" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
