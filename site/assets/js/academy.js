@@ -290,7 +290,7 @@ window.Academy = (function () {
     }
     root.innerHTML =
       '<div class="cert">' +
-        '<div class="cert-mark">🐮 BUYMO ACADEMY</div>' +
+        '<div class="cert-mark">🐪 BUYMO ACADEMY</div>' +
         '<div class="cert-title">修了証</div>' +
         '<p class="cert-lead">下記の者は所定の研修課程を修了したことを証します。</p>' +
         '<p class="cert-name">' + esc(learnerName()) + ' 殿</p>' +

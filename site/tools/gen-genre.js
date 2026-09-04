@@ -372,7 +372,7 @@ ${simBlock(g, rel)}
           ${accordion}
         </div>
       </div>
-      <div class="faq-mascot" aria-hidden="true">🐮👉</div>
+      <div class="faq-mascot" aria-hidden="true">🐪👉</div>
     </div>
   </section>
 
@@ -527,7 +527,7 @@ ${simBlock(g, rel, p.name)}
           ${accordion}
         </div>
       </div>
-      <div class="faq-mascot" aria-hidden="true">🐮👉</div>
+      <div class="faq-mascot" aria-hidden="true">🐪👉</div>
     </div>
   </section>
 
