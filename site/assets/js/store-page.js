@@ -48,6 +48,7 @@
         var hn = byId('stHeroName'); if (hn) hn.textContent = c.name.replace(/^\s*BUYMO\s*/i, '');
       }
       setText('stName', c.name);
+      if (c.photo) { var ph = byId('stPhoto'); if (ph) { ph.src = c.photo; ph.style.display = ''; } }
       if (c.address) {
         setText('stAddress', c.address);
         setText('stAccessAddr', c.address);
