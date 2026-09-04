@@ -69,6 +69,7 @@
   .st-sec .container{max-width:1000px;}
   .st-h2{font-size:26px;font-weight:900;color:var(--navy,#0A3D38);text-align:center;margin:0 0 8px;}
   .st-lead{text-align:center;color:var(--text-sub,#667085);font-size:14px;margin:0 0 30px;}
+  .st-photo{width:100%;max-width:640px;height:auto;border-radius:16px;display:block;margin:2px auto 20px;box-shadow:0 8px 24px rgba(10,61,56,.08);}
   .st-info{display:grid;grid-template-columns:1fr 1fr;gap:0;background:#fff;border:1px solid var(--border,#EAECF0);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(10,61,56,.06);}
   @media(max-width:640px){.st-info{grid-template-columns:1fr;}}
   .st-info dt{background:var(--green-bg,#F1FBF9);font-weight:800;color:var(--green-dark,#0B5A54);padding:14px 18px;font-size:13.5px;border-bottom:1px solid var(--border,#EAECF0);}
@@ -162,6 +163,7 @@
     <div class="container">
       <h2 class="st-h2">店舗情報</h2>
       <p class="st-lead">BUYMO 福島いわき本店（運営：合同会社アイズ）</p>
+      <img id="stPhoto" class="st-photo" src="/assets/img/buymo/store-default.jpg" alt="店舗の様子" loading="lazy" onerror="this.style.display='none'">
       <dl class="st-info">
         <dt>店舗名</dt><dd id="stName">BUYMO 福島いわき本店</dd>
         <dt>所在地</dt><dd id="stAddress">〒971-8138 福島県いわき市若葉台1丁目31-11</dd>
@@ -276,7 +278,7 @@
     <p>Copyright © 2026 合同会社アイズ（BUYMO） All Rights Reserved.</p>
   </div>
 </footer>
-<script src="../../assets/js/store-page.js?v=2" defer></script>
+<script src="../../assets/js/store-page.js?v=3" defer></script>
 <script src="/assets/js/popup.js" defer></script>
 </body>
 </html>
