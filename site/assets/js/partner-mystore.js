@@ -29,6 +29,8 @@
   /* ---- 現在の入力内容＋買取実績をまとめて1オブジェクトに ---- */
   function collectContent() {
     return {
+      name:    $('cName').value.trim(),
+      address: $('cAddress').value.trim(),
       'catch': $('cCatch').value.trim(),
       intro:   $('cIntro').value.trim(),
       hours:   $('cHours').value.trim(),
@@ -54,6 +56,8 @@
   /* ---- 店舗紹介の読み込み ---- */
   HQ.loadStoreContent(slug, function (c) {
     c = c || {};
+    $('cName').value = c.name || '';
+    $('cAddress').value = c.address || '';
     $('cCatch').value = c['catch'] || '';
     $('cIntro').value = c.intro || '';
     $('cHours').value = c.hours || '';
