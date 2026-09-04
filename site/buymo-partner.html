@@ -18,6 +18,31 @@
 <link rel="stylesheet" href="assets/css/buymo.css?v=37" />
 <link rel="stylesheet" href="assets/css/buymo-contact.css" />
 <link rel="stylesheet" href="assets/css/buymo-partner.css?v=5" />
+<style>
+/* ヒーロー画像 */
+.partner-hero .ph-img{display:block;width:100%;max-width:400px;height:auto;margin:18px auto 0;}
+@media(min-width:900px){
+  .partner-hero .ph-wrap{display:flex;align-items:center;gap:36px;}
+  .partner-hero .ph-text{flex:1;min-width:0;}
+  .partner-hero .ph-img{flex:0 0 42%;max-width:460px;margin:0;}
+}
+/* 声のアバター画像 */
+.voice-card .va{overflow:hidden;}
+.voice-card .va img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
+/* はじめ方 4STEP */
+.pstep-band{padding:52px 0;background:var(--green-bg,#F1FBF9);}
+.pstep-h{text-align:center;font-size:clamp(20px,3vw,26px);font-weight:900;color:var(--navy,#14425f);margin:0 0 28px;}
+.pstep-h .hl{color:var(--green,#0F766E);}
+.pstep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1000px;margin:0 auto;}
+@media(max-width:860px){.pstep-grid{grid-template-columns:repeat(2,1fr);gap:24px 16px;}}
+@media(max-width:420px){.pstep-grid{grid-template-columns:1fr;}}
+.pstep{text-align:center;}
+.pstep-img{width:140px;height:140px;margin:0 auto 12px;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 8px 22px rgba(10,61,56,.10);}
+.pstep-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.pstep-n{display:inline-block;font-size:11.5px;font-weight:900;color:var(--green,#0F766E);letter-spacing:.06em;margin-bottom:4px;}
+.pstep h3{font-size:15px;font-weight:900;color:var(--navy,#14425f);margin:0 0 6px;}
+.pstep p{font-size:12.5px;color:var(--text-sub,#667085);line-height:1.7;margin:0;}
+</style>
 </head>
 <body>
 
@@ -41,7 +66,8 @@
 
   <!-- ページヒーロー -->
   <section class="page-hero partner-hero" aria-labelledby="page-title">
-    <div class="container">
+    <div class="container ph-wrap">
+      <div class="ph-text">
       <nav class="breadcrumb" aria-label="パンくずリスト"><a href="/#top">ホーム</a><span aria-hidden="true">›</span><span>副業パートナー募集</span></nav>
       <p class="hero-lead">在庫なし・スキマ時間ではじめる</p>
       <h1 id="page-title"><span class="hl">副業で車買取</span>、という選択。</h1>
@@ -50,6 +76,8 @@
         <a href="#entry" class="btn btn-primary btn-lg">無料で資料請求する</a>
         <a href="#solution" class="btn btn-tel">仕組みを見る</a>
       </div>
+      </div>
+      <img class="ph-img" src="/assets/img/buymo/partner-hero.png" alt="スマホで車を撮影し、ノートPCで査定を確認する副業パートナー" loading="eager" width="460" height="371" onerror="this.style.display='none'">
     </div>
   </section>
 
@@ -59,6 +87,19 @@
       <div class="stat-card reveal"><span class="stat-num">要<small>相談</small></span><p>初期費用はセミナーにて<br>詳しく説明します</p></div>
       <div class="stat-card reveal"><span class="stat-num">在庫<small>ゼロ</small></span><p>買い取った車は<br>即時売却モデル</p></div>
       <div class="stat-card reveal"><span class="stat-num">スキマ<small>時間</small></span><p>写真査定で<br>ネット完結</p></div>
+    </div>
+  </section>
+
+  <!-- はじめ方 4STEP -->
+  <section class="pstep-band" aria-label="はじめ方 4ステップ">
+    <div class="container">
+      <h2 class="pstep-h">かんたん<span class="hl">4STEP</span>ではじめられます</h2>
+      <div class="pstep-grid">
+        <div class="pstep"><div class="pstep-img"><img src="/assets/img/buymo/partner-step1.png" alt="" loading="lazy" onerror="this.closest('.pstep-img').style.display='none'"></div><span class="pstep-n">STEP 1</span><h3>資料請求</h3><p>無料・入力1分。その場で資料をお送りします。</p></div>
+        <div class="pstep"><div class="pstep-img"><img src="/assets/img/buymo/partner-step2.png" alt="" loading="lazy" onerror="this.closest('.pstep-img').style.display='none'"></div><span class="pstep-n">STEP 2</span><h3>オンライン説明会</h3><p>仕組み・費用感を個別にご説明します。</p></div>
+        <div class="pstep"><div class="pstep-img"><img src="/assets/img/buymo/partner-step3.png" alt="" loading="lazy" onerror="this.closest('.pstep-img').style.display='none'"></div><span class="pstep-n">STEP 3</span><h3>研修・マニュアル</h3><p>査定・接客・システムを未経験から習得。</p></div>
+        <div class="pstep"><div class="pstep-img"><img src="/assets/img/buymo/partner-step4.png" alt="" loading="lazy" onerror="this.closest('.pstep-img').style.display='none'"></div><span class="pstep-n">STEP 4</span><h3>開業・契約</h3><p>準備を整えて開業。本部が伴走します。</p></div>
+      </div>
     </div>
   </section>
 
@@ -95,7 +136,10 @@
       <h2 class="pl-h">答えは、<span class="hl">在庫を持たない</span>車買取。</h2>
       <p>車買取は「仕入れて在庫を売る」ビジネスではありません。<strong>売りたい人と、買いたい市場（オートオークション）をつなぐ</strong>仲介型のビジネス。だから在庫リスクがなく、1件あたりの利益単価も大きい。副業と相性が良いのです。</p>
     </div>
-    <div class="container" style="margin-top:34px;">
+    <div class="container" style="margin-top:22px;text-align:center;">
+      <img src="/assets/img/buymo/partner-support.png" alt="本部が集客・査定ノウハウ・販路をサポート" loading="lazy" style="width:100%;max-width:560px;height:auto;" onerror="this.style.display='none'">
+    </div>
+    <div class="container" style="margin-top:24px;">
       <div class="grid grid-3 merit-grid">
         <article class="card merit-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-truck.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>在庫ゼロ</h3><p>買い取った車はオートオークション・販路へ即時売却。在庫も保管場所も抱えません。</p></article>
         <article class="card merit-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-photo.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>写真査定でネット完結</h3><p>出張査定は不要。お客様とはスマホ・チャットでやり取り。スキマ時間で対応できます。</p></article>
@@ -177,15 +221,15 @@
       <div class="voice-grid">
         <article class="voice-card reveal">
           <p class="vq">本業のスキマ時間で始めました。在庫を持たないので気持ちがラク。写真のやり取りだけで完結するので、家にいながら対応できています。</p>
-          <div class="vp"><span class="va" aria-hidden="true">🧑‍💻</span><div><div class="vn">会社員・30代（副業）</div><div class="vr">副業スタート／関東</div></div></div>
+          <div class="vp"><span class="va" aria-hidden="true"><img src="/assets/img/buymo/pv-1.jpg" alt="" loading="lazy" onerror="this.parentNode.textContent='🧑‍💻'"></span><div><div class="vn">会社員・30代（副業）</div><div class="vr">副業スタート／関東</div></div></div>
         </article>
         <article class="voice-card reveal">
           <p class="vq">整備工場に買取を足しました。既存のお客様に「車の相談窓口」として案内でき、オークションで早く現金化できるのが想像以上に助かっています。</p>
-          <div class="vp"><span class="va" aria-hidden="true">🔧</span><div><div class="vn">整備業・40代</div><div class="vr">既存事業に追加／東北</div></div></div>
+          <div class="vp"><span class="va" aria-hidden="true"><img src="/assets/img/buymo/pv-2.jpg" alt="" loading="lazy" onerror="this.parentNode.textContent='🔧'"></span><div><div class="vn">整備業・40代</div><div class="vr">既存事業に追加／東北</div></div></div>
         </article>
         <article class="voice-card reveal">
           <p class="vq">自動車は未経験でしたが、研修とマニュアルで少しずつ。集客は本部が支えてくれるので、営業より“対応”に集中できるのが自分に合っていました。</p>
-          <div class="vp"><span class="va" aria-hidden="true">🧑‍🌾</span><div><div class="vn">個人事業主・50代</div><div class="vr">未経験スタート／中部</div></div></div>
+          <div class="vp"><span class="va" aria-hidden="true"><img src="/assets/img/buymo/pv-3.jpg" alt="" loading="lazy" onerror="this.parentNode.textContent='🧑‍🌾'"></span><div><div class="vn">個人事業主・50代</div><div class="vr">未経験スタート／中部</div></div></div>
         </article>
       </div>
       <p class="area-note center" style="margin-top:18px;">※ 掲載の声は導入イメージです。実際のパートナー様の声に差し替えてご利用ください。</p>
