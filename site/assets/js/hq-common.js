@@ -7,6 +7,9 @@
 window.HQ = (function () {
   'use strict';
   var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
+  // 機密GET用のアクセスキー（本部/加盟店端末に保存）。未設定なら空＝従来動作。
+  // GAS側でScript Property「API_SECRET」を設定した場合のみ有効になります。
+  function keyQS() { try { var k = localStorage.getItem('buymo_api_key') || ''; return k ? ('&key=' + encodeURIComponent(k)) : ''; } catch (e) { return ''; } }
   var STAGES = ['新規受付', '査定中', '商談中', '後追い', '契約', '入金待ち', '完了', '失注'];
   var WON = ['契約', '入金待ち', '完了'];
   var CKEY = 'buymo_cases', SKEY = 'buymo_stores';
@@ -104,7 +107,7 @@ window.HQ = (function () {
 
   function loadCases(cb) {
     if (ENDPOINT) {
-      fetch(ENDPOINT + '?action=cases')
+      fetch(ENDPOINT + '?action=cases' + keyQS())
         .then(function (r) { return r.json(); })
         .then(function (d) {
           var list = (d && d.length) ? d : [];
@@ -119,7 +122,7 @@ window.HQ = (function () {
   /* 売却申請（清算）履歴を GAS「売却申請」シートから取得。未接続時は空配列。 */
   function loadSales(cb) {
     if (ENDPOINT) {
-      fetch(ENDPOINT + '?action=sales')
+      fetch(ENDPOINT + '?action=sales' + keyQS())
         .then(function (r) { return r.json(); })
         .then(function (d) { cb(Array.isArray(d) ? d : []); })
         .catch(function () { cb([]); });
@@ -232,7 +235,7 @@ window.HQ = (function () {
   // GAS（共有）からお知らせを取得。未接続/失敗時はローカルにフォールバック。
   function loadNotices(cb) {
     if (ENDPOINT) {
-      fetch(ENDPOINT + '?action=notices')
+      fetch(ENDPOINT + '?action=notices' + keyQS())
         .then(function (r) { return r.json(); })
         .then(function (d) {
           var list = (d && d.length) ? d : [];
@@ -249,7 +252,7 @@ window.HQ = (function () {
   /* アカデミー PDF資料＋解説（共有：GAS「教材資料」シート） */
   function loadMaterials(cb) {
     if (ENDPOINT) {
-      fetch(ENDPOINT + '?action=materials')
+      fetch(ENDPOINT + '?action=materials' + keyQS())
         .then(function (r) { return r.json(); })
         .then(function (d) { cb((d && d.length) ? d : []); })
         .catch(function () { cb(null); });
@@ -269,7 +272,7 @@ window.HQ = (function () {
   /* 加盟店アカウント管理（本部）：GAS「加盟店アカウント」シート */
   function loadPartners(cb) {
     if (ENDPOINT) {
-      fetch(ENDPOINT + '?action=partners')
+      fetch(ENDPOINT + '?action=partners' + keyQS())
         .then(function (r) { return r.json(); })
         .then(function (d) { cb((d && d.length) ? d : []); })
         .catch(function () { cb(null); });
@@ -290,7 +293,7 @@ window.HQ = (function () {
   /* 加盟店コミュニティ（共有：GAS「コミュニティ」シート） */
   function loadCommunity(cb) {
     if (ENDPOINT) {
-      fetch(ENDPOINT + '?action=community')
+      fetch(ENDPOINT + '?action=community' + keyQS())
         .then(function (r) { return r.json(); })
         .then(function (d) { cb((d && d.length) ? d : null); })
         .catch(function () { cb(null); });

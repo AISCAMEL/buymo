@@ -73,6 +73,23 @@ function getSlackWebhook(){ return getProp('SLACK_WEBHOOK_URL'); }
 function getAsanaPat()    { return getProp('ASANA_PAT'); }
 
 /* ============================================================
+   機密GETの簡易アクセス制御（段階導入・既定OFF）
+   - Script Property「API_SECRET」を設定すると、cases/sales/partners/
+     notices/materials/community は ?key=<API_SECRET> 一致時のみ返す。
+   - 未設定（空）の場合は従来どおり誰でも取得可（＝挙動不変・無停止）。
+   - フロントは各スタッフ端末の localStorage『buymo_api_key』から key を送信。
+     （鍵をリポジトリのJSに直書きしないため、URLだけを知る第三者の取得を防ぐ）
+   ※ これは簡易ロックです。本格運用では本部ログインもサーバー検証化し、
+     ログイン成功時にのみ鍵を配布する方式へ移行してください。
+   ============================================================ */
+function apiSecret_() { return String(getProp('API_SECRET') || ''); }
+function apiOK_(p) {
+  var sec = apiSecret_();
+  if (!sec) return true; // 未設定＝オープン（従来動作）
+  return String((p && p.key) || '') === sec;
+}
+
+/* ============================================================
    Asana 連携 (Phase 4)
    ・postToAsana({title, notes, sectionId?, assigneeGid?, dueOn?})
    ・PAT 未設定なら何もせず null を返す
@@ -220,17 +237,17 @@ function doGet(e) {
     if (action === 'list')   return jsonOut(getColumnList(p));
     if (action === 'get')    return jsonOut(getColumnById(p.id));
     if (action === 'check')  return jsonOut(checkDuplicate(p.title, p.body || ''));
-    if (action === 'cases')  return jsonOut(getCases());
-    if (action === 'notices') return jsonOut(getNoticesData());                      // NEW: 本部→加盟店 お知らせ配信
-    if (action === 'community') return jsonOut(getCommunityData());                   // NEW: 加盟店コミュニティ（共有）
-    if (action === 'materials') return jsonOut(getMaterialsData());                    // NEW: アカデミーPDF資料（共有）
-    if (action === 'sales')  return jsonOut(getSaleApplications());                    // NEW: 売却申請一覧（本部用）
+    if (action === 'cases')  return apiOK_(p) ? jsonOut(getCases())            : jsonOut({ error: 'unauthorized' }); // 機密：本部/加盟店のみ
+    if (action === 'notices') return apiOK_(p) ? jsonOut(getNoticesData())     : jsonOut({ error: 'unauthorized' }); // NEW: 本部→加盟店 お知らせ配信
+    if (action === 'community') return apiOK_(p) ? jsonOut(getCommunityData()) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店コミュニティ（共有）
+    if (action === 'materials') return apiOK_(p) ? jsonOut(getMaterialsData()) : jsonOut({ error: 'unauthorized' }); // NEW: アカデミーPDF資料（共有）
+    if (action === 'sales')  return apiOK_(p) ? jsonOut(getSaleApplications()) : jsonOut({ error: 'unauthorized' }); // NEW: 売却申請一覧（本部用）
     if (action === 'storecontent') return jsonOut(getStoreContent(p.store));           // NEW: 加盟店 公開ページ内容（/store/<slug>/）
     if (action === 'blog')   return jsonOut(getBlog(p.store));                          // NEW: 加盟店 ブログ一覧（新しい順）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
-    if (action === 'partners') return jsonOut(getPartners()); // NEW: 加盟店アカウント一覧（本部）
+    if (action === 'partners') return apiOK_(p) ? jsonOut(getPartners()) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店アカウント一覧（本部）
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
     if (action === 'ping')   return jsonp(p.callback, { v: 9, features: ['case_photo', 'store_content', 'blog'] }); // #4 機能検出
