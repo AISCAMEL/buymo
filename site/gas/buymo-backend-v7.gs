@@ -225,13 +225,15 @@ function doGet(e) {
     if (action === 'community') return jsonOut(getCommunityData());                   // NEW: 加盟店コミュニティ（共有）
     if (action === 'materials') return jsonOut(getMaterialsData());                    // NEW: アカデミーPDF資料（共有）
     if (action === 'sales')  return jsonOut(getSaleApplications());                    // NEW: 売却申請一覧（本部用）
+    if (action === 'storecontent') return jsonOut(getStoreContent(p.store));           // NEW: 加盟店 公開ページ内容（/store/<slug>/）
+    if (action === 'blog')   return jsonOut(getBlog(p.store));                          // NEW: 加盟店 ブログ一覧（新しい順）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
     if (action === 'partners') return jsonOut(getPartners()); // NEW: 加盟店アカウント一覧（本部）
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
-    if (action === 'ping')   return jsonp(p.callback, { v: 8, features: ['case_photo'] }); // #4 機能検出
+    if (action === 'ping')   return jsonp(p.callback, { v: 9, features: ['case_photo', 'store_content', 'blog'] }); // #4 機能検出
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
     return jsonOut({ error: err.message });
@@ -276,6 +278,9 @@ function doPost(e) {
     if (data.type === 'sale_apply')       return jsonOut(handleSaleApplication(data)); // NEW: 加盟店→本部 売却申請
     if (data.type === 'followup')         return jsonOut(handleFollowup(data));       // NEW: 案件の後追い履歴（お問い合わせ処理に誤流入させない）
     if (data.type === 'store')            return jsonOut(handleStore(data));          // NEW: 店舗レジストリ保存（同上）
+    if (data.type === 'store_content')    return jsonOut(saveStoreContent(data.store, data.data)); // NEW: 加盟店 公開ページ内容の保存
+    if (data.type === 'blog_post')        return jsonOut(addBlogPost(data.store, data.post));       // NEW: 加盟店 ブログ投稿
+    if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -2868,4 +2873,150 @@ function testAsAdmin() {
     source: 'testAsAdmin'
   }) }};
   Logger.log(doPost(fake).getContent());
+}
+
+
+/* ============================================================
+   NEW: 加盟店 マイ店舗ページ（公開ページ /store/<slug>/ の内容）＋ブログ
+   - フロント: hq-common.js / partner-mystore.js / store-page.js
+     GET  ?action=storecontent&store=<slug>   → 店舗紹介データ(JSON)
+     GET  ?action=blog&store=<slug>           → ブログ配列(新しい順)
+     POST {type:'store_content', store, data}  → 店舗紹介の保存(1店舗1行・上書き)
+     POST {type:'blog_post',     store, post}  → ブログ投稿(同id上書き)
+     POST {type:'blog_delete',   store, id}    → ブログ削除
+   Sheet「StoreContent」: [store, data(JSON), updated]
+   Sheet「Blog」        : [id, store, title, body, date, image, created]
+   ============================================================ */
+var STORE_CONTENT_SHEET_NAME = 'StoreContent';
+var BLOG_SHEET_NAME          = 'Blog';
+
+function normSlug_(s) { return String(s || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, ''); }
+
+function getStoreContentSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(STORE_CONTENT_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(STORE_CONTENT_SHEET_NAME);
+    sheet.appendRow(['store', 'data', 'updated']);
+    sheet.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function getBlogSheet() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName(BLOG_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(BLOG_SHEET_NAME);
+    sheet.appendRow(['id', 'store', 'title', 'body', 'date', 'image', 'created']);
+    sheet.getRange(1, 1, 1, 7).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+// 店舗紹介データ（未登録時は {} を返す → フロントは localStorage にフォールバック）
+function getStoreContent(store) {
+  try {
+    var slug = normSlug_(store);
+    if (!slug) return {};
+    var sheet = getStoreContentSheet();
+    var last = sheet.getLastRow();
+    if (last < 2) return {};
+    var vals = sheet.getRange(2, 1, last - 1, 2).getValues();
+    for (var i = 0; i < vals.length; i++) {
+      if (normSlug_(vals[i][0]) === slug) {
+        try { return JSON.parse(vals[i][1] || '{}'); } catch (e) { return {}; }
+      }
+    }
+    return {};
+  } catch (e) { return {}; }
+}
+
+// 店舗紹介の保存（1店舗＝1行・上書き）
+function saveStoreContent(store, data) {
+  var slug = normSlug_(store);
+  if (!slug) return { status: 'error', message: 'no_store' };
+  var sheet = getStoreContentSheet();
+  var json = JSON.stringify(data || {});
+  var d = new Date();
+  function p(n) { return ('0' + n).slice(-2); }
+  var updated = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var last = sheet.getLastRow();
+  if (last >= 2) {
+    var col = sheet.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < col.length; i++) {
+      if (normSlug_(col[i][0]) === slug) {
+        sheet.getRange(i + 2, 2, 1, 2).setValues([[json, updated]]);
+        return { status: 'ok', updated: updated };
+      }
+    }
+  }
+  sheet.appendRow([slug, json, updated]);
+  return { status: 'ok', updated: updated, created: true };
+}
+
+// ブログ一覧（新しい順）
+function getBlog(store) {
+  try {
+    var slug = normSlug_(store);
+    if (!slug) return [];
+    var sheet = getBlogSheet();
+    var last = sheet.getLastRow();
+    if (last < 2) return [];
+    var vals = sheet.getRange(2, 1, last - 1, 6).getValues(); // id,store,title,body,date,image
+    var out = [];
+    for (var i = 0; i < vals.length; i++) {
+      var r = vals[i];
+      if (!r[0]) continue;
+      if (normSlug_(r[1]) !== slug) continue;
+      out.push({ id: String(r[0]), title: String(r[2] || ''), body: String(r[3] || ''), date: String(r[4] || ''), image: String(r[5] || '') });
+    }
+    out.reverse(); // 追記順 → 新しい順
+    return out;
+  } catch (e) { return []; }
+}
+
+// ブログ投稿（同一 id は上書き／無ければ追記）
+function addBlogPost(store, post) {
+  var slug = normSlug_(store);
+  if (!slug) return { status: 'error', message: 'no_store' };
+  post = post || {};
+  var id = String(post.id || ('b' + new Date().getTime()));
+  var sheet = getBlogSheet();
+  var d = new Date();
+  function p(n) { return ('0' + n).slice(-2); }
+  var created = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var row = [id, slug, String(post.title || ''), String(post.body || ''), String(post.date || ''), String(post.image || ''), created];
+  var last = sheet.getLastRow();
+  if (last >= 2) {
+    var keys = sheet.getRange(2, 1, last - 1, 2).getValues(); // id, store
+    for (var i = 0; i < keys.length; i++) {
+      if (String(keys[i][0]) === id && normSlug_(keys[i][1]) === slug) {
+        sheet.getRange(i + 2, 1, 1, 7).setValues([row]);
+        return { status: 'ok', id: id, updated: true };
+      }
+    }
+  }
+  sheet.appendRow(row);
+  return { status: 'ok', id: id };
+}
+
+// ブログ削除（store + id 一致行を削除）
+function deleteBlogPost(store, id) {
+  var slug = normSlug_(store);
+  id = String(id || '');
+  if (!slug || !id) return { status: 'error', message: 'bad_params' };
+  var sheet = getBlogSheet();
+  var last = sheet.getLastRow();
+  if (last < 2) return { status: 'ok', deleted: 0 };
+  var keys = sheet.getRange(2, 1, last - 1, 2).getValues();
+  for (var i = keys.length - 1; i >= 0; i--) {
+    if (String(keys[i][0]) === id && normSlug_(keys[i][1]) === slug) {
+      sheet.deleteRow(i + 2);
+      return { status: 'ok', deleted: 1 };
+    }
+  }
+  return { status: 'ok', deleted: 0 };
 }
