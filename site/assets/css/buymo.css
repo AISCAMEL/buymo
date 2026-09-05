@@ -1462,3 +1462,14 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
 .sbm-ico img{width:40px;height:40px;object-fit:contain;}
 .sbm-t{font-size:16px;font-weight:900;color:var(--navy,#14425f);}
 .sbm-d{font-size:12.5px;color:var(--text-sub,#666);line-height:1.7;}
+
+/* ===== ホーム：スマホで撮って送るだけ（実写2カラム帯） ===== */
+.hpb{padding:60px 0;background:#fff;}
+.hpb-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:44px;align-items:center;}
+.hpb-text h2{font-size:29px;font-weight:900;color:var(--green-dark);line-height:1.42;margin:4px 0 14px;}
+.hpb-text p{color:#4a5654;font-size:15px;line-height:1.95;margin-bottom:18px;}
+.hpb-points{list-style:none;padding:0;margin:0 0 24px;}
+.hpb-points li{position:relative;padding-left:28px;font-size:15px;font-weight:700;color:#2c3e3b;margin-bottom:10px;}
+.hpb-points li::before{content:"✓";position:absolute;left:0;top:0;width:20px;height:20px;background:var(--green);color:#fff;border-radius:50%;font-size:12px;display:inline-flex;align-items:center;justify-content:center;}
+.hpb-img img{display:block;width:100%;height:auto;border-radius:18px;box-shadow:0 16px 38px rgba(0,0,0,.14);}
+@media(max-width:900px){.hpb{padding:44px 0;}.hpb-grid{grid-template-columns:1fr;gap:24px;}.hpb-text{order:2;}.hpb-img{order:1;}.hpb-text h2{font-size:23px;}}
