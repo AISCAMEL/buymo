@@ -20,7 +20,7 @@
 var BUYMO_VOICES = [
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-1.jpg',
+    avatar: 'assets/img/buymo/real-voice-2.jpg',
     name: '佐藤さん',
     meta: '40代／東京都',
     stars: 5,
@@ -28,7 +28,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-2.jpg',
+    avatar: 'assets/img/buymo/real-voice-1.jpg',
     name: '山田さん',
     meta: '30代／大阪府',
     stars: 5,
@@ -52,7 +52,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-5.jpg',
+    avatar: 'assets/img/buymo/real-voice-3.jpg',
     name: '伊藤さん',
     meta: '60代／神奈川県',
     stars: 5,
