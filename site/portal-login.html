@@ -49,6 +49,17 @@
     <a class="l-member" href="member.html">👤 会員マイページ（査定状況の確認）</a>
 
     <p class="login-note">本部・加盟店は<strong>登録済みのメールアドレスと本部発行のパスワード</strong>でログインします。ログインできるアカウントは本部で管理します。</p>
+
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer;font-size:12px;color:#999;text-align:center;list-style:none;">詳細設定（アクセスキー）</summary>
+      <div style="margin-top:10px;">
+        <label for="liApiKey" style="font-size:12px;color:#666;">アクセスキー<span style="color:#999;">（本部から配布された場合のみ入力）</span></label>
+        <input id="liApiKey" type="text" placeholder="未設定のままでOK" autocomplete="off"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;" />
+        <button id="liApiSave" type="button" class="l-btn" style="margin-top:8px;width:100%;background:var(--gray);color:var(--navy);">この端末に保存</button>
+        <p id="liApiNote" style="font-size:11px;color:#999;margin-top:6px;">※ 本部が機密データ保護（API_SECRET）を有効にした場合のみ必要です。この端末にのみ保存されます。</p>
+      </div>
+    </details>
   </div>
 </div>
 <script src="assets/js/auth.js"></script>
@@ -60,7 +71,7 @@
   }
   // 既ログインなら素通し
   if (AUTH.get()) { /* stay; user can re-login */ }
-  document.querySelectorAll('.l-btn').forEach(function (b) {
+  document.querySelectorAll('.l-btn[data-role]').forEach(function (b) {
     b.addEventListener('click', function () {
       err.textContent = '';
       AUTH.login(document.getElementById('liEmail').value, document.getElementById('liPass').value, b.getAttribute('data-role'), function (ok, msg) {
@@ -68,6 +79,19 @@
       });
     });
   });
+
+  // アクセスキー（機密データ保護が有効な場合のみ・端末に保存）
+  (function () {
+    var inp = document.getElementById('liApiKey');
+    var btn = document.getElementById('liApiSave');
+    var note = document.getElementById('liApiNote');
+    if (!inp || !btn) return;
+    try { inp.value = localStorage.getItem('buymo_api_key') || ''; } catch (e) {}
+    btn.addEventListener('click', function () {
+      try { localStorage.setItem('buymo_api_key', inp.value.trim()); note.textContent = '✓ この端末に保存しました。'; note.style.color = 'var(--green)'; }
+      catch (e) { note.textContent = '保存できませんでした（ブラウザ設定をご確認ください）。'; note.style.color = 'var(--red)'; }
+    });
+  })();
 </script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>

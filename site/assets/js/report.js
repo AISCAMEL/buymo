@@ -7,6 +7,7 @@
 (function () {
   'use strict';
   var ENDPOINT = 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec';
+  function repKeyQS() { try { var k = localStorage.getItem('buymo_api_key') || ''; return k ? ('&key=' + encodeURIComponent(k)) : ''; } catch (e) { return ''; } }
   var STAGES = ['新規受付', '査定中', '商談中', '契約', '入金待ち', '完了'];
   var WON = ['契約', '入金待ち', '完了'];
   var KEY = 'buymo_cases';
@@ -28,7 +29,7 @@
     if (ENDPOINT) {
       window.__rep = function (d) { build(d && d.length ? d : []); };
       var s = document.createElement('script');
-      s.src = ENDPOINT + '?action=cases&callback=__rep';
+      s.src = ENDPOINT + '?action=cases' + repKeyQS() + '&callback=__rep';
       s.onerror = function () { build(readLS()); };
       document.body.appendChild(s);
     } else { build(readLS()); }
