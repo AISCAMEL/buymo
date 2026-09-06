@@ -28,7 +28,11 @@
       };
       return '<div class="store-card">' +
         '<div class="store-head"><span class="store-name">🏪 ' + HQ.esc(s.name) + '</span>' +
-          '<button class="store-status ' + (on ? 'on' : 'off') + '" data-i="' + i + '">' + HQ.esc(s.status) + '</button></div>' +
+          '<span class="store-head-btns">' +
+          '<button class="store-status ' + (on ? 'on' : 'off') + '" data-i="' + i + '">' + HQ.esc(s.status) + '</button>' +
+          '<button class="store-del" data-i="' + i + '" title="この加盟店を削除（ログインも停止）" ' +
+            'style="border:1px solid #C0392B;color:#C0392B;background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;margin-left:6px;">🗑 削除</button>' +
+          '</span></div>' +
         '<p class="store-meta">📍 ' + HQ.esc(s.area || '—') + '<br>📞 ' + HQ.esc(s.tel || '—') +
           (s.email ? '<br>✉️ ' + HQ.esc(s.email) : '') + '</p>' +
         '<div class="store-notify">' + (notifyIcons.length ? '通知：' + notifyIcons.join(' ') : '<span style="color:#aaa;font-size:12px;">通知設定なし</span>') + '</div>' +
@@ -51,6 +55,18 @@
   }
 
   document.getElementById('storeGrid').addEventListener('click', function (e) {
+    // 削除（加盟店をリストから消し、紐づくログインアカウントも退会＝ログイン不可）
+    var del = e.target.closest('.store-del');
+    if (del) {
+      var di = Number(del.getAttribute('data-i'));
+      var s = stores[di]; if (!s) return;
+      if (!confirm(s.name + ' を削除します。\nこの加盟店は一覧から消え、ログインもできなくなります（元に戻せません）。よろしいですか？')) return;
+      HQ.deleteStore(s.name);                 // 店舗レジストリから削除（LS＋シート）
+      if (s.email && HQ.withdrawPartner) HQ.withdrawPartner(s.email); // ログインアカウントも退会
+      stores.splice(di, 1);
+      render();
+      return;
+    }
     var btn = e.target.closest('.store-status'); if (!btn) return;
     var i = Number(btn.getAttribute('data-i'));
     stores[i].status = stores[i].status === '稼働中' ? '準備中' : '稼働中';

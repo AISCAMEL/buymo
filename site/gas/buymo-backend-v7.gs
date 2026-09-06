@@ -297,6 +297,7 @@ function doPost(e) {
     if (data.type === 'sale_apply')       return jsonOut(handleSaleApplication(data)); // NEW: 加盟店→本部 売却申請
     if (data.type === 'followup')         return jsonOut(handleFollowup(data));       // NEW: 案件の後追い履歴（お問い合わせ処理に誤流入させない）
     if (data.type === 'store')            return jsonOut(handleStore(data));          // NEW: 店舗レジストリ保存（同上）
+    if (data.type === 'store_delete')     return jsonOut(deleteStoreRow(data.name));  // NEW: 店舗レジストリ削除
     if (data.type === 'store_content')    return jsonOut(saveStoreContent(data.store, data.data)); // NEW: 加盟店 公開ページ内容の保存
     if (data.type === 'blog_post')        return jsonOut(addBlogPost(data.store, data.post));       // NEW: 加盟店 ブログ投稿
     if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
@@ -3155,4 +3156,23 @@ function getPaymentsData() {
     }
     return out;
   } catch (e) { return {}; }
+}
+
+
+/* NEW: 店舗レジストリから1店舗を削除（店舗名一致・行削除） */
+function deleteStoreRow(name) {
+  try {
+    name = String(name || '').trim();
+    if (!name) return { status: 'error', message: 'name required' };
+    var ss = getSS();
+    var sheet = ss.getSheetByName(STORE_SHEET_NAME);
+    if (!sheet) return { status: 'ok', deleted: 0 };
+    var last = sheet.getLastRow();
+    if (last < 2) return { status: 'ok', deleted: 0 };
+    var names = sheet.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = names.length - 1; i >= 0; i--) {
+      if (String(names[i][0]).trim() === name) { sheet.deleteRow(i + 2); return { status: 'ok', deleted: 1 }; }
+    }
+    return { status: 'ok', deleted: 0 };
+  } catch (e) { return { status: 'error', message: e.message }; }
 }
