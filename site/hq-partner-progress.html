@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>加盟店 進捗カルテ｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=8" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>加盟店 進捗カルテ</h1>
+      <span id="pgMsg" class="pg-msg"></span>
+    </div>
+    <p class="portal-sub">加盟からの研修状況・コンテンツ閲覧履歴・違反・本部コメントを1社ずつ記録します。研修チェックとステータス・コメントは自動保存され、本部内で共有されます。</p>
+
+    <div class="pg-topbar">
+      <label>加盟店 <select id="pgStore"></select></label>
+      <span class="pg-since" id="pgSince"></span>
+      <label class="pg-status-l">総合ステータス
+        <select id="pgStatus">
+          <option value="順調">🟢 順調</option>
+          <option value="要注意">🟡 要注意</option>
+          <option value="停滞">🔴 停滞</option>
+        </select>
+      </label>
+      <a class="pg-back" href="hq-stores.html">← 加盟店管理へ戻る</a>
+    </div>
+
+    <div class="pg-grid">
+      <!-- 研修・オンボーディング -->
+      <section class="pg-card pg-col2">
+        <div class="pg-card-h"><h2>🎓 加盟からの研修状況（オンボーディング）</h2><span class="pg-prog" id="pgProg">0%</span></div>
+        <div class="pg-progbar"><span id="pgProgBar" style="width:0%"></span></div>
+        <div class="pg-steps" id="pgSteps"></div>
+      </section>
+
+      <!-- 本部コメント -->
+      <section class="pg-card">
+        <h2>📝 本部コメント</h2>
+        <div class="pg-addrow">
+          <input id="pgCmtIn" type="text" placeholder="コメントを入力（例：先月比で査定件数UP。継続支援）" />
+          <button id="pgCmtAdd" class="pg-btn" type="button">追加</button>
+        </div>
+        <div class="pg-timeline" id="pgComments"></div>
+      </section>
+
+      <!-- 違反記録 -->
+      <section class="pg-card">
+        <h2>⚠️ 違反・注意記録</h2>
+        <div class="pg-addrow pg-vio-add">
+          <select id="pgVioLevel">
+            <option value="軽微">軽微</option>
+            <option value="注意">注意</option>
+            <option value="重大">重大</option>
+          </select>
+          <input id="pgVioIn" type="text" placeholder="内容（例：査定根拠の未提示）" />
+          <button id="pgVioAdd" class="pg-btn" type="button">記録</button>
+        </div>
+        <div class="pg-timeline" id="pgViolations"></div>
+      </section>
+
+      <!-- 閲覧履歴 -->
+      <section class="pg-card pg-col2">
+        <div class="pg-card-h"><h2>👀 コンテンツ閲覧履歴</h2><span class="pg-hint">加盟店ポータルで開いたコンテンツを自動記録</span></div>
+        <div class="pg-views" id="pgViews"><p class="pg-empty">読み込み中…</p></div>
+      </section>
+    </div>
+    <p class="pg-updated" id="pgUpdated"></p>
+  </div>
+</main>
+
+<style>
+.pg-msg{font-size:13px;color:#0F766E;font-weight:700;}
+.pg-topbar{display:flex;align-items:center;flex-wrap:wrap;gap:14px;background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:12px 18px;margin-bottom:18px;}
+.pg-topbar label{font-size:14px;font-weight:700;color:var(--navy);}
+.pg-topbar select{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;margin-left:8px;}
+#pgStore{min-width:190px;}
+.pg-since{font-size:13px;color:#666;font-weight:700;}
+.pg-status-l{margin-left:auto;}
+.pg-back{font-size:13px;color:var(--green);font-weight:700;}
+.pg-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.pg-col2{grid-column:1 / -1;}
+@media(max-width:860px){.pg-grid{grid-template-columns:1fr;}.pg-status-l{margin-left:0;}}
+.pg-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:20px 22px;}
+.pg-card h2{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #eef1f6;text-align:left;}
+.pg-card{text-align:left;}
+.pg-step .s-label{text-align:left;}
+.pg-card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.pg-card-h h2{flex:1;}
+.pg-prog{font-size:18px;font-weight:900;color:#0F766E;}
+.pg-hint{font-size:11px;color:#999;font-weight:400;padding-bottom:10px;}
+.pg-progbar{height:8px;background:#eef1f6;border-radius:6px;overflow:hidden;margin-bottom:16px;}
+.pg-progbar span{display:block;height:100%;background:linear-gradient(90deg,#0F766E,#14b8a6);transition:width .3s;}
+.pg-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:640px){.pg-steps{grid-template-columns:1fr;}}
+.pg-step{display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #eef1f6;border-radius:10px;padding:10px 12px;}
+.pg-step.on{background:#F0FDF4;border-color:#BBF7D0;}
+.pg-step input[type=checkbox]{width:18px;height:18px;flex:0 0 auto;accent-color:#0F766E;}
+.pg-step .s-label{flex:1;font-size:13px;font-weight:700;color:var(--navy);}
+.pg-step .s-date{border:1px solid #dde3ee;border-radius:6px;padding:4px 6px;font-size:12px;font-family:inherit;width:130px;}
+.pg-addrow{display:flex;gap:8px;margin-bottom:14px;}
+.pg-addrow input[type=text]{flex:1;border:1px solid #dde3ee;border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;}
+.pg-vio-add select{border:1px solid #dde3ee;border-radius:8px;padding:0 8px;font-size:13px;font-family:inherit;}
+.pg-btn{background:#0F766E;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.pg-btn:hover{background:#0b5c55;}
+.pg-timeline{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;}
+.pg-item{border-left:3px solid #0F766E;background:#f8fafc;border-radius:0 8px 8px 0;padding:8px 12px;font-size:13px;position:relative;}
+.pg-item .i-meta{font-size:11px;color:#999;margin-bottom:2px;}
+.pg-item .i-del{position:absolute;top:8px;right:8px;color:#c00;background:none;border:0;cursor:pointer;font-size:12px;opacity:.5;}
+.pg-item .i-del:hover{opacity:1;}
+.pg-item.lv-重大{border-left-color:#B91C1C;background:#FEF2F2;}
+.pg-item.lv-注意{border-left-color:#C2410C;background:#FFF7ED;}
+.pg-item .i-badge{display:inline-block;font-size:10px;font-weight:800;padding:1px 7px;border-radius:20px;margin-right:6px;color:#fff;background:#0F766E;}
+.pg-item.lv-重大 .i-badge{background:#B91C1C;}
+.pg-item.lv-注意 .i-badge{background:#C2410C;}
+.pg-item.lv-軽微 .i-badge{background:#64748b;}
+.pg-views{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;}
+.pg-view{display:flex;gap:12px;align-items:center;font-size:13px;padding:7px 10px;border-bottom:1px solid #f2f4f8;}
+.pg-view .v-date{color:#999;font-size:12px;white-space:nowrap;min-width:118px;}
+.pg-view .v-kind{font-size:10px;font-weight:800;color:#0F766E;background:#E6F4F1;border-radius:20px;padding:1px 8px;white-space:nowrap;}
+.pg-view .v-item{font-weight:700;color:var(--navy);}
+.pg-empty{color:#999;font-size:13px;padding:8px 0;}
+.pg-updated{font-size:12px;color:#999;margin-top:14px;text-align:right;}
+</style>
+
+<script src="assets/js/hq-common.js?v=8"></script>
+<script src="assets/js/hq-partner-progress.js?v=1" defer></script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>

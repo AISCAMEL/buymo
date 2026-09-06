@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>加盟店 書類・情報｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=8" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head">
+      <h1>加盟店 書類・情報</h1>
+      <span id="docMsg" class="doc-msg"></span>
+    </div>
+    <p class="portal-sub">加盟店ごとに契約書・本人確認・保証人・古物商許可を管理します。免許証などの画像・PDFは <b>Google Drive等の共有リンク</b>を貼ってください（機密のためシステムには保存しません）。入力は自動保存されます。</p>
+
+    <div class="doc-topbar">
+      <label>加盟店 <select id="docStore"></select></label>
+      <a class="doc-back" href="hq-stores.html">← 加盟店管理へ戻る</a>
+    </div>
+
+    <div class="doc-grid">
+      <!-- 契約書 -->
+      <section class="doc-card">
+        <h2>📄 契約書</h2>
+        <div class="doc-fields">
+          <label>契約書番号<input data-sec="contract" data-k="no" type="text" placeholder="例：BUYMO-FC-2026-001"></label>
+          <label>締結日<input data-sec="contract" data-k="date" type="date"></label>
+          <label>契約年数<input data-sec="contract" data-k="years" type="number" min="0" placeholder="5"></label>
+          <label>更新区分<input data-sec="contract" data-k="renewal" type="text" placeholder="例：1年ごとに自動更新"></label>
+          <label class="doc-url">契約書PDF（リンク）<span class="doc-urlrow"><input data-sec="contract" data-k="url" type="url" placeholder="https://drive.google.com/..."><a class="doc-open" data-open="contract.url" target="_blank" rel="noopener">開く</a></span></label>
+        </div>
+      </section>
+
+      <!-- 運転免許証 -->
+      <section class="doc-card">
+        <h2>🪪 運転免許証（代表者 本人確認）</h2>
+        <div class="doc-fields">
+          <label>氏名<input data-sec="license" data-k="name" type="text"></label>
+          <label>生年月日<input data-sec="license" data-k="birth" type="date"></label>
+          <label>免許証番号<input data-sec="license" data-k="no" type="text"></label>
+          <label>住所<input data-sec="license" data-k="addr" type="text"></label>
+          <label>有効期限<input data-sec="license" data-k="expire" type="date"></label>
+          <label class="doc-url">免許証（表）リンク<span class="doc-urlrow"><input data-sec="license" data-k="frontUrl" type="url" placeholder="https://drive.google.com/..."><a class="doc-open" data-open="license.frontUrl" target="_blank" rel="noopener">開く</a></span></label>
+          <label class="doc-url">免許証（裏）リンク<span class="doc-urlrow"><input data-sec="license" data-k="backUrl" type="url" placeholder="https://drive.google.com/..."><a class="doc-open" data-open="license.backUrl" target="_blank" rel="noopener">開く</a></span></label>
+        </div>
+      </section>
+
+      <!-- 保証人 -->
+      <section class="doc-card">
+        <h2>🤝 保証人</h2>
+        <div class="doc-fields">
+          <label>氏名<input data-sec="guarantor" data-k="name" type="text"></label>
+          <label>続柄<input data-sec="guarantor" data-k="rel" type="text" placeholder="例：父／配偶者"></label>
+          <label>電話<input data-sec="guarantor" data-k="tel" type="tel"></label>
+          <label>住所<input data-sec="guarantor" data-k="addr" type="text"></label>
+          <label>勤務先<input data-sec="guarantor" data-k="work" type="text"></label>
+          <label class="doc-url">保証人同意書（リンク）<span class="doc-urlrow"><input data-sec="guarantor" data-k="url" type="url" placeholder="https://drive.google.com/..."><a class="doc-open" data-open="guarantor.url" target="_blank" rel="noopener">開く</a></span></label>
+        </div>
+      </section>
+
+      <!-- 古物商許可 -->
+      <section class="doc-card">
+        <h2>🏛 古物商許可</h2>
+        <div class="doc-fields">
+          <label>許可番号<input data-sec="kobutsu" data-k="no" type="text" placeholder="例：第00000000000号"></label>
+          <label>公安委員会<input data-sec="kobutsu" data-k="committee" type="text" placeholder="例：福島県公安委員会"></label>
+          <label>取得年月日<input data-sec="kobutsu" data-k="date" type="date"></label>
+          <label>許可名義<input data-sec="kobutsu" data-k="holder" type="text"></label>
+          <label class="doc-url">許可証（リンク）<span class="doc-urlrow"><input data-sec="kobutsu" data-k="url" type="url" placeholder="https://drive.google.com/..."><a class="doc-open" data-open="kobutsu.url" target="_blank" rel="noopener">開く</a></span></label>
+        </div>
+      </section>
+    </div>
+    <p class="doc-updated" id="docUpdated"></p>
+  </div>
+</main>
+
+<style>
+.doc-msg{font-size:13px;color:#0F766E;font-weight:700;}
+.doc-topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:12px 18px;margin-bottom:16px;}
+.doc-topbar label{font-size:14px;font-weight:700;color:var(--navy);}
+.doc-topbar select{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;margin-left:8px;min-width:200px;}
+.doc-back{font-size:13px;color:var(--green);font-weight:700;}
+.doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:820px){.doc-grid{grid-template-columns:1fr;}}
+.doc-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:20px 22px;}
+.doc-card h2{font-size:16px;font-weight:900;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #eef1f6;}
+.doc-fields{display:flex;flex-direction:column;gap:12px;}
+.doc-fields label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:700;color:#556;}
+.doc-fields input{height:40px;border:1px solid #dde3ee;border-radius:8px;padding:0 12px;font-size:14px;font-family:inherit;font-weight:400;}
+.doc-fields input:focus{outline:2px solid var(--green);border-color:var(--green);}
+.doc-urlrow{display:flex;gap:8px;align-items:center;}
+.doc-urlrow input{flex:1;}
+.doc-open{flex:0 0 auto;background:#0F766E;color:#fff;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;text-decoration:none;opacity:.4;pointer-events:none;}
+.doc-open.ready{opacity:1;pointer-events:auto;}
+.doc-updated{font-size:12px;color:#999;margin-top:14px;text-align:right;}
+</style>
+
+<script src="assets/js/hq-common.js?v=8"></script>
+<script src="assets/js/hq-partner-docs.js?v=1" defer></script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>

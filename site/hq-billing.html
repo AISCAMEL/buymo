@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
 <link rel="stylesheet" href="assets/css/buymo.css?v=37" />
-<link rel="stylesheet" href="assets/css/board.css?v=7" />
+<link rel="stylesheet" href="assets/css/board.css?v=8" />
 </head>
 <body>
 <script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
@@ -45,7 +45,8 @@
             <th>加盟店</th>
             <th>月額<span class="th-sub">積立/ロイヤリティ</span></th>
             <th>紹介料<span class="th-sub">¥1,000×件数</span></th>
-            <th>ｵｰｸｼｮﾝ/<br>ｼｽﾃﾑ利用料</th>
+            <th>ｵｰｸｼｮﾝ<br>ｼｽﾃﾑ利用料</th>
+            <th>ｵｰｸｼｮﾝ<br>成約料<span class="th-sub">5%</span></th>
             <th>加盟金<span class="th-sub">初回のみ</span></th>
             <th>その他</th>
             <th>小計</th>
@@ -53,7 +54,7 @@
             <th>発行</th>
           </tr>
         </thead>
-        <tbody id="billBody"><tr><td colspan="9" class="bill-empty">読み込み中…</td></tr></tbody>
+        <tbody id="billBody"><tr><td colspan="10" class="bill-empty">読み込み中…</td></tr></tbody>
       </table>
     </div>
     <p class="bill-note" id="billDates"></p>
@@ -83,8 +84,8 @@
 @media(max-width:820px){ .hq-table-wrap{overflow-x:auto;} .bill-table{min-width:820px;} }
 </style>
 
-<script src="assets/js/hq-common.js?v=7"></script>
-<script src="assets/js/hq-billing.js?v=1" defer></script>
+<script src="assets/js/hq-common.js?v=8"></script>
+<script src="assets/js/hq-billing.js?v=2" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
