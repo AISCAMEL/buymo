@@ -56,7 +56,10 @@
       refcount: refc,
       auctionsys: 0,      // オークションシステム利用料（出品代行）
       auctionfee: 0,      // オークション成約料（粗利×5%）
+      listing: 0,         // 出品手数料
       initfee: isJoinMonth(name, month) ? (Number(rec.initFee) || 0) : 0,
+      unpaid: 0,          // 未納金（前月からの繰越）
+      penalty: 0,         // ペナルティ
       other: 0
     };
   }
@@ -71,15 +74,18 @@
       refcount: d.refcount,
       auctionsys: saved.auctionsys != null ? Number(saved.auctionsys) : (legacySys != null ? legacySys : d.auctionsys),
       auctionfee: saved.auctionfee != null ? Number(saved.auctionfee) : d.auctionfee,
+      listing: saved.listing != null ? Number(saved.listing) : d.listing,
       initfee: saved.initfee != null ? Number(saved.initfee) : d.initfee,
+      unpaid: saved.unpaid != null ? Number(saved.unpaid) : d.unpaid,
+      penalty: saved.penalty != null ? Number(saved.penalty) : d.penalty,
       other: saved.other != null ? Number(saved.other) : d.other
     };
   }
-  function subtotal(l) { return (l.monthly || 0) + (l.referral || 0) + (l.auctionsys || 0) + (l.auctionfee || 0) + (l.initfee || 0) + (l.other || 0); }
+  function subtotal(l) { return (l.monthly || 0) + (l.referral || 0) + (l.auctionsys || 0) + (l.auctionfee || 0) + (l.listing || 0) + (l.initfee || 0) + (l.unpaid || 0) + (l.penalty || 0) + (l.other || 0); }
   function taxOf(sub, useTax) { return useTax ? Math.round(sub * 0.1) : 0; }
 
   function inCell(name, key, val) {
-    return '<input class="bill-in" data-name="' + esc(name) + '" data-k="' + key + '" type="number" min="0" step="1000" value="' + (Number(val) || 0) + '">';
+    return '<input class="bill-in" data-name="' + esc(name) + '" data-k="' + key + '" type="number" min="0" step="1" inputmode="numeric" value="' + (Number(val) || 0) + '">';
   }
 
   function render() {
@@ -99,13 +105,16 @@
         '<td>' + inCell(s.name, 'referral', l.referral) + '<span class="th-sub">' + l.refcount + '件</span></td>' +
         '<td>' + inCell(s.name, 'auctionsys', l.auctionsys) + '</td>' +
         '<td>' + inCell(s.name, 'auctionfee', l.auctionfee) + '</td>' +
+        '<td>' + inCell(s.name, 'listing', l.listing) + '</td>' +
         '<td>' + inCell(s.name, 'initfee', l.initfee) + '</td>' +
+        '<td>' + inCell(s.name, 'unpaid', l.unpaid) + '</td>' +
+        '<td>' + inCell(s.name, 'penalty', l.penalty) + '</td>' +
         '<td>' + inCell(s.name, 'other', l.other) + '</td>' +
         '<td class="bill-sub">' + yen(sub) + '</td>' +
         '<td class="bill-total">' + yen(tot) + '</td>' +
         '<td><button class="bill-issue" data-issue="' + esc(s.name) + '">請求書を発行</button></td>' +
         '</tr>';
-    }).join('') || '<tr><td colspan="10" class="bill-empty">加盟店がありません（加盟店管理で追加してください）</td></tr>';
+    }).join('') || '<tr><td colspan="13" class="bill-empty">加盟店がありません（加盟店管理で追加してください）</td></tr>';
 
     // 締め日・支払期限の表示
     var parts = month.split('-'); var y = Number(parts[0]), m = Number(parts[1]);
@@ -116,7 +125,22 @@
       '締め日：' + fmtDate(y, m, closeDay) + '（対象月末）　／　支払期限：' + fmtDate(ny, nm, dueDay) + '（翌月末）';
   }
 
-  // 入力変更 → 保存＆再計算
+  // 該当行の小計・合計だけをその場で更新（表を作り直さない＝入力欄のフォーカスを保持）
+  function updateRowTotals(name) {
+    var month = monthEl.value || thisMonth();
+    var st = loadState(month);
+    var l = lineOf(name, month, st);
+    var sub = subtotal(l), tot = sub + taxOf(sub, taxEl.checked);
+    var trs = body.querySelectorAll('tr[data-row]');
+    for (var i = 0; i < trs.length; i++) {
+      if (trs[i].getAttribute('data-row') === name) {
+        var cs = trs[i].querySelector('.bill-sub'); if (cs) cs.textContent = yen(sub);
+        var ct = trs[i].querySelector('.bill-total'); if (ct) ct.textContent = yen(tot);
+        break;
+      }
+    }
+  }
+  // 入力変更 → 保存＆該当行のみ再計算（フルレンダーしないので数字入力が途切れない）
   body.addEventListener('input', function (e) {
     var inp = e.target.closest('.bill-in'); if (!inp) return;
     var month = monthEl.value; var st = loadState(month);
@@ -125,7 +149,7 @@
     st.rows[name][k] = Number(inp.value) || 0;
     st.bank = bankEl.value; st.tax = taxEl.checked;
     saveState(month, st);
-    render();
+    updateRowTotals(name);
     flash('保存しました');
   });
   function flash(t) { if (msg) { msg.textContent = t; setTimeout(function () { msg.textContent = ''; }, 1800); } }
@@ -161,7 +185,10 @@
     line('紹介料', '¥1,000 × ' + l.refcount + '件', l.referral);
     line('オークションシステム利用料', '出品代行', l.auctionsys);
     line('オークション成約料', '粗利 × 5%', l.auctionfee);
+    line('出品手数料', '', l.listing);
     line('加盟金', '初回', l.initfee);
+    line('未納金', '前月からの繰越', l.unpaid);
+    line('ペナルティ', '', l.penalty);
     line('その他', '', l.other);
     if (!rows.length) rows.push('<tr><td>（請求項目なし）</td><td class="r">' + yen(0) + '</td></tr>');
 
@@ -209,10 +236,10 @@
   function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
   document.getElementById('btnCsv').addEventListener('click', function () {
     var month = monthEl.value || thisMonth(); var st = loadState(month); var useTax = taxEl.checked;
-    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝｼｽﾃﾑ利用料', 'ｵｰｸｼｮﾝ成約料5%', '加盟金', 'その他', '小計', '消費税', '合計(税込)']];
+    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝｼｽﾃﾑ利用料', 'ｵｰｸｼｮﾝ成約料5%', '出品手数料', '加盟金', '未納金', 'ペナルティ', 'その他', '小計', '消費税', '合計(税込)']];
     stores.forEach(function (s) {
       var l = lineOf(s.name, month, st); var sub = subtotal(l); var tax = taxOf(sub, useTax);
-      rows.push([month, s.name, l.monthly, l.referral, l.refcount, l.auctionsys, l.auctionfee, l.initfee, l.other, sub, tax, sub + tax]);
+      rows.push([month, s.name, l.monthly, l.referral, l.refcount, l.auctionsys, l.auctionfee, l.listing, l.initfee, l.unpaid, l.penalty, l.other, sub, tax, sub + tax]);
     });
     var csv = '﻿' + rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
