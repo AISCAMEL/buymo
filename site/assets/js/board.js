@@ -58,8 +58,18 @@
       listWeek: c.listWeek || '', auctionResult: c.auctionResult || '', flowAction: c.flowAction || '',
       venueFee: Number(c.venueFee) || 0, shipping: Number(c.shipping) || 0, claimCost: Number(c.claimCost) || 0,
       reListFee: Number(c.reListFee) || 0, reListed: !!c.reListed,
+      flowWeeks: c.flowWeeks || {},
       hqFee: Number(c.hqFee) || 0, partnerNet: Number(c.partnerNet) || 0
     });
+  }
+  // 流れ（未落札）の出品料を「出品週ごと」に記録（同一週は上書き＝二重計上防止）。
+  // キャンセル＝当月にまとめて請求／次週＝落札月にまとめて請求（hq-billingが集計）。
+  function recordFlowWeek(c) {
+    if (!c || c.saleMethod !== 'オークション' || c.auctionResult !== '流れ') return;
+    var wk = c.listWeek || c.dropoffDate || (c.date || '');
+    if (!wk) return;
+    c.flowWeeks = c.flowWeeks || {};
+    c.flowWeeks[wk] = Number(c.venueFee) || 0;
   }
 
   function renderSaleAlertBanner(list) {
@@ -332,6 +342,7 @@
     // オークション出品情報も取り込み
     c.venueFee = tc.venueFee; c.venue = tc.venue; c.transport = tc.transport;
     c.dropoffDate = tc.dropoffDate; c.listWeek = tc.listWeek; c.auctionResult = tc.auctionResult; c.flowAction = tc.flowAction;
+    recordFlowWeek(c);
     c.saleApplied = true; c.saleAppliedAt = nowStr(); c.saleAppliedSig = saleSig(c);
     addHistory(c, '売却申請：' + r.method + '／' + (r.method === 'オークション' ? '落札額' : '売却額') + HQ.yen(r.saleP) + '（' + (r.method === 'オークション' ? '本部手数料' + HQ.yen(r.hqFee) + '・お渡し額' + HQ.yen(r.partnerNet) : '本部手数料' + HQ.yen(r.hqFee) + '・加盟店取り分' + HQ.yen(r.partnerNet)) + '）');
     save(c); if (c.saleMethod === 'オークション') persistAuction(c); HQ.postSaleApplication(c); render(); fillPanel(c);
@@ -639,6 +650,7 @@
       var keys = ['saleMethod', 'salePrice', 'venue', 'transport', 'dropoffDate', 'listWeek', 'auctionResult', 'flowAction', 'venueFee', 'shipping', 'claimCost', 'reListFee', 'reListed'];
       var changed = false;
       keys.forEach(function (k) { if (a[k] !== undefined && a[k] !== '' && a[k] !== null && cur[k] == null) { cur[k] = a[k]; changed = true; } });
+      if (a.flowWeeks && !cur.flowWeeks) { cur.flowWeeks = a.flowWeeks; }
       // amount は既存優先。salePrice等はサーバー値があれば補完
       if (changed) fillPanel(cur);
     });
@@ -687,6 +699,7 @@
       var r = HQ.calcSale(c); c.hqFee = r.hqFee; c.partnerNet = r.partnerNet;
       // 申請済みの内容が変わったら再申請が必要（申請状態を解除）
       if (c.saleApplied && prevSig !== saleSig(c)) { c.saleApplied = false; c.saleAppliedSig = ''; }
+      recordFlowWeek(c);
       if (c.saleMethod === 'オークション') persistAuction(c);
     }
     save(c); render(); fillPanel(c);
