@@ -484,6 +484,7 @@ window.HQ = (function () {
       ['academy', 'アカデミー', 'partner-academy.html'],
       ['scripts', 'スクリプト', 'partner-scripts.html'],
       ['community', 'コミュニティ', 'partner-community.html'],
+      ['chatassist', '接客アシスト', 'hq-chat-assist.html'],
       ['guide', '使い方', 'partner-guide.html']
     ] : [
       ['dashboard', 'ダッシュボード', 'hq-dashboard.html'],
@@ -500,6 +501,7 @@ window.HQ = (function () {
       ['community', 'コミュニティ', 'partner-community.html'],
       ['report', '営業レポート', 'report.html'],
       ['documents', '書類発行', 'hq-documents.html'],
+      ['chatassist', '接客アシスト', 'hq-chat-assist.html'],
       ['guide', '使い方', 'partner-guide.html']
     ];
     el.innerHTML = items.map(function (it) {

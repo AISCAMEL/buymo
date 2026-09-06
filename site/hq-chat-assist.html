@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>接客アシスト（AI添削）｜BUYMO</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/board.css?v=10" />
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title" id="portalTitle">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <div class="report-head"><h1>接客アシスト（AI添削）</h1></div>
+    <p class="portal-sub">お客様へ送る前の文章を貼り付けて「AIで添削」を押すと、丁寧で正確・分かりやすい案内文に書き直します。料金・電話対応などBUYMOのルールに沿って整えます。そのままコピーしてチャット／メールに貼り付けてください。</p>
+
+    <div class="ca-grid">
+      <section class="ca-card">
+        <h2>✍️ 下書き（あなたの文章）</h2>
+        <label class="ca-label">お客様の直近の発言（任意・文脈用）
+          <textarea id="caCtx" rows="2" placeholder="例：事故で動かない車でも売れますか？"></textarea>
+        </label>
+        <label class="ca-label">下書き
+          <textarea id="caDraft" rows="8" placeholder="例：うごかない車でもかいとりできます。れっかーむりょうです。いくらになるかはさていしないとわからないです。"></textarea>
+        </label>
+        <div class="ca-row">
+          <label>トーン
+            <select id="caTone">
+              <option value="">標準</option>
+              <option value="丁寧">より丁寧</option>
+              <option value="簡潔">簡潔に</option>
+              <option value="謝罪">お詫びを含める</option>
+            </select>
+          </label>
+          <button id="caRun" class="btn btn-primary" type="button">AIで添削 ✨</button>
+        </div>
+      </section>
+
+      <section class="ca-card">
+        <h2>✅ 添削後（送信用）</h2>
+        <div id="caResult" class="ca-result ca-empty">ここに書き直した案内文が表示されます。</div>
+        <div class="ca-actions">
+          <button id="caCopy" class="btn btn-outline" type="button" disabled>📋 コピー</button>
+          <button id="caRedo" class="btn btn-outline" type="button" disabled>↻ もう一度添削</button>
+        </div>
+        <p class="ca-note">AIの生成結果です。送信前に内容が正しいか必ずご確認ください。金額や約束事は断定せず「無料査定で確認」の案内を基本にしています。</p>
+      </section>
+    </div>
+  </div>
+</main>
+
+<style>
+.ca-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:860px){.ca-grid{grid-template-columns:1fr;}}
+.ca-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:20px 22px;}
+.ca-card h2{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:14px;}
+.ca-label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:700;color:#556;margin-bottom:14px;}
+.ca-label textarea{border:1px solid #dde3ee;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;line-height:1.6;resize:vertical;}
+.ca-label textarea:focus{outline:2px solid var(--green);border-color:var(--green);}
+.ca-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.ca-row label{font-size:12.5px;font-weight:700;color:#556;display:flex;align-items:center;gap:8px;}
+.ca-row select{height:40px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;}
+.ca-result{min-height:200px;white-space:pre-wrap;background:#f8fafc;border:1px solid #eef1f6;border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.8;color:#1a2b28;}
+.ca-result.ca-empty{color:#aaa;display:flex;align-items:center;justify-content:center;text-align:center;}
+.ca-result.loading{color:#0F766E;}
+.ca-actions{display:flex;gap:10px;margin-top:12px;}
+.btn-outline{background:#fff;border:1px solid #0F766E;color:#0F766E;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-outline:disabled{opacity:.45;cursor:not-allowed;}
+.ca-note{font-size:11px;color:#999;margin-top:12px;line-height:1.6;}
+</style>
+
+<script src="assets/js/hq-common.js?v=10"></script>
+<script src="assets/js/hq-chat-assist.js?v=1" defer></script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>
