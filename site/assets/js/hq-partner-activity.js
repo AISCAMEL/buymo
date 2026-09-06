@@ -163,7 +163,8 @@
     var months = monthKeys(n);
     var cur = months[months.length - 1];
     titleEl.textContent = focusStore + ' の買取実績';
-    subEl.innerHTML = '<a class="pa-back" href="hq-partner-activity.html">← 加盟店の動き（一覧）へ戻る</a>';
+    subEl.innerHTML = '<a class="pa-back" href="hq-partner-activity.html">← 加盟店の動き（一覧）へ戻る</a>' +
+      '　｜　<a class="pa-back" href="hq-partner-progress.html?store=' + encodeURIComponent(focusStore) + '">📋 進捗カルテを開く</a>';
 
     var row = {}; months.forEach(function (m) { row[m] = { cnt: 0, amount: 0, leads: 0 }; });
     var recent = [];

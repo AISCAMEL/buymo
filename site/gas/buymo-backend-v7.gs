@@ -247,13 +247,15 @@ function doGet(e) {
     if (action === 'referrals') return apiOK_(p) ? jsonOut(getReferralsData()) : jsonOut({ error: 'unauthorized' }); // NEW: 紹介料一覧（本部・機密）
     if (action === 'payments')  return apiOK_(p) ? jsonOut(getPaymentsData())  : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店支払い/積立（本部・機密）
     if (action === 'partner_docs') return apiOK_(p) ? jsonOut(getPartnerDocs(p.store)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 書類・情報（本部・機密）
+    if (action === 'partner_progress') return apiOK_(p) ? jsonOut(getPartnerProgress(p.store)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 進捗カルテ（研修/違反/本部コメント）
+    if (action === 'partner_views') return apiOK_(p) ? jsonOut(getPartnerViews(p.store, p.limit)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 コンテンツ閲覧履歴
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
     if (action === 'partners') return apiOK_(p) ? jsonOut(getPartners()) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店アカウント一覧（本部）
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
-    if (action === 'ping')   return jsonp(p.callback, { v: 10, features: ['case_photo', 'store_content', 'blog', 'referral_fee', 'payments'] }); // #4 機能検出
+    if (action === 'ping')   return jsonp(p.callback, { v: 11, features: ['case_photo', 'store_content', 'blog', 'referral_fee', 'payments', 'partner_docs', 'partner_progress', 'partner_views'] }); // #4 機能検出
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
     return jsonOut({ error: err.message });
@@ -300,6 +302,8 @@ function doPost(e) {
     if (data.type === 'store')            return jsonOut(handleStore(data));          // NEW: 店舗レジストリ保存（同上）
     if (data.type === 'store_delete')     return jsonOut(deleteStoreRow(data.name));  // NEW: 店舗レジストリ削除
     if (data.type === 'partner_docs')     return jsonOut(savePartnerDocs(data.store, data.data)); // NEW: 加盟店 書類・情報の保存
+    if (data.type === 'partner_progress') return jsonOut(savePartnerProgress(data.store, data.data)); // NEW: 加盟店 進捗カルテの保存
+    if (data.type === 'partner_view')     return jsonOut(logPartnerView(data.store, data.item, data.kind)); // NEW: 加盟店 コンテンツ閲覧ログ追記
     if (data.type === 'store_content')    return jsonOut(saveStoreContent(data.store, data.data)); // NEW: 加盟店 公開ページ内容の保存
     if (data.type === 'blog_post')        return jsonOut(addBlogPost(data.store, data.post));       // NEW: 加盟店 ブログ投稿
     if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
@@ -3243,4 +3247,113 @@ function savePartnerDocs(store, data) {
   }
   sh.appendRow([name, json, updated]);
   return { status: 'ok', updated: updated, created: true };
+}
+
+/* ============================================================
+   NEW: 加盟店ごとの進捗カルテ（研修状況/違反/本部コメント/総合ステータス）
+   - フロント: hq-partner-progress.js
+     GET  ?action=partner_progress&store=<店名>&key=... → {onboarding,training,violations,comments,status,updated}
+     POST {type:'partner_progress', store, data:{...}}   → 1店舗1行・上書き
+   Sheet「加盟店進捗」: [store, data(JSON), updated]
+   ============================================================ */
+var PARTNER_PROGRESS_SHEET_NAME = '加盟店進捗';
+
+function getPartnerProgressSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(PARTNER_PROGRESS_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(PARTNER_PROGRESS_SHEET_NAME);
+    sh.appendRow(['store', 'data', 'updated']);
+    sh.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function getPartnerProgress(store) {
+  try {
+    var name = String(store || '').trim();
+    if (!name) return {};
+    var sh = getPartnerProgressSheet();
+    var last = sh.getLastRow();
+    if (last < 2) return {};
+    var vals = sh.getRange(2, 1, last - 1, 2).getValues();
+    for (var i = 0; i < vals.length; i++) {
+      if (String(vals[i][0]).trim() === name) {
+        try { return JSON.parse(vals[i][1] || '{}'); } catch (e) { return {}; }
+      }
+    }
+    return {};
+  } catch (e) { return {}; }
+}
+
+function savePartnerProgress(store, data) {
+  var name = String(store || '').trim();
+  if (!name) return { status: 'error', message: 'no_store' };
+  var sh = getPartnerProgressSheet();
+  var json = JSON.stringify(data || {});
+  var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+  var updated = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var col = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < col.length; i++) {
+      if (String(col[i][0]).trim() === name) {
+        sh.getRange(i + 2, 2, 1, 2).setValues([[json, updated]]);
+        return { status: 'ok', updated: updated };
+      }
+    }
+  }
+  sh.appendRow([name, json, updated]);
+  return { status: 'ok', updated: updated, created: true };
+}
+
+/* ============================================================
+   NEW: 加盟店 コンテンツ閲覧ログ（追記型）
+   - 加盟店がポータルのコンテンツを開いた記録を蓄積（role=partner のとき自動送信）。
+     POST {type:'partner_view', store, item, kind} → 1行追記
+     GET  ?action=partner_views&store=<店名>&limit=50&key=... → [{date, kind, item}]（新しい順）
+   Sheet「加盟店閲覧ログ」: [date, store, kind, item]
+   ============================================================ */
+var PARTNER_VIEWS_SHEET_NAME = '加盟店閲覧ログ';
+
+function getPartnerViewsSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(PARTNER_VIEWS_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(PARTNER_VIEWS_SHEET_NAME);
+    sh.appendRow(['date', 'store', 'kind', 'item']);
+    sh.getRange(1, 1, 1, 4).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function logPartnerView(store, item, kind) {
+  try {
+    var name = String(store || '').trim();
+    if (!name) return { status: 'ignored' };
+    var sh = getPartnerViewsSheet();
+    var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+    var ts = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    sh.appendRow([ts, name, String(kind || 'page').slice(0, 40), String(item || '').slice(0, 200)]);
+    return { status: 'ok' };
+  } catch (e) { return { status: 'error', message: e.message }; }
+}
+
+function getPartnerViews(store, limit) {
+  try {
+    var name = String(store || '').trim();
+    var sh = getPartnerViewsSheet();
+    var last = sh.getLastRow();
+    if (last < 2) return [];
+    var vals = sh.getRange(2, 1, last - 1, 4).getValues();
+    var out = [];
+    for (var i = vals.length - 1; i >= 0; i--) {
+      if (name && String(vals[i][1]).trim() !== name) continue;
+      out.push({ date: vals[i][0], store: vals[i][1], kind: vals[i][2], item: vals[i][3] });
+    }
+    var n = Number(limit) || 50; if (n > 300) n = 300;
+    return out.slice(0, n);
+  } catch (e) { return []; }
 }

@@ -53,6 +53,7 @@
           '<a class="store-pay-link" href="hq-payments.html?store=' + encodeURIComponent(s.name) + '">💴 支払い・積立</a>' +
           '<a class="store-pay-link" href="hq-partner-docs.html?store=' + encodeURIComponent(s.name) + '">📁 書類・情報</a>' +
           '<a class="store-pay-link" href="hq-partner-activity.html?store=' + encodeURIComponent(s.name) + '">📈 買取実績</a>' +
+          '<a class="store-pay-link" href="hq-partner-progress.html?store=' + encodeURIComponent(s.name) + '">📋 進捗カルテ</a>' +
         '</div>' +
         '</div>';
     }).join('');

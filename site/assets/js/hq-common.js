@@ -251,6 +251,45 @@ window.HQ = (function () {
     if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ type: 'partner_docs', token: authToken(), store: store, data: data }) }).catch(function () {});
   }
+  // 加盟店ごとの進捗カルテ（研修状況/違反/本部コメント/総合ステータス）。本部で編集し共有。
+  function loadPartnerProgress(store, cb) {
+    var lk = 'buymo_progress_' + store;
+    var local = {}; try { local = JSON.parse(localStorage.getItem(lk)) || {}; } catch (e) {}
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=partner_progress&store=' + encodeURIComponent(store) + keyQS())
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && !d.error && typeof d === 'object' && !Array.isArray(d)) ? d : local); })
+        .catch(function () { cb(local); });
+    } else cb(local);
+  }
+  function savePartnerProgress(store, data) {
+    try { localStorage.setItem('buymo_progress_' + store, JSON.stringify(data)); } catch (e) {}
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'partner_progress', token: authToken(), store: store, data: data }) }).catch(function () {});
+  }
+  // 加盟店 コンテンツ閲覧履歴（本部が閲覧）
+  function loadPartnerViews(store, cb, limit) {
+    if (!ENDPOINT) { cb([]); return; }
+    fetch(ENDPOINT + '?action=partner_views&store=' + encodeURIComponent(store) + '&limit=' + (limit || 80) + keyQS())
+      .then(function (r) { return r.json(); })
+      .then(function (d) { cb(Array.isArray(d) ? d : []); })
+      .catch(function () { cb([]); });
+  }
+  // 加盟店ポータルの閲覧を記録（role=partner のとき自動送信・1ページ30分に1回）
+  function logView(item, kind) {
+    try {
+      if (!ENDPOINT) return;
+      var s = (window.AUTH && AUTH.get) ? AUTH.get() : null;
+      if (!s || s.role !== 'partner' || !s.store) return;
+      var it = item || document.title || location.pathname;
+      var mk = 'buymo_vlog_' + s.store + '_' + it;
+      var lastT = 0; try { lastT = Number(localStorage.getItem(mk)) || 0; } catch (e) {}
+      if (Date.now() - lastT < 30 * 60 * 1000) return; // 30分デデュープ
+      try { localStorage.setItem(mk, String(Date.now())); } catch (e) {}
+      fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ type: 'partner_view', token: authToken(), store: s.store, item: it, kind: kind || 'page' }) }).catch(function () {});
+    } catch (e) {}
+  }
   // 店舗を削除（一覧＝localStorageから除去し、シートの店舗レジストリからも削除）
   function deleteStore(name) {
     saveStores(getStores().filter(function (s) { return s.name !== name; }));
@@ -431,6 +470,11 @@ window.HQ = (function () {
     el.innerHTML = items.map(function (it) {
       return '<a href="' + it[2] + '"' + (it[0] === active ? ' aria-current="page"' : '') + '>' + it[1] + '</a>';
     }).join('');
+    // 加盟店がコンテンツページを開いたら閲覧履歴を記録（本部の進捗把握用）
+    if (r === 'partner') {
+      var cur = null; for (var q = 0; q < items.length; q++) if (items[q][0] === active) { cur = items[q]; break; }
+      logView(cur ? cur[1] : (document.title || active), 'page');
+    }
   }
 
   return {
@@ -439,7 +483,8 @@ window.HQ = (function () {
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     loadPayments: loadPayments, savePayment: savePayment,
     addReferral: addReferral, getReferrals: getReferrals,
-    getStores: getStores, saveStores: saveStores, postStore: postStore, deleteStore: deleteStore, loadPartnerDocs: loadPartnerDocs, savePartnerDocs: savePartnerDocs, note: note, postFollowup: postFollowup,
+    getStores: getStores, saveStores: saveStores, postStore: postStore, deleteStore: deleteStore, loadPartnerDocs: loadPartnerDocs, savePartnerDocs: savePartnerDocs,
+    loadPartnerProgress: loadPartnerProgress, savePartnerProgress: savePartnerProgress, loadPartnerViews: loadPartnerViews, logView: logView, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
