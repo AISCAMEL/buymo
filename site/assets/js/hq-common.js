@@ -106,16 +106,16 @@ window.HQ = (function () {
   function readLS(k, seed) { try { var a = JSON.parse(localStorage.getItem(k)); return (a && a.length) ? a : seed(); } catch (e) { return seed(); } }
 
   function loadCases(cb) {
-    if (ENDPOINT) {
-      fetch(ENDPOINT + '?action=cases' + keyQS())
-        .then(function (r) { return r.json(); })
-        .then(function (d) {
-          var list = (d && d.length) ? d : [];
-          if (list.length) saveCases(list);
-          cb(list.length ? list : readLS(CKEY, seedCases));
-        })
-        .catch(function () { cb(readLS(CKEY, seedCases)); });
-    } else { cb(readLS(CKEY, seedCases)); }
+    // ① まず手元のデータを即表示（体感速度）② 裏でサーバー最新を取得できたら再表示
+    cb(readLS(CKEY, seedCases));
+    if (!ENDPOINT) return;
+    fetch(ENDPOINT + '?action=cases' + keyQS())
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var list = (d && d.length) ? d : [];
+        if (list.length) { saveCases(list); cb(list); } // サーバーに実データがある時だけ更新
+      })
+      .catch(function () {});
   }
   function getCasesLS() { return readLS(CKEY, seedCases); }
   function saveCases(arr) { try { localStorage.setItem(CKEY, JSON.stringify(arr)); } catch (e) {} }
