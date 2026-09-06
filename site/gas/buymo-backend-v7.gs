@@ -303,7 +303,12 @@ function doPost(e) {
     if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
     if (data.type === 'referral_fee')     return jsonOut(saveReferralFee(data));                    // NEW: 紹介料の記録（1案件1回・重複排除）
     if (data.type === 'payment_save')     return jsonOut(savePayment(data.store, data.data));       // NEW: 加盟店支払い/積立の保存
-    return jsonOut(handleContact(data));
+    // ★安全策：問い合わせ系の type だけを「お問い合わせ」処理へ。未知/内部保存 type は無視する。
+    //   （フロントとGASのバージョン差で store_delete 等が問い合わせ＝案件+Slack に誤登録されるのを防止）
+    //   ※ buymo_lead=査定リード / partner_apply=加盟店申込 は専用ハンドラが無く従来どおり受け皿で処理。
+    var CONTACT_TYPES = { '': true, 'contact': true, 'buymo_lead': true, 'partner_apply': true };
+    if (CONTACT_TYPES[String(data.type || '')]) return jsonOut(handleContact(data));
+    return jsonOut({ status: 'ignored', type: String(data.type || '') });
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
   }
