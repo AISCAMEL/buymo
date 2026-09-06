@@ -12,7 +12,11 @@
   var curName = null;
 
   function load() { try { return JSON.parse(localStorage.getItem(PKEY)) || {}; } catch (e) { return {}; } }
-  function save() { try { localStorage.setItem(PKEY, JSON.stringify(db)); } catch (e) {} }
+  function save() {
+    try { localStorage.setItem(PKEY, JSON.stringify(db)); } catch (e) {}
+    // シートにも保存（端末をまたいで共有・会計連携の土台）。現在選択中の加盟店ぶんを送信。
+    if (curName && window.HQ && HQ.savePayment) HQ.savePayment(curName, db[curName]);
+  }
   var yen = HQ.yen, esc = HQ.esc;
 
   // 契約レコード取得（無ければ初期化。加盟日は加盟店情報から引き継ぐ）
@@ -442,5 +446,20 @@
     var found = stores.filter(function (s) { return s.name === want; })[0];
     if (found) selectStore(found.name);
     else if (stores.length) selectStore(stores[0].name);
+
+    // シートから支払い/積立を取得して統合（端末をまたいで共有）。取得後に再描画。
+    if (window.HQ && HQ.loadPayments) {
+      HQ.loadPayments(function (server) {
+        if (server && typeof server === 'object') {
+          var changed = false, k;
+          for (k in server) { if (Object.prototype.hasOwnProperty.call(server, k)) { db[k] = server[k]; changed = true; } }
+          if (changed) {
+            try { localStorage.setItem(PKEY, JSON.stringify(db)); } catch (e) {}
+            renderOverview();
+            if (curName) { renderDetail(); }
+          }
+        }
+      });
+    }
   })();
 })();
