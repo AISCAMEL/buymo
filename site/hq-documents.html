@@ -112,6 +112,20 @@
       </div>
     </div>
 
+    <!-- 実PDF差込発行（アップロード様式） -->
+    <div class="ref-section" id="pdfFillSection">
+      <h2>📄 実PDF差込発行（アップロード様式）</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">アップロードいただいた<strong>実際の様式PDF</strong>に案件情報を差し込み、そのままダウンロードします。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映されます。初回はフォント読み込みに数秒かかります。</p>
+      <div class="pf-bar">
+        <label>様式 <select id="pfTemplate"></select></label>
+      </div>
+      <div id="pfFields" class="pf-fields"></div>
+      <div class="pf-actions">
+        <button id="pfGen" class="doc-btn" type="button">実PDFを差込・ダウンロード ⬇</button>
+        <span id="pfMsg" class="pf-msg"></span>
+      </div>
+    </div>
+
     <!-- 過誤納還付金：都道府県別 -->
     <div class="ref-section">
       <h2>💰 過誤納還付金（自動車税）— 都道府県窓口一覧</h2>
@@ -138,8 +152,22 @@
   </div>
 </main>
 
+<style>
+.pf-bar{margin-bottom:14px;}
+.pf-bar label,.pf-f>span{font-size:13px;font-weight:700;color:var(--navy);}
+.pf-bar select{height:38px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;margin-left:8px;min-width:240px;}
+.pf-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 16px;margin-bottom:16px;}
+@media(max-width:820px){.pf-fields{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.pf-fields{grid-template-columns:1fr;}}
+.pf-f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#556;}
+.pf-f input{border:1px solid #dde3ee;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;font-weight:400;}
+.pf-f input:focus{outline:2px solid var(--green);border-color:var(--green);}
+.pf-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.pf-msg{font-size:13px;color:#0F766E;font-weight:700;}
+</style>
 <script src="assets/js/hq-common.js?v=11"></script>
 <script src="assets/js/hq-documents.js" defer></script>
+<script src="assets/js/pdf-fill.js?v=1" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
