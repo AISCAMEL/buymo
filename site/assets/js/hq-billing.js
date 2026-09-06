@@ -18,6 +18,7 @@
   function readJSON(k, def) { try { return JSON.parse(localStorage.getItem(k)) || def; } catch (e) { return def; } }
   var payments = readJSON('buymo_payments', {});
   var referrals = readJSON('buymo_referrals', []);
+  var auctions = [];   // オークション（流れ出品料の自動計上用）
 
   var monthEl = document.getElementById('billMonth');
   var taxEl = document.getElementById('billTax');
@@ -44,6 +45,23 @@
     var rec = payments[name] || {}; var jd = ym(rec.joinDate || '');
     return jd && jd === month;
   }
+  // オークションの月（搬入日→出品週→更新日の順で判定）
+  function auctionMonth(a) { return ym(a.dropoffDate) || ym(a.listWeek) || ym(a.updated) || ''; }
+  // 流れ出品料の当月自動計上：
+  //  ・流れ＋キャンセル → その月にまとめて請求
+  //  ・流れ＋次週繰越 → 落札した月にまとめて請求（flowWeeksの累計）
+  function auctionFlowFee(name, month) {
+    var sum = 0;
+    auctions.forEach(function (a) {
+      if (a.assignee !== name) return;
+      var fw = a.flowWeeks || {}, total = 0; for (var k in fw) total += Number(fw[k]) || 0;
+      if (!total) return;
+      if (auctionMonth(a) !== month) return;
+      if (a.auctionResult === '流れ' && a.flowAction === 'キャンセル') sum += total;
+      else if (a.auctionResult === '落札') sum += total; // 次週繰越分を落札月にまとめて
+    });
+    return sum;
+  }
   // 既定の請求項目（保存済みの調整があれば上書き）
   function defaults(name, month) {
     var rec = payments[name] || {};
@@ -57,6 +75,7 @@
       auctionsys: 0,      // オークションシステム利用料（出品代行）
       auctionfee: 0,      // オークション成約料（粗利×5%）
       listing: 0,         // 出品手数料
+      auctionflow: auctionFlowFee(name, month), // オークション流れ出品料（自動計上）
       initfee: isJoinMonth(name, month) ? (Number(rec.initFee) || 0) : 0,
       unpaid: 0,          // 未納金（前月からの繰越）
       penalty: 0,         // ペナルティ
@@ -75,13 +94,14 @@
       auctionsys: saved.auctionsys != null ? Number(saved.auctionsys) : (legacySys != null ? legacySys : d.auctionsys),
       auctionfee: saved.auctionfee != null ? Number(saved.auctionfee) : d.auctionfee,
       listing: saved.listing != null ? Number(saved.listing) : d.listing,
+      auctionflow: saved.auctionflow != null ? Number(saved.auctionflow) : d.auctionflow,
       initfee: saved.initfee != null ? Number(saved.initfee) : d.initfee,
       unpaid: saved.unpaid != null ? Number(saved.unpaid) : d.unpaid,
       penalty: saved.penalty != null ? Number(saved.penalty) : d.penalty,
       other: saved.other != null ? Number(saved.other) : d.other
     };
   }
-  function subtotal(l) { return (l.monthly || 0) + (l.referral || 0) + (l.auctionsys || 0) + (l.auctionfee || 0) + (l.listing || 0) + (l.initfee || 0) + (l.unpaid || 0) + (l.penalty || 0) + (l.other || 0); }
+  function subtotal(l) { return (l.monthly || 0) + (l.referral || 0) + (l.auctionsys || 0) + (l.auctionfee || 0) + (l.listing || 0) + (l.auctionflow || 0) + (l.initfee || 0) + (l.unpaid || 0) + (l.penalty || 0) + (l.other || 0); }
   function taxOf(sub, useTax) { return useTax ? Math.round(sub * 0.1) : 0; }
 
   function inCell(name, key, val) {
@@ -106,6 +126,7 @@
         '<td>' + inCell(s.name, 'auctionsys', l.auctionsys) + '</td>' +
         '<td>' + inCell(s.name, 'auctionfee', l.auctionfee) + '</td>' +
         '<td>' + inCell(s.name, 'listing', l.listing) + '</td>' +
+        '<td>' + inCell(s.name, 'auctionflow', l.auctionflow) + '</td>' +
         '<td>' + inCell(s.name, 'initfee', l.initfee) + '</td>' +
         '<td>' + inCell(s.name, 'unpaid', l.unpaid) + '</td>' +
         '<td>' + inCell(s.name, 'penalty', l.penalty) + '</td>' +
@@ -114,7 +135,7 @@
         '<td class="bill-total">' + yen(tot) + '</td>' +
         '<td><button class="bill-issue" data-issue="' + esc(s.name) + '">請求書を発行</button></td>' +
         '</tr>';
-    }).join('') || '<tr><td colspan="13" class="bill-empty">加盟店がありません（加盟店管理で追加してください）</td></tr>';
+    }).join('') || '<tr><td colspan="14" class="bill-empty">加盟店がありません（加盟店管理で追加してください）</td></tr>';
 
     // 締め日・支払期限の表示
     var parts = month.split('-'); var y = Number(parts[0]), m = Number(parts[1]);
@@ -186,6 +207,7 @@
     line('オークションシステム利用料', '出品代行', l.auctionsys);
     line('オークション成約料', '粗利 × 5%', l.auctionfee);
     line('出品手数料', '', l.listing);
+    line('オークション出品料（流れ）', '未落札分', l.auctionflow);
     line('加盟金', '初回', l.initfee);
     line('未納金', '前月からの繰越', l.unpaid);
     line('ペナルティ', '', l.penalty);
@@ -236,10 +258,10 @@
   function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
   document.getElementById('btnCsv').addEventListener('click', function () {
     var month = monthEl.value || thisMonth(); var st = loadState(month); var useTax = taxEl.checked;
-    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝｼｽﾃﾑ利用料', 'ｵｰｸｼｮﾝ成約料5%', '出品手数料', '加盟金', '未納金', 'ペナルティ', 'その他', '小計', '消費税', '合計(税込)']];
+    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝｼｽﾃﾑ利用料', 'ｵｰｸｼｮﾝ成約料5%', '出品手数料', 'ｵｰｸｼｮﾝ流れ出品料', '加盟金', '未納金', 'ペナルティ', 'その他', '小計', '消費税', '合計(税込)']];
     stores.forEach(function (s) {
       var l = lineOf(s.name, month, st); var sub = subtotal(l); var tax = taxOf(sub, useTax);
-      rows.push([month, s.name, l.monthly, l.referral, l.refcount, l.auctionsys, l.auctionfee, l.listing, l.initfee, l.unpaid, l.penalty, l.other, sub, tax, sub + tax]);
+      rows.push([month, s.name, l.monthly, l.referral, l.refcount, l.auctionsys, l.auctionfee, l.listing, l.auctionflow, l.initfee, l.unpaid, l.penalty, l.other, sub, tax, sub + tax]);
     });
     var csv = '﻿' + rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -250,4 +272,6 @@
   });
 
   render();
+  // オークション（流れ出品料）を取得できたら再計算して反映
+  if (HQ.loadAuctions) HQ.loadAuctions(function (a) { auctions = a || []; render(); });
 })();
