@@ -501,6 +501,7 @@ window.HQ = (function () {
   function nav(active) {
     var el = document.getElementById('hqNav');
     if (!el) return;
+    try { document.body.classList.add('has-sidenav'); } catch (e) {} // 左サイドメニュー化（PC）
     var r = (window.AUTH && AUTH.role) ? AUTH.role() : null;
     var items = (r === 'partner') ? [
       ['board', '案件ボード', 'hq.html?role=partner'],
