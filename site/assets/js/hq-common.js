@@ -235,6 +235,12 @@ window.HQ = (function () {
     fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ type: 'store', token: authToken(), name: s.name, area: s.area, tel: s.tel, email: s.email || '', slack: s.slack || '', status: s.status }) }).catch(function () {});
   }
+  // 店舗を削除（一覧＝localStorageから除去し、シートの店舗レジストリからも削除）
+  function deleteStore(name) {
+    saveStores(getStores().filter(function (s) { return s.name !== name; }));
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'store_delete', token: authToken(), name: name }) }).catch(function () {});
+  }
 
   /* 本部→加盟店 お知らせ */
   var NKEY = 'buymo_notices';
@@ -415,7 +421,7 @@ window.HQ = (function () {
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     loadPayments: loadPayments, savePayment: savePayment,
     addReferral: addReferral, getReferrals: getReferrals,
-    getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
+    getStores: getStores, saveStores: saveStores, postStore: postStore, deleteStore: deleteStore, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
