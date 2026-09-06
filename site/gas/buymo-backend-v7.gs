@@ -251,6 +251,8 @@ function doGet(e) {
     if (action === 'partner_views') return apiOK_(p) ? jsonOut(getPartnerViews(p.store, p.limit)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 コンテンツ閲覧履歴
     if (action === 'auction')  return apiOK_(p) ? jsonOut(getAuction(p.id)) : jsonOut({ error: 'unauthorized' });   // NEW: 案件のオークション/清算データ
     if (action === 'auctions') return apiOK_(p) ? jsonOut(getAuctionsData())  : jsonOut({ error: 'unauthorized' }); // NEW: 全オークションデータ（本部可視化）
+    if (action === 'recruit_leads')  return apiOK_(p) ? jsonOut(getRecruitLeads())  : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店募集リード（教育ファネル）
+    if (action === 'recruit_config') return apiOK_(p) ? jsonOut(getRecruitConfig()) : jsonOut({ error: 'unauthorized' }); // NEW: ステップ配信テンプレ＋セミナー日程
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
@@ -258,7 +260,7 @@ function doGet(e) {
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
     if (action === 'reword') return jsonp(p.callback, handleReword(p)); // NEW: 接客文の添削・書き直し（スタッフ支援）
-    if (action === 'ping')   return jsonp(p.callback, { v: 13, features: ['case_photo', 'store_content', 'blog', 'referral_fee', 'payments', 'partner_docs', 'partner_progress', 'partner_views', 'auction', 'reword', 'bot_conversational'] }); // #4 機能検出
+    if (action === 'ping')   return jsonp(p.callback, { v: 14, features: ['case_photo', 'store_content', 'blog', 'referral_fee', 'payments', 'partner_docs', 'partner_progress', 'partner_views', 'auction', 'reword', 'bot_conversational', 'recruit'] }); // #4 機能検出
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
     return jsonOut({ error: err.message });
@@ -308,6 +310,8 @@ function doPost(e) {
     if (data.type === 'partner_progress') return jsonOut(savePartnerProgress(data.store, data.data)); // NEW: 加盟店 進捗カルテの保存
     if (data.type === 'partner_view')     return jsonOut(logPartnerView(data.store, data.item, data.kind)); // NEW: 加盟店 コンテンツ閲覧ログ追記
     if (data.type === 'auction_save')     return jsonOut(saveAuction(data.id, data.data)); // NEW: オークション/清算データの保存（案件ごと）
+    if (data.type === 'recruit_lead')     return jsonOut(saveRecruitLead(data.id, data.data));   // NEW: 募集リードの進捗/ステップ/セミナー/加盟後ケア保存
+    if (data.type === 'recruit_config')   return jsonOut(saveRecruitConfig(data.data));          // NEW: ステップ配信テンプレ＋セミナー日程の保存
     if (data.type === 'store_content')    return jsonOut(saveStoreContent(data.store, data.data)); // NEW: 加盟店 公開ページ内容の保存
     if (data.type === 'blog_post')        return jsonOut(addBlogPost(data.store, data.post));       // NEW: 加盟店 ブログ投稿
     if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
@@ -3478,4 +3482,124 @@ function handleReword(p) {
   parts.push('上記の下書きを、お客様へ送る案内文に書き直してください。本文のみを出力してください。');
   var out = callClaude([{ role: 'user', content: parts.join('\n\n') }], REWORD_SYSTEM);
   return { text: out || '', error: out ? '' : 'ai_unavailable' };
+}
+
+/* ============================================================
+   NEW: 加盟店募集 教育ファネル
+   - リード＝「加盟店申込」シート（受信）＋「募集リード」シート（本部のオーバーレイ：
+     ステージ/送付済みステップ/メモ/セミナー予約日/加盟後ケア）を id で結合。
+   - id ＝ メール（あれば） or join_<行番号>。
+   - 設定（ステップ配信テンプレ＋セミナー日程）は「募集設定」シートに1行(JSON)。
+     GET  ?action=recruit_leads / ?action=recruit_config
+     POST {type:'recruit_lead', id, data} / {type:'recruit_config', data}
+   ============================================================ */
+var RECRUIT_LEAD_SHEET_NAME = '募集リード';
+var RECRUIT_CONFIG_SHEET_NAME = '募集設定';
+
+function getRecruitLeadSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(RECRUIT_LEAD_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(RECRUIT_LEAD_SHEET_NAME);
+    sh.appendRow(['id', 'data', 'updated']);
+    sh.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#0A6B3C').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+function recruitOverlayMap() {
+  var sh = getRecruitLeadSheet(), last = sh.getLastRow(), map = {};
+  if (last < 2) return map;
+  var vals = sh.getRange(2, 1, last - 1, 2).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    var id = String(vals[i][0]).trim(); if (!id) continue;
+    try { map[id] = JSON.parse(vals[i][1] || '{}'); } catch (e) { map[id] = {}; }
+  }
+  return map;
+}
+function getRecruitLeads() {
+  try {
+    var sheet = getJoinSheet(), last = sheet.getLastRow();
+    var overlay = recruitOverlayMap();
+    var out = [];
+    if (last >= 2) {
+      var rows = sheet.getRange(2, 1, last - 1, 9).getValues();
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        var email = String(r[3] || '').trim();
+        var id = email || ('join_' + (i + 2));
+        var lead = {
+          id: id, date: r[0], storeName: r[1], name: r[2], email: email,
+          tel: r[4], pref: r[5], experience: r[6], message: r[7], intakeStatus: r[8],
+          stage: '新規', steps: {}, memo: '', seminarDate: '', care: {}, updated: ''
+        };
+        if (overlay[id]) { for (var k in overlay[id]) lead[k] = overlay[id][k]; }
+        out.push(lead);
+      }
+    }
+    // 申込シートに無い、本部が手動追加したリード（idが join_ でも email でもないもの）も返す
+    for (var oid in overlay) {
+      var found = false;
+      for (var j = 0; j < out.length; j++) { if (out[j].id === oid) { found = true; break; } }
+      if (!found && overlay[oid] && overlay[oid].manual) {
+        var m = overlay[oid]; m.id = oid; out.push(m);
+      }
+    }
+    out.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+    return out;
+  } catch (e) { return []; }
+}
+function saveRecruitLead(id, data) {
+  var key = String(id || '').trim();
+  if (!key) return { status: 'error', message: 'no_id' };
+  var sh = getRecruitLeadSheet();
+  var json = JSON.stringify(data || {});
+  var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+  var updated = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var col = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < col.length; i++) {
+      if (String(col[i][0]).trim() === key) { sh.getRange(i + 2, 2, 1, 2).setValues([[json, updated]]); return { status: 'ok', updated: updated }; }
+    }
+  }
+  sh.appendRow([key, json, updated]);
+  return { status: 'ok', updated: updated, created: true };
+}
+function getRecruitConfigSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(RECRUIT_CONFIG_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(RECRUIT_CONFIG_SHEET_NAME);
+    sh.appendRow(['key', 'data', 'updated']);
+    sh.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#0A6B3C').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+function getRecruitConfig() {
+  try {
+    var sh = getRecruitConfigSheet(), last = sh.getLastRow();
+    if (last < 2) return {};
+    var vals = sh.getRange(2, 1, last - 1, 2).getValues();
+    for (var i = 0; i < vals.length; i++) {
+      if (String(vals[i][0]).trim() === 'config') { try { return JSON.parse(vals[i][1] || '{}'); } catch (e) { return {}; } }
+    }
+    return {};
+  } catch (e) { return {}; }
+}
+function saveRecruitConfig(data) {
+  var sh = getRecruitConfigSheet();
+  var json = JSON.stringify(data || {});
+  var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+  var updated = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var col = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < col.length; i++) {
+      if (String(col[i][0]).trim() === 'config') { sh.getRange(i + 2, 2, 1, 2).setValues([[json, updated]]); return { status: 'ok', updated: updated }; }
+    }
+  }
+  sh.appendRow(['config', json, updated]);
+  return { status: 'ok', updated: updated, created: true };
 }

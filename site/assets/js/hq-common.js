@@ -184,6 +184,34 @@ window.HQ = (function () {
       .catch(function () { cb([]); });
   }
 
+  /* ===== 加盟店募集 教育ファネル ===== */
+  function loadRecruitLeads(cb) {
+    if (!ENDPOINT) { cb([]); return; }
+    fetch(ENDPOINT + '?action=recruit_leads' + keyQS())
+      .then(function (r) { return r.json(); })
+      .then(function (d) { cb(Array.isArray(d) ? d : []); })
+      .catch(function () { cb([]); });
+  }
+  function saveRecruitLead(id, data) {
+    if (!ENDPOINT || !id) return;
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'recruit_lead', token: authToken(), id: id, data: data }) }).catch(function () {});
+  }
+  function loadRecruitConfig(cb) {
+    var local = {}; try { local = JSON.parse(localStorage.getItem('buymo_recruit_cfg')) || {}; } catch (e) {}
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=recruit_config' + keyQS())
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && !d.error && typeof d === 'object' && !Array.isArray(d)) ? d : local); })
+        .catch(function () { cb(local); });
+    } else cb(local);
+  }
+  function saveRecruitConfig(data) {
+    try { localStorage.setItem('buymo_recruit_cfg', JSON.stringify(data)); } catch (e) {}
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'recruit_config', token: authToken(), data: data }) }).catch(function () {});
+  }
+
   /* ===== 紹介手数料（リード引き受け 1件¥1,000）=====
      加盟店が案件を引き受けたら1件分を記録。localStorageで即時管理し、
      GAS接続時は type:'referral_fee' も送信（サーバー側で月末請求に集計）。 */
@@ -490,6 +518,7 @@ window.HQ = (function () {
       ['dashboard', 'ダッシュボード', 'hq-dashboard.html'],
       ['board', '案件ボード', 'hq.html?role=hq'],
       ['leads', 'リード', 'hq-leads.html'],
+      ['recruit', '加盟店募集', 'hq-recruit.html'],
       ['stores', '加盟店', 'hq-stores.html'],
       ['activity', '加盟店の動き', 'hq-partner-activity.html'],
       ['auctions', 'オークション', 'hq-auctions.html'],
@@ -522,7 +551,8 @@ window.HQ = (function () {
     addReferral: addReferral, getReferrals: getReferrals,
     getStores: getStores, saveStores: saveStores, postStore: postStore, deleteStore: deleteStore, loadPartnerDocs: loadPartnerDocs, savePartnerDocs: savePartnerDocs,
     loadPartnerProgress: loadPartnerProgress, savePartnerProgress: savePartnerProgress, loadPartnerViews: loadPartnerViews, logView: logView,
-    loadAuction: loadAuction, saveAuction: saveAuction, loadAuctions: loadAuctions, note: note, postFollowup: postFollowup,
+    loadAuction: loadAuction, saveAuction: saveAuction, loadAuctions: loadAuctions,
+    loadRecruitLeads: loadRecruitLeads, saveRecruitLead: saveRecruitLead, loadRecruitConfig: loadRecruitConfig, saveRecruitConfig: saveRecruitConfig, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,
