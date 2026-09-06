@@ -23,9 +23,10 @@ window.HQ = (function () {
      ============================================================ */
   var FEES = {
     franchiseMonthly: 35000, // 加盟店 月額（積立）標準額
-    auctionSystemFee: 5000,  // オークション システム利用料（出品代行・税込）
+    auctionSystemFee: 10000, // オークション 出品代行費（税抜）※旧システム利用料を¥10,000に統合
     directHqFee: 30000,      // 直販 本部手数料（一律・税抜）
-    auctionRate: 0.05        // オークション 成約手数料＝粗利 × 5%
+    auctionRate: 0.05,       // オークション 成約手数料＝粗利 × 5%
+    transferFee: 550         // 加盟店への振込手数料（清算時に差引）
   };
 
   /* ============================================================
@@ -156,6 +157,33 @@ window.HQ = (function () {
   }
   function authToken() { return (window.AUTH && AUTH.token) ? AUTH.token() : ''; }
 
+  /* ===== オークション出品・清算データ（案件ごと・本部/加盟店で共有）=====
+     GAS「オークション」シートに case id をキーに保存。localStorage即時 → 裏でサーバー同期。
+     data: {venue, transport, dropoffDate, listWeek, status, result, venueFee, rolloverFrom, saleMethod, salePrice, ...} */
+  function loadAuction(id, cb) {
+    var lk = 'buymo_auction_' + id;
+    var local = {}; try { local = JSON.parse(localStorage.getItem(lk)) || {}; } catch (e) {}
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=auction&id=' + encodeURIComponent(id) + keyQS())
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && !d.error && typeof d === 'object' && !Array.isArray(d)) ? d : local); })
+        .catch(function () { cb(local); });
+    } else cb(local);
+  }
+  function saveAuction(id, data) {
+    try { localStorage.setItem('buymo_auction_' + id, JSON.stringify(data)); } catch (e) {}
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'auction_save', token: authToken(), id: id, data: data }) }).catch(function () {});
+  }
+  // 本部の可視化用：全オークションデータ（[{id, ...data}]）
+  function loadAuctions(cb) {
+    if (!ENDPOINT) { cb([]); return; }
+    fetch(ENDPOINT + '?action=auctions' + keyQS())
+      .then(function (r) { return r.json(); })
+      .then(function (d) { cb(Array.isArray(d) ? d : []); })
+      .catch(function () { cb([]); });
+  }
+
   /* ===== 紹介手数料（リード引き受け 1件¥1,000）=====
      加盟店が案件を引き受けたら1件分を記録。localStorageで即時管理し、
      GAS接続時は type:'referral_fee' も送信（サーバー側で月末請求に集計）。 */
@@ -202,17 +230,23 @@ window.HQ = (function () {
     var shipping = Number(c && c.shipping) || 0;
     var claimCost = Number(c && c.claimCost) || 0;
     var reListFee = (c && c.reListed) ? (Number(c.reListFee) || 0) : 0;
-    var agencyFee = 0, commission = 0, hqFee = 0;
+    var venueFee = Number(c && c.venueFee) || 0;        // 会場費（オークション会場に支払う）
+    var actual = shipping + claimCost + reListFee;       // 実費（陸送・クレーム・再出品）
+    var agencyFee = 0, commission = 0, hqFee = 0, transferFee = 0, partnerNet = 0;
     if (method === '直販') {
       hqFee = FEES.directHqFee; // 一律（税抜）
+      partnerNet = profit - hqFee;
     } else if (method === 'オークション') {
-      agencyFee = FEES.auctionSystemFee; // システム利用料（出品代行・税込）
-      commission = Math.round(Math.max(0, profit) * FEES.auctionRate); // 成約手数料＝粗利×率
-      hqFee = agencyFee + commission + shipping + claimCost + reListFee;
+      agencyFee = FEES.auctionSystemFee;  // 出品代行費（税抜）
+      commission = Math.round(Math.max(0, profit) * FEES.auctionRate); // 成約手数料＝粗利×5%
+      transferFee = FEES.transferFee;     // 振込手数料
+      hqFee = agencyFee + commission;     // BUYMO本部の収益（手数料合計）
+      // 加盟店お渡し額（振込額）＝落札額 − 会場費 − 実費 − 出品代行費 − 成約手数料 − 振込手数料
+      partnerNet = saleP - venueFee - actual - agencyFee - commission - transferFee;
     }
-    var partnerNet = profit - hqFee;
     return { method: method, buyP: buyP, saleP: saleP, profit: profit, agencyFee: agencyFee, commission: commission,
-      shipping: shipping, claimCost: claimCost, reListFee: reListFee, hqFee: hqFee, partnerNet: partnerNet };
+      shipping: shipping, claimCost: claimCost, reListFee: reListFee, venueFee: venueFee, actual: actual,
+      transferFee: transferFee, hqFee: hqFee, partnerNet: partnerNet };
   }
   // 売却の申請が必要な状態か（売却方法を選択済みだが未申請）
   function needsSaleApp(c) { return !!(c && c.saleMethod && !c.saleApplied); }
@@ -457,6 +491,7 @@ window.HQ = (function () {
       ['leads', 'リード', 'hq-leads.html'],
       ['stores', '加盟店', 'hq-stores.html'],
       ['activity', '加盟店の動き', 'hq-partner-activity.html'],
+      ['auctions', 'オークション', 'hq-auctions.html'],
       ['payments', '支払い管理', 'hq-payments.html'],
       ['billing', '請求書', 'hq-billing.html'],
       ['notices', 'お知らせ', 'hq-notices.html'],
@@ -484,7 +519,8 @@ window.HQ = (function () {
     loadPayments: loadPayments, savePayment: savePayment,
     addReferral: addReferral, getReferrals: getReferrals,
     getStores: getStores, saveStores: saveStores, postStore: postStore, deleteStore: deleteStore, loadPartnerDocs: loadPartnerDocs, savePartnerDocs: savePartnerDocs,
-    loadPartnerProgress: loadPartnerProgress, savePartnerProgress: savePartnerProgress, loadPartnerViews: loadPartnerViews, logView: logView, note: note, postFollowup: postFollowup,
+    loadPartnerProgress: loadPartnerProgress, savePartnerProgress: savePartnerProgress, loadPartnerViews: loadPartnerViews, logView: logView,
+    loadAuction: loadAuction, saveAuction: saveAuction, loadAuctions: loadAuctions, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
     getNotices: getNotices, loadNotices: loadNotices, addNotice: addNotice, deleteNotice: deleteNotice,
     loadCommunity: loadCommunity, addCommunityPost: addCommunityPost, likeCommunity: likeCommunity,

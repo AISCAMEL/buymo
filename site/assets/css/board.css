@@ -297,6 +297,12 @@
 .cp-sale-check{flex-direction:row!important;align-items:center;gap:8px!important;}
 .cp-sale-hqcost input[type="checkbox"]{width:18px;height:18px;}
 .cp-sale-fields input:read-only,.cp-sale-hqcost input:disabled{background:#f1f3f7;color:#889;cursor:not-allowed;}
+.cp-auction-plan{background:#f0f9f7;border:1px solid #cfeae4;border-radius:10px;padding:12px 14px 2px;margin-bottom:14px;}
+.cp-auction-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;}
+.cp-auction-grid label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:12px;color:#556;margin-bottom:10px;}
+.cp-auction-grid input,.cp-auction-grid select{border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff;}
+.cp-auction-grid input:focus,.cp-auction-grid select:focus{outline:none;border-color:var(--orange);}
+@media(max-width:520px){.cp-auction-grid{grid-template-columns:1fr;}}
 .cp-sale-actions{display:flex;gap:10px;flex-wrap:wrap;}
 .cp-sale-apply{flex:1;min-width:150px;height:46px;border:none;border-radius:10px;background:var(--orange,#E8703A);color:#fff;font-weight:900;font-size:14px;cursor:pointer;}
 .cp-sale-apply:hover{filter:brightness(1.08);}
