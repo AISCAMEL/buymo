@@ -54,7 +54,8 @@
       monthly: monthly,
       referral: refc * 1000,
       refcount: refc,
-      system: 0,
+      auctionsys: 0,      // オークションシステム利用料（出品代行）
+      auctionfee: 0,      // オークション成約料（粗利×5%）
       initfee: isJoinMonth(name, month) ? (Number(rec.initFee) || 0) : 0,
       other: 0
     };
@@ -62,16 +63,19 @@
   function lineOf(name, month, st) {
     var d = defaults(name, month);
     var saved = (st.rows && st.rows[name]) || {};
+    // 旧データ互換：旧「system」1項目は オークションシステム利用料 に引き継ぐ
+    var legacySys = saved.system != null ? Number(saved.system) : null;
     return {
       monthly: saved.monthly != null ? Number(saved.monthly) : d.monthly,
       referral: saved.referral != null ? Number(saved.referral) : d.referral,
       refcount: d.refcount,
-      system: saved.system != null ? Number(saved.system) : d.system,
+      auctionsys: saved.auctionsys != null ? Number(saved.auctionsys) : (legacySys != null ? legacySys : d.auctionsys),
+      auctionfee: saved.auctionfee != null ? Number(saved.auctionfee) : d.auctionfee,
       initfee: saved.initfee != null ? Number(saved.initfee) : d.initfee,
       other: saved.other != null ? Number(saved.other) : d.other
     };
   }
-  function subtotal(l) { return (l.monthly || 0) + (l.referral || 0) + (l.system || 0) + (l.initfee || 0) + (l.other || 0); }
+  function subtotal(l) { return (l.monthly || 0) + (l.referral || 0) + (l.auctionsys || 0) + (l.auctionfee || 0) + (l.initfee || 0) + (l.other || 0); }
   function taxOf(sub, useTax) { return useTax ? Math.round(sub * 0.1) : 0; }
 
   function inCell(name, key, val) {
@@ -93,14 +97,15 @@
         '<td>🏪 ' + esc(s.name) + '</td>' +
         '<td>' + inCell(s.name, 'monthly', l.monthly) + '</td>' +
         '<td>' + inCell(s.name, 'referral', l.referral) + '<span class="th-sub">' + l.refcount + '件</span></td>' +
-        '<td>' + inCell(s.name, 'system', l.system) + '</td>' +
+        '<td>' + inCell(s.name, 'auctionsys', l.auctionsys) + '</td>' +
+        '<td>' + inCell(s.name, 'auctionfee', l.auctionfee) + '</td>' +
         '<td>' + inCell(s.name, 'initfee', l.initfee) + '</td>' +
         '<td>' + inCell(s.name, 'other', l.other) + '</td>' +
         '<td class="bill-sub">' + yen(sub) + '</td>' +
         '<td class="bill-total">' + yen(tot) + '</td>' +
         '<td><button class="bill-issue" data-issue="' + esc(s.name) + '">請求書を発行</button></td>' +
         '</tr>';
-    }).join('') || '<tr><td colspan="9" class="bill-empty">加盟店がありません（加盟店管理で追加してください）</td></tr>';
+    }).join('') || '<tr><td colspan="10" class="bill-empty">加盟店がありません（加盟店管理で追加してください）</td></tr>';
 
     // 締め日・支払期限の表示
     var parts = month.split('-'); var y = Number(parts[0]), m = Number(parts[1]);
@@ -154,7 +159,8 @@
     function line(label, note, amt) { if (!amt) return; rows.push('<tr><td>' + label + (note ? ' <span class="n">' + note + '</span>' : '') + '</td><td class="r">' + yen(amt) + '</td></tr>'); }
     line('月額（積立・ロイヤリティ）', month + '分', l.monthly);
     line('紹介料', '¥1,000 × ' + l.refcount + '件', l.referral);
-    line('オークション／システム利用料', '', l.system);
+    line('オークションシステム利用料', '出品代行', l.auctionsys);
+    line('オークション成約料', '粗利 × 5%', l.auctionfee);
     line('加盟金', '初回', l.initfee);
     line('その他', '', l.other);
     if (!rows.length) rows.push('<tr><td>（請求項目なし）</td><td class="r">' + yen(0) + '</td></tr>');
@@ -203,10 +209,10 @@
   function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
   document.getElementById('btnCsv').addEventListener('click', function () {
     var month = monthEl.value || thisMonth(); var st = loadState(month); var useTax = taxEl.checked;
-    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝ/ｼｽﾃﾑ利用料', '加盟金', 'その他', '小計', '消費税', '合計(税込)']];
+    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝｼｽﾃﾑ利用料', 'ｵｰｸｼｮﾝ成約料5%', '加盟金', 'その他', '小計', '消費税', '合計(税込)']];
     stores.forEach(function (s) {
       var l = lineOf(s.name, month, st); var sub = subtotal(l); var tax = taxOf(sub, useTax);
-      rows.push([month, s.name, l.monthly, l.referral, l.refcount, l.system, l.initfee, l.other, sub, tax, sub + tax]);
+      rows.push([month, s.name, l.monthly, l.referral, l.refcount, l.auctionsys, l.auctionfee, l.initfee, l.other, sub, tax, sub + tax]);
     });
     var csv = '﻿' + rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });

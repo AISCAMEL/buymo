@@ -246,6 +246,7 @@ function doGet(e) {
     if (action === 'blog')   return jsonOut(getBlog(p.store));                          // NEW: 加盟店 ブログ一覧（新しい順）
     if (action === 'referrals') return apiOK_(p) ? jsonOut(getReferralsData()) : jsonOut({ error: 'unauthorized' }); // NEW: 紹介料一覧（本部・機密）
     if (action === 'payments')  return apiOK_(p) ? jsonOut(getPaymentsData())  : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店支払い/積立（本部・機密）
+    if (action === 'partner_docs') return apiOK_(p) ? jsonOut(getPartnerDocs(p.store)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 書類・情報（本部・機密）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
@@ -298,6 +299,7 @@ function doPost(e) {
     if (data.type === 'followup')         return jsonOut(handleFollowup(data));       // NEW: 案件の後追い履歴（お問い合わせ処理に誤流入させない）
     if (data.type === 'store')            return jsonOut(handleStore(data));          // NEW: 店舗レジストリ保存（同上）
     if (data.type === 'store_delete')     return jsonOut(deleteStoreRow(data.name));  // NEW: 店舗レジストリ削除
+    if (data.type === 'partner_docs')     return jsonOut(savePartnerDocs(data.store, data.data)); // NEW: 加盟店 書類・情報の保存
     if (data.type === 'store_content')    return jsonOut(saveStoreContent(data.store, data.data)); // NEW: 加盟店 公開ページ内容の保存
     if (data.type === 'blog_post')        return jsonOut(addBlogPost(data.store, data.post));       // NEW: 加盟店 ブログ投稿
     if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
@@ -3180,4 +3182,65 @@ function deleteStoreRow(name) {
     }
     return { status: 'ok', deleted: 0 };
   } catch (e) { return { status: 'error', message: e.message }; }
+}
+
+
+/* ============================================================
+   NEW: 加盟店ごとの書類・情報（契約書/免許証/保証人/古物商）
+   - 免許証等の機密画像は本文に保存せず、Google Drive等の「リンク」で管理。
+   - フロント: hq-partner-docs.js
+     GET  ?action=partner_docs&store=<店名>&key=...  → {contract:{...}, license:{...}, guarantor:{...}, kobutsu:{...}, updated}
+     POST {type:'partner_docs', store, data:{...}}    → 1店舗1行・上書き
+   Sheet「加盟店書類」: [store, data(JSON), updated]
+   ============================================================ */
+var PARTNER_DOCS_SHEET_NAME = '加盟店書類';
+
+function getPartnerDocsSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(PARTNER_DOCS_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(PARTNER_DOCS_SHEET_NAME);
+    sh.appendRow(['store', 'data', 'updated']);
+    sh.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function getPartnerDocs(store) {
+  try {
+    var name = String(store || '').trim();
+    if (!name) return {};
+    var sh = getPartnerDocsSheet();
+    var last = sh.getLastRow();
+    if (last < 2) return {};
+    var vals = sh.getRange(2, 1, last - 1, 2).getValues();
+    for (var i = 0; i < vals.length; i++) {
+      if (String(vals[i][0]).trim() === name) {
+        try { return JSON.parse(vals[i][1] || '{}'); } catch (e) { return {}; }
+      }
+    }
+    return {};
+  } catch (e) { return {}; }
+}
+
+function savePartnerDocs(store, data) {
+  var name = String(store || '').trim();
+  if (!name) return { status: 'error', message: 'no_store' };
+  var sh = getPartnerDocsSheet();
+  var json = JSON.stringify(data || {});
+  var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+  var updated = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var col = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < col.length; i++) {
+      if (String(col[i][0]).trim() === name) {
+        sh.getRange(i + 2, 2, 1, 2).setValues([[json, updated]]);
+        return { status: 'ok', updated: updated };
+      }
+    }
+  }
+  sh.appendRow([name, json, updated]);
+  return { status: 'ok', updated: updated, created: true };
 }

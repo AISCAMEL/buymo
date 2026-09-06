@@ -49,7 +49,11 @@
           '<div><span class="ss-num">' + st.active + '</span><span class="ss-label">進行中</span></div>' +
           '<div><span class="ss-num">' + HQ.yen(st.sales) + '</span><span class="ss-label">確定売上</span></div>' +
         '</div>' +
-        '<a class="store-pay-link" href="hq-payments.html?store=' + encodeURIComponent(s.name) + '">💴 支払い・積立・契約書を管理 →</a>' +
+        '<div class="store-links">' +
+          '<a class="store-pay-link" href="hq-payments.html?store=' + encodeURIComponent(s.name) + '">💴 支払い・積立</a>' +
+          '<a class="store-pay-link" href="hq-partner-docs.html?store=' + encodeURIComponent(s.name) + '">📁 書類・情報</a>' +
+          '<a class="store-pay-link" href="hq-partner-activity.html?store=' + encodeURIComponent(s.name) + '">📈 買取実績</a>' +
+        '</div>' +
         '</div>';
     }).join('');
   }
