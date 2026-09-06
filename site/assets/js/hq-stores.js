@@ -26,7 +26,7 @@
           '<input data-i="' + i + '" data-k="' + key + '" type="' + type + '" value="' + HQ.esc(v) + '"' +
           (type === 'text' ? ' placeholder="—"' : '') + ' /></label>';
       };
-      return '<div class="store-card">' +
+      return '<div class="store-card" data-store="' + HQ.esc(s.name) + '">' +
         '<div class="store-head"><span class="store-name">🏪 ' + HQ.esc(s.name) + '</span>' +
           '<span class="store-head-btns">' +
           '<button class="store-status ' + (on ? 'on' : 'off') + '" data-i="' + i + '">' + HQ.esc(s.status) + '</button>' +
@@ -135,5 +135,15 @@
   var csvBtn = document.getElementById('btnCsv');
   if (csvBtn) csvBtn.addEventListener('click', exportCsv);
 
-  HQ.loadCases(function (list) { cases = list; render(); });
+  HQ.loadCases(function (list) {
+    cases = list; render();
+    // サイド検索から ?store=<名前> で来たら該当カードへスクロール＆強調
+    try {
+      var want = new URLSearchParams(location.search).get('store');
+      if (want) {
+        var card = document.querySelector('.store-card[data-store="' + (window.CSS && CSS.escape ? CSS.escape(want) : want) + '"]');
+        if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); card.style.outline = '3px solid var(--green,#0F766E)'; setTimeout(function () { card.style.outline = ''; }, 2500); }
+      }
+    } catch (e) {}
+  });
 })();

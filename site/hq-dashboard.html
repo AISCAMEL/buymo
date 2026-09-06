@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
 <link rel="stylesheet" href="assets/css/buymo.css?v=37" />
-<link rel="stylesheet" href="assets/css/board.css?v=11" />
+<link rel="stylesheet" href="assets/css/board.css?v=12" />
 </head>
 <body>
 <script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
@@ -49,7 +49,7 @@
 
     <div class="hq-2col">
       <section class="rep-card">
-        <h2>対応アラート</h2>
+        <h2>🗒️ 今日やること</h2>
         <div id="alerts" class="alert-list"></div>
       </section>
       <section class="rep-card">
@@ -112,7 +112,7 @@
 .pnl-ref .ref-n small{font-size:13px;color:#999;}
 .pnl-ref .ref-l{display:block;font-size:11px;color:#888;margin-top:4px;font-weight:700;}
 </style>
-<script src="assets/js/hq-common.js?v=11"></script>
+<script src="assets/js/hq-common.js?v=12"></script>
 <script>
   HQ.nav('dashboard');
   HQ.mountCalendar('sharedCal');
@@ -141,9 +141,40 @@
       al.push({ lv: 'warn', t: '対応が滞っている案件が ' + stale.length + ' 件（受付から' + STALE_DAYS + '日以上・未完了。最長 ' + daysSince(oldest.date) + '日：' + oldest.id + '）。', href: 'hq-leads.html' });
     }
     var ae = document.getElementById('alerts');
-    ae.innerHTML = al.length ? al.map(function (a) {
-      return '<a class="alert ' + a.lv + '" href="' + a.href + '"><span class="alert-ico">' + (a.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' + HQ.esc(a.t) + '</a>';
-    }).join('') : '<p class="alert-none">対応が必要なアラートはありません。</p>';
+    function renderAlerts() {
+      ae.innerHTML = al.length ? al.map(function (a) {
+        return '<a class="alert ' + a.lv + '" href="' + a.href + '"><span class="alert-ico">' + (a.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' + HQ.esc(a.t) + '</a>';
+      }).join('') : '<p class="alert-none">対応が必要なアラートはありません。すべて対応済みです。</p>';
+    }
+    renderAlerts();
+
+    // 加盟店の動き：今月まだ買取ゼロの加盟店
+    (function () {
+      function ym(v) { return String(v || '').replace(/-/g, '/').slice(0, 7); }
+      var curM = (function () { var d = new Date(); return d.getFullYear() + '/' + ('0' + (d.getMonth() + 1)).slice(-2); })();
+      var stores = (HQ.getStores() || []).filter(function (s) { return s.status !== '準備中'; });
+      if (!stores.length) return;
+      var bought = {};
+      list.forEach(function (c) { if (HQ.WON.indexOf(c.stage) >= 0 && ym(c.date) === curM && c.assignee) bought[c.assignee] = true; });
+      var zero = stores.filter(function (s) { return !bought[s.name]; }).length;
+      if (zero) { al.push({ lv: 'warn', t: '今月まだ買取のない加盟店が ' + zero + ' 社。フォローを。', href: 'hq-partner-activity.html' }); renderAlerts(); }
+    })();
+
+    // オークション：搬入予定・流れ（未処理）
+    if (HQ.loadAuctions) HQ.loadAuctions(function (aucs) {
+      aucs = aucs || [];
+      var plan = aucs.filter(function (a) { return a.auctionResult === '出品予定' || a.auctionResult === '搬入済'; }).length;
+      var flow = aucs.filter(function (a) { return a.auctionResult === '流れ' && !a.flowAction; }).length;
+      if (plan) al.push({ lv: 'info', t: 'オークション出品予定/搬入待ちが ' + plan + ' 件。', href: 'hq-auctions.html' });
+      if (flow) al.push({ lv: 'warn', t: '流れ（未処理）の車両が ' + flow + ' 件。キャンセル/次週の判断を。', href: 'hq-auctions.html' });
+      if (plan || flow) renderAlerts();
+    });
+
+    // 加盟店募集：未対応（新規）リード
+    if (HQ.loadRecruitLeads) HQ.loadRecruitLeads(function (leads) {
+      var nw2 = (leads || []).filter(function (l) { return (l.stage || '新規') === '新規'; }).length;
+      if (nw2) { al.push({ lv: 'warn', t: '加盟店募集の未対応リードが ' + nw2 + ' 件。', href: 'hq-recruit.html' }); renderAlerts(); }
+    });
 
     // 最近の案件（受付日の新しい順で先頭8件）
     var recent = list.slice().sort(function (a, b) {

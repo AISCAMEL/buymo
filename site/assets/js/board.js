@@ -730,5 +730,12 @@
     });
   }
 
-  HQ.loadCases(function (list) { cases = list; render(); });
+  HQ.loadCases(function (list) {
+    cases = list; render();
+    // サイド検索から ?case=<id> で来たら該当案件を開く
+    try {
+      var want = new URLSearchParams(location.search).get('case');
+      if (want && findCase(want)) openPanel(want);
+    } catch (e) {}
+  });
 })();
