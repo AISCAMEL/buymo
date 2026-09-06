@@ -244,13 +244,15 @@ function doGet(e) {
     if (action === 'sales')  return apiOK_(p) ? jsonOut(getSaleApplications()) : jsonOut({ error: 'unauthorized' }); // NEW: 売却申請一覧（本部用）
     if (action === 'storecontent') return jsonOut(getStoreContent(p.store));           // NEW: 加盟店 公開ページ内容（/store/<slug>/）
     if (action === 'blog')   return jsonOut(getBlog(p.store));                          // NEW: 加盟店 ブログ一覧（新しい順）
+    if (action === 'referrals') return apiOK_(p) ? jsonOut(getReferralsData()) : jsonOut({ error: 'unauthorized' }); // NEW: 紹介料一覧（本部・機密）
+    if (action === 'payments')  return apiOK_(p) ? jsonOut(getPaymentsData())  : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店支払い/積立（本部・機密）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
     if (action === 'partners') return apiOK_(p) ? jsonOut(getPartners()) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店アカウント一覧（本部）
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
-    if (action === 'ping')   return jsonp(p.callback, { v: 9, features: ['case_photo', 'store_content', 'blog'] }); // #4 機能検出
+    if (action === 'ping')   return jsonp(p.callback, { v: 10, features: ['case_photo', 'store_content', 'blog', 'referral_fee', 'payments'] }); // #4 機能検出
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
     return jsonOut({ error: err.message });
@@ -298,6 +300,8 @@ function doPost(e) {
     if (data.type === 'store_content')    return jsonOut(saveStoreContent(data.store, data.data)); // NEW: 加盟店 公開ページ内容の保存
     if (data.type === 'blog_post')        return jsonOut(addBlogPost(data.store, data.post));       // NEW: 加盟店 ブログ投稿
     if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
+    if (data.type === 'referral_fee')     return jsonOut(saveReferralFee(data));                    // NEW: 紹介料の記録（1案件1回・重複排除）
+    if (data.type === 'payment_save')     return jsonOut(savePayment(data.store, data.data));       // NEW: 加盟店支払い/積立の保存
     return jsonOut(handleContact(data));
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -3036,4 +3040,119 @@ function deleteBlogPost(store, id) {
     }
   }
   return { status: 'ok', deleted: 0 };
+}
+
+
+/* ============================================================
+   NEW: 紹介料（リード引受 1件¥1,000）＋ 加盟店 支払い/積立
+   - フロント: hq-common.js addReferral() / hq-payments.js
+     POST {type:'referral_fee', partner, caseId, amount, date}
+     GET  ?action=referrals&key=...   → [{partner,caseId,amount,date,month}, ...]
+     POST {type:'payment_save', store, data:{joinDate,years,monthly,payments:[...]}}
+     GET  ?action=payments&key=...    → { "<店名>": {joinDate,years,monthly,payments:[...]}, ... }
+   Sheet「紹介料」  : [caseId, partner, amount, date, month, created]
+   Sheet「加盟店支払い」: [store, data(JSON), updated]
+   ============================================================ */
+var REFERRAL_SHEET_NAME = '紹介料';
+var PAYMENT_SHEET_NAME  = '加盟店支払い';
+
+function getReferralSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(REFERRAL_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(REFERRAL_SHEET_NAME);
+    sh.appendRow(['caseId', 'partner', 'amount', 'date', 'month', 'created']);
+    sh.getRange(1, 1, 1, 6).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+// 紹介料の記録（同一 caseId は二重記録しない＝1案件1回）
+function saveReferralFee(data) {
+  data = data || {};
+  var caseId = String(data.caseId || '').trim();
+  if (!caseId) return { status: 'error', message: 'no_caseId' };
+  var sh = getReferralSheet();
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var ids = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]).trim() === caseId) return { status: 'ok', duplicate: true }; // 既に記録済み
+    }
+  }
+  var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+  var date = String(data.date || (d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate())));
+  var month = (String(date).slice(0, 7).replace(/\//g, '-')) || (d.getFullYear() + '-' + p(d.getMonth() + 1));
+  var created = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  sh.appendRow([caseId, String(data.partner || ''), Number(data.amount) || 1000, date, month, created]);
+  return { status: 'ok' };
+}
+
+// 紹介料一覧（本部の月末集計用）
+function getReferralsData() {
+  try {
+    var sh = getReferralSheet();
+    var last = sh.getLastRow();
+    if (last < 2) return [];
+    var vals = sh.getRange(2, 1, last - 1, 5).getValues();
+    var out = [];
+    for (var i = 0; i < vals.length; i++) {
+      var r = vals[i];
+      if (!r[0]) continue;
+      out.push({ caseId: String(r[0]), partner: String(r[1] || ''), amount: Number(r[2]) || 0, date: String(r[3] || ''), month: String(r[4] || '') });
+    }
+    return out;
+  } catch (e) { return []; }
+}
+
+function getPaymentSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(PAYMENT_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(PAYMENT_SHEET_NAME);
+    sh.appendRow(['store', 'data', 'updated']);
+    sh.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+// 加盟店ごとの支払い/積立レコードを保存（1店舗1行・上書き）
+function savePayment(store, data) {
+  var name = String(store || '').trim();
+  if (!name) return { status: 'error', message: 'no_store' };
+  var sh = getPaymentSheet();
+  var json = JSON.stringify(data || {});
+  var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+  var updated = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var col = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < col.length; i++) {
+      if (String(col[i][0]).trim() === name) {
+        sh.getRange(i + 2, 2, 1, 2).setValues([[json, updated]]);
+        return { status: 'ok', updated: updated };
+      }
+    }
+  }
+  sh.appendRow([name, json, updated]);
+  return { status: 'ok', updated: updated, created: true };
+}
+
+// 全加盟店の支払い/積立（本部画面が端末をまたいで共有するため）
+function getPaymentsData() {
+  try {
+    var sh = getPaymentSheet();
+    var last = sh.getLastRow();
+    if (last < 2) return {};
+    var vals = sh.getRange(2, 1, last - 1, 2).getValues();
+    var out = {};
+    for (var i = 0; i < vals.length; i++) {
+      var name = String(vals[i][0] || '').trim();
+      if (!name) continue;
+      try { out[name] = JSON.parse(vals[i][1] || '{}'); } catch (e) { out[name] = {}; }
+    }
+    return out;
+  } catch (e) { return {}; }
 }

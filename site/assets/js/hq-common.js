@@ -128,6 +128,21 @@ window.HQ = (function () {
         .catch(function () { cb([]); });
     } else { cb([]); }
   }
+  /* 加盟店 支払い/積立（hq-payments）をシートと同期。未接続時は localStorage のみ。 */
+  function loadPayments(cb) {
+    var local = {}; try { local = JSON.parse(localStorage.getItem('buymo_payments')) || {}; } catch (e) {}
+    if (ENDPOINT) {
+      fetch(ENDPOINT + '?action=payments' + keyQS())
+        .then(function (r) { return r.json(); })
+        .then(function (d) { cb((d && !d.error && typeof d === 'object' && !Array.isArray(d)) ? d : local); })
+        .catch(function () { cb(local); });
+    } else { cb(local); }
+  }
+  function savePayment(store, data) {
+    if (!ENDPOINT || !store) return;
+    fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'payment_save', token: authToken(), store: store, data: data }) }).catch(function () {});
+  }
   function upsertCase(c) {
     var arr = getCasesLS();
     var i = -1, k; for (k = 0; k < arr.length; k++) if (arr[k].id === c.id) { i = k; break; }
@@ -398,6 +413,7 @@ window.HQ = (function () {
     ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES, CALENDAR: CALENDAR,
     mountCalendar: mountCalendar, calendarEmbedUrl: calendarEmbedUrl,
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
+    loadPayments: loadPayments, savePayment: savePayment,
     addReferral: addReferral, getReferrals: getReferrals,
     getStores: getStores, saveStores: saveStores, postStore: postStore, note: note, postFollowup: postFollowup,
     postSaleApplication: postSaleApplication, calcSale: calcSale, needsSaleApp: needsSaleApp,
