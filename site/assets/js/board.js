@@ -48,6 +48,19 @@
   function nowStr() { var d = new Date(); function p(n) { return ('0' + n).slice(-2); } return d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
   function addHistory(c, m) { c.history = c.history || []; c.history.unshift({ t: nowStr(), m: m }); }
   function save(c) { HQ.upsertCase(c); }
+  // オークション/清算データを案件IDで共有保存（本部・加盟店で同期）
+  function persistAuction(c) {
+    if (!c || !HQ.saveAuction) return;
+    HQ.saveAuction(c.id, {
+      id: c.id, name: c.name || '', genre: c.genre || '', assignee: c.assignee || '',
+      saleMethod: c.saleMethod || '', amount: Number(c.amount) || 0, salePrice: Number(c.salePrice) || 0,
+      venue: c.venue || '', transport: c.transport || '', dropoffDate: c.dropoffDate || '',
+      listWeek: c.listWeek || '', auctionResult: c.auctionResult || '', flowAction: c.flowAction || '',
+      venueFee: Number(c.venueFee) || 0, shipping: Number(c.shipping) || 0, claimCost: Number(c.claimCost) || 0,
+      reListFee: Number(c.reListFee) || 0, reListed: !!c.reListed,
+      hqFee: Number(c.hqFee) || 0, partnerNet: Number(c.partnerNet) || 0
+    });
+  }
 
   function renderSaleAlertBanner(list) {
     var board = document.getElementById('board');
@@ -236,7 +249,14 @@
       shipping: Number(g('cpShipping')) || 0,
       claimCost: Number(g('cpClaimCost')) || 0,
       reListFee: Number(g('cpReListFee')) || 0,
-      reListed: ck('cpReListed')
+      reListed: ck('cpReListed'),
+      venueFee: Number(g('cpVenueFee')) || 0,
+      venue: g('cpVenue').trim ? g('cpVenue').trim() : g('cpVenue'),
+      transport: g('cpTransport'),
+      dropoffDate: g('cpDropoff'),
+      listWeek: g('cpListWeek'),
+      auctionResult: g('cpAuctionResult'),
+      flowAction: g('cpFlowAction')
     };
   }
   function saleSig(c) { var r = HQ.calcSale(c); return [r.method, r.saleP, r.hqFee].join('|'); }
@@ -256,24 +276,34 @@
           ' ＝ <strong class="' + sign + '">' + HQ.yen(diff) + '</strong>';
       } else { diffEl.innerHTML = ''; }
     }
-    // オークションのみ実費欄を表示
-    if (hqBox) hqBox.style.display = (method === 'オークション') ? '' : 'none';
+    // オークションのみ 実費欄・出品情報欄・流れ時対応を表示
+    var isAuction = (method === 'オークション');
+    if (hqBox) hqBox.style.display = isAuction ? '' : 'none';
+    var planBox = document.getElementById('cpAuctionPlan');
+    if (planBox) planBox.style.display = isAuction ? '' : 'none';
+    var flowWrap = document.getElementById('cpFlowActionWrap');
+    if (flowWrap) flowWrap.style.display = (isAuction && tc.auctionResult === '流れ') ? '' : 'none';
     if (!method) { if (res) res.innerHTML = '<span class="cp-sale-hint">売却方法を選択してください。</span>'; if (st) st.innerHTML = ''; return; }
     var r = HQ.calcSale(tc);
     var lines = [
       '<span>買取金額（仕入れ）：' + HQ.yen(r.buyP) + '</span>',
-      '<span>精算書の金額（' + (method === 'オークション' ? '落札額' : '売却額') + '）：' + HQ.yen(r.saleP) + '</span>',
+      '<span>精算書の金額（' + (isAuction ? '落札額' : '売却額') + '）：' + HQ.yen(r.saleP) + '</span>',
       '<span class="profit">差引き（粗利）：' + HQ.yen(r.profit) + '</span>'
     ];
-    if (method === 'オークション') {
-      lines.push('<span class="fee-detail">├ 出品代行：' + HQ.yen(r.agencyFee) + '（税込）</span>');
+    if (isAuction) {
+      lines.push('<span class="fee-detail">├ 出品代行費：' + HQ.yen(r.agencyFee) + '（税抜）</span>');
       lines.push('<span class="fee-detail">├ 成約手数料（粗利5%）：' + HQ.yen(r.commission) + '</span>');
+      if (r.venueFee) lines.push('<span class="fee-detail">├ 会場費：' + HQ.yen(r.venueFee) + '</span>');
       if (r.shipping) lines.push('<span class="fee-detail">├ 陸送費：' + HQ.yen(r.shipping) + '</span>');
       if (r.claimCost) lines.push('<span class="fee-detail">├ クレーム処理：' + HQ.yen(r.claimCost) + '</span>');
       if (r.reListFee) lines.push('<span class="fee-detail">├ 再出品手数料：' + HQ.yen(r.reListFee) + '</span>');
+      lines.push('<span class="fee-detail">├ 振込手数料：' + HQ.yen(r.transferFee) + '</span>');
+      lines.push('<span class="fee">本部手数料（出品代行＋成約）：' + HQ.yen(r.hqFee) + '</span>');
+      lines.push('<span class="partner">加盟店お渡し額（振込額）：' + HQ.yen(r.partnerNet) + '</span>');
+    } else {
+      lines.push('<span class="fee">本部手数料 合計：' + HQ.yen(r.hqFee) + '（一律・税抜）</span>');
+      lines.push('<span class="partner">加盟店取り分：' + HQ.yen(r.partnerNet) + '</span>');
     }
-    lines.push('<span class="fee">本部手数料 合計：' + HQ.yen(r.hqFee) + (method === '直販' ? '（一律・税抜）' : '') + '</span>');
-    lines.push('<span class="partner">加盟店取り分：' + HQ.yen(r.partnerNet) + '</span>');
     if (res) res.innerHTML = lines.join('');
     // 申請状態バッジ
     if (st) {
@@ -299,9 +329,12 @@
     c.saleMethod = tc.saleMethod; c.salePrice = tc.salePrice;
     c.shipping = tc.shipping; c.claimCost = tc.claimCost; c.reListFee = tc.reListFee; c.reListed = tc.reListed;
     var r = HQ.calcSale(c); c.hqFee = r.hqFee; c.partnerNet = r.partnerNet;
+    // オークション出品情報も取り込み
+    c.venueFee = tc.venueFee; c.venue = tc.venue; c.transport = tc.transport;
+    c.dropoffDate = tc.dropoffDate; c.listWeek = tc.listWeek; c.auctionResult = tc.auctionResult; c.flowAction = tc.flowAction;
     c.saleApplied = true; c.saleAppliedAt = nowStr(); c.saleAppliedSig = saleSig(c);
-    addHistory(c, '売却申請：' + r.method + '／' + (r.method === 'オークション' ? '落札額' : '売却額') + HQ.yen(r.saleP) + '（本部手数料' + HQ.yen(r.hqFee) + '・加盟店取り分' + HQ.yen(r.partnerNet) + '）');
-    save(c); HQ.postSaleApplication(c); render(); fillPanel(c);
+    addHistory(c, '売却申請：' + r.method + '／' + (r.method === 'オークション' ? '落札額' : '売却額') + HQ.yen(r.saleP) + '（' + (r.method === 'オークション' ? '本部手数料' + HQ.yen(r.hqFee) + '・お渡し額' + HQ.yen(r.partnerNet) : '本部手数料' + HQ.yen(r.hqFee) + '・加盟店取り分' + HQ.yen(r.partnerNet)) + '）');
+    save(c); if (c.saleMethod === 'オークション') persistAuction(c); HQ.postSaleApplication(c); render(); fillPanel(c);
     flash(document.getElementById('cpSaleApply'), '申請しました ✓');
   }
   function printSettlement(c) {
@@ -320,20 +353,23 @@
       ['申請状況', c.saleApplied ? ('申請済み ' + HQ.esc(c.saleAppliedAt || '')) : '未申請']
     ];
     if (method === 'オークション') {
+      if (tc.venue) rows.push(['オークション会場', HQ.esc(tc.venue)]);
       rows = rows.concat([
-        ['① 買取金額（仕入れ）', fy(r.buyP)], ['② 精算書の金額（落札額）', fy(r.saleP)], ['差引き（粗利）', fy(r.profit)],
-        ['出品代行手数料（税込）', fy(r.agencyFee)], ['成約手数料（粗利5%）', fy(r.commission)]
+        ['② 落札額', fy(r.saleP)], ['① 買取金額（仕入れ）', fy(r.buyP)], ['差引き（粗利）', fy(r.profit)]
       ]);
-      if (r.shipping) rows.push(['陸送費', fy(r.shipping)]);
-      if (r.claimCost) rows.push(['クレーム処理費', fy(r.claimCost)]);
-      if (r.reListFee) rows.push(['再出品手数料', fy(r.reListFee)]);
-      rows.push(['本部手数料 合計', fy(r.hqFee)]);
-      rows.push(['加盟店受取額', fy(r.partnerNet)]);
+      if (r.venueFee) rows.push(['会場費', '− ' + fy(r.venueFee)]);
+      if (r.shipping) rows.push(['陸送費', '− ' + fy(r.shipping)]);
+      if (r.claimCost) rows.push(['クレーム処理費', '− ' + fy(r.claimCost)]);
+      if (r.reListFee) rows.push(['再出品手数料', '− ' + fy(r.reListFee)]);
+      rows.push(['出品代行費（税抜）', '− ' + fy(r.agencyFee)]);
+      rows.push(['成約手数料（粗利5%）', '− ' + fy(r.commission)]);
+      rows.push(['振込手数料', '− ' + fy(r.transferFee)]);
+      rows.push(['加盟店お渡し額（振込額）', fy(r.partnerNet)]);
     } else {
       rows = rows.concat([['① 買取金額（仕入れ）', fy(r.buyP)], ['② 精算書の金額（売却額）', fy(r.saleP)], ['差引き（粗利）', fy(r.profit)], ['本部手数料（一律・税抜）', fy(r.hqFee)], ['加盟店受取額', fy(r.partnerNet)]]);
     }
     var trs = rows.map(function (r2, i) {
-      var cls = (r2[0].indexOf('本部手数料') >= 0) ? ' class="s-fee"' : (r2[0].indexOf('加盟店受取') >= 0) ? ' class="s-partner"' : (r2[0].indexOf('粗利') >= 0) ? ' class="s-profit"' : '';
+      var cls = (r2[0].indexOf('本部手数料') >= 0) ? ' class="s-fee"' : (r2[0].indexOf('お渡し') >= 0 || r2[0].indexOf('加盟店受取') >= 0) ? ' class="s-partner"' : (r2[0].indexOf('粗利') >= 0) ? ' class="s-profit"' : '';
       return '<tr' + cls + '><td>' + r2[0] + '</td><td>' + r2[1] + '</td></tr>';
     }).join('');
     var html = '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>清算書 ' + c.id + '</title>' +
@@ -424,7 +460,18 @@
           '<div class="cp-sale-status" id="cpSaleStatus"></div>' +
           '<div class="cp-sale-methods">' +
             '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="直販" id="cpSaleDirect"> 直販（自社）<span class="cp-sale-note">本部手数料 一律 ' + HQ.yen(HQ.FEES.directHqFee) + '（税抜）</span></label>' +
-            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="オークション" id="cpSaleAuction"> オークション<span class="cp-sale-note">システム利用料 ' + HQ.yen(HQ.FEES.auctionSystemFee) + '＋成約手数料（粗利' + Math.round(HQ.FEES.auctionRate * 100) + '%）＋実費</span></label>' +
+            '<label class="cp-sale-opt"><input type="radio" name="cpSaleM" value="オークション" id="cpSaleAuction"> オークション<span class="cp-sale-note">出品代行費 ' + HQ.yen(HQ.FEES.auctionSystemFee) + '（税抜）＋成約手数料（粗利' + Math.round(HQ.FEES.auctionRate * 100) + '%）＋会場費・実費（清算書で精算）</span></label>' +
+          '</div>' +
+          '<div class="cp-auction-plan" id="cpAuctionPlan" style="display:none;">' +
+            '<div class="cp-sale-hqcost-head">🚚 オークション出品情報</div>' +
+            '<div class="cp-auction-grid">' +
+              '<label>会場<input id="cpVenue" type="text" placeholder="例：USS東京 / TAA / JU福島"></label>' +
+              '<label>搬入予定日<input id="cpDropoff" type="date"></label>' +
+              '<label>搬送方法<select id="cpTransport"><option value="">—</option><option>自走</option><option>陸送（依頼）</option><option>積載車</option><option>その他</option></select></label>' +
+              '<label>出品週<input id="cpListWeek" type="week"></label>' +
+              '<label>結果<select id="cpAuctionResult"><option value="出品予定">出品予定</option><option value="搬入済">搬入済</option><option value="落札">落札（売れた）</option><option value="流れ">流れ（未落札）</option></select></label>' +
+              '<label id="cpFlowActionWrap" style="display:none;">流れ時の対応<select id="cpFlowAction"><option value="">—</option><option value="キャンセル">キャンセル（出品料を請求）</option><option value="次週">次週に回す（繰越）</option></select></label>' +
+            '</div>' +
           '</div>' +
           '<div class="cp-sale-fields">' +
             '<label class="cp-sale-price-l">① 買取金額（仕入れ・円）<input id="cpBuyPrice" type="number" min="0" placeholder="0"></label>' +
@@ -432,7 +479,8 @@
             '<div class="cp-sale-diff" id="cpSaleDiff"></div>' +
           '</div>' +
           '<div class="cp-sale-hqcost" id="cpSaleHqCost" style="display:none;">' +
-            '<div class="cp-sale-hqcost-head">本部実費（本部が入力・加盟店負担／清算時に差引）</div>' +
+            '<div class="cp-sale-hqcost-head">会場費・本部実費（清算時に落札額から差引）</div>' +
+            '<label>会場費（円）<input id="cpVenueFee" type="number" min="0" placeholder="0"></label>' +
             '<label>陸送費（円）<input id="cpShipping" type="number" min="0" placeholder="0"></label>' +
             '<label>クレーム処理費（円）<input id="cpClaimCost" type="number" min="0" placeholder="0"></label>' +
             '<label>再出品手数料（円）<input id="cpReListFee" type="number" min="0" placeholder="0"></label>' +
@@ -468,8 +516,11 @@
     panel.querySelectorAll('input[name="cpSaleM"]').forEach(function (r) {
       r.addEventListener('change', function () { updateSaleCalc(); });
     });
-    ['cpBuyPrice', 'cpSalePrice', 'cpShipping', 'cpClaimCost', 'cpReListFee'].forEach(function (id) {
+    ['cpBuyPrice', 'cpSalePrice', 'cpShipping', 'cpClaimCost', 'cpReListFee', 'cpVenueFee', 'cpVenue', 'cpDropoff', 'cpListWeek'].forEach(function (id) {
       var el = document.getElementById(id); if (el) el.addEventListener('input', updateSaleCalc);
+    });
+    ['cpTransport', 'cpAuctionResult', 'cpFlowAction'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) el.addEventListener('change', updateSaleCalc);
     });
     var relCk = document.getElementById('cpReListed'); if (relCk) relCk.addEventListener('change', updateSaleCalc);
     // 買取金額は上部「金額」欄と相互同期（どちらを編集しても一致させる）
@@ -489,7 +540,7 @@
     var applyBtn = document.getElementById('cpSaleApply');
     var methodInputs = panel.querySelectorAll('input[name="cpSaleM"]');
     var priceEls = [document.getElementById('cpBuyPrice'), document.getElementById('cpSalePrice')];
-    var hqInputs = ['cpShipping', 'cpClaimCost', 'cpReListFee', 'cpReListed'].map(function (id) { return document.getElementById(id); });
+    var hqInputs = ['cpShipping', 'cpClaimCost', 'cpReListFee', 'cpReListed', 'cpVenueFee'].map(function (id) { return document.getElementById(id); });
     if (role === 'partner') {
       // 加盟店：売却方法・買取金額・精算書金額を入力／申請できる。実費は本部入力のため閲覧のみ。
       methodInputs.forEach(function (r) { r.disabled = false; });
@@ -534,6 +585,13 @@
     var cl = document.getElementById('cpClaimCost'); if (cl) cl.value = c.claimCost || '';
     var rf = document.getElementById('cpReListFee'); if (rf) rf.value = c.reListFee || '';
     var rl = document.getElementById('cpReListed'); if (rl) rl.checked = !!c.reListed;
+    var vf = document.getElementById('cpVenueFee'); if (vf) vf.value = c.venueFee || '';
+    var vn = document.getElementById('cpVenue'); if (vn) vn.value = c.venue || '';
+    var tr = document.getElementById('cpTransport'); if (tr) tr.value = c.transport || '';
+    var dp = document.getElementById('cpDropoff'); if (dp) dp.value = c.dropoffDate || '';
+    var lw = document.getElementById('cpListWeek'); if (lw) lw.value = c.listWeek || '';
+    var ar2 = document.getElementById('cpAuctionResult'); if (ar2) ar2.value = c.auctionResult || '出品予定';
+    var fa = document.getElementById('cpFlowAction'); if (fa) fa.value = c.flowAction || '';
     updateSaleCalc();
   }
   function renderVehicle(c) {
@@ -574,6 +632,16 @@
     var c = findCase(id); if (!c) return;
     panelId = id; fillPanel(c);
     panel.classList.add('open');
+    // 共有オークション/清算データを取得して反映（別端末の入力を同期）
+    if (HQ.loadAuction) HQ.loadAuction(id, function (a) {
+      if (!a || !panelId || panelId !== id) return;
+      var cur = findCase(id); if (!cur) return;
+      var keys = ['saleMethod', 'salePrice', 'venue', 'transport', 'dropoffDate', 'listWeek', 'auctionResult', 'flowAction', 'venueFee', 'shipping', 'claimCost', 'reListFee', 'reListed'];
+      var changed = false;
+      keys.forEach(function (k) { if (a[k] !== undefined && a[k] !== '' && a[k] !== null && cur[k] == null) { cur[k] = a[k]; changed = true; } });
+      // amount は既存優先。salePrice等はサーバー値があれば補完
+      if (changed) fillPanel(cur);
+    });
   }
   function closePanel() { if (panel) panel.classList.remove('open'); panelId = null; }
   function deleteCurrentCase() {
@@ -608,9 +676,18 @@
       c.claimCost = Number((document.getElementById('cpClaimCost') || {}).value) || 0;
       c.reListFee = Number((document.getElementById('cpReListFee') || {}).value) || 0;
       c.reListed = !!(document.getElementById('cpReListed') || {}).checked;
+      // オークション出品情報
+      c.venueFee = Number((document.getElementById('cpVenueFee') || {}).value) || 0;
+      c.venue = ((document.getElementById('cpVenue') || {}).value || '').trim();
+      c.transport = (document.getElementById('cpTransport') || {}).value || '';
+      c.dropoffDate = (document.getElementById('cpDropoff') || {}).value || '';
+      c.listWeek = (document.getElementById('cpListWeek') || {}).value || '';
+      c.auctionResult = (document.getElementById('cpAuctionResult') || {}).value || '';
+      c.flowAction = (document.getElementById('cpFlowAction') || {}).value || '';
       var r = HQ.calcSale(c); c.hqFee = r.hqFee; c.partnerNet = r.partnerNet;
       // 申請済みの内容が変わったら再申請が必要（申請状態を解除）
       if (c.saleApplied && prevSig !== saleSig(c)) { c.saleApplied = false; c.saleAppliedSig = ''; }
+      if (c.saleMethod === 'オークション') persistAuction(c);
     }
     save(c); render(); fillPanel(c);
     flash(document.getElementById('cpSave'), '保存しました ✓');

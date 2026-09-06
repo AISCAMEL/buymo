@@ -249,13 +249,15 @@ function doGet(e) {
     if (action === 'partner_docs') return apiOK_(p) ? jsonOut(getPartnerDocs(p.store)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 書類・情報（本部・機密）
     if (action === 'partner_progress') return apiOK_(p) ? jsonOut(getPartnerProgress(p.store)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 進捗カルテ（研修/違反/本部コメント）
     if (action === 'partner_views') return apiOK_(p) ? jsonOut(getPartnerViews(p.store, p.limit)) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店 コンテンツ閲覧履歴
+    if (action === 'auction')  return apiOK_(p) ? jsonOut(getAuction(p.id)) : jsonOut({ error: 'unauthorized' });   // NEW: 案件のオークション/清算データ
+    if (action === 'auctions') return apiOK_(p) ? jsonOut(getAuctionsData())  : jsonOut({ error: 'unauthorized' }); // NEW: 全オークションデータ（本部可視化）
     if (action === 'mycase') return jsonp(p.callback, getMyCases(p.email || ''));   // NEW
     if (action === 'authcheck') return jsonp(p.callback, authCheck(p.email || '', p.pw || '')); // ログイン可否（ID=メール / PW=携帯下4桁）
     if (action === 'partner_login') return jsonp(p.callback, partnerLogin(p.email || '', p.pw || '')); // NEW: 加盟店ログイン検証
     if (action === 'partners') return apiOK_(p) ? jsonOut(getPartners()) : jsonOut({ error: 'unauthorized' }); // NEW: 加盟店アカウント一覧（本部）
     if (action === 'chatreplies') return jsonp(p.callback, getChatReplies(p.session || '', p.since || '0')); // NEW: 担当者返信取得(Phase6)
     if (action === 'bot')    return jsonp(p.callback, handleBot(p));
-    if (action === 'ping')   return jsonp(p.callback, { v: 11, features: ['case_photo', 'store_content', 'blog', 'referral_fee', 'payments', 'partner_docs', 'partner_progress', 'partner_views'] }); // #4 機能検出
+    if (action === 'ping')   return jsonp(p.callback, { v: 12, features: ['case_photo', 'store_content', 'blog', 'referral_fee', 'payments', 'partner_docs', 'partner_progress', 'partner_views', 'auction'] }); // #4 機能検出
     return jsonOut({ error: 'unknown action' });
   } catch (err) {
     return jsonOut({ error: err.message });
@@ -304,6 +306,7 @@ function doPost(e) {
     if (data.type === 'partner_docs')     return jsonOut(savePartnerDocs(data.store, data.data)); // NEW: 加盟店 書類・情報の保存
     if (data.type === 'partner_progress') return jsonOut(savePartnerProgress(data.store, data.data)); // NEW: 加盟店 進捗カルテの保存
     if (data.type === 'partner_view')     return jsonOut(logPartnerView(data.store, data.item, data.kind)); // NEW: 加盟店 コンテンツ閲覧ログ追記
+    if (data.type === 'auction_save')     return jsonOut(saveAuction(data.id, data.data)); // NEW: オークション/清算データの保存（案件ごと）
     if (data.type === 'store_content')    return jsonOut(saveStoreContent(data.store, data.data)); // NEW: 加盟店 公開ページ内容の保存
     if (data.type === 'blog_post')        return jsonOut(addBlogPost(data.store, data.post));       // NEW: 加盟店 ブログ投稿
     if (data.type === 'blog_delete')      return jsonOut(deleteBlogPost(data.store, data.id));      // NEW: 加盟店 ブログ削除
@@ -3355,5 +3358,81 @@ function getPartnerViews(store, limit) {
     }
     var n = Number(limit) || 50; if (n > 300) n = 300;
     return out.slice(0, n);
+  } catch (e) { return []; }
+}
+
+/* ============================================================
+   NEW: オークション出品・清算データ（案件ごと）
+   - フロント: board.js（案件詳細のオークション欄）／hq-auctions.js（本部可視化）
+     GET  ?action=auction&id=<案件ID>&key=... → {venue, transport, dropoffDate, listWeek, status, result, venueFee, saleMethod, salePrice, ...}
+     GET  ?action=auctions&key=...            → [{id, ...data}]（全件・本部可視化）
+     POST {type:'auction_save', id, data:{...}} → 1案件1行・上書き
+   Sheet「オークション」: [id, data(JSON), updated]
+   ============================================================ */
+var AUCTION_SHEET_NAME = 'オークション';
+
+function getAuctionSheet() {
+  var ss = getSS();
+  var sh = ss.getSheetByName(AUCTION_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(AUCTION_SHEET_NAME);
+    sh.appendRow(['id', 'data', 'updated']);
+    sh.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#0F766E').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function getAuction(id) {
+  try {
+    var key = String(id || '').trim();
+    if (!key) return {};
+    var sh = getAuctionSheet();
+    var last = sh.getLastRow();
+    if (last < 2) return {};
+    var vals = sh.getRange(2, 1, last - 1, 2).getValues();
+    for (var i = 0; i < vals.length; i++) {
+      if (String(vals[i][0]).trim() === key) {
+        try { return JSON.parse(vals[i][1] || '{}'); } catch (e) { return {}; }
+      }
+    }
+    return {};
+  } catch (e) { return {}; }
+}
+
+function saveAuction(id, data) {
+  var key = String(id || '').trim();
+  if (!key) return { status: 'error', message: 'no_id' };
+  var sh = getAuctionSheet();
+  var json = JSON.stringify(data || {});
+  var d = new Date(); function p(n) { return ('0' + n).slice(-2); }
+  var updated = d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var col = sh.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < col.length; i++) {
+      if (String(col[i][0]).trim() === key) {
+        sh.getRange(i + 2, 2, 1, 2).setValues([[json, updated]]);
+        return { status: 'ok', updated: updated };
+      }
+    }
+  }
+  sh.appendRow([key, json, updated]);
+  return { status: 'ok', updated: updated, created: true };
+}
+
+function getAuctionsData() {
+  try {
+    var sh = getAuctionSheet();
+    var last = sh.getLastRow();
+    if (last < 2) return [];
+    var vals = sh.getRange(2, 1, last - 1, 3).getValues();
+    var out = [];
+    for (var i = 0; i < vals.length; i++) {
+      var obj = {}; try { obj = JSON.parse(vals[i][1] || '{}'); } catch (e) { obj = {}; }
+      obj.id = vals[i][0]; obj.updated = vals[i][2];
+      out.push(obj);
+    }
+    return out;
   } catch (e) { return []; }
 }
