@@ -52,6 +52,33 @@
   .has-sidenav .portal-main{min-height:100vh;}
 }
 
+/* ナビ：グループ／アイコン／検索（上部バーではフラット表示） */
+.nav-group{display:contents;}
+.nav-group-h{display:none;}
+.nav-ic{margin-right:3px;}
+.side-search{display:none;}
+@media (min-width: 992px) {
+  .has-sidenav .nav-group{display:block;margin-bottom:8px;}
+  .has-sidenav .nav-group-h{display:block;font-size:10.5px;font-weight:800;color:#7f8db0;letter-spacing:.06em;padding:8px 12px 4px;}
+  .has-sidenav .nav-ic{display:inline-block;width:20px;text-align:center;margin-right:8px;}
+  .has-sidenav .side-search{display:block;position:relative;margin:0 4px 12px;}
+  .has-sidenav .side-search input{width:100%;height:36px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;border-radius:8px;padding:0 10px;font-size:12.5px;font-family:inherit;}
+  .has-sidenav .side-search input::placeholder{color:#9fb0d6;}
+  .has-sidenav .side-search input:focus{outline:2px solid var(--green,#0F766E);background:rgba(255,255,255,.14);}
+  .has-sidenav .side-results{position:absolute;left:0;right:0;top:40px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.28);z-index:200;max-height:340px;overflow-y:auto;padding:4px;}
+  .has-sidenav .side-res{display:block;padding:8px 10px;border-radius:8px;text-decoration:none;}
+  .has-sidenav .side-res:hover{background:#f0f6f4;}
+  .has-sidenav .side-res-t{display:block;font-size:12.5px;font-weight:800;color:var(--navy);}
+  .has-sidenav .side-res-s{display:block;font-size:11px;color:#889;}
+  .has-sidenav .side-res-none{padding:10px;color:#999;font-size:12.5px;}
+}
+
+/* 一覧テーブル 共通の視認性（数字揃え・見出し固定・ゼブラ・ホバー） */
+.hq-table,.bill-table,.au-table{font-variant-numeric:tabular-nums;}
+.hq-table thead th,.bill-table thead th,.au-table thead th{position:sticky;top:0;z-index:2;}
+.hq-table tbody tr:nth-child(even),.bill-table tbody tr:nth-child(even){background:#fafbfd;}
+.hq-table tbody tr:hover,.bill-table tbody tr:hover,.au-table tbody tr:hover{background:#f0f6f4;}
+
 /* 営業レポート */
 .kpi-row-5{grid-template-columns:repeat(5,1fr);}
 .rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}

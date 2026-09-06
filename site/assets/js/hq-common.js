@@ -503,45 +503,100 @@ window.HQ = (function () {
     if (!el) return;
     try { document.body.classList.add('has-sidenav'); } catch (e) {} // 左サイドメニュー化（PC）
     var r = (window.AUTH && AUTH.role) ? AUTH.role() : null;
-    var items = (r === 'partner') ? [
-      ['board', '案件ボード', 'hq.html?role=partner'],
-      ['leadmarket', '案件マーケット', 'partner-leads.html'],
-      ['mystore', 'マイ店舗ページ', 'partner-mystore.html'],
-      ['sales', '売上・請求', 'partner-sales.html'],
-      ['info', '現場サポート', 'partner-info.html'],
-      ['downloads', 'ダウンロード', 'partner-downloads.html'],
-      ['academy', 'アカデミー', 'partner-academy.html'],
-      ['scripts', 'スクリプト', 'partner-scripts.html'],
-      ['community', 'コミュニティ', 'partner-community.html'],
-      ['chatassist', '接客アシスト', 'hq-chat-assist.html'],
-      ['guide', '使い方', 'partner-guide.html']
+    // グループ [ラベル, [ [key,表示名,href,アイコン], ... ] ]
+    var groups = (r === 'partner') ? [
+      ['業務', [
+        ['board', '案件ボード', 'hq.html?role=partner', '🗂️'],
+        ['leadmarket', '案件マーケット', 'partner-leads.html', '🛒'],
+        ['sales', '売上・請求', 'partner-sales.html', '💴'],
+        ['mystore', 'マイ店舗ページ', 'partner-mystore.html', '🏪']
+      ]],
+      ['学ぶ・支援', [
+        ['info', '現場サポート', 'partner-info.html', '🛟'],
+        ['downloads', 'ダウンロード', 'partner-downloads.html', '⬇️'],
+        ['academy', 'アカデミー', 'partner-academy.html', '🎓'],
+        ['scripts', 'スクリプト', 'partner-scripts.html', '📝'],
+        ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬'],
+        ['community', 'コミュニティ', 'partner-community.html', '👥']
+      ]],
+      ['その他', [
+        ['guide', '使い方', 'partner-guide.html', '❓']
+      ]]
     ] : [
-      ['dashboard', 'ダッシュボード', 'hq-dashboard.html'],
-      ['board', '案件ボード', 'hq.html?role=hq'],
-      ['leads', 'リード', 'hq-leads.html'],
-      ['recruit', '加盟店募集', 'hq-recruit.html'],
-      ['stores', '加盟店', 'hq-stores.html'],
-      ['activity', '加盟店の動き', 'hq-partner-activity.html'],
-      ['auctions', 'オークション', 'hq-auctions.html'],
-      ['payments', '支払い管理', 'hq-payments.html'],
-      ['billing', '請求書', 'hq-billing.html'],
-      ['notices', 'お知らせ', 'hq-notices.html'],
-      ['column', 'コラム', 'hq-column.html'],
-      ['academy', 'アカデミー管理', 'hq-academy.html'],
-      ['community', 'コミュニティ', 'partner-community.html'],
-      ['report', '営業レポート', 'report.html'],
-      ['documents', '書類発行', 'hq-documents.html'],
-      ['chatassist', '接客アシスト', 'hq-chat-assist.html'],
-      ['guide', '使い方', 'partner-guide.html']
+      ['業務', [
+        ['dashboard', 'ダッシュボード', 'hq-dashboard.html', '🏠'],
+        ['board', '案件ボード', 'hq.html?role=hq', '🗂️'],
+        ['leads', 'リード', 'hq-leads.html', '📋'],
+        ['auctions', 'オークション', 'hq-auctions.html', '🔨'],
+        ['billing', '請求書', 'hq-billing.html', '🧾'],
+        ['documents', '書類発行', 'hq-documents.html', '📄'],
+        ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬']
+      ]],
+      ['加盟店', [
+        ['stores', '加盟店', 'hq-stores.html', '🏪'],
+        ['activity', '加盟店の動き', 'hq-partner-activity.html', '📈'],
+        ['payments', '支払い管理', 'hq-payments.html', '💴'],
+        ['recruit', '加盟店募集', 'hq-recruit.html', '🤝']
+      ]],
+      ['発信・育成', [
+        ['notices', 'お知らせ', 'hq-notices.html', '📢'],
+        ['column', 'コラム', 'hq-column.html', '✍️'],
+        ['academy', 'アカデミー管理', 'hq-academy.html', '🎓'],
+        ['community', 'コミュニティ', 'partner-community.html', '👥']
+      ]],
+      ['その他', [
+        ['report', '営業レポート', 'report.html', '📊'],
+        ['guide', '使い方', 'partner-guide.html', '❓']
+      ]]
     ];
-    el.innerHTML = items.map(function (it) {
-      return '<a href="' + it[2] + '"' + (it[0] === active ? ' aria-current="page"' : '') + '>' + it[1] + '</a>';
-    }).join('');
+    var flat = [];
+    var html = '<div class="side-search"><input type="search" id="navSearch" placeholder="🔍 案件ID・顧客名・加盟店名" autocomplete="off"><div class="side-results" id="navResults" hidden></div></div>';
+    groups.forEach(function (grp) {
+      html += '<div class="nav-group"><div class="nav-group-h">' + esc(grp[0]) + '</div>';
+      html += grp[1].map(function (it) {
+        flat.push(it);
+        return '<a href="' + it[2] + '"' + (it[0] === active ? ' aria-current="page"' : '') + '><span class="nav-ic" aria-hidden="true">' + (it[3] || '') + '</span>' + esc(it[1]) + '</a>';
+      }).join('');
+      html += '</div>';
+    });
+    el.innerHTML = html;
+    wireNavSearch(r);
     // 加盟店がコンテンツページを開いたら閲覧履歴を記録（本部の進捗把握用）
     if (r === 'partner') {
-      var cur = null; for (var q = 0; q < items.length; q++) if (items[q][0] === active) { cur = items[q]; break; }
+      var cur = null; for (var q = 0; q < flat.length; q++) if (flat[q][0] === active) { cur = flat[q]; break; }
       logView(cur ? cur[1] : (document.title || active), 'page');
     }
+  }
+  // サイド検索：案件ID・顧客名・加盟店名で横断 → 該当ページへジャンプ
+  function wireNavSearch(role) {
+    var inp = document.getElementById('navSearch'), box = document.getElementById('navResults');
+    if (!inp || !box) return;
+    var boardHref = 'hq.html?role=' + (role === 'partner' ? 'partner' : 'hq');
+    function run() {
+      var q = (inp.value || '').trim().toLowerCase();
+      if (!q) { box.hidden = true; box.innerHTML = ''; return; }
+      var out = [];
+      var cases = getCasesLS() || [];
+      cases.forEach(function (c) {
+        if (out.length >= 8) return;
+        var hay = ((c.id || '') + ' ' + (c.name || '') + ' ' + (c.genre || '') + ' ' + (c.assignee || '')).toLowerCase();
+        if (hay.indexOf(q) >= 0) out.push({ t: '🗂️ ' + (c.id || '') + '　' + (c.name || ''), s: (c.assignee || '担当未定') + '・' + (c.stage || ''), href: boardHref + '&case=' + encodeURIComponent(c.id) });
+      });
+      var stores = getStores() || [];
+      stores.forEach(function (s) {
+        if (out.length >= 8) return;
+        if (((s.name || '') + ' ' + (s.area || '')).toLowerCase().indexOf(q) >= 0)
+          out.push({ t: '🏪 ' + (s.name || ''), s: (s.area || ''), href: 'hq-stores.html?store=' + encodeURIComponent(s.name) });
+      });
+      if (!out.length) { box.innerHTML = '<div class="side-res-none">該当なし</div>'; box.hidden = false; return; }
+      box.innerHTML = out.map(function (o) {
+        return '<a class="side-res" href="' + o.href + '"><span class="side-res-t">' + esc(o.t) + '</span><span class="side-res-s">' + esc(o.s) + '</span></a>';
+      }).join('');
+      box.hidden = false;
+    }
+    inp.addEventListener('input', run);
+    inp.addEventListener('focus', run);
+    document.addEventListener('click', function (e) { if (!e.target.closest('.side-search')) { box.hidden = true; } });
   }
 
   return {
