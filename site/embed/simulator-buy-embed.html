@@ -1,10 +1,10 @@
 <!--
 ============================================================
- BUYMO かんたん査定シミュレーター 埋め込み（LPtools / WordPress カスタムHTML用）
- - このブロックを「カスタムHTML」に丸ごと貼り付け。
- - 係数（CLASS_BASE / CONDITION 等）は下のスクリプト内で編集可。
- - CTA（無料査定へ）のリンク先 data-cta を自社フォームURLに変更してください。
- - すべて #buymo-sim 配下にスコープしてあり、テーマと干渉しません。
+ BUYMO &#x304b;&#x3093;&#x305f;&#x3093;&#x67fb;&#x5b9a;&#x30b7;&#x30df;&#x30e5;&#x30ec;&#x30fc;&#x30bf;&#x30fc; &#x57cb;&#x3081;&#x8fbc;&#x307f;&#xff08;LPtools / WordPress &#x30ab;&#x30b9;&#x30bf;&#x30e0;HTML&#x7528;&#xff09;
+ - &#x3053;&#x306e;&#x30d6;&#x30ed;&#x30c3;&#x30af;&#x3092;&#x300c;&#x30ab;&#x30b9;&#x30bf;&#x30e0;HTML&#x300d;&#x306b;&#x4e38;&#x3054;&#x3068;&#x8cbc;&#x308a;&#x4ed8;&#x3051;&#x3002;
+ - &#x4fc2;&#x6570;&#xff08;CLASS_BASE / CONDITION &#x7b49;&#xff09;&#x306f;&#x4e0b;&#x306e;&#x30b9;&#x30af;&#x30ea;&#x30d7;&#x30c8;&#x5185;&#x3067;&#x7de8;&#x96c6;&#x53ef;&#x3002;
+ - CTA&#xff08;&#x7121;&#x6599;&#x67fb;&#x5b9a;&#x3078;&#xff09;&#x306e;&#x30ea;&#x30f3;&#x30af;&#x5148; data-cta &#x3092;&#x81ea;&#x793e;&#x30d5;&#x30a9;&#x30fc;&#x30e0;URL&#x306b;&#x5909;&#x66f4;&#x3057;&#x3066;&#x304f;&#x3060;&#x3055;&#x3044;&#x3002;
+ - &#x3059;&#x3079;&#x3066; #buymo-sim &#x914d;&#x4e0b;&#x306b;&#x30b9;&#x30b3;&#x30fc;&#x30d7;&#x3057;&#x3066;&#x3042;&#x308a;&#x3001;&#x30c6;&#x30fc;&#x30de;&#x3068;&#x5e72;&#x6e09;&#x3057;&#x307e;&#x305b;&#x3093;&#x3002;
 ============================================================
 -->
 <div id="buymo-sim" data-cta="/buymo-contact.html">
@@ -25,36 +25,36 @@
     @media(max-width:767px){#buymo-sim .bs-grid{grid-template-columns:1fr;}#buymo-sim .bs-range{font-size:24px;}}
   </style>
   <div class="bs-card">
-    <h3>かんたん査定シミュレーション</h3>
-    <p class="bs-lead">車種クラス・年式・走行距離・状態を選ぶだけ。おおよその買取額がすぐ分かります。</p>
+    <h3>&#x304b;&#x3093;&#x305f;&#x3093;&#x67fb;&#x5b9a;&#x30b7;&#x30df;&#x30e5;&#x30ec;&#x30fc;&#x30b7;&#x30e7;&#x30f3;</h3>
+    <p class="bs-lead">&#x8eca;&#x7a2e;&#x30af;&#x30e9;&#x30b9;&#x30fb;&#x5e74;&#x5f0f;&#x30fb;&#x8d70;&#x884c;&#x8ddd;&#x96e2;&#x30fb;&#x72b6;&#x614b;&#x3092;&#x9078;&#x3076;&#x3060;&#x3051;&#x3002;&#x304a;&#x304a;&#x3088;&#x305d;&#x306e;&#x8cb7;&#x53d6;&#x984d;&#x304c;&#x3059;&#x3050;&#x5206;&#x304b;&#x308a;&#x307e;&#x3059;&#x3002;</p>
     <div class="bs-grid">
-      <label>車種クラス<select id="bsCls"></select></label>
-      <label>年式<select id="bsYear"></select></label>
-      <label>走行距離<select id="bsMile"></select></label>
-      <label>状態<select id="bsCond"></select></label>
+      <label>&#x8eca;&#x7a2e;&#x30af;&#x30e9;&#x30b9;<select id="bsCls"></select></label>
+      <label>&#x5e74;&#x5f0f;<select id="bsYear"></select></label>
+      <label>&#x8d70;&#x884c;&#x8ddd;&#x96e2;<select id="bsMile"></select></label>
+      <label>&#x72b6;&#x614b;<select id="bsCond"></select></label>
     </div>
-    <button type="button" class="bs-btn" id="bsCalc">概算をみる</button>
+    <button type="button" class="bs-btn" id="bsCalc">&#x6982;&#x7b97;&#x3092;&#x307f;&#x308b;</button>
     <div class="bs-res" id="bsRes" hidden>
-      <p style="font-weight:700;font-size:14px;color:#cdd6ee;margin:0;">概算の買取目安</p>
-      <p class="bs-range"><span id="bsMin"></span> 〜 <span id="bsMax"></span></p>
-      <p class="bs-note">※ AIによる概算の目安です。実際の金額は車両状態により異なります。正確な金額は無料査定で。</p>
-      <a class="bs-cta" id="bsCta" href="#">この内容で無料査定を依頼 ›</a>
+      <p style="font-weight:700;font-size:14px;color:#cdd6ee;margin:0;">&#x6982;&#x7b97;&#x306e;&#x8cb7;&#x53d6;&#x76ee;&#x5b89;</p>
+      <p class="bs-range"><span id="bsMin"></span> &#x301c; <span id="bsMax"></span></p>
+      <p class="bs-note">&#x203b; AI&#x306b;&#x3088;&#x308b;&#x6982;&#x7b97;&#x306e;&#x76ee;&#x5b89;&#x3067;&#x3059;&#x3002;&#x5b9f;&#x969b;&#x306e;&#x91d1;&#x984d;&#x306f;&#x8eca;&#x4e21;&#x72b6;&#x614b;&#x306b;&#x3088;&#x308a;&#x7570;&#x306a;&#x308a;&#x307e;&#x3059;&#x3002;&#x6b63;&#x78ba;&#x306a;&#x91d1;&#x984d;&#x306f;&#x7121;&#x6599;&#x67fb;&#x5b9a;&#x3067;&#x3002;</p>
+      <a class="bs-cta" id="bsCta" href="#">&#x3053;&#x306e;&#x5185;&#x5bb9;&#x3067;&#x7121;&#x6599;&#x67fb;&#x5b9a;&#x3092;&#x4f9d;&#x983c; &#x203a;</a>
     </div>
   </div>
   <script>
   (function(){
     var root=document.getElementById('buymo-sim');
-    var CLASS_BASE={'軽自動車':900000,'コンパクト':1000000,'セダン':1300000,'ミニバン':1600000,'SUV':1800000,'輸入車・高級車':3000000,'トラック・商用車':1500000};
-    var MILEAGE=[['〜1万km',5000],['1〜3万km',20000],['3〜5万km',40000],['5〜8万km',65000],['8〜10万km',90000],['10〜15万km',125000],['15万km〜',170000]];
-    var COND={'良好（目立つ傷なし）':1.0,'普通（小傷・経年相応）':0.85,'修復歴・事故車':0.55,'不動車・廃車予定':0.22};
+    var CLASS_BASE={'\u8efd\u81ea\u52d5\u8eca':900000,'\u30b3\u30f3\u30d1\u30af\u30c8':1000000,'\u30bb\u30c0\u30f3':1300000,'\u30df\u30cb\u30d0\u30f3':1600000,'SUV':1800000,'\u8f38\u5165\u8eca\u30fb\u9ad8\u7d1a\u8eca':3000000,'\u30c8\u30e9\u30c3\u30af\u30fb\u5546\u7528\u8eca':1500000};
+    var MILEAGE=[['\u301c1\u4e07km',5000],['1\u301c3\u4e07km',20000],['3\u301c5\u4e07km',40000],['5\u301c8\u4e07km',65000],['8\u301c10\u4e07km',90000],['10\u301c15\u4e07km',125000],['15\u4e07km\u301c',170000]];
+    var COND={'\u826f\u597d\uff08\u76ee\u7acb\u3064\u50b7\u306a\u3057\uff09':1.0,'\u666e\u901a\uff08\u5c0f\u50b7\u30fb\u7d4c\u5e74\u76f8\u5fdc\uff09':0.85,'\u4fee\u5fa9\u6b74\u30fb\u4e8b\u6545\u8eca':0.55,'\u4e0d\u52d5\u8eca\u30fb\u5ec3\u8eca\u4e88\u5b9a':0.22};
     var now=new Date().getFullYear();
     function opt(v,l){return '<option value="'+v+'">'+(l||v)+'</option>';}
     var cls='';for(var c in CLASS_BASE)cls+=opt(c);root.querySelector('#bsCls').innerHTML=cls;
-    var ys='';for(var y=now;y>=now-30;y--)ys+=opt(y,y+'年');root.querySelector('#bsYear').innerHTML=ys;
+    var ys='';for(var y=now;y>=now-30;y--)ys+=opt(y,y+'\u5e74');root.querySelector('#bsYear').innerHTML=ys;
     root.querySelector('#bsMile').innerHTML=MILEAGE.map(function(m,i){return opt(i,m[0]);}).join('');
     var cd='';for(var k in COND)cd+=opt(k);root.querySelector('#bsCond').innerHTML=cd;
     function round(n){return n>=100000?Math.round(n/10000)*10000:Math.max(5000,Math.round(n/1000)*1000);}
-    function yen(n){return '¥'+(n||0).toLocaleString('en-US');}
+    function yen(n){return '\u00a5'+(n||0).toLocaleString('en-US');}
     root.querySelector('#bsCalc').addEventListener('click',function(){
       var base=CLASS_BASE[root.querySelector('#bsCls').value]||1000000;
       var age=Math.max(0,now-Number(root.querySelector('#bsYear').value));
@@ -64,7 +64,7 @@
       var mn=Math.max(5000,round(point*0.88)),mx=Math.max(10000,round(point*1.12));
       root.querySelector('#bsMin').textContent=yen(mn);root.querySelector('#bsMax').textContent=yen(mx);
       var cta=root.getAttribute('data-cta')||'#';
-      root.querySelector('#bsCta').href=cta+(cta.indexOf('?')<0?'?':'&')+'genre='+encodeURIComponent(root.querySelector('#bsCls').value)+'&est='+encodeURIComponent(yen(mn)+'〜'+yen(mx));
+      root.querySelector('#bsCta').href=cta+(cta.indexOf('?')<0?'?':'&')+'genre='+encodeURIComponent(root.querySelector('#bsCls').value)+'&est='+encodeURIComponent(yen(mn)+'\u301c'+yen(mx));
       root.querySelector('#bsRes').hidden=false;
     });
   })();
