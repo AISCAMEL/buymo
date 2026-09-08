@@ -286,7 +286,8 @@ img{max-width:100%;display:block;}
 
 /* ============ お取引の流れ ============ */
 .flow{background:var(--white);padding:80px 0;}
-.flow-inner{display:grid;grid-template-columns:1.4fr .6fr;gap:40px;align-items:center;}
+.flow-inner{text-align:center;}
+.flow-cols{display:grid;grid-template-columns:1.4fr .6fr;gap:40px;align-items:center;text-align:left;margin-top:8px;}
 .flow-steps{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
 .flow-steps>li:not(.flow-arrow){
   background:#fff;border:1px solid var(--border);border-radius:var(--radius);
@@ -1016,7 +1017,7 @@ a.genre-link:hover{background:var(--green);border-color:var(--green);transform:t
   .voice-card{flex:0 0 calc((100% - 24px)/2);}
   .faq-inner{grid-template-columns:1fr;}
   .faq-mascot{display:none;}
-  .flow-inner{grid-template-columns:1fr;}
+  .flow-cols{grid-template-columns:1fr;}
   .form-inner{grid-template-columns:1fr;}
   .form-mascot{display:none;}
 }

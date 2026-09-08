@@ -41,8 +41,11 @@
     '.sign-box p{font-size:9pt;color:#555;margin-bottom:2mm;}',
     '.note{font-size:9pt;color:#555;margin-top:4mm;}',
     '.seal{display:inline-block;border:1px solid #999;width:22mm;height:22mm;text-align:center;line-height:22mm;font-size:10pt;color:#aaa;margin-left:4mm;}',
+    '.terms h3{font-size:10.5pt;font-weight:700;margin:4mm 0 1.5mm;break-after:avoid;page-break-after:avoid;}',
+    '.terms p{font-size:9.5pt;line-height:1.7;margin-bottom:1.5mm;text-align:justify;}',
+    '.terms{margin-bottom:6mm;}',
     'footer{position:fixed;bottom:8mm;left:0;right:0;text-align:center;font-size:9pt;color:#aaa;}',
-    '@media print{.no-print{display:none;} body{padding:0;} footer{position:fixed;}}'
+    '@media print{.no-print{display:none;} body{padding:14mm;} footer{position:fixed;} .sign-row{page-break-inside:avoid;}}'
   ].join('');
   function printWin(title, body) {
     var html = '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>' + title + '</title><style>' + A4_STYLE + '</style></head><body>' +
@@ -58,30 +61,97 @@
      書類テンプレート
   ====================================================== */
 
-  /* ① 売買契約書 */
-  function docContract(f) {
-    return '<h1>自動車売買契約書（買取）</h1>' +
-      '<p class="sub">本契約書は甲（売主）と乙（BUYMO加盟店）との間で締結する車両売買に関するものです。</p>' +
-      '<h2>1. 契約当事者</h2>' +
-      '<table><tr><td class="label">甲（売主）</td><td>' + esc(f.name) + '<br>住所：' + esc(f.address) + '</td></tr>' +
-      '<tr><td class="label">乙（買主）</td><td>BUYMO加盟店（担当者より署名欄に記入）</td></tr></table>' +
-      '<h2>2. 対象車両</h2>' +
-      '<table><tr><td class="label">車台番号</td><td>' + esc(f.vin) + '</td></tr>' +
-      '<tr><td class="label">登録番号</td><td>' + esc(f.plate) + '</td></tr>' +
-      '<tr><td class="label">買取価格</td><td style="font-weight:700;">金　　　　　　　　　　円（税込）</td></tr></table>' +
-      '<h2>3. 特約条項</h2>' +
-      '<table><tr><td style="font-size:10pt;line-height:1.8;">' +
-        '① 甲は対象車両に関するすべての権利を乙に譲渡することに同意します。<br>' +
-        '② 甲は本車両に抵当権・リース残債・所有権留保等の担保がないことを保証します（ある場合は別途協議）。<br>' +
-        '③ 車検証・自賠責保険証書・リサイクル券等の書類は引渡し時に提出します。<br>' +
-        '④ 本契約締結後のキャンセルは原則として認められません。<br>' +
-        '⑤ 引渡し後に生じた故障・事故等の責任は乙が負います。' +
-      '</td></tr></table>' +
-      '<p class="note">契約日：' + nowStr() + '　　案件ID：' + esc(f.caseId) + '</p>' +
-      '<div class="sign-row">' +
-        '<div class="sign-box"><p>甲（売主）署名・捺印</p><br><br>署名：<br><br>印<span class="seal">印</span></div>' +
-        '<div class="sign-box"><p>乙（買主）署名・捺印</p><br><br>BUYMO加盟店名：<br><br>担当者署名：<br><br>印<span class="seal">印</span></div>' +
+  /* ① 自動車売買契約書（約款付き・法的詳細版） */
+  // 契約書専用の入力を読み取り（無ければ上部fill-barで補完）
+  function getContract() {
+    function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+    var base = getFields();
+    return {
+      caseId: base.caseId,
+      date: g('ctDate') || nowStr(),
+      koName: g('ctKoName') || base.name,
+      koAddr: g('ctKoAddr') || base.address,
+      koTel: g('ctKoTel'),
+      carName: g('ctCarName'),
+      carType: g('ctCarType'),
+      carYear: g('ctCarYear'),
+      vin: g('ctVin') || base.vin,
+      plate: g('ctPlate') || base.plate,
+      mileage: g('ctMileage'),
+      color: g('ctColor'),
+      price: g('ctPrice'),
+      payMethod: g('ctPayMethod') || '銀行振込',
+      payDue: g('ctPayDue'),
+      bank: g('ctBank'),
+      deliveryDate: g('ctDeliveryDate'),
+      deliveryPlace: g('ctDeliveryPlace'),
+      otsuName: g('ctOtsuName') || '合同会社アイズ（BUYMO）',
+      otsuStaff: g('ctOtsuStaff'),
+      otsuAddr: g('ctOtsuAddr') || '〒979-0204 福島県いわき市四倉町細谷字大町1番',
+      otsuKobutsu: g('ctOtsuKobutsu') || '福島県公安委員会 第25121A010859号',
+      note: g('ctNote')
+    };
+  }
+  function yenText(v) { var n = Number(String(v).replace(/[^0-9.]/g, '')); return n ? ('金 ' + n.toLocaleString('en-US') + ' 円（税込）') : '金　　　　　　　　　円（税込）'; }
+  function orBlank(s) { return esc(s) || '　'; }
+
+  function docContract() {
+    var v = getContract();
+    var head =
+      '<h1>自動車売買契約書</h1>' +
+      '<p class="sub">売主（以下「甲」という。）と買主（以下「乙」という。）とは、下記の自動車（以下「本自動車」という。）の売買について、以下のとおり契約（以下「本契約」という。）を締結する。</p>';
+    var parties =
+      '<h2>当事者の表示</h2>' +
+      '<table>' +
+        '<tr><td class="label">甲（売主）氏名</td><td>' + orBlank(v.koName) + '</td></tr>' +
+        '<tr><td class="label">甲 住所</td><td>' + orBlank(v.koAddr) + '</td></tr>' +
+        '<tr><td class="label">甲 電話</td><td>' + orBlank(v.koTel) + '</td></tr>' +
+        '<tr><td class="label">乙（買主）名称</td><td>' + orBlank(v.otsuName) + '</td></tr>' +
+        '<tr><td class="label">乙 住所</td><td>' + orBlank(v.otsuAddr) + '</td></tr>' +
+        '<tr><td class="label">乙 担当者</td><td>' + orBlank(v.otsuStaff) + '</td></tr>' +
+        '<tr><td class="label">乙 古物商許可</td><td>' + orBlank(v.otsuKobutsu) + '</td></tr>' +
+      '</table>';
+    var car =
+      '<h2>本自動車の表示</h2>' +
+      '<table>' +
+        '<tr><td class="label">車名</td><td>' + orBlank(v.carName) + '</td><td class="label">型式</td><td>' + orBlank(v.carType) + '</td></tr>' +
+        '<tr><td class="label">年式</td><td>' + orBlank(v.carYear) + '</td><td class="label">走行距離</td><td>' + (v.mileage ? esc(v.mileage) + ' km' : '　') + '</td></tr>' +
+        '<tr><td class="label">車台番号</td><td>' + orBlank(v.vin) + '</td><td class="label">登録番号</td><td>' + orBlank(v.plate) + '</td></tr>' +
+        '<tr><td class="label">色</td><td>' + orBlank(v.color) + '</td><td class="label">売買代金</td><td style="font-weight:700;">' + yenText(v.price) + '</td></tr>' +
+      '</table>';
+    // 約款
+    function art(n, title, body) { return '<h3>第' + n + '条（' + title + '）</h3>' + body; }
+    var terms = '<div class="terms">' +
+      art(1, '目的', '<p>甲は、本自動車を現状有姿にて乙に売り渡し、乙はこれを買い受けた。</p>') +
+      art(2, '売買代金', '<p>本自動車の売買代金は、頭書記載の金額（税込）とする。</p>') +
+      art(3, '代金の支払', '<p>乙は、売買代金を' + esc(v.payMethod) + 'により、' + (v.payDue ? esc(v.payDue) + 'まで' : '別途定める期日まで') + 'に甲へ支払う。' + (v.bank ? '振込先：' + esc(v.bank) + '。' : '') + '振込手数料は乙の負担とする。ただし、名義変更・必要書類の確認完了後の支払とすることができる。</p>') +
+      art(4, '引渡し', '<p>甲は、' + (v.deliveryDate ? esc(v.deliveryDate) : '別途甲乙協議のうえ定める日') + 'に、' + (v.deliveryPlace ? esc(v.deliveryPlace) : '甲乙協議のうえ定める場所') + 'において、本自動車及び第7条の付帯書類を乙に引き渡す。引取りに要する費用は乙の負担とする。</p>') +
+      art(5, '所有権の移転及び危険負担', '<p>本自動車の所有権は、売買代金の完済及び本自動車の引渡しが完了した時に、甲から乙へ移転する。引渡し前に生じた本自動車の滅失・毀損等の危険は甲が、引渡し後に生じたものは乙が負担する。</p>') +
+      art(6, '名義変更等の手続', '<p>甲は、本自動車の移転登録（名義変更）又は抹消登録その他の手続に必要な書類（委任状・譲渡証明書・印鑑証明書等）を、乙の請求に応じ速やかに交付する。乙は、引渡し後速やかに自己の負担と責任において当該手続を行う。</p>') +
+      art(7, '付帯書類の交付', '<p>甲は、引渡しに際し、自動車検査証、自動車損害賠償責任保険証明書、自動車リサイクル券、その他本自動車に関する書類を乙に交付する。</p>') +
+      art(8, '甲の表明及び保証', '<p>甲は、乙に対し、次の各号を表明し保証する。<br>' +
+        '（1）甲が本自動車の正当な所有者又は処分権限を有する者であること。<br>' +
+        '（2）本自動車に、抵当権・所有権留保・リース・差押えその他乙の完全な所有権取得を妨げる負担が存在しないこと（存在する場合は事前に乙へ告知し、甲の責任と負担で解消する）。<br>' +
+        '（3）走行距離計（メーター）の改ざんがないこと。<br>' +
+        '（4）査定時に告知した事項に虚偽がなく、重大な修復歴・冠水歴等を隠していないこと。</p>') +
+      art(9, '契約不適合責任', '<p>引渡し後に、第8条の表明保証に反する事実又は甲が故意・重過失により告知しなかった重大な瑕疵が判明した場合、乙は、相当期間を定めて代金の減額、損害の賠償又は本契約の解除を求めることができる。</p>') +
+      art(10, '契約の解除', '<p>甲又は乙は、相手方が本契約に違反し、催告後相当期間内に是正しないときは、本契約を解除することができる。第8条の表明保証違反が判明した場合、乙は催告を要せず本契約を解除できる。</p>') +
+      art(11, '反社会的勢力の排除', '<p>甲及び乙は、自己が暴力団等の反社会的勢力に該当せず、将来にわたり関係を持たないことを表明・確約する。これに反することが判明した場合、相手方は何らの催告なく本契約を解除でき、これによる損害を賠償する義務を負わない。</p>') +
+      art(12, '個人情報の取扱い', '<p>乙は、本契約に関して知り得た甲の個人情報を、本取引の履行及び関連手続の目的の範囲内でのみ利用し、法令に従い適切に管理する。</p>') +
+      art(13, '遅延損害金', '<p>乙が支払を遅延したときは、支払期日の翌日から支払済みまで年14.6％の割合による遅延損害金を甲に支払う。</p>') +
+      art(14, '協議', '<p>本契約に定めのない事項又は解釈に疑義が生じた事項は、信義誠実の原則に従い甲乙協議のうえ解決する。</p>') +
+      art(15, '合意管轄', '<p>本契約に関する紛争については、乙の本店所在地を管轄する地方裁判所を第一審の専属的合意管轄裁判所とする。</p>') +
       '</div>';
+    var special = '<h2>特記事項</h2><table><tr><td style="min-height:16mm;font-size:10pt;line-height:1.8;">' + (esc(v.note) || '　') + '</td></tr></table>';
+    var sign =
+      '<p class="note" style="margin-top:6mm;">本契約の成立を証するため本書2通を作成し、甲乙記名押印のうえ各1通を保有する。</p>' +
+      '<p class="note">契約年月日：' + esc(v.date) + (v.caseId ? '　　案件ID：' + esc(v.caseId) : '') + '</p>' +
+      '<div class="sign-row">' +
+        '<div class="sign-box"><p>甲（売主）</p>住所：' + orBlank(v.koAddr) + '<br><br>氏名：' + orBlank(v.koName) + '　<span class="seal">印</span></div>' +
+        '<div class="sign-box"><p>乙（買主）</p>住所：' + orBlank(v.otsuAddr) + '<br><br>名称：' + orBlank(v.otsuName) + '<br>担当：' + orBlank(v.otsuStaff) + '　<span class="seal">印</span></div>' +
+      '</div>' +
+      '<p class="note" style="margin-top:6mm;color:#888;">※本契約書はひな形です。実際のお取引内容・法令改正に合わせ、必要に応じて内容をご確認・調整のうえご利用ください。</p>';
+    return head + parties + car + terms + special + sign;
   }
 
   /* ② 委任状（移転登録用） */
