@@ -88,10 +88,23 @@
 .pa-act.warn{border-color:#C0392B;color:#C0392B;}
 .pa-act.on{border-color:#15803d;color:#15803d;}
 .pa-empty{color:#999;text-align:center;}
+/* 加盟年月数の経過・途中解約の逆算 */
+.store-tenure{margin:10px 0 4px;}
+.st-badge{display:inline-block;background:#0F766E;color:#fff;font-size:12.5px;font-weight:800;border-radius:20px;padding:4px 12px;}
+.st-badge small{font-weight:600;opacity:.85;font-size:10.5px;}
+.st-badge.st-none{background:#e6e9ef;color:#8a93a5;}
+.st-cancel{margin-top:9px;background:#f8fafc;border:1px solid #e6ebf2;border-left:3px solid #F4B740;border-radius:8px;padding:9px 12px;}
+.st-cancel-h{font-size:11.5px;font-weight:800;color:#8a6d1f;margin-bottom:6px;}
+.st-row{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:#475467;padding:2px 0;}
+.st-row b{color:var(--navy,#0A3D38);font-weight:800;}
+.st-row.st-hl{margin-top:4px;padding-top:6px;border-top:1px dashed #e0e4ea;}
+.st-row.st-hl b{color:#B45309;}
+.st-note{font-size:10.5px;color:#98a2b3;line-height:1.6;margin-top:5px;}
+.st-cancel-none{margin-top:8px;font-size:11.5px;color:#98a2b3;line-height:1.6;}
 </style>
 
 <script src="assets/js/hq-common.js?v=13"></script>
-<script src="assets/js/hq-stores.js?v=6" defer></script>
+<script src="assets/js/hq-stores.js?v=7" defer></script>
 <script>
 (function () {
   var body = document.getElementById('paBody'), msg = document.getElementById('paMsg');

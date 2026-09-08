@@ -5,6 +5,58 @@
   var stores = HQ.getStores();
   var cases = [];
 
+  /* ---- 加盟年月数の経過・途中解約の逆算 ---- */
+  function parseD(s) { if (!s) return null; var d = new Date(s); return isNaN(d.getTime()) ? null : d; }
+  function monthsBetween(a, b) { // a→b の満了月数（b>=a 前提、負なら負値）
+    if (!a || !b) return null;
+    var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+    if (b.getDate() < a.getDate()) m -= 1;
+    return m;
+  }
+  function tenureOf(join) {
+    var j = parseD(join); if (!j) return null;
+    var now = new Date();
+    if (j > now) return { future: true };
+    var y = now.getFullYear() - j.getFullYear(), mo = now.getMonth() - j.getMonth();
+    if (now.getDate() < j.getDate()) mo -= 1;
+    if (mo < 0) { y -= 1; mo += 12; }
+    return { y: y, m: mo, days: Math.floor((now - j) / 86400000) };
+  }
+  function cancelCalc(join, expire, monthly) {
+    var j = parseD(join), e = parseD(expire); if (!j || !e) return null;
+    var now = new Date();
+    var total = monthsBetween(j, e); if (total == null || total < 0) total = 0;
+    var elapsed = monthsBetween(j, now); elapsed = Math.max(0, Math.min(total, elapsed == null ? 0 : elapsed));
+    var remain = monthsBetween(now, e); remain = Math.max(0, remain == null ? 0 : remain);
+    return { total: total, elapsed: elapsed, remain: remain, remainFee: remain * monthly, expired: now > e };
+  }
+  function tenureBadge(join) {
+    var t = tenureOf(join);
+    if (!t) return '<span class="st-badge st-none">加盟日 未設定</span>';
+    if (t.future) return '<span class="st-badge st-none">加盟開始前</span>';
+    return '<span class="st-badge">加盟 ' + t.y + '年' + t.m + 'ヶ月<small>（' + t.days + '日）</small></span>';
+  }
+  function tenureBlock(s) {
+    var monthly = Number(s.monthly) || (HQ.FEES && HQ.FEES.franchiseMonthly) || 35000;
+    var cc = cancelCalc(s.joinDate, s.expireDate, monthly);
+    var html = '<div class="store-tenure">' + tenureBadge(s.joinDate);
+    if (cc) {
+      html += '<div class="st-cancel">' +
+        '<div class="st-cancel-h">⏱ 途中解約の逆算（本日基準）</div>' +
+        '<div class="st-row"><span>契約期間</span><b>' + cc.total + 'ヶ月</b></div>' +
+        '<div class="st-row"><span>経過 / 残り</span><b>' + cc.elapsed + 'ヶ月 / ' + cc.remain + 'ヶ月</b></div>' +
+        (cc.expired
+          ? '<div class="st-note">契約期間は満了しています（更新をご確認ください）。</div>'
+          : '<div class="st-row st-hl"><span>本日解約の残存目安</span><b>残' + cc.remain + 'ヶ月 × ' + HQ.yen(monthly) + ' ＝ ' + HQ.yen(cc.remainFee) + '</b></div>' +
+            '<div class="st-note">※ 月額' + HQ.yen(monthly) + 'で残存期間から逆算した目安です。実際の違約金・精算は契約書の条項に従います。</div>') +
+        '</div>';
+    } else if (s.joinDate) {
+      html += '<div class="st-cancel-none">契約期限を入力すると、途中解約の逆算（残存期間×月額）を表示します。</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   function statsFor(name) {
     var cs = cases.filter(function (c) { return c.assignee === name; });
     var sales = cs.filter(function (c) { return c.stage === '完了'; }).reduce(function (s, c) { return s + (Number(c.amount) || 0); }, 0);
@@ -43,6 +95,7 @@
           f('更新', 'renewal', 'text') +
           f('ペナルティ', 'penalty', 'text') +
         '</div>' +
+        tenureBlock(s) +
         '<div class="store-stats-label">実績</div>' +
         '<div class="store-stats">' +
           '<div><span class="ss-num">' + st.total + '</span><span class="ss-label">案件</span></div>' +
@@ -88,6 +141,8 @@
     stores[i][k] = inp.value;
     HQ.saveStores(stores);
     HQ.postStore(stores[i]);
+    // 加盟日・契約期限の変更は経過年月／途中解約の逆算に影響するため再描画
+    if (k === 'joinDate' || k === 'expireDate' || k === 'monthly') render();
   });
 
   document.getElementById('addStore').addEventListener('submit', function (e) {
