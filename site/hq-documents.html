@@ -193,14 +193,15 @@
 
     <!-- 実PDF差込発行（アップロード様式） -->
     <div class="ref-section" id="pdfFillSection">
-      <h2>📄 実PDF差込発行（アップロード様式）</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:14px;">アップロードいただいた<strong>実際の様式PDF</strong>に案件情報を差し込み、そのままダウンロードします。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映されます。初回はフォント読み込みに数秒かかります。</p>
+      <h2>📄 実PDF発行（譲渡証明書・委任状／書き込み可能）</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;"><strong>実際の様式PDF</strong>に案件情報を差し込み、<strong>ダウンロード後もPDF上で各欄を書き込み・修正できる</strong>フォーム付きPDFで発行します（Adobe Acrobat・ブラウザのPDFビューアで入力可）。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映。空欄のまま発行して、PDF上で入力することもできます。初回はフォント読み込みに数秒かかります。</p>
       <div class="pf-bar">
         <label>様式 <select id="pfTemplate"></select></label>
       </div>
       <div id="pfFields" class="pf-fields"></div>
       <div class="pf-actions">
-        <button id="pfGen" class="doc-btn" type="button">実PDFを差込・ダウンロード ⬇</button>
+        <button id="pfGen" class="doc-btn" type="button">✍️ 書き込み可能PDFでダウンロード ⬇</button>
+        <button id="pfGenFlat" class="doc-btn outline" type="button">文字を焼付けて発行（編集不可）</button>
         <span id="pfMsg" class="pf-msg"></span>
       </div>
     </div>
@@ -254,7 +255,7 @@
 </style>
 <script src="assets/js/hq-common.js?v=13"></script>
 <script src="assets/js/hq-documents.js?v=4" defer></script>
-<script src="assets/js/pdf-fill.js?v=1" defer></script>
+<script src="assets/js/pdf-fill.js?v=2" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

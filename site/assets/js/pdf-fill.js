@@ -60,16 +60,46 @@
     page.drawText(text, { x: f.x, y: f.y, size: s, font: font, color: PDFLib.rgb(0.05, 0.05, 0.1) });
   }
 
-  function generate(tplKey, values, msg) {
+  // mode: 'fillable'（書き込み可能なフォーム欄付きPDF・既定）／'flat'（文字を焼付け・編集不可）
+  function generate(tplKey, values, msg, mode) {
     var tpl = TEMPLATES[tplKey]; if (!tpl) return;
-    if (msg) msg.textContent = '生成中…';
+    var fillable = (mode !== 'flat');
+    if (msg) msg.textContent = fillable ? '書き込み可能PDFを生成中…（初回はフォント読み込みに数秒）' : '生成中…';
     ensureLibs(msg).then(function () {
       return fetch(tpl.file).then(function (r) { return r.arrayBuffer(); });
     }).then(function (tmplBytes) {
       return PDFLib.PDFDocument.load(tmplBytes).then(function (doc) {
         doc.registerFontkit(fontkit);
-        return doc.embedFont(fontBytes, { subset: true }).then(function (font) {
+        // 書き込み可能フォームは、入力後の日本語も表示できるようフォントを全埋め込み（subsetしない）
+        return doc.embedFont(fontBytes, { subset: !fillable }).then(function (font) {
           var page = doc.getPages()[0];
+          if (fillable) {
+            var form = doc.getForm();
+            tpl.fields.forEach(function (f) {
+              var tf;
+              try { tf = form.createTextField(tplKey + '_' + f.k); }
+              catch (e) { tf = form.createTextField(tplKey + '_' + f.k + '_' + Math.random().toString(36).slice(2, 6)); }
+              var h = Math.max(13, (f.size || 9) + 6);
+              tf.addToPage(page, {
+                x: f.x - 2, y: f.y - 4, width: (f.maxW || 120) + 6, height: h,
+                borderWidth: 0.75, borderColor: PDFLib.rgb(0.55, 0.68, 0.85),
+                backgroundColor: PDFLib.rgb(0.96, 0.98, 1),
+                font: font
+              });
+              try { tf.setFontSize(f.size || 9); } catch (e2) {}
+              var val = values[f.k]; if (val != null && String(val) !== '') tf.setText(String(val));
+              // 各フィールドの外観を日本語フォントで生成（Helveticaフォールバック回避）
+              try { tf.updateAppearances(font); } catch (e3) {}
+            });
+            // ビューアで入力した日本語も表示できるよう、既定リソースに日本語フォントを設定
+            try { form.updateFieldAppearances(font); } catch (e4) {}
+            try {
+              var acro = form.acroForm;
+              if (acro && acro.dict && PDFLib.PDFBool) acro.dict.set(PDFLib.PDFName.of('NeedAppearances'), PDFLib.PDFBool.True);
+            } catch (e5) {}
+            // 保存時にpdf-libが既定フォント(WinAnsi)で再生成しないよう抑止
+            return doc.save({ updateFieldAppearances: false });
+          }
           tpl.fields.forEach(function (f) { drawFit(page, font, values[f.k], f, PDFLib); });
           return doc.save();
         });
@@ -78,10 +108,10 @@
       var blob = new Blob([bytes], { type: 'application/pdf' });
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a'); a.href = url;
-      a.download = tpl.name.replace(/（.*?）/g, '') + '_' + (values.sellerName || values.ownerName || '発行') + '.pdf';
+      a.download = tpl.name.replace(/（.*?）/g, '') + (fillable ? '_記入用' : '') + '_' + (values.sellerName || values.ownerName || '発行') + '.pdf';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-      if (msg) { msg.textContent = '✓ ダウンロードしました'; setTimeout(function () { msg.textContent = ''; }, 2500); }
+      if (msg) { msg.textContent = fillable ? '✓ 書き込み可能PDFをダウンロードしました（PDFを開いて各欄に入力できます）' : '✓ ダウンロードしました'; setTimeout(function () { msg.textContent = ''; }, 3500); }
     }).catch(function (e) {
       if (msg) msg.textContent = '生成に失敗しました（' + (e && e.message ? e.message : 'エラー') + '）。時間をおいて再度お試しください。';
     });
@@ -128,10 +158,17 @@
     ['docCaseId', 'docName', 'docAddress', 'docVin', 'docPlate'].forEach(function (id) {
       var el = document.getElementById(id); if (el) el.addEventListener('change', renderFields);
     });
-    document.getElementById('pfGen').addEventListener('click', function () {
-      var k = sel.value; var values = {};
+    function collect() {
+      var values = {};
       fieldsEl.querySelectorAll('input[data-k]').forEach(function (inp) { values[inp.getAttribute('data-k')] = inp.value; });
-      generate(k, values, msg);
+      return values;
+    }
+    document.getElementById('pfGen').addEventListener('click', function () {
+      generate(sel.value, collect(), msg, 'fillable');
+    });
+    var flatBtn = document.getElementById('pfGenFlat');
+    if (flatBtn) flatBtn.addEventListener('click', function () {
+      generate(sel.value, collect(), msg, 'flat');
     });
     renderFields();
   }
