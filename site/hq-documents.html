@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="assets/css/buymo.css?v=38" />
 <link rel="stylesheet" href="assets/css/board.css?v=12" />
 <style>
 .doc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px;}
@@ -75,10 +75,10 @@
     <!-- 発行書類 -->
     <div class="doc-grid">
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">📝</span><span class="doc-title">売買契約書（買取用）</span></div>
-        <p class="doc-desc">車両の買取に関する売買契約書。A4×2枚（甲乙各1通）。事業者情報・車両情報・金額・特約条項を含む標準書式。</p>
+        <div class="doc-card-head"><span class="doc-icon">📝</span><span class="doc-title">自動車売買契約書（約款付き）</span></div>
+        <p class="doc-desc">全15条の約款付き・法的に詳細な買取契約書。下の入力フォームに記入すると各項目へ自動印字され、A4で印刷／PDF保存できます。</p>
         <div class="doc-btns">
-          <button class="doc-btn" onclick="printDoc('contract')">A4で発行・印刷</button>
+          <button class="doc-btn" onclick="document.getElementById('contractSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
         </div>
       </div>
       <div class="doc-card">
@@ -109,6 +109,40 @@
         <div class="doc-btns">
           <button class="doc-btn" onclick="printDoc('ownership-release')">A4で発行・印刷</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 自動車売買契約書（約款付き） -->
+    <div class="ref-section" id="contractSection">
+      <h2>📝 自動車売買契約書（約款付き）</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">下記に入力して「約款付きで発行」を押すと、全15条の約款付き契約書に各項目が印字されます。上部の案件選択・お名前・住所・車台番号・登録番号も反映されます。空欄は空白のまま出力されます。</p>
+      <div class="ct-grid">
+        <label class="ct-f"><span>契約日</span><input id="ctDate" type="text" placeholder="例：2026年9月8日"></label>
+        <label class="ct-f"><span>甲（売主）氏名</span><input id="ctKoName" type="text" placeholder="山田 太郎"></label>
+        <label class="ct-f"><span>甲 住所</span><input id="ctKoAddr" type="text" placeholder="〒000-0000 ○○県…"></label>
+        <label class="ct-f"><span>甲 電話</span><input id="ctKoTel" type="tel" placeholder="090-0000-0000"></label>
+        <label class="ct-f"><span>車名</span><input id="ctCarName" type="text" placeholder="トヨタ ハイエース"></label>
+        <label class="ct-f"><span>型式</span><input id="ctCarType" type="text" placeholder="CBF-TRH200V"></label>
+        <label class="ct-f"><span>年式</span><input id="ctCarYear" type="text" placeholder="令和2年"></label>
+        <label class="ct-f"><span>走行距離(km)</span><input id="ctMileage" type="text" placeholder="82000"></label>
+        <label class="ct-f"><span>車台番号</span><input id="ctVin" type="text" placeholder="TRH200-1234567"></label>
+        <label class="ct-f"><span>登録番号</span><input id="ctPlate" type="text" placeholder="福島 300 あ 1234"></label>
+        <label class="ct-f"><span>色</span><input id="ctColor" type="text" placeholder="ホワイト"></label>
+        <label class="ct-f"><span>売買代金(税込・円)</span><input id="ctPrice" type="text" inputmode="numeric" placeholder="1500000"></label>
+        <label class="ct-f"><span>支払方法</span><select id="ctPayMethod"><option>銀行振込</option><option>現金</option></select></label>
+        <label class="ct-f"><span>支払期日</span><input id="ctPayDue" type="text" placeholder="例：引渡し後3営業日以内"></label>
+        <label class="ct-f ct-wide"><span>振込先</span><input id="ctBank" type="text" placeholder="○○銀行 ○○支店 普通 1234567 …"></label>
+        <label class="ct-f"><span>引渡日</span><input id="ctDeliveryDate" type="text" placeholder="例：2026年9月15日"></label>
+        <label class="ct-f"><span>引渡場所</span><input id="ctDeliveryPlace" type="text" placeholder="甲宅／指定場所 等"></label>
+        <label class="ct-f"><span>乙（買主）名称</span><input id="ctOtsuName" type="text" placeholder="合同会社アイズ（BUYMO）／加盟店名"></label>
+        <label class="ct-f"><span>乙 担当者</span><input id="ctOtsuStaff" type="text" placeholder="担当者名"></label>
+        <label class="ct-f"><span>乙 住所</span><input id="ctOtsuAddr" type="text" placeholder="〒979-0204 福島県いわき市…"></label>
+        <label class="ct-f"><span>乙 古物商許可</span><input id="ctOtsuKobutsu" type="text" placeholder="福島県公安委員会 第…号"></label>
+        <label class="ct-f ct-wide"><span>特記事項</span><textarea id="ctNote" rows="2" placeholder="任意（受渡し条件・付属品・残債精算など）"></textarea></label>
+      </div>
+      <div class="pf-actions" style="margin-top:12px;">
+        <button class="doc-btn" type="button" onclick="printDoc('contract')">📄 約款付きで発行・印刷</button>
+        <span style="font-size:12px;color:#999;">※ひな形です。内容は必要に応じてご確認・調整ください。</span>
       </div>
     </div>
 
@@ -164,9 +198,17 @@
 .pf-f input:focus{outline:2px solid var(--green);border-color:var(--green);}
 .pf-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .pf-msg{font-size:13px;color:#0F766E;font-weight:700;}
+.ct-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 16px;margin-bottom:8px;}
+@media(max-width:820px){.ct-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.ct-grid{grid-template-columns:1fr;}}
+.ct-f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#556;}
+.ct-f.ct-wide{grid-column:1 / -1;}
+.ct-f input,.ct-f select,.ct-f textarea{border:1px solid #dde3ee;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;font-weight:400;}
+.ct-f input:focus,.ct-f select:focus,.ct-f textarea:focus{outline:2px solid var(--green);border-color:var(--green);}
+.ct-f textarea{resize:vertical;line-height:1.6;}
 </style>
 <script src="assets/js/hq-common.js?v=12"></script>
-<script src="assets/js/hq-documents.js" defer></script>
+<script src="assets/js/hq-documents.js?v=2" defer></script>
 <script src="assets/js/pdf-fill.js?v=1" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
