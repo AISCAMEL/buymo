@@ -561,6 +561,7 @@ window.HQ = (function () {
     });
     el.innerHTML = html;
     wireNavSearch(r);
+    mountGlobalSearch(r, flat);
     // 加盟店がコンテンツページを開いたら閲覧履歴を記録（本部の進捗把握用）
     if (r === 'partner') {
       var cur = null; for (var q = 0; q < flat.length; q++) if (flat[q][0] === active) { cur = flat[q]; break; }
@@ -599,6 +600,130 @@ window.HQ = (function () {
     document.addEventListener('click', function (e) { if (!e.target.closest('.side-search')) { box.hidden = true; } });
   }
 
+  // ========= 全画面 横断検索（ヘッダー🔍・全幅対応：案件／加盟店／メニュー） =========
+  function mountGlobalSearch(role, flat) {
+    if (window.__gsMounted) { window.__gsMenu = flat || window.__gsMenu; window.__gsRole = role; return; }
+    window.__gsMounted = true;
+    window.__gsMenu = flat || [];
+    window.__gsRole = role;
+    var isP = (role === 'partner');
+    var portalUrl = 'portal-login.html';
+
+    // ヘッダーに 🔍 ボタンを差し込む（ログアウトの直前）
+    var cont = document.querySelector('.portal-header .container');
+    if (cont && !document.getElementById('gsBtn')) {
+      var btn = document.createElement('button');
+      btn.id = 'gsBtn'; btn.type = 'button'; btn.className = 'gs-btn';
+      btn.setAttribute('aria-label', '検索');
+      btn.title = '検索（ / または Ctrl+K）';
+      btn.innerHTML = '<span class="gs-ico" aria-hidden="true">🔍</span><span class="gs-btn-t">検索</span>';
+      var logout = cont.querySelector('.portal-logout');
+      if (logout) cont.insertBefore(btn, logout); else cont.appendChild(btn);
+      btn.addEventListener('click', openGS);
+    }
+
+    // オーバーレイ（1回だけ生成）
+    if (!document.getElementById('gsOverlay')) {
+      var ov = document.createElement('div');
+      ov.id = 'gsOverlay'; ov.className = 'gs-overlay'; ov.hidden = true;
+      ov.innerHTML =
+        '<div class="gs-modal" role="dialog" aria-modal="true" aria-label="横断検索">' +
+          '<div class="gs-bar"><span class="gs-bar-ico" aria-hidden="true">🔍</span>' +
+          '<input type="search" id="gsInput" autocomplete="off" placeholder="案件ID・顧客名・加盟店名・メニューで検索…" />' +
+          '<button type="button" class="gs-close" id="gsClose" aria-label="閉じる">✕</button></div>' +
+          '<div class="gs-results" id="gsResults"></div>' +
+          '<div class="gs-foot"><span><b>Enter</b> 先頭を開く</span><span><b>Esc</b> 閉じる</span><span><b>/</b> または <b>Ctrl+K</b> で検索</span></div>' +
+        '</div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click', function (e) { if (e.target === ov) closeGS(); });
+      document.getElementById('gsClose').addEventListener('click', closeGS);
+      var gi = document.getElementById('gsInput');
+      gi.addEventListener('input', runGS);
+      gi.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          var first = document.querySelector('#gsResults .gs-res');
+          if (first) { window.location.href = first.getAttribute('href'); }
+        }
+      });
+    }
+
+    // キーボードショートカット（1回だけ）
+    if (!window.__gsKeys) {
+      window.__gsKeys = true;
+      document.addEventListener('keydown', function (e) {
+        var ov = document.getElementById('gsOverlay');
+        if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) { e.preventDefault(); openGS(); return; }
+        if (e.key === 'Escape' && ov && !ov.hidden) { closeGS(); return; }
+        if (e.key === '/' && ov && ov.hidden) {
+          var t = e.target, tag = (t && t.tagName || '').toLowerCase();
+          if (tag !== 'input' && tag !== 'textarea' && tag !== 'select' && !(t && t.isContentEditable)) { e.preventDefault(); openGS(); }
+        }
+      });
+    }
+
+    function openGS() {
+      var ov = document.getElementById('gsOverlay'); if (!ov) return;
+      ov.hidden = false; document.body.style.overflow = 'hidden';
+      var gi = document.getElementById('gsInput');
+      setTimeout(function () { gi && gi.focus(); }, 20);
+      runGS();
+    }
+    function closeGS() {
+      var ov = document.getElementById('gsOverlay'); if (!ov) return;
+      ov.hidden = true; document.body.style.overflow = '';
+    }
+    function runGS() {
+      var gi = document.getElementById('gsInput'), box = document.getElementById('gsResults');
+      if (!gi || !box) return;
+      var q = (gi.value || '').trim().toLowerCase();
+      var role2 = window.__gsRole, boardHref = 'hq.html?role=' + (role2 === 'partner' ? 'partner' : 'hq');
+      var groups = [];
+
+      // メニュー（コマンドパレット的にページへジャンプ）
+      var menu = (window.__gsMenu || []).filter(function (it) {
+        if (!q) return true;
+        return (it[1] || '').toLowerCase().indexOf(q) >= 0;
+      }).slice(0, 8).map(function (it) {
+        return { t: (it[3] || '📄') + ' ' + it[1], s: 'メニューを開く', href: it[2] };
+      });
+      if (menu.length) groups.push({ label: 'メニュー', items: menu });
+
+      if (q) {
+        // 案件
+        var caseItems = [];
+        (getCasesLS() || []).forEach(function (c) {
+          if (caseItems.length >= 8) return;
+          var hay = ((c.id || '') + ' ' + (c.name || '') + ' ' + (c.genre || '') + ' ' + (c.assignee || '') + ' ' + (c.stage || '')).toLowerCase();
+          if (hay.indexOf(q) >= 0) caseItems.push({ t: '🗂️ ' + (c.id || '') + '　' + (c.name || ''), s: (c.assignee || '担当未定') + '・' + (c.stage || '') + (c.genre ? '・' + c.genre : ''), href: boardHref + '&case=' + encodeURIComponent(c.id) });
+        });
+        if (caseItems.length) groups.push({ label: '案件', items: caseItems });
+
+        // 加盟店（本部のみ店舗管理ページへ、加盟店ロールでも表示）
+        var storeItems = [];
+        (getStores() || []).forEach(function (s) {
+          if (storeItems.length >= 8) return;
+          if (((s.name || '') + ' ' + (s.area || '')).toLowerCase().indexOf(q) >= 0)
+            storeItems.push({ t: '🏪 ' + (s.name || ''), s: (s.area || '') + (isP ? '' : '・加盟店管理を開く'), href: isP ? boardHref : 'hq-stores.html?store=' + encodeURIComponent(s.name) });
+        });
+        if (storeItems.length) groups.push({ label: '加盟店', items: storeItems });
+      }
+
+      if (!groups.length) {
+        box.innerHTML = '<div class="gs-none">' + (q ? 'キーワードに一致する項目がありません。' : '案件ID・顧客名・加盟店名、またはメニュー名を入力してください。') + '</div>';
+        return;
+      }
+      box.innerHTML = groups.map(function (g) {
+        return '<div class="gs-group"><div class="gs-group-h">' + esc(g.label) + '</div>' +
+          g.items.map(function (o) {
+            return '<a class="gs-res" href="' + o.href + '"><span class="gs-res-t">' + esc(o.t) + '</span><span class="gs-res-s">' + esc(o.s) + '</span></a>';
+          }).join('') + '</div>';
+      }).join('');
+    }
+
+    // 外から呼べるように公開
+    window.__openGlobalSearch = openGS;
+  }
+
   return {
     ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES, CALENDAR: CALENDAR,
     mountCalendar: mountCalendar, calendarEmbedUrl: calendarEmbedUrl,
@@ -616,6 +741,7 @@ window.HQ = (function () {
     loadBlog: loadBlog, addBlog: addBlog, deleteBlog: deleteBlog,
     loadMaterials: loadMaterials, addMaterial: addMaterial, deleteMaterial: deleteMaterial,
     loadPartners: loadPartners, addPartner: addPartner, withdrawPartner: withdrawPartner, restorePartner: restorePartner, reissuePartner: reissuePartner, setPartnerPw: setPartnerPw,
-    yen: yen, esc: esc, stageIdx: stageIdx, nav: nav
+    yen: yen, esc: esc, stageIdx: stageIdx, nav: nav,
+    openSearch: function () { if (window.__openGlobalSearch) window.__openGlobalSearch(); }
   };
 })();

@@ -219,7 +219,7 @@
         payday = v('aPayday') || '末日', territory = v('aTerritory');
     var initFee = Number(v('aInitFee')) || 0;
     var today = fmt(new Date());
-    var FEES = (window.HQ && HQ.FEES) || { auctionSystemFee: 5000, directHqFee: 30000, auctionRate: 0.05 };
+    var FEES = (window.HQ && HQ.FEES) || { auctionSystemFee: 10000, directHqFee: 30000, auctionRate: 0.05 };
     var aucRate = Math.round((FEES.auctionRate || 0.05) * 100);
     var OL = function (items) { return '<ol class="ag-ol"><li>' + items.join('</li><li>') + '</li></ol>'; };
 
@@ -264,7 +264,7 @@
         ])],
       ['オークション取引の売上精算',
         OL([
-          '乙が本部アカウントを通じて車両を売却したときは、甲は、売却代金（落札額）から本部手数料（システム利用料 <b>' + yen(FEES.auctionSystemFee) + '</b>／件及び成約手数料＝粗利の <b>' + aucRate + '％</b>）並びに陸送費・保管費等の実費を控除した残額を、乙の取り分として乙に支払う。',
+          '乙が本部アカウントを通じて車両を売却したときは、甲は、売却代金（落札額）から本部手数料（出品代行手数料 <b>' + yen(FEES.auctionSystemFee) + '</b>／件及び成約手数料＝粗利の <b>' + aucRate + '％</b>）並びに陸送費・保管費等の実費を控除した残額を、乙の取り分として乙に支払う。',
           '甲の販路を利用した売却（直販）の場合、本部手数料は一律 <b>' + yen(FEES.directHqFee) + '</b>（税抜）とする。',
           '本部手数料及び実費の額は、甲が別途定める料金表によるものとし、経済情勢等に応じて改定されることがある。改定は乙への事前通知をもって効力を生じる。'
         ])],
@@ -325,7 +325,7 @@
       '<tr><td class="lbl">月額費用</td><td>' + yen(c.monthly) + '（税込）／毎月 ' + esc(payday) + ' 支払</td></tr>' +
       '<tr><td class="lbl">支払総額</td><td>' + yen(c.contractTotal) + '</td></tr>' +
       '<tr><td class="lbl">中途解約時</td><td>残存期間分を一括請求（＝契約総額 − 既払金）</td></tr>' +
-      '<tr><td class="lbl">オークション手数料</td><td>システム利用料 ' + yen(FEES.auctionSystemFee) + '／件 ＋ 成約手数料（粗利×' + aucRate + '％）</td></tr>' +
+      '<tr><td class="lbl">オークション手数料</td><td>出品代行手数料 ' + yen(FEES.auctionSystemFee) + '／件 ＋ 成約手数料（粗利×' + aucRate + '％）</td></tr>' +
       '<tr><td class="lbl">クレーム対応</td><td>一次＝本部／二次＝加盟店。利益返還時は本部手数料を返還し、返還額・ペナルティ等は加盟店負担</td></tr>' +
       '<tr><td class="lbl">更新</td><td>' + esc(renewal) + '</td></tr>' +
       '</table>';

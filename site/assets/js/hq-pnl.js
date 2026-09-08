@@ -79,7 +79,7 @@
           '<table class="pnl-t">' +
             incRow('加盟店 月額（積立・ロイヤリティ）', inc.monthly) +
             incRow('紹介料', inc.referral) +
-            incRow('オークション（システム利用料＋成約料）', inc.auction) +
+            incRow('オークション（出品代行手数料＋成約料）', inc.auction) +
             incRow('出品手数料', inc.listing) +
             incRow('加盟金', inc.initfee, '当月加盟のみ') +
             incRow('未納金（繰越）', inc.unpaid) +
