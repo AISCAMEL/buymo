@@ -430,6 +430,11 @@
           '<div class="cp-vehicle-grid" id="cpVehicleGrid"></div>' +
           '<div class="cp-vehicle-photos" id="cpVehiclePhotos"></div>' +
         '</div>' +
+        '<div class="cp-cust-area" id="cpCustArea" style="display:none;">' +
+          '<h3>👥 同一のお客様の履歴<span class="cp-cust-badge" id="cpCustBadge"></span></h3>' +
+          '<div class="cp-cust-list" id="cpCustList"></div>' +
+          '<button class="cp-cust-add" id="cpCustAdd" type="button">＋ このお客様で次の車（2台目〜）を登録</button>' +
+        '</div>' +
         '<div class="cp-btn-row">' +
           '<button class="cp-save" id="cpSave">保存する</button>' +
           '<button class="cp-delete" id="cpDelete" style="display:none;">🗑 案件を削除</button>' +
@@ -503,6 +508,25 @@
             '<button id="cpSettlement" class="cp-sale-settle">清算書を発行 📄</button>' +
           '</div>' +
         '</div>' +
+        '<div class="cp-close-area">' +
+          '<h3>🎉 成約・お引渡し管理</h3>' +
+          '<label class="cp-close-won"><input type="checkbox" id="cpWon"> この案件は成約（買取成立）</label>' +
+          '<div class="cp-close-grid">' +
+            '<label>売却予定日<input type="date" id="cpSoldPlan"></label>' +
+            '<label>売却日（引渡）<input type="date" id="cpSoldDate"></label>' +
+            '<label>入金（振込）日<input type="date" id="cpPayDate"></label>' +
+            '<label>名義変更日<input type="date" id="cpNameChange"></label>' +
+          '</div>' +
+          '<div class="cp-close-docs">' +
+            '<span class="cp-close-docs-h">📄 書類の確認</span>' +
+            '<label><input type="checkbox" id="cpDoc1"> 必要書類 受領</label>' +
+            '<label><input type="checkbox" id="cpDoc2"> 譲渡・委任状</label>' +
+            '<label><input type="checkbox" id="cpDoc3"> 印鑑証明</label>' +
+            '<label><input type="checkbox" id="cpDoc4"> 車検証・自賠責</label>' +
+          '</div>' +
+          '<div class="cp-close-status" id="cpCloseStatus"></div>' +
+          '<p class="cp-close-note">日付・チェックは「保存する」で記録されます。</p>' +
+        '</div>' +
       '</aside>';
     document.body.appendChild(panel);
     panel.addEventListener('click', function (e) { if (e.target.hasAttribute('data-close')) closePanel(); });
@@ -542,6 +566,7 @@
     }
     document.getElementById('cpSaleApply').addEventListener('click', applySale);
     document.getElementById('cpSettlement').addEventListener('click', function () { printSettlement(findCase(panelId)); });
+    var custAdd = document.getElementById('cpCustAdd'); if (custAdd) custAdd.addEventListener('click', addSecondCar);
     // ロール別の操作制御：売却方法・落札額は加盟店が入力／実費は本部が入力
     applySaleRoleUI();
   }
@@ -604,6 +629,76 @@
     var ar2 = document.getElementById('cpAuctionResult'); if (ar2) ar2.value = c.auctionResult || '出品予定';
     var fa = document.getElementById('cpFlowAction'); if (fa) fa.value = c.flowAction || '';
     updateSaleCalc();
+    /* 成約・お引渡し管理 */
+    var setV = function (id, v) { var e = document.getElementById(id); if (e) e.value = v || ''; };
+    var setC = function (id, v) { var e = document.getElementById(id); if (e) e.checked = !!v; };
+    setC('cpWon', c.won || HQ.WON.indexOf(c.stage) >= 0);
+    setV('cpSoldPlan', c.soldPlan); setV('cpSoldDate', c.soldDate);
+    setV('cpPayDate', c.payDate); setV('cpNameChange', c.nameChangeDate);
+    var dc = c.docCheck || {};
+    setC('cpDoc1', dc.received); setC('cpDoc2', dc.transfer); setC('cpDoc3', dc.seal); setC('cpDoc4', dc.inspect);
+    renderCloseStatus(c);
+    renderCustomer(c);
+  }
+  /* 成約サマリー（未設定項目のリマインド） */
+  function renderCloseStatus(c) {
+    var el = document.getElementById('cpCloseStatus'); if (!el) return;
+    var won = c.won || HQ.WON.indexOf(c.stage) >= 0;
+    if (!won) { el.innerHTML = '<span class="cp-close-hint">成約になったらチェックを入れ、売却日・振込日・名義変更日を記録しましょう。</span>'; return; }
+    var todo = [];
+    if (!c.soldDate) todo.push('売却日');
+    if (!c.payDate) todo.push('入金日');
+    if (!c.nameChangeDate) todo.push('名義変更日');
+    var dc = c.docCheck || {};
+    if (!(dc.received && dc.transfer && dc.seal && dc.inspect)) todo.push('書類確認');
+    el.innerHTML = todo.length
+      ? '<span class="cp-close-todo">未設定：' + todo.map(HQ.esc).join('・') + '</span>'
+      : '<span class="cp-close-done">✅ 成約後の記録がすべて完了しています。</span>';
+  }
+  /* 同一顧客の判定キー（電話→氏名+メール） */
+  function custKey(c) {
+    var t = (c.tel || '').replace(/[^0-9]/g, '');
+    if (t.length >= 6) return 't:' + t;
+    var n = (c.name || '').trim();
+    return n ? 'n:' + n + '|' + (c.email || '').trim() : '';
+  }
+  function renderCustomer(c) {
+    var area = document.getElementById('cpCustArea'); if (!area) return;
+    var key = custKey(c);
+    if (!key) { area.style.display = 'none'; return; }
+    var mates = cases.filter(function (x) { return custKey(x) === key; });
+    mates.sort(function (a, b) { return String(a.date || a.id).localeCompare(String(b.date || b.id)) || String(a.id).localeCompare(String(b.id)); });
+    var badge = document.getElementById('cpCustBadge');
+    if (badge) { badge.textContent = mates.length > 1 ? '全' + mates.length + '台（リピート）' : '初回'; badge.className = 'cp-cust-badge' + (mates.length > 1 ? ' repeat' : ''); }
+    var list = document.getElementById('cpCustList');
+    if (list) {
+      list.innerHTML = mates.map(function (m, i) {
+        var cur = m.id === c.id;
+        return '<div class="cp-cust-item' + (cur ? ' cur' : '') + '" data-id="' + HQ.esc(m.id) + '">' +
+          '<span class="cp-cust-n">' + (i + 1) + '台目</span>' +
+          '<span class="cp-cust-main"><b>' + HQ.esc(m.id) + '</b>　' + HQ.esc(m.genre || '—') + (cur ? ' <em>（今回）</em>' : '') + '</span>' +
+          '<span class="cp-cust-sub">' + HQ.esc(m.stage || '') + (m.amount ? '・' + HQ.yen(m.amount) : '') + (m.date ? '・' + HQ.esc(m.date) : '') + '</span>' +
+        '</div>';
+      }).join('');
+      list.querySelectorAll('.cp-cust-item').forEach(function (el) {
+        el.addEventListener('click', function () { var id = el.getAttribute('data-id'); if (id && id !== panelId) openPanel(id); });
+      });
+    }
+    area.style.display = '';
+  }
+  /* このお客様で次の車（2台目〜）を登録 */
+  function addSecondCar() {
+    var c = findCase(panelId); if (!c) return;
+    var key = custKey(c);
+    var n = (key ? cases.filter(function (x) { return custKey(x) === key; }).length : 1) + 1;
+    var nc = {
+      id: 'CS-' + Date.now().toString().slice(-5), name: c.name || '', tel: c.tel || '', email: c.email || '',
+      genre: '', assignee: c.assignee || '', stage: '新規受付', amount: 0, memo: '', history: [],
+      date: nowStr().slice(0, 10)
+    };
+    addHistory(nc, '案件を作成（' + (c.name || '同一顧客') + ' の' + n + '台目）');
+    cases.unshift(nc); save(nc); render(); openPanel(nc.id);
+    flash(document.getElementById('cpCustAdd'), '2台目を作成しました ✓');
   }
   function renderVehicle(c) {
     var area = document.getElementById('cpVehicleArea'); if (!area) return;
@@ -702,6 +797,20 @@
       recordFlowWeek(c);
       if (c.saleMethod === 'オークション') persistAuction(c);
     }
+    /* 成約・お引渡し管理 */
+    var wasWon = !!c.won;
+    c.won = !!(document.getElementById('cpWon') || {}).checked;
+    if (c.won && !wasWon) addHistory(c, '成約（買取成立）にしました');
+    c.soldPlan = (document.getElementById('cpSoldPlan') || {}).value || '';
+    c.soldDate = (document.getElementById('cpSoldDate') || {}).value || '';
+    c.payDate = (document.getElementById('cpPayDate') || {}).value || '';
+    c.nameChangeDate = (document.getElementById('cpNameChange') || {}).value || '';
+    c.docCheck = {
+      received: !!(document.getElementById('cpDoc1') || {}).checked,
+      transfer: !!(document.getElementById('cpDoc2') || {}).checked,
+      seal: !!(document.getElementById('cpDoc3') || {}).checked,
+      inspect: !!(document.getElementById('cpDoc4') || {}).checked
+    };
     save(c); render(); fillPanel(c);
     flash(document.getElementById('cpSave'), '保存しました ✓');
   }
