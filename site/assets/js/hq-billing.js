@@ -204,7 +204,7 @@
     function line(label, note, amt) { if (!amt) return; rows.push('<tr><td>' + label + (note ? ' <span class="n">' + note + '</span>' : '') + '</td><td class="r">' + yen(amt) + '</td></tr>'); }
     line('月額（積立・ロイヤリティ）', month + '分', l.monthly);
     line('紹介料', '¥1,000 × ' + l.refcount + '件', l.referral);
-    line('オークションシステム利用料', '出品代行', l.auctionsys);
+    line('オークション出品代行手数料', '税抜1万円', l.auctionsys);
     line('オークション成約料', '粗利 × 5%', l.auctionfee);
     line('出品手数料', '', l.listing);
     line('オークション出品料（流れ）', '未落札分', l.auctionflow);
@@ -258,7 +258,7 @@
   function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
   document.getElementById('btnCsv').addEventListener('click', function () {
     var month = monthEl.value || thisMonth(); var st = loadState(month); var useTax = taxEl.checked;
-    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝｼｽﾃﾑ利用料', 'ｵｰｸｼｮﾝ成約料5%', '出品手数料', 'ｵｰｸｼｮﾝ流れ出品料', '加盟金', '未納金', 'ペナルティ', 'その他', '小計', '消費税', '合計(税込)']];
+    var rows = [['対象月', '加盟店', '月額', '紹介料', '紹介件数', 'ｵｰｸｼｮﾝ出品代行手数料', 'ｵｰｸｼｮﾝ成約料5%', '出品手数料', 'ｵｰｸｼｮﾝ流れ出品料', '加盟金', '未納金', 'ペナルティ', 'その他', '小計', '消費税', '合計(税込)']];
     stores.forEach(function (s) {
       var l = lineOf(s.name, month, st); var sub = subtotal(l); var tax = taxOf(sub, useTax);
       rows.push([month, s.name, l.monthly, l.referral, l.refcount, l.auctionsys, l.auctionfee, l.listing, l.auctionflow, l.initfee, l.unpaid, l.penalty, l.other, sub, tax, sub + tax]);

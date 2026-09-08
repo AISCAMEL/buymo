@@ -10,7 +10,7 @@
   var host = document.getElementById('revSim');
   if (!host || !window.HQ) return;
 
-  var FEES = HQ.FEES || { franchiseMonthly: 35000, auctionSystemFee: 5000, auctionRate: 0.05 };
+  var FEES = HQ.FEES || { franchiseMonthly: 35000, auctionSystemFee: 10000, auctionRate: 0.05 };
   var yen = HQ.yen || function (n) { return '¥' + (Number(n) || 0).toLocaleString('ja-JP'); };
 
   function thisMonthKey() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1); }
@@ -72,7 +72,7 @@
     { grp: 'オークション手数料', items: [
       { k: 'aucCount', label: '月間 成約件数', unit: '件' },
       { k: 'aucAvgProfit', label: '平均粗利／件', unit: '円', step: 10000 },
-      { k: 'aucSysFee', label: 'システム利用料／件', unit: '円', step: 1000 }
+      { k: 'aucSysFee', label: '出品代行手数料／件', unit: '円', step: 1000 }
     ] },
     { grp: '加盟金（新規）', items: [
       { k: 'newStores', label: '新規加盟店／月', unit: '店' },
@@ -146,7 +146,7 @@
         bar('加盟金', r.revJoining, r.revTotal, 'b3') +
         bar('データ（紹介）', r.revData, r.revTotal, 'b4') +
       '</div>' +
-      '<p class="rs-note">オークション手数料＝1件あたり（システム利用料 ' + yen(v.aucSysFee) + ' ＋ 平均粗利 ' + yen(v.aucAvgProfit) + ' × ' + Math.round(FEES.auctionRate * 100) + '%）＝ <b>' + yen(r.aucFeePer) + '／件</b>。数値を変更すると自動で再計算します（入力は端末に保存）。</p>';
+      '<p class="rs-note">オークション手数料＝1件あたり（出品代行手数料 ' + yen(v.aucSysFee) + ' ＋ 平均粗利 ' + yen(v.aucAvgProfit) + ' × ' + Math.round(FEES.auctionRate * 100) + '%）＝ <b>' + yen(r.aucFeePer) + '／件</b>。数値を変更すると自動で再計算します（入力は端末に保存）。</p>';
   }
 
   render();
