@@ -509,6 +509,7 @@ window.HQ = (function () {
         ['board', '案件ボード', 'hq.html?role=partner', '🗂️'],
         ['leadmarket', '案件マーケット', 'partner-leads.html', '🛒'],
         ['sales', '売上・請求', 'partner-sales.html', '💴'],
+        ['documents', '書類発行', 'hq-documents.html', '📄'],
         ['mystore', 'マイ店舗ページ', 'partner-mystore.html', '🏪']
       ]],
       ['学ぶ・支援', [

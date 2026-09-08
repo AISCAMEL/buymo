@@ -2,6 +2,8 @@
 (function () {
   'use strict';
   HQ.nav('documents');
+  // ロールに応じたヘッダー表示（加盟店も利用可）
+  try { var r = AUTH.role && AUTH.role(); if (r === 'partner') { var t = document.getElementById('portalTitle'); if (t) t.textContent = '加盟店'; } } catch (e) {}
 
   /* ---- 共通ヘルパー ---- */
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
