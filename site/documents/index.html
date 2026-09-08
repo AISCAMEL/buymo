@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" />
-<link rel="stylesheet" href="/assets/css/buymo.css?v=37" />
+<link rel="stylesheet" href="/assets/css/buymo.css?v=38" />
 <style>
   .doc-hero{background:radial-gradient(700px 260px at 82% -10%,#DCF5F1,transparent 60%),linear-gradient(180deg,#fff,var(--green-bg));padding:48px 0 40px;text-align:center;}
   .doc-hero .breadcrumb{font-size:13px;color:#777;margin-bottom:12px;}
@@ -58,6 +58,38 @@
     .doc-sec h2{font-size:18px;}
     .doc-sec .sub{margin-left:0;}
   }
+  /* ===== 必要書類 かんたん診断（インタラクティブ） ===== */
+  .dcheck{max-width:880px;margin:0 auto 34px;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:0 10px 30px rgba(10,61,56,.08);overflow:hidden;}
+  .dcheck-head{background:linear-gradient(135deg,var(--green-dark),var(--green));color:#fff;padding:24px 24px 22px;}
+  .dcheck-badge{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);border-radius:30px;font-size:12px;font-weight:800;letter-spacing:.06em;padding:5px 14px;}
+  .dcheck-head h2{font-size:22px;font-weight:900;color:#fff;margin:12px 0 6px;line-height:1.4;}
+  .dcheck-head p{font-size:13.5px;color:#e6f3f1;line-height:1.8;}
+  .dcheck-form{padding:20px 24px 6px;}
+  .dcheck-q{margin-bottom:18px;}
+  .dcheck-q>label{display:block;font-size:13.5px;font-weight:900;color:var(--green-dark);margin-bottom:10px;}
+  .dcheck-opts{display:flex;flex-wrap:wrap;gap:8px;}
+  .dcheck-opts button{border:1.5px solid var(--border);background:#fff;color:#44524f;border-radius:10px;padding:10px 15px;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s;}
+  .dcheck-opts button:hover{border-color:var(--green);}
+  .dcheck-opts button.on{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 4px 12px rgba(15,118,110,.3);}
+  .dcheck-result{border-top:1px solid var(--border);padding:22px 24px 26px;background:var(--green-bg);}
+  .dcheck-rgrp{margin-bottom:18px;}
+  .dcheck-rgrp:last-child{margin-bottom:0;}
+  .dcheck-rgrp-h{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900;color:var(--green-dark);margin-bottom:10px;}
+  .dcheck-rgrp-h .cnt{font-size:11.5px;font-weight:800;color:#fff;background:var(--green);border-radius:20px;padding:1px 9px;}
+  .dcheck-rgrp.buymo .dcheck-rgrp-h{color:var(--gold-dark,#D99A1F);}
+  .dcheck-rgrp.buymo .dcheck-rgrp-h .cnt{background:var(--gold,#F4B740);color:#5a3d00;}
+  .dcheck-list{list-style:none;padding:0;margin:0;display:grid;gap:8px;}
+  .dcheck-list li{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--border);border-radius:11px;padding:11px 14px;font-size:14px;color:#2c3e3b;line-height:1.6;}
+  .dcheck-list li .ic{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;margin-top:1px;font-weight:900;}
+  .dcheck-rgrp.buymo .dcheck-list li .ic{background:var(--gold,#F4B740);color:#5a3d00;}
+  .dcheck-list li b{font-weight:900;color:var(--green-dark);}
+  .dcheck-list li .rn{display:block;font-size:11.5px;color:#8a97a3;font-weight:600;margin-top:2px;}
+  .dcheck-notes{margin-top:6px;background:var(--red-wash);border:1px solid #f3c9c5;border-radius:12px;padding:13px 16px;}
+  .dcheck-notes li{font-size:12.5px;color:#7a2b26;line-height:1.8;margin-left:1.1em;}
+  .dcheck-print{display:inline-flex;align-items:center;gap:7px;margin-top:16px;background:#fff;border:1.5px solid var(--green);color:var(--green-dark);border-radius:30px;padding:9px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
+  .dcheck-print:hover{background:var(--green);color:#fff;}
+  @media(max-width:767px){.dcheck-head h2{font-size:19px;}.dcheck-opts button{flex:1 1 auto;}}
+  @media print{.site-header,.hamburger,.dcheck-form .dcheck-q:after,.dcheck-print{display:none!important;}.dcheck{box-shadow:none;}}
 </style>
 </head>
 <body>
@@ -106,6 +138,44 @@
 
   <section class="doc-wrap">
     <div class="container">
+
+      <!-- ============ かんたん診断ツール ============ -->
+      <div class="dcheck" id="docCheck">
+        <div class="dcheck-head">
+          <span class="dcheck-badge">🔎 かんたん診断</span>
+          <h2>あなたの必要書類を一瞬でチェック</h2>
+          <p>3つ選ぶだけ。ご状況に合わせた必要書類リストをその場で表示します。名義変更などの手続きはBUYMOが無料で代行します。</p>
+        </div>
+        <div class="dcheck-form">
+          <div class="dcheck-q">
+            <label>① お車の種類</label>
+            <div class="dcheck-opts" data-group="type">
+              <button type="button" data-v="futsu" class="on">普通車（登録車）</button>
+              <button type="button" data-v="kei">軽自動車</button>
+            </div>
+          </div>
+          <div class="dcheck-q">
+            <label>② 名義（所有者）</label>
+            <div class="dcheck-opts" data-group="owner">
+              <button type="button" data-v="self" class="on">ご本人</button>
+              <button type="button" data-v="family">ご家族など個人</button>
+              <button type="button" data-v="loan">ローン／リース中</button>
+              <button type="button" data-v="corp">法人名義</button>
+              <button type="button" data-v="souzoku">名義人が亡くなった（相続）</button>
+            </div>
+          </div>
+          <div class="dcheck-q">
+            <label>③ 住所・お名前の変更（車検証と現在の一致）</label>
+            <div class="dcheck-opts" data-group="change">
+              <button type="button" data-v="none" class="on">変わっていない</button>
+              <button type="button" data-v="move1">引越し1回（住所が違う）</button>
+              <button type="button" data-v="move2">引越し2回以上／つながらない</button>
+              <button type="button" data-v="name">結婚などで姓が変わった</button>
+            </div>
+          </div>
+        </div>
+        <div class="dcheck-result" id="docResult"></div>
+      </div>
 
       <div class="doc-note-top">
         <strong>※ 書類はすべて「原本」をご用意ください。</strong> コピー可の書類（本人確認書類など）は各項目に記載しています。
@@ -296,5 +366,111 @@
 
 <script src="/assets/js/buymo.js?v=2" defer></script>
 <script src="/assets/js/analytics.js?v=2" defer></script>
+<script>
+/* ===== 必要書類 かんたん診断エンジン ===== */
+(function () {
+  var root = document.getElementById('docCheck');
+  if (!root) return;
+  var out = document.getElementById('docResult');
+  var sel = { type: 'futsu', owner: 'self', change: 'none' };
+
+  // 選択ボタン（グループ内で単一選択）
+  root.querySelectorAll('.dcheck-opts').forEach(function (grp) {
+    var key = grp.getAttribute('data-group');
+    grp.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      grp.querySelectorAll('button').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      sel[key] = b.getAttribute('data-v');
+      render();
+    });
+  });
+
+  function build(s) {
+    var type = s.type, owner = s.owner, ch = s.change;
+    var you = [], buymo = [], notes = [];
+    var isFutsu = (type === 'futsu');
+
+    // 基本（全ケース共通）
+    you.push(['自動車検査証（車検証）の原本', '']);
+    you.push(['自賠責保険証明書', '']);
+    you.push(['自動車リサイクル券（預託証明書）', 'お手元になくてもお手続きできます']);
+    you.push(['本人確認書類（運転免許証など）', 'コピー可']);
+    you.push(['お振込先口座がわかるもの', '買取代金のお振込用']);
+    you.push([(isFutsu ? '自動車税' : '軽自動車税') + 'の納税証明書', '紛失時はご相談ください']);
+
+    // 名義パターン
+    if (owner === 'self' || owner === 'family') {
+      if (isFutsu) {
+        you.push(['印鑑登録証明書（発行1ヶ月以内・1〜2通）', '']);
+        you.push(['実印', '譲渡証明書・委任状に押印']);
+      } else {
+        you.push(['認印', '軽自動車は実印・印鑑登録証明書は不要']);
+      }
+      if (owner === 'family') notes.push('名義人ご本人の書類（印鑑登録証明書・実印／認印）が必要です。ご本人がお手続きできない場合はご相談ください。');
+    } else if (owner === 'loan') {
+      if (isFutsu) { you.push(['使用者ご本人の印鑑登録証明書（1ヶ月以内）', '']); you.push(['実印', '']); }
+      else { you.push(['認印', '']); }
+      buymo.push(['所有権解除の書類取り寄せ', '信販会社・ディーラー発行の譲渡証明書／委任状／印鑑証明の取り寄せをサポート']);
+      notes.push('ローン・リースが残っている場合は、残債の精算後に名義変更となります。残債の確認・精算もサポートします。');
+    } else if (owner === 'corp') {
+      if (isFutsu) {
+        you.push(['法人の印鑑登録証明書（1ヶ月以内・1〜2通）', '']);
+        you.push(['代表者印（会社実印）', '譲渡証明書・委任状に押印']);
+        if (ch !== 'none') you.push(['登記事項証明書（履歴事項全部証明書など）', '車検証と現在の商号・所在地が異なる場合']);
+      } else {
+        you.push(['社印（認印可）', '軽自動車は印鑑登録証明書は不要']);
+      }
+    } else if (owner === 'souzoku') {
+      you.push(['亡くなった方（被相続人）の戸籍（除籍）謄本', '出生〜死亡までがわかるもの']);
+      you.push(['相続人全員の戸籍謄本', '']);
+      you.push(['遺産分割協議書（相続人全員の実印）', '']);
+      you.push(['新しく所有される相続人の印鑑登録証明書・実印', '']);
+      if (isFutsu) notes.push('査定額が100万円以下の普通車は「遺産分割協議成立申立書」で手続きを簡略化できる場合があります。');
+      notes.push('相続は必要書類が複雑になりがちです。ご状況をお伺いし、BUYMOが最適な進め方をご案内します。');
+    }
+
+    // 住所・氏名の変更（個人所有＝本人／家族／ローンで影響）
+    if (owner === 'self' || owner === 'family' || owner === 'loan') {
+      if (isFutsu) {
+        if (ch === 'move1') you.push(['住民票', '車検証の住所→現住所のつながりを証明']);
+        else if (ch === 'move2') you.push(['戸籍の附票（または除票）', '引越しが2回以上／住所がつながらない場合']);
+        else if (ch === 'name') { you.push(['戸籍謄本', '姓の変更を証明']); notes.push('印鑑登録証明書は現在（変更後）の姓のものをご用意ください。'); }
+      } else {
+        if (ch !== 'none') you.push(['住民票', '住所・お名前の変更を確認']);
+      }
+    }
+
+    // BUYMOが無料代行（全ケース共通）
+    buymo.push(['譲渡証明書・委任状の作成', '必要事項はBUYMOがご用意します']);
+    buymo.push(['名義変更（移転登録）／解体・抹消などの手続き', '']);
+    buymo.push(['自動車税の月割還付・自賠責の解約案内', '']);
+
+    return { you: you, buymo: buymo, notes: notes };
+  }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function listHtml(items) {
+    return items.map(function (it) {
+      return '<li><span class="ic">✓</span><span><b>' + esc(it[0]) + '</b>' + (it[1] ? '<span class="rn">' + esc(it[1]) + '</span>' : '') + '</span></li>';
+    }).join('');
+  }
+
+  function render() {
+    var r = build(sel);
+    var typeLabel = sel.type === 'futsu' ? '普通車' : '軽自動車';
+    var html = '';
+    html += '<div class="dcheck-rgrp"><div class="dcheck-rgrp-h">📋 ご準備いただくもの（' + esc(typeLabel) + '）<span class="cnt">' + r.you.length + '</span></div><ul class="dcheck-list">' + listHtml(r.you) + '</ul></div>';
+    html += '<div class="dcheck-rgrp buymo"><div class="dcheck-rgrp-h">🤝 BUYMOが無料で代行<span class="cnt">' + r.buymo.length + '</span></div><ul class="dcheck-list">' + listHtml(r.buymo) + '</ul></div>';
+    if (r.notes.length) {
+      html += '<div class="dcheck-rgrp"><div class="dcheck-rgrp-h">⚠️ ご確認ください</div><div class="dcheck-notes"><ul>' + r.notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul></div></div>';
+    }
+    html += '<button type="button" class="dcheck-print" onclick="window.print()">🖨️ このリストを印刷／保存</button>';
+    out.innerHTML = html;
+  }
+
+  render();
+})();
+</script>
 </body>
 </html>
