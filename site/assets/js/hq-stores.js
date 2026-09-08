@@ -59,9 +59,37 @@
 
   function statsFor(name) {
     var cs = cases.filter(function (c) { return c.assignee === name; });
-    var sales = cs.filter(function (c) { return c.stage === '完了'; }).reduce(function (s, c) { return s + (Number(c.amount) || 0); }, 0);
+    var done = cs.filter(function (c) { return c.stage === '完了'; });
+    var sales = done.reduce(function (s, c) { return s + (Number(c.amount) || 0); }, 0);
     var active = cs.filter(function (c) { return c.stage !== '完了'; }).length;
-    return { total: cs.length, active: active, sales: sales };
+    return { total: cs.length, active: active, sales: sales, done: done.length };
+  }
+
+  /* ---- 加盟店ランク（成約件数・確定売上の高い方でティア判定） ---- */
+  var RANKS = [
+    { label: '新規', icon: '🌱', cls: 'r0', minDone: 0, minSales: 0 },
+    { label: 'ブロンズ', icon: '🥉', cls: 'r1', minDone: 1, minSales: 1 },
+    { label: 'シルバー', icon: '🥈', cls: 'r2', minDone: 5, minSales: 2000000 },
+    { label: 'ゴールド', icon: '🥇', cls: 'r3', minDone: 10, minSales: 5000000 },
+    { label: 'プラチナ', icon: '👑', cls: 'r4', minDone: 20, minSales: 10000000 }
+  ];
+  function rankIndex(st) {
+    var byCount = 0, bySales = 0;
+    for (var i = RANKS.length - 1; i >= 0; i--) { if (st.done >= RANKS[i].minDone) { byCount = i; break; } }
+    for (var j = RANKS.length - 1; j >= 0; j--) { if (st.sales >= RANKS[j].minSales) { bySales = j; break; } }
+    return Math.max(byCount, bySales);
+  }
+  function rankBadge(st) {
+    var idx = rankIndex(st), r = RANKS[idx];
+    var html = '<span class="store-rank ' + r.cls + '" title="成約 ' + st.done + '件・確定売上 ' + HQ.yen(st.sales) + '">' + r.icon + ' ' + r.label + '</span>';
+    // 次ランクまでの目安
+    if (idx < RANKS.length - 1) {
+      var nx = RANKS[idx + 1];
+      var needDone = Math.max(0, nx.minDone - st.done);
+      var needSales = Math.max(0, nx.minSales - st.sales);
+      html += '<span class="store-rank-next">次の' + nx.label + 'まで：あと成約' + needDone + '件 または 売上' + HQ.yen(needSales) + '</span>';
+    }
+    return '<div class="store-rank-row">' + html + '</div>';
   }
 
   function render() {
@@ -85,6 +113,7 @@
           '<button class="store-del" data-i="' + i + '" title="この加盟店を削除（ログインも停止）" ' +
             'style="border:1px solid #C0392B;color:#C0392B;background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;margin-left:6px;">🗑 削除</button>' +
           '</span></div>' +
+        rankBadge(st) +
         '<p class="store-meta">📍 ' + HQ.esc(s.area || '—') + '<br>📞 ' + HQ.esc(s.tel || '—') +
           (s.email ? '<br>✉️ ' + HQ.esc(s.email) : '') + '</p>' +
         '<div class="store-notify">' + (notifyIcons.length ? '通知：' + notifyIcons.join(' ') : '<span style="color:#aaa;font-size:12px;">通知設定なし</span>') + '</div>' +

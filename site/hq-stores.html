@@ -88,6 +88,15 @@
 .pa-act.warn{border-color:#C0392B;color:#C0392B;}
 .pa-act.on{border-color:#15803d;color:#15803d;}
 .pa-empty{color:#999;text-align:center;}
+/* 加盟店ランク */
+.store-rank-row{display:flex;flex-direction:column;gap:3px;margin:2px 0 8px;}
+.store-rank{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;font-size:13px;font-weight:900;border-radius:20px;padding:4px 14px;letter-spacing:.02em;}
+.store-rank.r0{background:#eef1f5;color:#7a8699;}
+.store-rank.r1{background:#f6e9dd;color:#9c5b2b;}
+.store-rank.r2{background:#eceff3;color:#5c6b7a;border:1px solid #d6dde5;}
+.store-rank.r3{background:#fdf0cf;color:#9a7209;}
+.store-rank.r4{background:linear-gradient(135deg,#0F766E,#14b8a6);color:#fff;}
+.store-rank-next{font-size:10.5px;color:#98a2b3;font-weight:600;}
 /* 加盟年月数の経過・途中解約の逆算 */
 .store-tenure{margin:10px 0 4px;}
 .st-badge{display:inline-block;background:#0F766E;color:#fff;font-size:12.5px;font-weight:800;border-radius:20px;padding:4px 12px;}
@@ -104,7 +113,7 @@
 </style>
 
 <script src="assets/js/hq-common.js?v=13"></script>
-<script src="assets/js/hq-stores.js?v=7" defer></script>
+<script src="assets/js/hq-stores.js?v=8" defer></script>
 <script>
 (function () {
   var body = document.getElementById('paBody'), msg = document.getElementById('paMsg');
