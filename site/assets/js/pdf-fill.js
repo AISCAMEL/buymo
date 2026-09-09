@@ -8,7 +8,7 @@
   // 差込テンプレート定義（座標は pdf-lib＝左下原点・pt）
   var TEMPLATES = {
     joto: {
-      name: '譲渡証明書（第21号様式）', file: P + 'joto-shomeisho.pdf',
+      name: '譲渡証明書（第21号様式）', file: P + 'joto-shomeisho.pdf?v=2',
       fields: [
         { k: 'carName', label: '車名', x: 66, y: 407, size: 9, maxW: 78 },
         { k: 'model', label: '型式', x: 142, y: 407, size: 9, maxW: 82 },
@@ -21,7 +21,7 @@
       ]
     },
     ininjo: {
-      name: '委任状', file: P + 'ininjo.pdf',
+      name: '委任状', file: P + 'ininjo.pdf?v=2',
       fields: [
         { k: 'agentAddr', label: '受任者 住所', x: 300, y: 424, size: 9, maxW: 230 },
         { k: 'agentName', label: '受任者 氏名／名称', x: 300, y: 380, size: 9, maxW: 230 },
