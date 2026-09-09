@@ -14,7 +14,7 @@
         { k: 'model', label: '型式', x: 142, y: 407, size: 9, maxW: 82 },
         { k: 'vin', label: '車台番号', x: 230, y: 407, size: 9, maxW: 92 },
         { k: 'engine', label: '原動機の型式', x: 330, y: 407, size: 9, maxW: 78 },
-        { k: 'date', label: '譲渡年月日', x: 44, y: 322, size: 8, maxW: 70 },
+        { k: 'date', label: '譲渡年月日', x: 44, y: 268, size: 8, maxW: 70 },
         { k: 'sellerName', label: '譲渡人 氏名／名称', x: 120, y: 322, size: 9, maxW: 200 },
         { k: 'sellerAddr', label: '譲渡人 住所', x: 120, y: 308, size: 8, maxW: 210 },
         { k: 'note', label: '備考', x: 110, y: 118, size: 9, maxW: 380 }
@@ -80,10 +80,10 @@
               try { tf = form.createTextField(tplKey + '_' + f.k); }
               catch (e) { tf = form.createTextField(tplKey + '_' + f.k + '_' + Math.random().toString(36).slice(2, 6)); }
               var h = Math.max(13, (f.size || 9) + 6);
+              // 枠線・背景色なし（文字のみ表示・入力できるように）
               tf.addToPage(page, {
                 x: f.x - 2, y: f.y - 4, width: (f.maxW || 120) + 6, height: h,
-                borderWidth: 0.75, borderColor: PDFLib.rgb(0.55, 0.68, 0.85),
-                backgroundColor: PDFLib.rgb(0.96, 0.98, 1),
+                borderWidth: 0,
                 font: font
               });
               try { tf.setFontSize(f.size || 9); } catch (e2) {}
@@ -91,12 +91,10 @@
               // 各フィールドの外観を日本語フォントで生成（Helveticaフォールバック回避）
               try { tf.updateAppearances(font); } catch (e3) {}
             });
-            // ビューアで入力した日本語も表示できるよう、既定リソースに日本語フォントを設定
+            // 既定リソース／DAに日本語フォントを設定（ビューアで入力した日本語も表示できるように）
             try { form.updateFieldAppearances(font); } catch (e4) {}
-            try {
-              var acro = form.acroForm;
-              if (acro && acro.dict && PDFLib.PDFBool) acro.dict.set(PDFLib.PDFName.of('NeedAppearances'), PDFLib.PDFBool.True);
-            } catch (e5) {}
+            // NeedAppearances は付けない：付けるとビューアが既定の枠（ボックス）を描画してしまうため、
+            // 埋め込んだ外観（updateAppearances）で「文字のみ」表示にする。
             // 保存時にpdf-libが既定フォント(WinAnsi)で再生成しないよう抑止
             return doc.save({ updateFieldAppearances: false });
           }
