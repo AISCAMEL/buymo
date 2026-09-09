@@ -40,7 +40,7 @@ function footer(rel) {
       <p>✉️ kaitori@buymo.me</p>
     </div>
     <nav class="footer-col" aria-label="サイトマップ"><h3>サイトマップ</h3><ul class="footer-links">
-      <li><a href="${rel}index.html#company">会社概要</a></li>
+      <li><a href="${rel}index.html#company">運営会社</a></li>
       <li><a href="${rel}privacy.html">プライバシーポリシー</a></li>
       <li><a href="${rel}tokushoho.html">特定商取引法・古物商表記</a></li>
       <li><a href="${rel}genre/">買取ジャンル一覧</a></li>
