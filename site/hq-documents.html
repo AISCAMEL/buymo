@@ -85,7 +85,7 @@
         <div class="doc-card-head"><span class="doc-icon">✍️</span><span class="doc-title">委任状（書き込み可能）</span></div>
         <p class="doc-desc">移転登録・抹消登録を代理で行うための委任状。入力して印字、または空欄で印刷して手書きもできます。</p>
         <div class="doc-btns">
-          <button class="doc-btn" onclick="document.getElementById('ininSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
+          <button class="doc-btn" onclick="document.getElementById('pdfFillSection').scrollIntoView({behavior:'smooth'})">▼ 実PDFで発行</button>
           <button class="doc-btn outline" onclick="printInin(true)">空欄で印刷（手書き用）</button>
         </div>
       </div>
@@ -93,7 +93,7 @@
         <div class="doc-card-head"><span class="doc-icon">📋</span><span class="doc-title">譲渡証明書（書き込み可能）</span></div>
         <p class="doc-desc">車両を譲渡したことを証明する書面。入力して印字、または空欄で印刷して手書きもできます。</p>
         <div class="doc-btns">
-          <button class="doc-btn" onclick="document.getElementById('jotoSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
+          <button class="doc-btn" onclick="document.getElementById('pdfFillSection').scrollIntoView({behavior:'smooth'})">▼ 実PDFで発行</button>
           <button class="doc-btn outline" onclick="printJoto(true)">空欄で印刷（手書き用）</button>
         </div>
       </div>
@@ -137,50 +137,6 @@
       <div class="pf-actions" style="margin-top:12px;">
         <button class="doc-btn" type="button" onclick="printDoc('contract')">📄 約款付きで発行・印刷</button>
         <span style="font-size:12px;color:#999;">※ひな形です。内容は必要に応じてご確認・調整ください。</span>
-      </div>
-    </div>
-
-    <!-- 委任状（書き込み可能） -->
-    <div class="ref-section" id="ininSection">
-      <h2>✍️ 委任状（書き込み可能）</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:14px;">入力して「発行・印刷」を押すと各欄に印字されます。上部の案件選択・お名前・住所・車台番号・登録番号も反映されます。<strong>空欄のまま印刷すれば、その欄は手書きで記入できます。</strong></p>
-      <div class="ct-grid">
-        <label class="ct-f ct-wide"><span>用途</span>
-          <span style="display:flex;gap:18px;align-items:center;padding:6px 0;">
-            <label style="font-weight:400;"><input type="radio" name="wjPurpose" value="transfer" checked> 移転登録用（名義変更）</label>
-            <label style="font-weight:400;"><input type="radio" name="wjPurpose" value="cancel"> 抹消登録用（廃車）</label>
-          </span>
-        </label>
-        <label class="ct-f"><span>登録番号（ナンバー）</span><input id="wjPlate" type="text" placeholder="福島 300 あ 1234"></label>
-        <label class="ct-f"><span>車台番号</span><input id="wjVin" type="text" placeholder="TRH200-1234567"></label>
-        <label class="ct-f"><span>委任者（旧所有者）氏名</span><input id="wjOwnerName" type="text" placeholder="山田 太郎"></label>
-        <label class="ct-f"><span>委任者 住所</span><input id="wjOwnerAddr" type="text" placeholder="〒000-0000 ○○県…"></label>
-        <label class="ct-f"><span>受任者（代理人）氏名・社名</span><input id="wjAgentName" type="text" placeholder="BUYMO加盟店　担当：〇〇"></label>
-        <label class="ct-f"><span>受任者 住所</span><input id="wjAgentAddr" type="text" placeholder="〒000-0000 ○○県…"></label>
-        <label class="ct-f"><span>委任日</span><input id="wjDate" type="text" placeholder="例：2026年9月8日（空欄で当日）"></label>
-      </div>
-      <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printInin(false)">✍️ 入力内容で発行・印刷</button>
-        <button class="doc-btn outline" type="button" onclick="printInin(true)">空欄で発行（手書き用）</button>
-      </div>
-    </div>
-
-    <!-- 譲渡証明書（書き込み可能） -->
-    <div class="ref-section" id="jotoSection">
-      <h2>📋 譲渡証明書（書き込み可能）</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:14px;">入力して「発行・印刷」を押すと各欄に印字されます。上部の案件選択・お名前・住所・車台番号・登録番号も反映されます。<strong>空欄のまま印刷すれば、その欄は手書きで記入できます。</strong></p>
-      <div class="ct-grid">
-        <label class="ct-f"><span>登録番号</span><input id="jtPlate" type="text" placeholder="福島 300 あ 1234"></label>
-        <label class="ct-f"><span>車台番号</span><input id="jtVin" type="text" placeholder="TRH200-1234567"></label>
-        <label class="ct-f"><span>譲渡人（売主）氏名</span><input id="jtFromName" type="text" placeholder="山田 太郎"></label>
-        <label class="ct-f"><span>譲渡人 住所</span><input id="jtFromAddr" type="text" placeholder="〒000-0000 ○○県…"></label>
-        <label class="ct-f"><span>譲受人（買主）氏名・社名</span><input id="jtToName" type="text" placeholder="BUYMO加盟店　担当：〇〇"></label>
-        <label class="ct-f"><span>譲受人 住所</span><input id="jtToAddr" type="text" placeholder="〒000-0000 ○○県…"></label>
-        <label class="ct-f"><span>証明日</span><input id="jtDate" type="text" placeholder="例：2026年9月8日（空欄で当日）"></label>
-      </div>
-      <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printJoto(false)">📋 入力内容で発行・印刷</button>
-        <button class="doc-btn outline" type="button" onclick="printJoto(true)">空欄で発行（手書き用）</button>
       </div>
     </div>
 
