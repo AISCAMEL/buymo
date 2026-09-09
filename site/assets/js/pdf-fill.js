@@ -65,7 +65,7 @@
     var tpl = TEMPLATES[tplKey]; if (!tpl) return;
     var fillable = (mode !== 'flat');
     if (msg) msg.textContent = fillable ? '書き込み可能PDFを生成中…（初回はフォント読み込みに数秒）' : '生成中…';
-    ensureLibs(msg).then(function () {
+    return ensureLibs(msg).then(function () {
       return fetch(tpl.file).then(function (r) { return r.arrayBuffer(); });
     }).then(function (tmplBytes) {
       return PDFLib.PDFDocument.load(tmplBytes).then(function (doc) {
@@ -117,59 +117,106 @@
     });
   }
 
-  /* ---- UI 構築 ---- */
+  /* ---- UI 構築（統合入力 → 譲渡証明書・委任状の両PDFへ一括書き込み） ---- */
+  // 統合入力項目。共通項目（氏名・住所・車台番号 等）は1回の入力で両PDFへ反映。
+  var UNIFIED = [
+    { k: 'name',      label: '氏名（譲渡人・委任者）' },
+    { k: 'address',   label: '住所（譲渡人・委任者）', wide: true },
+    { k: 'carName',   label: '車名' },
+    { k: 'model',     label: '型式' },
+    { k: 'vin',       label: '車台番号' },
+    { k: 'engine',    label: '原動機の型式' },
+    { k: 'regNo',     label: '登録番号（ナンバー）' },
+    { k: 'appType',   label: '申請の別（委任状）', type: 'select', opts: ['移転登録', '変更登録', '抹消登録'] },
+    { k: 'gYear',     label: '日付：令和（年）' },
+    { k: 'gMonth',    label: '月' },
+    { k: 'gDay',      label: '日' },
+    { k: 'agentName', label: '受任者 氏名／名称（委任状）', wide: true },
+    { k: 'agentAddr', label: '受任者 住所（委任状）', wide: true },
+    { k: 'note',      label: '備考（譲渡証明書）', wide: true }
+  ];
+
   function boot() {
     var sec = document.getElementById('pdfFillSection'); if (!sec) return;
-    var sel = document.getElementById('pfTemplate');
     var fieldsEl = document.getElementById('pfFields');
     var msg = document.getElementById('pfMsg');
-    sel.innerHTML = Object.keys(TEMPLATES).map(function (k) { return '<option value="' + k + '">' + TEMPLATES[k].name + '</option>'; }).join('');
 
     function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
     function carOfSelectedCase() {
       var id = g('docCaseId'); if (!id || !window.HQ) return {};
       var c = (HQ.getCasesLS() || []).filter(function (x) { return x.id === id; })[0] || {};
       var car = c.car || {};
-      return { carName: [car.maker, car.model].filter(Boolean).join(' '), vin: car.vin || '', plate: '' , c: c };
+      return { carName: [car.maker, car.model].filter(Boolean).join(' '), vin: car.vin || '' };
     }
-    function prefill(k) {
+    function prefill() {
       var r = reiwa(); var car = carOfSelectedCase();
-      var map = {
-        joto: {
-          carName: car.carName, model: '', vin: g('docVin'), engine: '', date: jDate(),
-          sellerName: g('docName'), sellerAddr: g('docAddress'), note: ''
-        },
-        ininjo: {
-          agentAddr: '福島県いわき市四倉町細谷字大町1番', agentName: '合同会社アイズ（BUYMO）', appType: '移転登録',
-          regNo: g('docPlate') || g('docVin'), gYear: String(r.g), gMonth: String(r.m), gDay: String(r.d),
-          ownerName: g('docName'), ownerAddr: g('docAddress')
-        }
+      return {
+        name: g('docName'), address: g('docAddress'),
+        carName: car.carName || '', model: '', vin: g('docVin') || car.vin || '',
+        engine: '', regNo: g('docPlate') || g('docVin') || '',
+        appType: '移転登録',
+        gYear: String(r.g), gMonth: String(r.m), gDay: String(r.d),
+        agentName: '合同会社アイズ（BUYMO）', agentAddr: '福島県いわき市四倉町細谷字大町1番',
+        note: ''
       };
-      return map[k] || {};
     }
     function renderFields() {
-      var k = sel.value, tpl = TEMPLATES[k], pv = prefill(k);
-      fieldsEl.innerHTML = tpl.fields.map(function (f) {
-        return '<label class="pf-f"><span>' + f.label + '</span><input data-k="' + f.k + '" type="text" value="' + (pv[f.k] ? String(pv[f.k]).replace(/"/g, '&quot;') : '') + '"></label>';
+      var pv = prefill();
+      fieldsEl.innerHTML = UNIFIED.map(function (f) {
+        var v = pv[f.k] != null ? String(pv[f.k]) : '';
+        var cls = 'pf-f' + (f.wide ? ' pf-wide' : '');
+        var ctrl;
+        if (f.type === 'select') {
+          ctrl = '<select data-k="' + f.k + '">' + f.opts.map(function (o) {
+            return '<option' + (o === v ? ' selected' : '') + '>' + o + '</option>';
+          }).join('') + '</select>';
+        } else {
+          ctrl = '<input data-k="' + f.k + '" type="text" value="' + v.replace(/"/g, '&quot;') + '">';
+        }
+        return '<label class="' + cls + '"><span>' + f.label + '</span>' + ctrl + '</label>';
       }).join('');
     }
-    sel.addEventListener('change', renderFields);
     // 案件選択や上部入力が変わったら未編集の前提で再プリフィル
     ['docCaseId', 'docName', 'docAddress', 'docVin', 'docPlate'].forEach(function (id) {
       var el = document.getElementById(id); if (el) el.addEventListener('change', renderFields);
     });
     function collect() {
-      var values = {};
-      fieldsEl.querySelectorAll('input[data-k]').forEach(function (inp) { values[inp.getAttribute('data-k')] = inp.value; });
-      return values;
+      var u = {};
+      fieldsEl.querySelectorAll('[data-k]').forEach(function (inp) { u[inp.getAttribute('data-k')] = inp.value; });
+      return u;
     }
-    document.getElementById('pfGen').addEventListener('click', function () {
-      generate(sel.value, collect(), msg, 'fillable');
+    function jDateFrom(u) {
+      if (u.gYear && u.gMonth && u.gDay) return '令和' + u.gYear + '年' + u.gMonth + '月' + u.gDay + '日';
+      return jDate();
+    }
+    function toJoto(u) {
+      return {
+        carName: u.carName, model: u.model, vin: u.vin, engine: u.engine,
+        date: jDateFrom(u), sellerName: u.name, sellerAddr: u.address, note: u.note
+      };
+    }
+    function toInin(u) {
+      return {
+        agentAddr: u.agentAddr, agentName: u.agentName, appType: u.appType,
+        regNo: u.regNo || u.vin, gYear: u.gYear, gMonth: u.gMonth, gDay: u.gDay,
+        ownerName: u.name, ownerAddr: u.address
+      };
+    }
+    function genOne(tplKey, u) {
+      return generate(tplKey, tplKey === 'joto' ? toJoto(u) : toInin(u), msg, 'fillable');
+    }
+
+    var bBoth = document.getElementById('pfGenBoth');
+    if (bBoth) bBoth.addEventListener('click', function () {
+      var u = collect();
+      // 順番に生成（2ファイルの連続ダウンロード）
+      genOne('joto', u).then(function () { return genOne('ininjo', u); });
     });
-    var flatBtn = document.getElementById('pfGenFlat');
-    if (flatBtn) flatBtn.addEventListener('click', function () {
-      generate(sel.value, collect(), msg, 'flat');
-    });
+    var bJoto = document.getElementById('pfGenJoto');
+    if (bJoto) bJoto.addEventListener('click', function () { genOne('joto', collect()); });
+    var bInin = document.getElementById('pfGenInin');
+    if (bInin) bInin.addEventListener('click', function () { genOne('ininjo', collect()); });
+
     renderFields();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

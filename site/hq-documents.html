@@ -83,18 +83,16 @@
       </div>
       <div class="doc-card">
         <div class="doc-card-head"><span class="doc-icon">✍️</span><span class="doc-title">委任状（書き込み可能）</span></div>
-        <p class="doc-desc">移転登録・抹消登録を代理で行うための委任状。入力して印字、または空欄で印刷して手書きもできます。</p>
+        <p class="doc-desc">移転登録・抹消登録を代理で行うための委任状。下の「実PDF発行」で必要事項を入力し、実際の様式PDFに書き込んで発行します（空欄のまま発行して手書きも可）。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('pdfFillSection').scrollIntoView({behavior:'smooth'})">▼ 実PDFで発行</button>
-          <button class="doc-btn outline" onclick="printInin(true)">空欄で印刷（手書き用）</button>
         </div>
       </div>
       <div class="doc-card">
         <div class="doc-card-head"><span class="doc-icon">📋</span><span class="doc-title">譲渡証明書（書き込み可能）</span></div>
-        <p class="doc-desc">車両を譲渡したことを証明する書面。入力して印字、または空欄で印刷して手書きもできます。</p>
+        <p class="doc-desc">車両を譲渡したことを証明する書面。下の「実PDF発行」で必要事項を入力し、実際の様式PDFに書き込んで発行します（空欄のまま発行して手書きも可）。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('pdfFillSection').scrollIntoView({behavior:'smooth'})">▼ 実PDFで発行</button>
-          <button class="doc-btn outline" onclick="printJoto(true)">空欄で印刷（手書き用）</button>
         </div>
       </div>
       <div class="doc-card">
@@ -143,14 +141,12 @@
     <!-- 実PDF差込発行（アップロード様式） -->
     <div class="ref-section" id="pdfFillSection">
       <h2>📄 実PDF発行（譲渡証明書・委任状／書き込み可能）</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:14px;"><strong>実際の様式PDF</strong>に案件情報を差し込み、<strong>ダウンロード後もPDF上で各欄を書き込み・修正できる</strong>フォーム付きPDFで発行します（Adobe Acrobat・ブラウザのPDFビューアで入力可）。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映。空欄のまま発行して、PDF上で入力することもできます。初回はフォント読み込みに数秒かかります。</p>
-      <div class="pf-bar">
-        <label>様式 <select id="pfTemplate"></select></label>
-      </div>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">下記に必要事項を<strong>まとめて一度だけ入力</strong>すると、<strong>譲渡証明書と委任状の実PDFへ一括で書き込み</strong>ます（氏名・住所・車台番号などの共通項目は1回の入力でOK）。<strong>ダウンロード後もPDF上で各欄を修正できる</strong>フォーム付きPDFです（Adobe Acrobat・ブラウザのPDFビューアで入力可）。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映。空欄のまま発行してPDF上で入力・手書き印刷もできます。初回はフォント読み込みに数秒かかります。</p>
       <div id="pfFields" class="pf-fields"></div>
       <div class="pf-actions">
-        <button id="pfGen" class="doc-btn" type="button">✍️ 書き込み可能PDFでダウンロード ⬇</button>
-        <button id="pfGenFlat" class="doc-btn outline" type="button">文字を焼付けて発行（編集不可）</button>
+        <button id="pfGenBoth" class="doc-btn" type="button">✍️ 譲渡証明書＋委任状を一括発行 ⬇</button>
+        <button id="pfGenJoto" class="doc-btn outline" type="button">譲渡証明書PDFのみ ⬇</button>
+        <button id="pfGenInin" class="doc-btn outline" type="button">委任状PDFのみ ⬇</button>
         <span id="pfMsg" class="pf-msg"></span>
       </div>
     </div>
@@ -204,8 +200,9 @@
 @media(max-width:820px){.pf-fields{grid-template-columns:1fr 1fr;}}
 @media(max-width:560px){.pf-fields{grid-template-columns:1fr;}}
 .pf-f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:#556;}
-.pf-f input{border:1px solid #dde3ee;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;font-weight:400;}
-.pf-f input:focus{outline:2px solid var(--green);border-color:var(--green);}
+.pf-f.pf-wide{grid-column:1 / -1;}
+.pf-f input,.pf-f select{border:1px solid #dde3ee;border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;font-weight:400;background:#fff;}
+.pf-f input:focus,.pf-f select:focus{outline:2px solid var(--green);border-color:var(--green);}
 .pf-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .pf-msg{font-size:13px;color:#0F766E;font-weight:700;}
 .ct-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 16px;margin-bottom:8px;}
@@ -218,8 +215,8 @@
 .ct-f textarea{resize:vertical;line-height:1.6;}
 </style>
 <script src="assets/js/hq-common.js?v=14"></script>
-<script src="assets/js/hq-documents.js?v=6" defer></script>
-<script src="assets/js/pdf-fill.js?v=3" defer></script>
+<script src="assets/js/hq-documents.js?v=7" defer></script>
+<script src="assets/js/pdf-fill.js?v=4" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

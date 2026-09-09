@@ -159,89 +159,6 @@
     return head + parties + car + terms + special + sign;
   }
 
-  /* ② 委任状（移転登録用） */
-  /* 手書き記入セル（値があれば印字、空欄なら書き込めるスペース） */
-  function cell(v) { return '<div class="wc">' + (esc(v) || '&nbsp;') + '</div>'; }
-  function cellSeal(v) { return '<div class="wc wc-seal"><span>' + (esc(v) || '&nbsp;') + '</span><span class="seal">印</span></div>'; }
-  function blankHint(on) { return on ? '<p class="blank-hint">✎ 手書き用（空欄）フォームです。各欄に直接ご記入ください。</p>' : ''; }
-
-  /* 委任状フォームの読み取り（空欄印刷は blank=true） */
-  function readInin(blank) {
-    function g(id) { if (blank) return ''; var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
-    var base = blank ? {} : getFields();
-    var purpose = 'transfer';
-    if (!blank) { var r = document.querySelector('input[name="wjPurpose"]:checked'); if (r) purpose = r.value; }
-    return {
-      blank: !!blank, purpose: purpose,
-      plate: g('wjPlate') || base.plate || '',
-      vin: g('wjVin') || base.vin || '',
-      ownerName: g('wjOwnerName') || base.name || '',
-      ownerAddr: g('wjOwnerAddr') || base.address || '',
-      agentName: blank ? '' : (g('wjAgentName') || 'BUYMO加盟店　担当：'),
-      agentAddr: blank ? '' : g('wjAgentAddr'),
-      date: blank ? '' : (g('wjDate') || nowStr()),
-      caseId: base.caseId || ''
-    };
-  }
-
-  /* ① 委任状（移転／抹消・書き込み可能） */
-  function docInin(d) {
-    var cancel = (d.purpose === 'cancel');
-    return '<h1>委 任 状</h1>' +
-      '<p class="sub">（自動車' + (cancel ? '抹消' : '移転') + '登録手続用）</p>' +
-      blankHint(d.blank) +
-      '<p style="margin-bottom:6mm;">私は、下記の者を代理人と定め、下記自動車の' + (cancel ? '抹消登録（一時・永久）' : '移転登録（名義変更）') + '手続きに関する一切の権限を委任します。</p>' +
-      '<h2>委任する事項</h2>' +
-      '<p style="margin-bottom:4mm;">自動車の' + (cancel ? '抹消登録（一時抹消・永久抹消）' : '移転登録（名義変更）') + 'に関する申請書類の作成・提出・受領に関する一切の行為</p>' +
-      '<h2>対象車両</h2>' +
-      '<table><tr><td class="label">登録番号（ナンバー）</td><td>' + cell(d.plate) + '</td></tr>' +
-      '<tr><td class="label">車台番号</td><td>' + cell(d.vin) + '</td></tr></table>' +
-      '<h2>委任者（' + (cancel ? '所有者' : '旧所有者') + '）</h2>' +
-      '<table><tr><td class="label">氏名</td><td>' + cellSeal(d.ownerName) + '</td></tr>' +
-      '<tr><td class="label">住所</td><td>' + cell(d.ownerAddr) + '</td></tr>' +
-      '<tr><td class="label">委任日</td><td>' + cell(d.date) + '</td></tr></table>' +
-      '<h2>受任者（代理人）</h2>' +
-      '<table><tr><td class="label">氏名・社名</td><td>' + cell(d.agentName) + '</td></tr>' +
-      '<tr><td class="label">住所</td><td>' + cell(d.agentAddr) + '</td></tr></table>' +
-      '<p class="note">※ この委任状は' + (cancel ? '抹消' : '移転') + '登録の申請手続のみに使用します。' + (d.caseId ? '案件ID：' + esc(d.caseId) : '') + '</p>';
-  }
-
-  /* 譲渡証明書フォームの読み取り */
-  function readJoto(blank) {
-    function g(id) { if (blank) return ''; var e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
-    var base = blank ? {} : getFields();
-    return {
-      blank: !!blank,
-      plate: g('jtPlate') || base.plate || '',
-      vin: g('jtVin') || base.vin || '',
-      fromName: g('jtFromName') || base.name || '',
-      fromAddr: g('jtFromAddr') || base.address || '',
-      toName: blank ? '' : (g('jtToName') || 'BUYMO加盟店　担当：'),
-      toAddr: blank ? '' : g('jtToAddr'),
-      date: blank ? '' : (g('jtDate') || nowStr()),
-      caseId: base.caseId || ''
-    };
-  }
-
-  /* ③ 譲渡証明書（書き込み可能） */
-  function docJoto(d) {
-    return '<h1>譲 渡 証 明 書</h1>' +
-      '<p class="sub">（自動車の所有権を移転することを証明します）</p>' +
-      blankHint(d.blank) +
-      '<table style="margin-bottom:8mm;">' +
-      '<tr><td class="label">登録番号</td><td>' + cell(d.plate) + '</td></tr>' +
-      '<tr><td class="label">車台番号</td><td>' + cell(d.vin) + '</td></tr>' +
-      '</table>' +
-      '<h2>譲渡人（売主）</h2>' +
-      '<table><tr><td class="label">氏名</td><td>' + cellSeal(d.fromName) + '</td></tr>' +
-      '<tr><td class="label">住所</td><td>' + cell(d.fromAddr) + '</td></tr></table>' +
-      '<h2>譲受人（買主）</h2>' +
-      '<table><tr><td class="label">氏名・社名</td><td>' + cell(d.toName) + '</td></tr>' +
-      '<tr><td class="label">住所</td><td>' + cell(d.toAddr) + '</td></tr></table>' +
-      '<p style="margin:6mm 0;font-size:10pt;">上記の通り、対象車両の所有権を譲受人へ譲渡したことに相違ありません。</p>' +
-      '<p class="note" style="text-align:right;">証明日：' + (esc(d.date) || '　　　年　　月　　日') + '　　' + (d.caseId ? '案件ID：' + esc(d.caseId) : '') + '</p>';
-  }
-
   /* ④ 所有権解除依頼書 */
   function docOwnershipRelease(f) {
     return '<h1>所有権解除依頼書</h1>' +
@@ -325,15 +242,6 @@
     var d = DOCS[key]; if (!d) return;
     printWin(d.title, d.fn(getFields()));
   };
-  // 委任状・譲渡証明書（書き込み可能）: blank=true で手書き用の空欄フォーム
-  window.printInin = function (blank) {
-    var d = readInin(blank);
-    printWin('委任状（' + (d.purpose === 'cancel' ? '抹消' : '移転') + '登録用）', docInin(d));
-  };
-  window.printJoto = function (blank) {
-    printWin('譲渡証明書', docJoto(readJoto(blank)));
-  };
-
   /* ---- 案件セレクト ---- */
   var allCases = [];
   function findCaseFull(id) {
