@@ -68,6 +68,20 @@
       </div>
     </section>
 
+    <!-- 印刷物・グッズ -->
+    <section class="dc-sec">
+      <h2><img class="sec-ico" src="assets/img/buymo/pic-logo.png?v=1" alt="" width="26" height="26">印刷物・グッズ（印刷用データ）</h2>
+      <p class="dc-note">名刺・封筒・クリアファイル・ネックストラップの印刷用デザインです。<strong>「ダウンロード」</strong>で印刷会社へご入稿、または<strong>「印刷」</strong>からそのままプリントできます（PNG／原寸・ブランド色）。</p>
+      <div class="dc-logos dc-print">
+        <figure class="dc-logo"><div class="dc-logo-img"><img src="assets/print/meishi-front.png?v=1" alt="名刺 表" loading="lazy" /></div><figcaption>名刺（表）91×55mm</figcaption><div class="dc-2btn"><a class="dc-btn" href="assets/print/meishi-front.png?v=1" download="BUYMO_meishi_omote.png">ダウンロード</a><button class="dc-btn ghost" type="button" onclick="printImg('assets/print/meishi-front.png?v=1')">印刷</button></div></figure>
+        <figure class="dc-logo"><div class="dc-logo-img"><img src="assets/print/meishi-back.png?v=1" alt="名刺 裏" loading="lazy" /></div><figcaption>名刺（裏）会社情報</figcaption><div class="dc-2btn"><a class="dc-btn" href="assets/print/meishi-back.png?v=1" download="BUYMO_meishi_ura.png">ダウンロード</a><button class="dc-btn ghost" type="button" onclick="printImg('assets/print/meishi-back.png?v=1')">印刷</button></div></figure>
+        <figure class="dc-logo"><div class="dc-logo-img"><img src="assets/print/fuutou-naga3.png?v=1" alt="封筒 長3" loading="lazy" /></div><figcaption>封筒（長形3号）235×120mm</figcaption><div class="dc-2btn"><a class="dc-btn" href="assets/print/fuutou-naga3.png?v=1" download="BUYMO_fuutou_naga3.png">ダウンロード</a><button class="dc-btn ghost" type="button" onclick="printImg('assets/print/fuutou-naga3.png?v=1')">印刷</button></div></figure>
+        <figure class="dc-logo"><div class="dc-logo-img"><img src="assets/print/clearfile-a4.png?v=1" alt="クリアファイル A4" loading="lazy" /></div><figcaption>クリアファイル（A4）</figcaption><div class="dc-2btn"><a class="dc-btn" href="assets/print/clearfile-a4.png?v=1" download="BUYMO_clearfile_A4.png">ダウンロード</a><button class="dc-btn ghost" type="button" onclick="printImg('assets/print/clearfile-a4.png?v=1')">印刷</button></div></figure>
+        <figure class="dc-logo"><div class="dc-logo-img"><img src="assets/print/strap-band.png?v=1" alt="ストラップ" loading="lazy" /></div><figcaption>ネックストラップ（帯・繰り返し）</figcaption><div class="dc-2btn"><a class="dc-btn" href="assets/print/strap-band.png?v=1" download="BUYMO_strap.png">ダウンロード</a><button class="dc-btn ghost" type="button" onclick="printImg('assets/print/strap-band.png?v=1')">印刷</button></div></figure>
+      </div>
+      <p class="dc-note" style="margin-top:12px;">※ 名刺はお名前・役職をあけています（印刷時に追記、または印刷会社で差し込み）。※ 封筒は返送先を印字済み。※ ストラップは帯デザインを繰り返して長さを調整してください。</p>
+    </section>
+
     <!-- 買取に必要な書類 -->
     <section class="dc-sec">
       <h2><img class="sec-ico" src="assets/img/buymo/pic-pdf.png?v=1" alt="" width="26" height="26">買取に必要な書類（発行・ダウンロード）</h2>
@@ -92,6 +106,11 @@
 .dc-logo{margin:0;text-align:center;border:1px solid #eef1f6;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;align-items:center;}
 .dc-logo-img{width:100%;height:110px;display:grid;place-items:center;background:#f7fbfa;border-radius:10px;}
 .dc-pattern{background:#FFF7EE url('assets/img/buymo/pattern-camel.png?v=1') repeat;background-size:150px auto;}
+.dc-print .dc-logo-img{height:130px;background:#fff;border:1px solid #eef1f6;}
+.dc-print .dc-logo-img img{max-width:96%;max-height:120px;}
+.dc-2btn{display:flex;gap:8px;justify-content:center;}
+.dc-btn.ghost{background:#fff;border:1px solid var(--green,#0F766E);color:var(--green-dark,#0b5c55);}
+.dc-btn.ghost:hover{background:#f0f6f4;}
 .dc-logo-img img{max-width:80%;max-height:88px;object-fit:contain;}
 .dc-logo figcaption{font-size:12.5px;font-weight:700;color:#444;}
 .dc-btn{display:inline-block;background:var(--navy,#14425f);color:#fff;font-weight:800;font-size:12.5px;padding:7px 16px;border-radius:8px;text-decoration:none;}
@@ -107,6 +126,14 @@
 
 <script src="assets/js/hq-common.js?v=14"></script>
 <script>HQ.nav('downloads');</script>
+<script>
+function printImg(src){
+  var w=window.open('','_blank','width=800,height=600');
+  if(!w)return;
+  w.document.write('<!doctype html><meta charset="utf-8"><title>印刷</title><style>@page{margin:8mm}body{margin:0;text-align:center}img{max-width:100%}</style><img src="'+src+'" onload="setTimeout(function(){window.print()},200)">');
+  w.document.close();
+}
+</script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
