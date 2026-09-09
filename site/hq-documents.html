@@ -104,13 +104,6 @@
           <button class="doc-btn" onclick="printDoc('settlement')">発行・印刷</button>
         </div>
       </div>
-      <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">🔓</span><span class="doc-title">所有権解除依頼書</span></div>
-        <p class="doc-desc">ローン残債が残っている場合にディーラー・金融機関へ提出する所有権解除依頼書。</p>
-        <div class="doc-btns">
-          <button class="doc-btn" onclick="printDoc('ownership-release')">A4で発行・印刷</button>
-        </div>
-      </div>
     </div>
 
     <!-- 自動車売買契約書（約款付き） -->
@@ -229,10 +222,25 @@
         </table>
       </div>
     </div>
+
+    <!-- 所有権解除 お問い合わせ先 -->
+    <div class="ref-section">
+      <h2>🔓 所有権解除 お問い合わせ先</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:10px;">車検証の<strong>「所有者」欄がディーラー・信販会社</strong>の場合、名義変更・廃車の前に所有権解除が必要です。<strong>車検証の所有者欄に記載の会社</strong>へ連絡し、ローン完済の確認後に必要書類（譲渡証明書・委任状・所有者の印鑑証明書）を取り寄せます。</p>
+      <div class="alert-flow">① 車検証の「所有者」を確認 → ② 記載の会社へ連絡（残債があれば完済） → ③ 所有権解除書類を取り寄せ → ④ 移転登録／廃車手続き</div>
+      <div class="hq-table-wrap">
+        <table class="ref-table">
+          <thead><tr><th>主な所有権留保先（会社）</th><th>種別</th><th>備考</th><th>手続き案内</th></tr></thead>
+          <tbody id="ownerBody"></tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:#888;margin-top:10px;">※ 販売店名義（ディーラー・中古車店）の場合は、<strong>購入された販売店</strong>へお問い合わせください。※ 上記以外の会社が所有者の場合も、手続きの流れは同じです（車検証記載の所有者へ連絡）。</p>
+    </div>
   </div>
 </main>
 
 <style>
+.alert-flow{background:#F6F8F8;border:1px solid #dbe6e3;border-left:3px solid var(--green,#0F766E);border-radius:8px;padding:10px 14px;font-size:12.5px;font-weight:700;color:#0b5c55;line-height:1.8;margin-bottom:14px;}
 .pf-bar{margin-bottom:14px;}
 .pf-bar label,.pf-f>span{font-size:13px;font-weight:700;color:var(--navy);}
 .pf-bar select{height:38px;border:1px solid #ddd;border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit;margin-left:8px;min-width:240px;}
@@ -254,7 +262,7 @@
 .ct-f textarea{resize:vertical;line-height:1.6;}
 </style>
 <script src="assets/js/hq-common.js?v=14"></script>
-<script src="assets/js/hq-documents.js?v=5" defer></script>
+<script src="assets/js/hq-documents.js?v=6" defer></script>
 <script src="assets/js/pdf-fill.js?v=3" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
