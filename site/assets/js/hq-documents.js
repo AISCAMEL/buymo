@@ -69,7 +69,11 @@
     '.hg-mark{font-size:9pt;letter-spacing:.3em;color:#a98b3e;font-weight:800;text-align:center;margin-bottom:3mm;}',
     '.hg-h{font-size:15pt;font-weight:900;text-align:center;letter-spacing:.14em;color:#1a1a1a;margin-bottom:5mm;}',
     '.hg-rule{height:1px;background:#e3d7bd;margin:0 auto 5mm;width:70%;}',
+    '.hg-photo{text-align:center;margin:0 0 4mm;}',
+    '.hg-photo img{max-width:66mm;max-height:42mm;object-fit:cover;border:1px solid #e3d7bd;padding:1.2mm;background:#fff;border-radius:2px;box-shadow:0 1px 3px rgba(0,0,0,.14);}',
+    '.hg-photo .cap{display:block;font-size:8pt;color:#9a8a63;margin-top:1.5mm;letter-spacing:.05em;}',
     '.hg-body{font-size:10pt;line-height:2;text-align:justify;margin-bottom:6mm;}',
+    '.hg-body.compact{font-size:9pt;line-height:1.8;margin-bottom:4mm;}',
     '.hg-to{font-size:11pt;font-weight:700;margin-bottom:5mm;}',
     '.hg-from{font-size:9pt;color:#555;text-align:right;line-height:1.7;margin-top:4mm;}',
     '.hg-from b{font-size:10.5pt;color:#1a1a1a;}',
@@ -433,13 +437,15 @@
       '<div class="sign-row"><div class="sign-box"><p>査定担当者</p><div class="sign-line"></div></div><div class="sign-box"><p>お客様 確認サイン</p><div class="sign-line"></div></div></div>';
   }
 
-  /* ⑩ お礼はがき（郵便はがき100×148mm・お客様へ） */
+  /* ⑩ お礼はがき（郵便はがき100×148mm・お客様へ／思い出の写真を添付可） */
+  var thanksImg = ''; // 添付画像のデータURL（思い出の写真）
   function getThanks() {
     function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
     var base = getFields();
     return {
       name: g('tkName') || base.name, issuer: g('tkIssuer') || '合同会社アイズ（BUYMO）', store: g('tkStore'),
-      staff: g('tkStaff'), tel: g('tkTel'), addr: g('tkAddr') || '〒979-0204 福島県いわき市四倉町細谷字大町1番', msg: g('tkMsg')
+      staff: g('tkStaff'), tel: g('tkTel'), addr: g('tkAddr') || '〒979-0204 福島県いわき市四倉町細谷字大町1番',
+      msg: g('tkMsg'), cap: g('tkCaption')
     };
   }
   function docThanks() {
@@ -448,13 +454,43 @@
       '大切なお車をお譲りいただき、心より御礼申し上げます。名義変更等のお手続きは、責任をもって進めてまいります。\n' +
       'またお車のご売却・お乗り換えの際は、ぜひ当店にご用命くださいませ。スタッフ一同、心より感謝申し上げます。';
     var msg = v.msg || def;
+    var photo = thanksImg ? ('<div class="hg-photo"><img src="' + thanksImg + '" alt="">' + (v.cap ? '<span class="cap">' + esc(v.cap) + '</span>' : '') + '</div>') : '';
+    // 写真がある時は本文をやや小さめにしてはがき内に収める
+    var bodyCls = thanksImg ? 'hg-body compact' : 'hg-body';
     return '<div class="hg-mark">THANK YOU</div>' +
       '<div class="hg-h">御 礼</div>' +
       '<div class="hg-rule"></div>' +
+      photo +
       (v.name ? '<div class="hg-to">' + esc(v.name) + ' 様</div>' : '') +
-      '<div class="hg-body">' + esc(msg).replace(/\n/g, '<br>') + '</div>' +
+      '<div class="' + bodyCls + '">' + esc(msg).replace(/\n/g, '<br>') + '</div>' +
       '<div class="hg-from"><b>' + esc(v.issuer) + (v.store ? '　' + esc(v.store) : '') + '</b><br>' + esc(v.addr) + (v.tel ? '<br>TEL：' + esc(v.tel) : '') + (v.staff ? '<br>担当：' + esc(v.staff) : '') + '</div>';
   }
+  // お礼はがきの写真添付（縮小してデータURL化。プレビュー・削除に対応）
+  function initThanksImage() {
+    var inp = document.getElementById('tkImage'); if (!inp) return;
+    var prev = document.getElementById('tkImgPreview'), rm = document.getElementById('tkImgRemove');
+    inp.addEventListener('change', function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+          var max = 1100, w = img.width, h = img.height;
+          if (w > max || h > max) { var r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+          var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          try { cv.getContext('2d').drawImage(img, 0, 0, w, h); thanksImg = cv.toDataURL('image/jpeg', 0.85); }
+          catch (err) { thanksImg = e.target.result; }
+          if (prev) { prev.src = thanksImg; prev.hidden = false; }
+          if (rm) rm.hidden = false;
+        };
+        img.onerror = function () { thanksImg = e.target.result; if (prev) { prev.src = thanksImg; prev.hidden = false; } if (rm) rm.hidden = false; };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(f);
+    });
+    if (rm) rm.addEventListener('click', function () { thanksImg = ''; inp.value = ''; if (prev) { prev.hidden = true; prev.src = ''; } rm.hidden = true; });
+  }
+  initThanksImage();
 
   /* ---- 全書類ルーター ---- */
   var DOCS = {
