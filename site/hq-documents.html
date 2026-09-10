@@ -116,6 +116,27 @@
           <button class="doc-btn" onclick="printDoc('settlement')">発行・印刷</button>
         </div>
       </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">🧾</span><span class="doc-title">領収書</span></div>
+        <p class="doc-desc">金額・宛名・但し書きを入力して発行。本部・加盟店共通。お客様へお渡し／PDF保存できます。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="document.getElementById('receiptSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">📝</span><span class="doc-title">車両査定表（記入用）</span></div>
+        <p class="doc-desc">査定時の記入用シート。お客様・車両情報・状態チェック欄付き。印刷して手書き、PDF保存も可。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="document.getElementById('appraisalSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">💌</span><span class="doc-title">お礼はがき（お客様用）</span></div>
+        <p class="doc-desc">買取後にお送りするお礼状（郵便はがき100×148mm）。文面は編集でき、印字／PDF保存できます。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="document.getElementById('thanksSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
+        </div>
+      </div>
     </div>
 
     <!-- 自動車売買契約書（約款付き） -->
@@ -194,6 +215,69 @@
       <div class="pf-actions" style="margin-top:12px;">
         <button class="doc-btn" type="button" onclick="printDoc('checklist')">✅ チェックリストを発行・印刷</button>
         <span style="font-size:12px;color:#999;">※お客様へお渡し／送付できます。</span>
+      </div>
+    </div>
+
+    <!-- 領収書 -->
+    <div class="ref-section" id="receiptSection">
+      <h2>🧾 領収書</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">金額・宛名・但し書きを入力して発行します。<strong>宛名＝お支払元、発行者＝金額を受領した側</strong>です（例：買取代金の受領はお客様が受領者になります）。上部のお名前も反映されます。</p>
+      <div class="ct-grid">
+        <label class="ct-f"><span>領収No（任意）</span><input id="rcNo" type="text" placeholder="R-0001"></label>
+        <label class="ct-f"><span>発行日</span><input id="rcDate" type="text" placeholder="例：2026年9月10日"></label>
+        <label class="ct-f"><span>宛名（お支払元）</span><input id="rcTo" type="text" placeholder="山田 太郎 ／ 合同会社アイズ"></label>
+        <label class="ct-f"><span>金額（税込・円）</span><input id="rcAmount" type="text" inputmode="numeric" placeholder="1500000"></label>
+        <label class="ct-f ct-wide"><span>但し書き</span><input id="rcTadashi" type="text" placeholder="自動車買取代金として"></label>
+        <label class="ct-f"><span>発行者（受領者）名称</span><input id="rcIssuer" type="text" placeholder="合同会社アイズ（BUYMO）／加盟店名／お客様名"></label>
+        <label class="ct-f"><span>担当者</span><input id="rcStaff" type="text" placeholder="担当者名"></label>
+        <label class="ct-f ct-wide"><span>発行者住所</span><input id="rcAddr" type="text" placeholder="〒979-0204 福島県いわき市…"></label>
+        <label class="ct-f"><span>古物商許可</span><input id="rcKobutsu" type="text" placeholder="福島県公安委員会 第…号"></label>
+      </div>
+      <div class="pf-actions" style="margin-top:12px;">
+        <button class="doc-btn" type="button" onclick="printDoc('receipt')">🧾 領収書を発行・印刷</button>
+        <span style="font-size:12px;color:#999;">※本部・加盟店共通。印刷／PDF保存できます。</span>
+      </div>
+    </div>
+
+    <!-- 車両査定表 -->
+    <div class="ref-section" id="appraisalSection">
+      <h2>📝 車両査定表（記入用）</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">査定時にお使いいただく記入用シートです。入力した項目は印字され、空欄は手書きできます。上部の案件・お名前・住所・車台番号・登録番号も反映されます。</p>
+      <div class="ct-grid">
+        <label class="ct-f"><span>査定日</span><input id="apDate" type="text" placeholder="例：2026年9月10日"></label>
+        <label class="ct-f"><span>担当者</span><input id="apStaff" type="text" placeholder="担当者名"></label>
+        <label class="ct-f"><span>連絡先</span><input id="apTel" type="tel" placeholder="090-0000-0000"></label>
+        <label class="ct-f"><span>車名</span><input id="apCarName" type="text" placeholder="トヨタ ハイエース"></label>
+        <label class="ct-f"><span>型式</span><input id="apCarType" type="text" placeholder="CBF-TRH200V"></label>
+        <label class="ct-f"><span>年式</span><input id="apYear" type="text" placeholder="令和2年"></label>
+        <label class="ct-f"><span>初度登録</span><input id="apFirstReg" type="text" placeholder="令和2年3月"></label>
+        <label class="ct-f"><span>走行距離(km)</span><input id="apMileage" type="text" inputmode="numeric" placeholder="82000"></label>
+        <label class="ct-f"><span>車検満了日</span><input id="apShaken" type="text" placeholder="令和8年3月"></label>
+        <label class="ct-f"><span>色</span><input id="apColor" type="text" placeholder="ホワイト"></label>
+        <label class="ct-f"><span>査定金額（提示額・円）</span><input id="apPrice" type="text" inputmode="numeric" placeholder="1500000"></label>
+      </div>
+      <div class="pf-actions" style="margin-top:12px;">
+        <button class="doc-btn" type="button" onclick="printDoc('appraisal')">📝 査定表を発行・印刷</button>
+        <span style="font-size:12px;color:#999;">※空欄は印刷後に手書きできます。状態チェック欄付き。</span>
+      </div>
+    </div>
+
+    <!-- お礼はがき -->
+    <div class="ref-section" id="thanksSection">
+      <h2>💌 お礼はがき（お客様用）</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">買取後にお送りするお礼状です（郵便はがき 100×148mm）。文面はそのまま／編集して使えます。印刷時はプリンタの用紙をはがきに設定してください。</p>
+      <div class="ct-grid">
+        <label class="ct-f"><span>お客様氏名</span><input id="tkName" type="text" placeholder="山田 太郎"></label>
+        <label class="ct-f"><span>発行者名称</span><input id="tkIssuer" type="text" placeholder="合同会社アイズ（BUYMO）"></label>
+        <label class="ct-f"><span>店舗名（任意）</span><input id="tkStore" type="text" placeholder="いわき店"></label>
+        <label class="ct-f"><span>担当者</span><input id="tkStaff" type="text" placeholder="担当者名"></label>
+        <label class="ct-f"><span>連絡先TEL</span><input id="tkTel" type="tel" placeholder="0246-00-0000"></label>
+        <label class="ct-f ct-wide"><span>発行者住所</span><input id="tkAddr" type="text" placeholder="〒979-0204 福島県いわき市…"></label>
+        <label class="ct-f ct-wide"><span>文面（空欄なら定型文）</span><textarea id="tkMsg" rows="3" placeholder="空欄の場合は定型のお礼文が入ります。"></textarea></label>
+      </div>
+      <div class="pf-actions" style="margin-top:12px;">
+        <button class="doc-btn" type="button" onclick="printDoc('thanks')">💌 お礼はがきを発行・印刷</button>
+        <span style="font-size:12px;color:#999;">※用紙をはがき（100×148mm）に設定してください。PDF保存も可。</span>
       </div>
     </div>
 
@@ -277,7 +361,7 @@
 .ct-f textarea{resize:vertical;line-height:1.6;}
 </style>
 <script src="assets/js/hq-common.js?v=15"></script>
-<script src="assets/js/hq-documents.js?v=8" defer></script>
+<script src="assets/js/hq-documents.js?v=9" defer></script>
 <script src="assets/js/pdf-fill.js?v=6" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
