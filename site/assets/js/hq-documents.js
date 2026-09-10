@@ -28,42 +28,63 @@
     };
   }
 
-  /* ---- 印刷ウィンドウ共通 ---- */
+  /* ---- 印刷ウィンドウ共通（シンプル・枠なし） ---- */
   var A4_STYLE = [
     '*{box-sizing:border-box;margin:0;padding:0;}',
-    'body{font-family:"Noto Sans JP",sans-serif;font-size:11pt;color:#111;padding:20mm 18mm;}',
-    'h1{font-size:18pt;font-weight:900;text-align:center;margin-bottom:6mm;}',
-    'h2{font-size:13pt;font-weight:700;margin-bottom:4mm;border-bottom:1px solid #aaa;padding-bottom:2mm;}',
-    '.sub{text-align:center;color:#555;font-size:10pt;margin-bottom:8mm;}',
-    'table{width:100%;border-collapse:collapse;margin-bottom:6mm;}',
-    'td,th{border:1px solid #999;padding:5px 8px;font-size:10pt;vertical-align:top;}',
-    '.label{background:#f4f6fa;font-weight:700;width:38%;}',
-    '.wc{min-height:9mm;padding:1mm 0;}',            // 手書き記入スペース（空欄でも書き込める高さ）',
+    'body{font-family:"Noto Sans JP",sans-serif;font-size:11pt;color:#1a1a1a;padding:22mm 22mm;line-height:1.75;}',
+    'h1{font-size:19pt;font-weight:900;text-align:center;letter-spacing:.16em;margin-bottom:7mm;}',
+    'h2{font-size:11.5pt;font-weight:800;margin:7mm 0 1mm;color:#0e1b33;letter-spacing:.02em;}',   // 見出しは細い下線のみ（枠なし）
+    'h2::after{content:"";display:block;height:2px;background:#0e1b33;width:100%;margin-top:1.5mm;opacity:.85;}',
+    '.sub{text-align:center;color:#555;font-size:10pt;margin-bottom:8mm;line-height:1.85;}',
+    'table{width:100%;border-collapse:collapse;margin:1mm 0 5mm;}',
+    'td,th{border:none;border-bottom:1px solid #e7e9ee;padding:5.5px 2px;font-size:10.5pt;vertical-align:top;text-align:left;}',
+    '.label{color:#5a6472;font-weight:700;width:34%;white-space:nowrap;background:none;}',
+    '.wc{min-height:9mm;padding:1mm 0;}',
     '.wc-seal{display:flex;align-items:center;justify-content:space-between;gap:6mm;}',
-    '.blank-hint{text-align:center;font-size:9pt;color:#888;border:1px dashed #bbb;border-radius:4px;padding:2mm 3mm;margin-bottom:6mm;}',
-    '.sign-row{display:flex;gap:16mm;margin-top:10mm;}',
-    '.sign-box{flex:1;border:1px solid #999;padding:4mm 6mm;min-height:28mm;}',
-    '.sign-box p{font-size:9pt;color:#555;margin-bottom:2mm;}',
-    '.note{font-size:9pt;color:#555;margin-top:4mm;}',
-    '.seal{display:inline-block;border:1px solid #999;width:22mm;height:22mm;text-align:center;line-height:22mm;font-size:10pt;color:#aaa;margin-left:4mm;}',
+    '.blank-hint{text-align:center;font-size:9pt;color:#999;padding:1mm 3mm;margin-bottom:6mm;}',
+    '.sign-row{display:flex;gap:14mm;margin-top:11mm;}',
+    '.sign-box{flex:1;padding:2mm 0;}',                                // 枠なし・署名は下線で受ける
+    '.sign-box p{font-size:9pt;color:#5a6472;margin-bottom:9mm;font-weight:700;}',
+    '.sign-line{border-bottom:1px solid #99a;margin-top:2mm;}',
+    '.note{font-size:9pt;color:#666;margin-top:4mm;line-height:1.75;}',
+    '.seal{display:inline-block;border:1px dashed #c3c8d0;width:20mm;height:20mm;text-align:center;line-height:20mm;font-size:9pt;color:#bfc4cc;}',
     '.terms h3{font-size:10.5pt;font-weight:700;margin:4mm 0 1.5mm;break-after:avoid;page-break-after:avoid;}',
     '.terms p{font-size:9.5pt;line-height:1.7;margin-bottom:1.5mm;text-align:justify;}',
     '.terms{margin-bottom:6mm;}',
     '.chk-list{list-style:none;margin:0 0 6mm;padding:0;}',
-    '.chk-list li{font-size:10.5pt;line-height:1.85;padding:1.2mm 0;border-bottom:1px dashed #ddd;}',
+    '.chk-list li{font-size:10.5pt;line-height:1.85;padding:1.4mm 0;border-bottom:1px solid #eef0f3;}',
     '.chk-list li.chk-sub{border-bottom:0;color:#555;font-size:9.5pt;padding-left:7mm;}',
     '.chk-list.plain li{border-bottom:0;}',
-    '.big-amt{font-size:16pt;font-weight:900;color:#0e1b33;}',
-    'footer{position:fixed;bottom:8mm;left:0;right:0;text-align:center;font-size:9pt;color:#aaa;}',
-    '@media print{.no-print{display:none;} body{padding:14mm;} footer{position:fixed;} .sign-row{page-break-inside:avoid;}}'
+    '.big-amt{font-size:20pt;font-weight:900;color:#0e1b33;letter-spacing:.02em;}',
+    '.amt-band{margin:3mm 0 5mm;padding:4mm 6mm;background:#f6f8fb;border-radius:8px;display:flex;align-items:baseline;justify-content:space-between;}',
+    '.amt-band .k{font-size:10.5pt;font-weight:700;color:#5a6472;}',
+    'footer{position:fixed;bottom:8mm;left:0;right:0;text-align:center;font-size:9pt;color:#b3b8c0;}',
+    '@media print{.no-print{display:none;} body{padding:16mm 18mm;} footer{position:fixed;} .sign-row{page-break-inside:avoid;}}'
   ].join('');
-  function printWin(title, body) {
-    var html = '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>' + title + '</title><style>' + A4_STYLE + '</style></head><body>' +
-      body +
-      '<footer>BUYMO ／ 合同会社アイズ</footer>' +
-      '<p class="no-print" style="text-align:center;margin-top:12mm;"><button onclick="window.print()" style="padding:8px 28px;font-size:13px;cursor:pointer;border:none;background:#0e1b33;color:#fff;border-radius:8px;">印刷する</button>&nbsp;<button onclick="window.close()" style="padding:8px 20px;font-size:13px;cursor:pointer;border:1px solid #ccc;background:#fff;border-radius:8px;">閉じる</button></p>' +
+  // お礼はがき（郵便はがき 100×148mm）用のシンプルなスタイル
+  var HAGAKI_STYLE = [
+    '@page{size:100mm 148mm;margin:0;}',
+    '*{box-sizing:border-box;margin:0;padding:0;}',
+    'body{font-family:"Noto Sans JP",serif;width:100mm;min-height:148mm;padding:12mm 11mm;color:#2a2622;background:#fffef9;line-height:1.9;}',
+    '.hg-mark{font-size:9pt;letter-spacing:.3em;color:#a98b3e;font-weight:800;text-align:center;margin-bottom:3mm;}',
+    '.hg-h{font-size:15pt;font-weight:900;text-align:center;letter-spacing:.14em;color:#1a1a1a;margin-bottom:5mm;}',
+    '.hg-rule{height:1px;background:#e3d7bd;margin:0 auto 5mm;width:70%;}',
+    '.hg-body{font-size:10pt;line-height:2;text-align:justify;margin-bottom:6mm;}',
+    '.hg-to{font-size:11pt;font-weight:700;margin-bottom:5mm;}',
+    '.hg-from{font-size:9pt;color:#555;text-align:right;line-height:1.7;margin-top:4mm;}',
+    '.hg-from b{font-size:10.5pt;color:#1a1a1a;}',
+    '.no-print{margin-top:6mm;text-align:center;}',
+    '@media print{.no-print{display:none;} body{background:#fff;}}'
+  ].join('');
+  function printWin(title, body, style) {
+    var css = (style === 'hagaki') ? HAGAKI_STYLE : A4_STYLE;
+    var footer = (style === 'hagaki') ? '' : '<footer>BUYMO ／ 合同会社アイズ</footer>';
+    var winSize = (style === 'hagaki') ? 'width=520,height=760' : 'width=760,height=760';
+    var html = '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>' + title + '</title><style>' + css + '</style></head><body>' +
+      body + footer +
+      '<p class="no-print" style="text-align:center;margin-top:12mm;"><button onclick="window.print()" style="padding:8px 28px;font-size:13px;cursor:pointer;border:none;background:#0e1b33;color:#fff;border-radius:8px;">印刷 / PDF保存</button>&nbsp;<button onclick="window.close()" style="padding:8px 20px;font-size:13px;cursor:pointer;border:1px solid #ccc;background:#fff;border-radius:8px;">閉じる</button></p>' +
       '</body></html>';
-    var w = window.open('', '_blank', 'width=760,height=700');
+    var w = window.open('', '_blank', winSize);
     w.document.write(html); w.document.close();
   }
 
@@ -338,17 +359,117 @@
       '<div class="sign-row"><div class="sign-box"><p>担当者</p><br></div><div class="sign-box"><p>ご連絡先 TEL</p><br></div></div>';
   }
 
+  /* ⑧ 領収書（本部・加盟店共通） */
+  function getReceipt() {
+    function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+    var base = getFields();
+    return {
+      caseId: base.caseId, no: g('rcNo'), date: g('rcDate') || nowStr(),
+      to: g('rcTo') || base.name, amount: g('rcAmount'), tadashi: g('rcTadashi') || '自動車買取代金として',
+      issuer: g('rcIssuer') || '合同会社アイズ（BUYMO）', issuerAddr: g('rcAddr') || '〒979-0204 福島県いわき市四倉町細谷字大町1番',
+      kobutsu: g('rcKobutsu') || '福島県公安委員会 第25121A010859号', staff: g('rcStaff')
+    };
+  }
+  function docReceipt() {
+    var v = getReceipt();
+    var n = Number(String(v.amount).replace(/[^0-9.]/g, ''));
+    var amt = n ? ('¥ ' + n.toLocaleString('en-US') + ' －') : '¥ 　　　　　　　 －';
+    var stamp = n >= 50000;
+    return '<h1>領 収 書</h1>' +
+      '<table style="margin-bottom:2mm;"><tr><td style="border:none;color:#5a6472;">No. ' + esc(v.no || '　') + '</td><td style="border:none;text-align:right;color:#5a6472;">発行日：' + esc(v.date) + '</td></tr></table>' +
+      '<p style="font-size:13pt;font-weight:700;border-bottom:1px solid #333;padding-bottom:2mm;margin-bottom:5mm;">' + (v.to ? esc(v.to) + ' 様' : '　　　　　　　　　　 様') + '</p>' +
+      '<div class="amt-band"><span class="k">金額（税込）</span><span class="big-amt">' + amt + '</span></div>' +
+      '<p style="margin-bottom:5mm;">但し　' + esc(v.tadashi) + '</p>' +
+      '<p style="margin-bottom:9mm;">上記正に領収いたしました。</p>' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10mm;">' +
+        '<div style="font-size:9.5pt;color:#333;line-height:1.95;"><b style="font-size:11pt;">' + esc(v.issuer) + '</b><br>' + esc(v.issuerAddr) + '<br>古物商許可：' + esc(v.kobutsu) + (v.staff ? '<br>担当：' + esc(v.staff) : '') + '</div>' +
+        '<div style="text-align:center;"><span class="seal">印</span></div>' +
+      '</div>' +
+      '<p class="note" style="margin-top:8mm;">' + (stamp ? '※ 課税文書に該当する場合は、所定の収入印紙を貼付・消印してください（自動車の買取＝仕入代金の支払は通常非課税ですが、念のためご確認ください）。<br>' : '') + (v.caseId ? '案件ID：' + esc(v.caseId) : '') + '</p>';
+  }
+
+  /* ⑨ 車両査定表（記入用・本部/加盟店共通） */
+  function getAppraisal() {
+    function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+    var base = getFields();
+    return {
+      caseId: base.caseId, date: g('apDate') || nowStr(), staff: g('apStaff'), tel: g('apTel'),
+      name: base.name, addr: base.address, carName: g('apCarName'), carType: g('apCarType'),
+      year: g('apYear'), firstReg: g('apFirstReg'), mileage: g('apMileage'), vin: base.vin,
+      plate: base.plate, color: g('apColor'), shaken: g('apShaken'), price: g('apPrice')
+    };
+  }
+  function docAppraisal() {
+    var v = getAppraisal();
+    function line(a) { return a.map(function (t) { return '☐ ' + t; }).join('　　'); }
+    function cell(val) { return val ? esc(val) : '<span style="color:#c3c8d0;">（記入）</span>'; }
+    return '<h1>車 両 査 定 表</h1>' +
+      '<table><tr><td class="label">査定日</td><td>' + esc(v.date) + '</td><td class="label">担当者</td><td>' + cell(v.staff) + '</td></tr>' +
+        '<tr><td class="label">案件ID</td><td>' + cell(v.caseId) + '</td><td class="label">連絡先</td><td>' + cell(v.tel) + '</td></tr></table>' +
+      '<h2>お客様</h2>' +
+      '<table><tr><td class="label">お名前</td><td>' + cell(v.name) + '</td></tr><tr><td class="label">ご住所</td><td>' + cell(v.addr) + '</td></tr></table>' +
+      '<h2>車両情報</h2>' +
+      '<table>' +
+        '<tr><td class="label">車名</td><td>' + cell(v.carName) + '</td><td class="label">型式</td><td>' + cell(v.carType) + '</td></tr>' +
+        '<tr><td class="label">年式</td><td>' + cell(v.year) + '</td><td class="label">初度登録</td><td>' + cell(v.firstReg) + '</td></tr>' +
+        '<tr><td class="label">走行距離</td><td>' + (v.mileage ? esc(v.mileage) + ' km' : '<span style="color:#c3c8d0;">（記入）</span>') + '</td><td class="label">車検満了</td><td>' + cell(v.shaken) + '</td></tr>' +
+        '<tr><td class="label">登録番号</td><td>' + cell(v.plate) + '</td><td class="label">車台番号</td><td>' + cell(v.vin) + '</td></tr>' +
+        '<tr><td class="label">色</td><td colspan="3">' + cell(v.color) + '</td></tr>' +
+      '</table>' +
+      '<h2>状態チェック</h2>' +
+      '<table>' +
+        '<tr><td class="label">修復歴</td><td>☐ 無　　☐ 有（箇所：　　　　　　　）</td></tr>' +
+        '<tr><td class="label">外装（キズ・凹み）</td><td>' + line(['良好', '小傷あり', '要補修']) + '　　メモ：</td></tr>' +
+        '<tr><td class="label">内装（汚れ・臭い）</td><td>' + line(['良好', '喫煙', 'ペット', '汚れ']) + '</td></tr>' +
+        '<tr><td class="label">機関（エンジン/AT）</td><td>' + line(['良好', '要点検', '不調']) + '</td></tr>' +
+        '<tr><td class="label">電装・エアコン</td><td>' + line(['良好', '一部不良']) + '</td></tr>' +
+        '<tr><td class="label">タイヤ残溝</td><td>前 　　mm ／ 後 　　mm　' + line(['交換不要', '要交換']) + '</td></tr>' +
+        '<tr><td class="label">付属・装備</td><td>' + line(['スペアキー', '取説', '記録簿', 'ナビ', 'ETC', 'ドラレコ']) + '</td></tr>' +
+        '<tr><td class="label">警告灯・その他</td><td>&nbsp;</td></tr>' +
+      '</table>' +
+      '<h2>査定メモ・加減点</h2>' +
+      '<div style="border-bottom:1px solid #e7e9ee;height:11mm;"></div><div style="border-bottom:1px solid #e7e9ee;height:11mm;margin-bottom:4mm;"></div>' +
+      '<div class="amt-band"><span class="k">査定金額（提示額・税込）</span><span class="big-amt">' + (v.price ? '¥ ' + Number(String(v.price).replace(/[^0-9.]/g, '')).toLocaleString('en-US') : '¥ 　　　　　　') + '</span></div>' +
+      '<div class="sign-row"><div class="sign-box"><p>査定担当者</p><div class="sign-line"></div></div><div class="sign-box"><p>お客様 確認サイン</p><div class="sign-line"></div></div></div>';
+  }
+
+  /* ⑩ お礼はがき（郵便はがき100×148mm・お客様へ） */
+  function getThanks() {
+    function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+    var base = getFields();
+    return {
+      name: g('tkName') || base.name, issuer: g('tkIssuer') || '合同会社アイズ（BUYMO）', store: g('tkStore'),
+      staff: g('tkStaff'), tel: g('tkTel'), addr: g('tkAddr') || '〒979-0204 福島県いわき市四倉町細谷字大町1番', msg: g('tkMsg')
+    };
+  }
+  function docThanks() {
+    var v = getThanks();
+    var def = 'この度は、数ある買取店の中から BUYMO をお選びいただき、誠にありがとうございました。\n' +
+      '大切なお車をお譲りいただき、心より御礼申し上げます。名義変更等のお手続きは、責任をもって進めてまいります。\n' +
+      'またお車のご売却・お乗り換えの際は、ぜひ当店にご用命くださいませ。スタッフ一同、心より感謝申し上げます。';
+    var msg = v.msg || def;
+    return '<div class="hg-mark">THANK YOU</div>' +
+      '<div class="hg-h">御 礼</div>' +
+      '<div class="hg-rule"></div>' +
+      (v.name ? '<div class="hg-to">' + esc(v.name) + ' 様</div>' : '') +
+      '<div class="hg-body">' + esc(msg).replace(/\n/g, '<br>') + '</div>' +
+      '<div class="hg-from"><b>' + esc(v.issuer) + (v.store ? '　' + esc(v.store) : '') + '</b><br>' + esc(v.addr) + (v.tel ? '<br>TEL：' + esc(v.tel) : '') + (v.staff ? '<br>担当：' + esc(v.staff) : '') + '</div>';
+  }
+
   /* ---- 全書類ルーター ---- */
   var DOCS = {
     'contract':                   { title: '売買契約書',            fn: docContract },
     'buyback':                    { title: '買取証明書',            fn: docBuyback },
+    'receipt':                    { title: '領収書',                fn: docReceipt },
+    'appraisal':                  { title: '車両査定表',            fn: docAppraisal },
     'checklist':                  { title: '買取に必要な書類のご案内', fn: docChecklist },
+    'thanks':                     { title: 'お礼はがき',            fn: docThanks, style: 'hagaki' },
     'ownership-release':          { title: '所有権解除依頼書',        fn: docOwnershipRelease },
     'settlement':                 { title: '清算書',                fn: docSettlement }
   };
   window.printDoc = function (key) {
     var d = DOCS[key]; if (!d) return;
-    printWin(d.title, d.fn(getFields()));
+    printWin(d.title, d.fn(getFields()), d.style);
   };
   /* ---- 案件セレクト ---- */
   var allCases = [];
