@@ -82,6 +82,20 @@
         </div>
       </div>
       <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">🧾</span><span class="doc-title">買取証明書（査定金額）</span></div>
+        <p class="doc-desc">査定した買取金額を証明する書面。査定日から5日以内の有効期限付きで、お客様にお渡し・送付できます。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="document.getElementById('buybackSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
+        </div>
+      </div>
+      <div class="doc-card">
+        <div class="doc-card-head"><span class="doc-icon">✅</span><span class="doc-title">必要書類のご案内（お客様用）</span></div>
+        <p class="doc-desc">お客様にお渡しする、買取に必要な書類のチェックリスト。車種・お名義・手続きに応じて内容が変わります。</p>
+        <div class="doc-btns">
+          <button class="doc-btn" onclick="document.getElementById('checklistSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
+        </div>
+      </div>
+      <div class="doc-card">
         <div class="doc-card-head"><span class="doc-icon">✍️</span><span class="doc-title">委任状（書き込み可能）</span></div>
         <p class="doc-desc">移転登録・抹消登録を代理で行うための委任状。下の「実PDF発行」で必要事項を入力し、実際の様式PDFに書き込んで発行します（空欄のまま発行して手書きも可）。</p>
         <div class="doc-btns">
@@ -135,6 +149,51 @@
       <div class="pf-actions" style="margin-top:12px;">
         <button class="doc-btn" type="button" onclick="printDoc('contract')">📄 約款付きで発行・印刷</button>
         <span style="font-size:12px;color:#999;">※ひな形です。内容は必要に応じてご確認・調整ください。</span>
+      </div>
+    </div>
+
+    <!-- 買取証明書（査定金額・5日以内有効） -->
+    <div class="ref-section" id="buybackSection">
+      <h2>🧾 買取証明書（査定金額・査定日から5日以内有効）</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">査定した買取金額を証明する書面です。査定日を入力すると<strong>有効期限（査定日＋5日）</strong>を自動計算します。上部の案件・お名前・住所・車台番号・登録番号も反映されます。お客様へお渡し／送付できます。</p>
+      <div class="ct-grid">
+        <label class="ct-f"><span>査定日</span><input id="bbAssessDate" type="date"></label>
+        <label class="ct-f"><span>お客様氏名</span><input id="bbName" type="text" placeholder="山田 太郎"></label>
+        <label class="ct-f ct-wide"><span>お客様住所</span><input id="bbAddr" type="text" placeholder="〒000-0000 ○○県…"></label>
+        <label class="ct-f"><span>車名</span><input id="bbCarName" type="text" placeholder="トヨタ ハイエース"></label>
+        <label class="ct-f"><span>型式</span><input id="bbCarType" type="text" placeholder="CBF-TRH200V"></label>
+        <label class="ct-f"><span>年式</span><input id="bbCarYear" type="text" placeholder="令和2年"></label>
+        <label class="ct-f"><span>走行距離(km)</span><input id="bbMileage" type="text" inputmode="numeric" placeholder="82000"></label>
+        <label class="ct-f"><span>車台番号</span><input id="bbVin" type="text" placeholder="TRH200-1234567"></label>
+        <label class="ct-f"><span>登録番号</span><input id="bbPlate" type="text" placeholder="福島 300 あ 1234"></label>
+        <label class="ct-f"><span>色</span><input id="bbColor" type="text" placeholder="ホワイト"></label>
+        <label class="ct-f"><span>買取金額（税込・円）</span><input id="bbPrice" type="text" inputmode="numeric" placeholder="1500000"></label>
+        <label class="ct-f"><span>発行者名称</span><input id="bbIssuer" type="text" placeholder="合同会社アイズ（BUYMO）／加盟店名"></label>
+        <label class="ct-f"><span>担当者</span><input id="bbStaff" type="text" placeholder="担当者名"></label>
+        <label class="ct-f"><span>連絡先TEL</span><input id="bbTel" type="tel" placeholder="0246-00-0000"></label>
+        <label class="ct-f ct-wide"><span>発行者住所</span><input id="bbIssuerAddr" type="text" placeholder="〒979-0204 福島県いわき市…"></label>
+        <label class="ct-f"><span>古物商許可</span><input id="bbKobutsu" type="text" placeholder="福島県公安委員会 第…号"></label>
+        <label class="ct-f ct-wide"><span>備考</span><input id="bbNote" type="text" placeholder="任意（受渡し条件・特記事項など）"></label>
+      </div>
+      <div class="pf-actions" style="margin-top:12px;">
+        <button class="doc-btn" type="button" onclick="printDoc('buyback')">🧾 買取証明書を発行・印刷</button>
+        <span style="font-size:12px;color:#999;">※査定日から5日以内有効。お客様へお渡し／送付できます。</span>
+      </div>
+    </div>
+
+    <!-- 必要書類のご案内（お客様用チェックリスト） -->
+    <div class="ref-section" id="checklistSection">
+      <h2>✅ 必要書類のご案内（お客様用チェックリスト）</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">車種・お名義・お手続きを選ぶと、お客様にお渡しする<strong>必要書類チェックリスト</strong>を作成します（内容が自動で切り替わります）。買取証明書と一緒にお渡しください。</p>
+      <div class="ct-grid">
+        <label class="ct-f"><span>車種</span><select id="clType"><option>普通車</option><option>軽自動車</option></select></label>
+        <label class="ct-f"><span>お名義</span><select id="clOwner"><option>本人名義</option><option>ローン・リース中（所有権留保）</option><option>ご家族など他人名義</option></select></label>
+        <label class="ct-f"><span>お手続き</span><select id="clAction"><option>名義変更（移転登録）</option><option>廃車（抹消登録）</option></select></label>
+        <label class="ct-f"><span>お客様氏名（任意）</span><input id="clName" type="text" placeholder="山田 太郎"></label>
+      </div>
+      <div class="pf-actions" style="margin-top:12px;">
+        <button class="doc-btn" type="button" onclick="printDoc('checklist')">✅ チェックリストを発行・印刷</button>
+        <span style="font-size:12px;color:#999;">※お客様へお渡し／送付できます。</span>
       </div>
     </div>
 
@@ -218,7 +277,7 @@
 .ct-f textarea{resize:vertical;line-height:1.6;}
 </style>
 <script src="assets/js/hq-common.js?v=15"></script>
-<script src="assets/js/hq-documents.js?v=7" defer></script>
+<script src="assets/js/hq-documents.js?v=8" defer></script>
 <script src="assets/js/pdf-fill.js?v=6" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
