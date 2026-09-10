@@ -200,20 +200,25 @@
         ownerName: u.name, ownerAddr: u.address
       };
     }
-    function genOne(tplKey, u) {
-      return generate(tplKey, tplKey === 'joto' ? toJoto(u) : toInin(u), msg, 'fillable');
+    // mode 既定は 'flat'（枠のない「文字のみ」の完成版・入力枠は一切表示されない）。
+    // 'fillable' は PDF上で入力・修正できる記入用フォーム付き。
+    function genOne(tplKey, u, mode) {
+      return generate(tplKey, tplKey === 'joto' ? toJoto(u) : toInin(u), msg, mode || 'flat');
     }
-
-    var bBoth = document.getElementById('pfGenBoth');
-    if (bBoth) bBoth.addEventListener('click', function () {
-      var u = collect();
-      // 順番に生成（2ファイルの連続ダウンロード）
-      genOne('joto', u).then(function () { return genOne('ininjo', u); });
-    });
+    function bindBoth(id, mode) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('click', function () {
+        var u = collect();
+        // 順番に生成（2ファイルの連続ダウンロード）
+        genOne('joto', u, mode).then(function () { return genOne('ininjo', u, mode); });
+      });
+    }
+    bindBoth('pfGenBoth', 'flat');   // 一括発行（文字のみ・完成版）
+    bindBoth('pfGenEdit', 'fillable'); // 記入用（PDF上で入力・修正）
     var bJoto = document.getElementById('pfGenJoto');
-    if (bJoto) bJoto.addEventListener('click', function () { genOne('joto', collect()); });
+    if (bJoto) bJoto.addEventListener('click', function () { genOne('joto', collect(), 'flat'); });
     var bInin = document.getElementById('pfGenInin');
-    if (bInin) bInin.addEventListener('click', function () { genOne('ininjo', collect()); });
+    if (bInin) bInin.addEventListener('click', function () { genOne('ininjo', collect(), 'flat'); });
 
     renderFields();
   }

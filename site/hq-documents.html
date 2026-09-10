@@ -141,13 +141,16 @@
     <!-- 実PDF差込発行（アップロード様式） -->
     <div class="ref-section" id="pdfFillSection">
       <h2>📄 実PDF発行（譲渡証明書・委任状／書き込み可能）</h2>
-      <p style="font-size:13px;color:#666;margin-bottom:14px;">下記に必要事項を<strong>まとめて一度だけ入力</strong>すると、<strong>譲渡証明書と委任状の実PDFへ一括で書き込み</strong>ます（氏名・住所・車台番号などの共通項目は1回の入力でOK）。<strong>ダウンロード後もPDF上で各欄を修正できる</strong>フォーム付きPDFです（Adobe Acrobat・ブラウザのPDFビューアで入力可）。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映。空欄のまま発行してPDF上で入力・手書き印刷もできます。初回はフォント読み込みに数秒かかります。</p>
+      <p style="font-size:13px;color:#666;margin-bottom:14px;">下記に必要事項を<strong>まとめて一度だけ入力</strong>すると、<strong>譲渡証明書と委任状の実PDFへ一括で反映</strong>します（氏名・住所・車台番号などの共通項目は1回の入力でOK）。通常の発行は<strong>青い入力枠が表示されない「文字のみ」の完成版</strong>で出力されます。PDF上で直接入力・修正したい場合は下の<strong>「記入用フォーム付き」</strong>をご利用ください。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映。初回はフォント読み込みに数秒かかります。</p>
       <div id="pfFields" class="pf-fields"></div>
       <div class="pf-actions">
-        <button id="pfGenBoth" class="doc-btn" type="button">✍️ 譲渡証明書＋委任状を一括発行 ⬇</button>
-        <button id="pfGenJoto" class="doc-btn outline" type="button">譲渡証明書PDFのみ ⬇</button>
-        <button id="pfGenInin" class="doc-btn outline" type="button">委任状PDFのみ ⬇</button>
+        <button id="pfGenBoth" class="doc-btn" type="button">📄 譲渡証明書＋委任状を一括発行（文字のみ）⬇</button>
+        <button id="pfGenJoto" class="doc-btn outline" type="button">譲渡証明書のみ ⬇</button>
+        <button id="pfGenInin" class="doc-btn outline" type="button">委任状のみ ⬇</button>
         <span id="pfMsg" class="pf-msg"></span>
+      </div>
+      <div class="pf-actions" style="margin-top:8px;">
+        <button id="pfGenEdit" class="doc-btn outline" type="button">✎ PDF上で入力・修正したい方（記入用フォーム付き）⬇</button>
       </div>
     </div>
 
@@ -216,7 +219,7 @@
 </style>
 <script src="assets/js/hq-common.js?v=14"></script>
 <script src="assets/js/hq-documents.js?v=7" defer></script>
-<script src="assets/js/pdf-fill.js?v=5" defer></script>
+<script src="assets/js/pdf-fill.js?v=6" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
