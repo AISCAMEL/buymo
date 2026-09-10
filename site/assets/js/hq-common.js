@@ -518,6 +518,7 @@ window.HQ = (function () {
         ['academy', 'アカデミー', 'partner-academy.html', '🎓'],
         ['scripts', 'スクリプト', 'partner-scripts.html', '📝'],
         ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬'],
+        ['chatbot', 'AIチャットボット', 'partner-chatbot.html', '🤖'],
         ['community', 'コミュニティ', 'partner-community.html', '👥']
       ]],
       ['その他', [
@@ -543,6 +544,7 @@ window.HQ = (function () {
         ['notices', 'お知らせ', 'hq-notices.html', '📢'],
         ['column', 'コラム', 'hq-column.html', '✍️'],
         ['academy', 'アカデミー管理', 'hq-academy.html', '🎓'],
+        ['chatbot', 'チャットボット/ナレッジ', 'partner-chatbot.html', '🤖'],
         ['community', 'コミュニティ', 'partner-community.html', '👥']
       ]],
       ['その他', [
