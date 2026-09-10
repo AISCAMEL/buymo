@@ -23,13 +23,8 @@
 <header class="portal-header">
   <div class="container">
     <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
-    <span class="portal-title">加盟店</span>
-    <nav class="portal-nav">
-      <a href="hq.html?role=partner">案件ボード</a>
-      <a href="partner-academy.html" aria-current="page">アカデミー</a>
-      <a href="partner-scripts.html">スクリプト</a>
-      <a href="partner-community.html">コミュニティ</a>
-    </nav>
+    <span class="portal-title" id="portalTitle">加盟店</span>
+    <nav class="portal-nav" id="hqNav"></nav>
     <a href="portal-login.html" class="portal-logout">ログアウト</a>
   </div>
 </header>
@@ -209,5 +204,8 @@ BUYMOは事故車・不動車・廃車も買取OK！🚗
     document.body.removeChild(ta);
   }
 </script>
+<script src="assets/js/hq-common.js?v=16"></script>
+<script>HQ.nav('promo');try{var _pt=document.getElementById('portalTitle');var _pr=(window.AUTH&&AUTH.role)?AUTH.role():null;if(_pt)_pt.textContent=(_pr==='partner')?'加盟店':'本部';}catch(e){}</script>
+<script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

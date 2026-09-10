@@ -515,6 +515,7 @@ window.HQ = (function () {
       ['学ぶ・支援', [
         ['info', '現場サポート', 'partner-info.html', '🛟'],
         ['downloads', 'ダウンロード', 'partner-downloads.html', '⬇️'],
+        ['promo', '販促ツール', 'partner-promo.html', '📣'],
         ['academy', 'アカデミー', 'partner-academy.html', '🎓'],
         ['scripts', 'スクリプト', 'partner-scripts.html', '📝'],
         ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬'],
@@ -545,6 +546,7 @@ window.HQ = (function () {
         ['column', 'コラム', 'hq-column.html', '✍️'],
         ['academy', 'アカデミー管理', 'hq-academy.html', '🎓'],
         ['chatbot', 'チャットボット/ナレッジ', 'partner-chatbot.html', '🤖'],
+        ['promo', '販促ツール', 'partner-promo.html', '📣'],
         ['community', 'コミュニティ', 'partner-community.html', '👥']
       ]],
       ['その他', [
