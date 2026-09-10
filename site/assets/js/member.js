@@ -400,14 +400,14 @@
       var email = document.getElementById('mEmail').value.trim();
       var name = document.getElementById('mName').value.trim();
       var passEl = document.getElementById('mPass');
-      var pw = passEl ? passEl.value.replace(/\D/g, '') : '';
+      var pw = passEl ? passEl.value.trim() : ''; // 確認メール記載のパスワード（英数字）。携帯下4桁も可
       var errEl = document.getElementById('mErr');
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         errEl.textContent = 'メールアドレスを正しく入力してください';
         return;
       }
-      if (pw.length !== 4) {
-        errEl.textContent = 'パスワード（ご登録の携帯番号 下4桁）を入力してください';
+      if (pw.length < 4) {
+        errEl.textContent = 'パスワードを入力してください（確認メールに記載。以前にお申し込みの方は携帯番号の下4桁）';
         if (passEl) passEl.focus();
         return;
       }
@@ -421,8 +421,8 @@
           try { localStorage.setItem(EKEY, email); if (name) localStorage.setItem(NKEY, name); } catch (e2) {}
           show(email);
         } else if (res && (res.reason === 'badpw' || res.reason === 'need_pw')) {
-          errEl.innerHTML = 'パスワード（ご登録の携帯番号 下4桁）が一致しません。<br>' +
-            'お申し込み時にご登録いただいた携帯番号の下4桁をご確認ください。';
+          errEl.innerHTML = 'パスワードが一致しません。<br>' +
+            'お申し込み後にお送りした<strong>確認メールに記載のパスワード</strong>をご確認ください（以前にお申し込みの方は携帯番号の下4桁）。';
           if (passEl) { passEl.value = ''; passEl.focus(); }
         } else {
           errEl.innerHTML = 'このメールアドレスでの査定のお申し込みが確認できませんでした。<br>' +
