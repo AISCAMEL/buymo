@@ -506,7 +506,112 @@
   window.printDoc = function (key) {
     var d = DOCS[key]; if (!d) return;
     printWin(d.title, d.fn(getFields()), d.style);
+    try { logDoc('発行', key, d.title); } catch (e) {}
   };
+
+  /* ======================================================
+     発行履歴（記録）：下書き／発行を記録し、種別（フォルダー）・日付で管理
+     ・localStorage（端末内）を基本に、GAS接続時は type:'doc_log' でバックアップ送信
+  ====================================================== */
+  var HKEY = 'buymo_doc_history';
+  function hget() { try { var a = JSON.parse(localStorage.getItem(HKEY)); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function hset(a) { try { if (a.length > 400) a = a.slice(0, 400); localStorage.setItem(HKEY, JSON.stringify(a)); } catch (e) {} }
+  function whoName() { try { var s = (window.AUTH && AUTH.get) ? AUTH.get() : null; return (s && (s.store || s.name)) || ''; } catch (e) { return ''; } }
+  function stamp() { var d = new Date(); function p(n) { return ('0' + n).slice(-2); } return { ts: d.getTime(), day: d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()), time: p(d.getHours()) + ':' + p(d.getMinutes()) }; }
+  function captureState() {
+    var st = {};
+    var els = document.querySelectorAll('.fill-bar [id], .ref-section [id]');
+    Array.prototype.forEach.call(els, function (el) {
+      var tag = el.tagName.toLowerCase();
+      if (tag !== 'input' && tag !== 'select' && tag !== 'textarea') return;
+      if (el.type === 'file') return;
+      if (el.id) st[el.id] = el.value;
+    });
+    return st;
+  }
+  function restoreState(st) { if (!st) return; for (var id in st) { var el = document.getElementById(id); if (el && el.type !== 'file') el.value = st[id]; } }
+  var PRICEID = { contract: 'ctPrice', buyback: 'bbPrice', receipt: 'rcAmount', appraisal: 'apPrice' };
+  function extractAmount(key) { var id = PRICEID[key]; if (!id) return 0; var el = document.getElementById(id); if (!el) return 0; var n = Number(String(el.value).replace(/[^0-9.]/g, '')); return n || 0; }
+  function gasLog(rec) {
+    if (!HQ.ENDPOINT) return;
+    try { fetch(HQ.ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'doc_log', token: (window.AUTH && AUTH.token) ? AUTH.token() : '', rec: rec }) }).catch(function () {}); } catch (e) {}
+  }
+  function logDoc(kind, key, title) {
+    var f = getFields(); var s = stamp();
+    var rec = { id: 'd' + s.ts + Math.random().toString(36).slice(2, 5), ts: s.ts, day: s.day, time: s.time,
+      type: title, docKey: key || '', kind: kind, customer: f.name || '', caseId: f.caseId || '', amount: extractAmount(key), by: whoName(), state: captureState() };
+    var a = hget(); a.unshift(rec); hset(a); gasLog(rec); renderHistory();
+    return rec;
+  }
+  function saveDraft() {
+    var f = getFields(); var s = stamp();
+    var rec = { id: 'd' + s.ts + Math.random().toString(36).slice(2, 5), ts: s.ts, day: s.day, time: s.time,
+      type: '下書き', docKey: '', kind: '下書き', customer: f.name || '', caseId: f.caseId || '', amount: 0, by: whoName(), state: captureState() };
+    var a = hget(); a.unshift(rec); hset(a); gasLog(rec); renderHistory();
+    var btn = document.getElementById('docSaveDraft');
+    if (btn) { var o = btn.textContent; btn.textContent = '✓ 下書きを保存しました'; setTimeout(function () { btn.textContent = o; }, 1600); }
+  }
+  function deleteHist(id) { hset(hget().filter(function (r) { return r.id !== id; })); renderHistory(); }
+  function openHist(id) {
+    var r = null, a = hget(); for (var i = 0; i < a.length; i++) if (a[i].id === id) { r = a[i]; break; }
+    if (!r) return;
+    restoreState(r.state);
+    var fb = document.querySelector('.fill-bar'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var msg = document.getElementById('docHistMsg'); if (msg) { msg.textContent = '「' + (r.customer || r.type) + '」の入力内容を復元しました。'; setTimeout(function () { msg.textContent = ''; }, 2800); }
+  }
+  function fillHistTypeOptions() {
+    var sel = document.getElementById('histType'); if (!sel) return;
+    var titles = []; for (var k in DOCS) if (titles.indexOf(DOCS[k].title) < 0) titles.push(DOCS[k].title);
+    titles.unshift('下書き');
+    sel.innerHTML = '<option value="">すべての種別</option>' + titles.map(function (t) { return '<option>' + esc(t) + '</option>'; }).join('');
+  }
+  function renderHistory() {
+    var host = document.getElementById('docHistList'); if (!host) return;
+    var typeF = (document.getElementById('histType') || {}).value || '';
+    var kindF = (document.getElementById('histKind') || {}).value || '';
+    var q = (((document.getElementById('histSearch') || {}).value) || '').trim().toLowerCase();
+    var all = hget();
+    var list = all.filter(function (r) {
+      if (typeF && r.type !== typeF) return false;
+      if (kindF && r.kind !== kindF) return false;
+      if (q && (((r.customer || '') + (r.caseId || '') + (r.type || '')).toLowerCase().indexOf(q) < 0)) return false;
+      return true;
+    });
+    var cnt = document.getElementById('docHistCount'); if (cnt) cnt.textContent = '全 ' + all.length + ' 件（表示 ' + list.length + '）';
+    if (!list.length) { host.innerHTML = '<p class="dh-empty">記録はありません。書類を発行すると自動で記録され、「下書き保存」で作成途中の内容も残せます。</p>'; return; }
+    var groups = {}, order = [];
+    list.forEach(function (r) { if (!groups[r.day]) { groups[r.day] = []; order.push(r.day); } groups[r.day].push(r); });
+    host.innerHTML = order.map(function (day) {
+      return '<div class="dh-day"><div class="dh-day-h">📅 ' + esc(day.replace(/-/g, '/')) + '<span class="dh-day-n">' + groups[day].length + '件</span></div>' +
+        groups[day].map(function (r) {
+          var badge = r.kind === '発行' ? '<span class="dh-b issued">発行</span>' : '<span class="dh-b draft">下書き</span>';
+          var amt = r.amount ? '　<b>' + yen(r.amount) + '</b>' : '';
+          var tgt = (r.customer ? esc(r.customer) + ' 様' : '') + (r.caseId ? '　' + esc(r.caseId) : '');
+          return '<div class="dh-row">' +
+            '<div class="dh-main">' + badge + '<span class="dh-type">' + esc(r.type) + '</span>' +
+              '<span class="dh-tgt">' + (tgt || '—') + amt + '</span></div>' +
+            '<div class="dh-side"><span class="dh-time">' + esc(r.time) + (r.by ? '・' + esc(r.by) : '') + '</span>' +
+              '<button type="button" class="dh-op" data-open="' + r.id + '">開く</button>' +
+              '<button type="button" class="dh-del" data-del="' + r.id + '">削除</button></div>' +
+          '</div>';
+        }).join('') + '</div>';
+    }).join('');
+  }
+  function initHistory() {
+    if (!document.getElementById('docHistList')) return;
+    fillHistTypeOptions();
+    ['histType', 'histKind'].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener('change', renderHistory); });
+    var se = document.getElementById('histSearch'); if (se) se.addEventListener('input', renderHistory);
+    var sd = document.getElementById('docSaveDraft'); if (sd) sd.addEventListener('click', saveDraft);
+    var host = document.getElementById('docHistList');
+    host.addEventListener('click', function (e) {
+      var op = e.target.closest('.dh-op'); if (op) { openHist(op.getAttribute('data-open')); return; }
+      var dl = e.target.closest('.dh-del'); if (dl) { if (confirm('この記録を削除しますか？')) deleteHist(dl.getAttribute('data-del')); return; }
+    });
+    renderHistory();
+  }
+  initHistory();
+
   /* ---- 案件セレクト ---- */
   var allCases = [];
   function findCaseFull(id) {
