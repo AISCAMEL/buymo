@@ -49,6 +49,11 @@
     '.terms h3{font-size:10.5pt;font-weight:700;margin:4mm 0 1.5mm;break-after:avoid;page-break-after:avoid;}',
     '.terms p{font-size:9.5pt;line-height:1.7;margin-bottom:1.5mm;text-align:justify;}',
     '.terms{margin-bottom:6mm;}',
+    '.chk-list{list-style:none;margin:0 0 6mm;padding:0;}',
+    '.chk-list li{font-size:10.5pt;line-height:1.85;padding:1.2mm 0;border-bottom:1px dashed #ddd;}',
+    '.chk-list li.chk-sub{border-bottom:0;color:#555;font-size:9.5pt;padding-left:7mm;}',
+    '.chk-list.plain li{border-bottom:0;}',
+    '.big-amt{font-size:16pt;font-weight:900;color:#0e1b33;}',
     'footer{position:fixed;bottom:8mm;left:0;right:0;text-align:center;font-size:9pt;color:#aaa;}',
     '@media print{.no-print{display:none;} body{padding:14mm;} footer{position:fixed;} .sign-row{page-break-inside:avoid;}}'
   ].join('');
@@ -232,11 +237,114 @@
     }
   }
 
+  /* ⑥ 買取証明書（査定金額・査定日から5日以内有効） */
+  function getBuyback() {
+    function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+    var base = getFields();
+    var ad = g('bbAssessDate'); // yyyy-mm-dd（未入力なら本日）
+    var assessD = ad ? new Date(ad + 'T00:00:00') : new Date();
+    if (isNaN(assessD.getTime())) assessD = new Date();
+    var validD = new Date(assessD.getTime()); validD.setDate(validD.getDate() + 5);
+    function fmt(d) { function p(n) { return ('0' + n).slice(-2); } return d.getFullYear() + '年' + p(d.getMonth() + 1) + '月' + p(d.getDate()) + '日'; }
+    return {
+      caseId: base.caseId, issueDate: nowStr(), assessDate: fmt(assessD), validDate: fmt(validD),
+      name: g('bbName') || base.name, addr: g('bbAddr') || base.address,
+      carName: g('bbCarName'), carType: g('bbCarType'), carYear: g('bbCarYear'), mileage: g('bbMileage'),
+      vin: g('bbVin') || base.vin, plate: g('bbPlate') || base.plate, color: g('bbColor'), price: g('bbPrice'),
+      issuer: g('bbIssuer') || '合同会社アイズ（BUYMO）', staff: g('bbStaff'), tel: g('bbTel'),
+      issuerAddr: g('bbIssuerAddr') || '〒979-0204 福島県いわき市四倉町細谷字大町1番',
+      kobutsu: g('bbKobutsu') || '福島県公安委員会 第25121A010859号', note: g('bbNote')
+    };
+  }
+  function docBuyback() {
+    var v = getBuyback();
+    function amt(p) { var n = Number(String(p).replace(/[^0-9.]/g, '')); return n ? ('¥' + n.toLocaleString('en-US') + '（税込）') : '¥　　　　　　　　（税込）'; }
+    return '<h1>買 取 証 明 書</h1>' +
+      '<p class="sub">この度は査定のご依頼を賜り、誠にありがとうございます。下記のとおり買取金額を証明いたします。</p>' +
+      '<table>' +
+        '<tr><td class="label">発行日</td><td>' + esc(v.issueDate) + '</td></tr>' +
+        '<tr><td class="label">査定日</td><td>' + esc(v.assessDate) + '</td></tr>' +
+        '<tr><td class="label" style="background:#fff4e0;">有効期限</td><td style="font-weight:700;">' + esc(v.validDate) + ' まで（査定日から5日以内）</td></tr>' +
+      '</table>' +
+      '<h2>お客様（車両所有者）</h2>' +
+      '<table><tr><td class="label">お名前</td><td>' + orBlank(v.name) + ' 様</td></tr>' +
+      '<tr><td class="label">ご住所</td><td>' + orBlank(v.addr) + '</td></tr></table>' +
+      '<h2>対象車両</h2>' +
+      '<table>' +
+        '<tr><td class="label" style="width:22%;">車名</td><td>' + orBlank(v.carName) + '</td><td class="label" style="width:22%;">型式</td><td>' + orBlank(v.carType) + '</td></tr>' +
+        '<tr><td class="label">年式</td><td>' + orBlank(v.carYear) + '</td><td class="label">走行距離</td><td>' + (v.mileage ? esc(v.mileage) + ' km' : '　') + '</td></tr>' +
+        '<tr><td class="label">登録番号</td><td>' + orBlank(v.plate) + '</td><td class="label">車台番号</td><td>' + orBlank(v.vin) + '</td></tr>' +
+        '<tr><td class="label">色</td><td colspan="3">' + orBlank(v.color) + '</td></tr>' +
+      '</table>' +
+      '<h2>買取金額</h2>' +
+      '<table><tr><td class="label" style="width:38%;">買取金額（税込）</td><td class="big-amt">' + amt(v.price) + '</td></tr></table>' +
+      '<p class="note">※ 本証明書は上記査定日から <b>5日以内</b> 有効です。有効期限を過ぎた場合、相場変動・現車状態の再確認により買取金額が変わることがあります。<br>' +
+      '※ 買取成立には、名義変更等に必要な書類のご準備が必要です（別紙「買取に必要な書類のご案内」をご確認ください）。<br>' +
+      '※ 概算査定の場合、現車確認後に金額を確定いたします。' + (v.note ? '<br>※ ' + esc(v.note) : '') + '</p>' +
+      '<h2>発行者</h2>' +
+      '<table><tr><td class="label">名称</td><td>' + orBlank(v.issuer) + '</td></tr>' +
+        '<tr><td class="label">住所</td><td>' + orBlank(v.issuerAddr) + '</td></tr>' +
+        '<tr><td class="label">古物商許可</td><td>' + orBlank(v.kobutsu) + '</td></tr>' +
+        '<tr><td class="label">担当者／連絡先</td><td>' + orBlank(v.staff) + (v.tel ? '　TEL: ' + esc(v.tel) : '') + '</td></tr>' +
+        (v.caseId ? '<tr><td class="label">案件ID</td><td>' + esc(v.caseId) + '</td></tr>' : '') +
+      '</table>' +
+      '<div class="sign-row"><div class="sign-box" style="flex:0 0 62mm;"><p>発行者（社印）</p><br><br><span class="seal">印</span></div></div>';
+  }
+
+  /* ⑦ 必要書類のご案内（お客様用チェックリスト） */
+  function getChecklist() {
+    function g(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+    return { type: g('clType') || '普通車', owner: g('clOwner') || '本人名義', action: g('clAction') || '名義変更（移転登録）', name: g('clName') || getFields().name };
+  }
+  function docChecklist() {
+    var v = getChecklist();
+    var kei = v.type.indexOf('軽') >= 0;
+    var loan = v.owner.indexOf('ローン') >= 0 || v.owner.indexOf('リース') >= 0 || v.owner.indexOf('留保') >= 0;
+    var other = v.owner.indexOf('他人') >= 0 || v.owner.indexOf('家族') >= 0;
+    var haisha = v.action.indexOf('廃車') >= 0 || v.action.indexOf('抹消') >= 0;
+    function chk(t) { return '<li>☐ ' + t + '</li>'; }
+    var cust = [];
+    if (!kei) { cust.push('印鑑証明書（発行から3か月以内・1通）'); cust.push('実印（各書類への押印用）'); }
+    else { cust.push('認印（軽自動車は実印・印鑑証明は不要です）'); }
+    cust.push('自動車検査証（車検証）の原本');
+    cust.push('自動車税（種別割）納税証明書');
+    cust.push('自賠責保険証明書（有効期限内のもの）');
+    cust.push('自動車リサイクル券（預託済みのもの）');
+    if (!kei && !haisha) cust.push('住民票（車検証の住所と現住所が異なる場合）');
+    if (kei && !haisha) cust.push('ナンバープレート（管轄の運輸支局が変わる場合）');
+    if (haisha) cust.push('ナンバープレート 前後2枚（返納します）');
+    if (other) cust.push('所有者ご本人の 印鑑証明書・実印・委任状（名義人の方にご用意いただきます）');
+    var loanBlk = loan ?
+      ('<h2>ローン・リース中の場合（所有権留保）</h2>' +
+        '<ul class="chk-list">' +
+          '<li>☐ 所有権解除の書類一式（信販会社・ディーラーから取り寄せ）</li>' +
+          '<li class="chk-sub">… 譲渡証明書（所有者の実印）／委任状／所有者の印鑑証明書</li>' +
+          '<li>☐ ローンの完済（残債がある場合は完済が必要です）</li>' +
+        '</ul>' +
+        '<p class="note">※ 車検証の「所有者」欄に記載の会社へご連絡のうえ、上記書類をお取り寄せください。手続きのご案内は当社でも承ります。</p>')
+      : '';
+    var buymo = kei ? ['申請依頼書（当社様式にご署名・ご押印）'] : ['譲渡証明書（当社様式・実印をご押印）', '委任状（当社様式・実印をご押印）'];
+    return '<h1>買取に必要な書類のご案内</h1>' +
+      '<p class="sub">' + (v.name ? esc(v.name) + ' 様　' : '') + '（' + esc(v.type) + '・' + esc(v.owner) + '・' + esc(v.action) + '）</p>' +
+      '<p style="font-size:10pt;margin-bottom:5mm;">お手続きにあたり、下記の書類のご準備をお願いいたします。ご不明な点は担当者までお気軽にお問い合わせください。</p>' +
+      '<h2>お客様にご準備いただくもの</h2>' +
+      '<ul class="chk-list">' + cust.map(chk).join('') + '</ul>' +
+      loanBlk +
+      '<h2>当社（BUYMO）でご用意する書類</h2>' +
+      '<ul class="chk-list plain">' + buymo.map(function (t) { return '<li>・' + t + '（お客様には署名・押印のみお願いします）</li>'; }).join('') + '</ul>' +
+      '<p class="note">※ 車種・お名義・お手続き内容により必要書類が異なる場合があります。最終的な要否は担当者がご案内いたします。<br>' +
+      '※ 印鑑証明書・住民票はお近くの市区町村窓口またはコンビニ交付で取得できます。<br>' +
+      '※ 本チェックリストはご準備の目安です。</p>' +
+      '<div class="sign-row"><div class="sign-box"><p>担当者</p><br></div><div class="sign-box"><p>ご連絡先 TEL</p><br></div></div>';
+  }
+
   /* ---- 全書類ルーター ---- */
   var DOCS = {
-    'contract':                   { title: '売買契約書',      fn: docContract },
-    'ownership-release':          { title: '所有権解除依頼書',  fn: docOwnershipRelease },
-    'settlement':                 { title: '清算書',          fn: docSettlement }
+    'contract':                   { title: '売買契約書',            fn: docContract },
+    'buyback':                    { title: '買取証明書',            fn: docBuyback },
+    'checklist':                  { title: '買取に必要な書類のご案内', fn: docChecklist },
+    'ownership-release':          { title: '所有権解除依頼書',        fn: docOwnershipRelease },
+    'settlement':                 { title: '清算書',                fn: docSettlement }
   };
   window.printDoc = function (key) {
     var d = DOCS[key]; if (!d) return;
