@@ -108,6 +108,38 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://buymo.me/genre/camper/"/>
   </url>
   <url>
+    <loc>https://buymo.me/genre/harrier/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://buymo.me/genre/harrier/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://buymo.me/genre/harrier/"/>
+  </url>
+  <url>
+    <loc>https://buymo.me/genre/velfire/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://buymo.me/genre/velfire/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://buymo.me/genre/velfire/"/>
+  </url>
+  <url>
+    <loc>https://buymo.me/genre/noahvoxy/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://buymo.me/genre/noahvoxy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://buymo.me/genre/noahvoxy/"/>
+  </url>
+  <url>
+    <loc>https://buymo.me/genre/nbox/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://buymo.me/genre/nbox/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://buymo.me/genre/nbox/"/>
+  </url>
+  <url>
     <loc>https://buymo.me/genre/fudou/</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>

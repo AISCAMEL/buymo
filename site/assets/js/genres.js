@@ -27,7 +27,11 @@
       { name: 'アルファード買取',   slug: 'alphard',     icon: '👑', desc: '高級ミニバンの代表格。グレード・装備を高評価。' },
       { name: 'プリウス買取',       slug: 'prius',       icon: '🌱', desc: '定番ハイブリッド。台数が多くても安定査定。' },
       { name: 'ジムニー買取',       slug: 'jimny',       icon: '🧭', desc: '高い人気で値落ちしにくい。旧型ジムニーも歓迎。' },
-      { name: '軽トラ買取',         slug: 'keitora',     icon: '🛻', desc: '軽トラック・農用車も需要安定。過走行でもOK。' }
+      { name: '軽トラ買取',         slug: 'keitora',     icon: '🛻', desc: '軽トラック・農用車も需要安定。過走行でもOK。' },
+      { name: 'ハリアー買取',       slug: 'harrier',     icon: '🚙', desc: 'トヨタの人気SUV。リセールが高く年式・グレードを高評価。' },
+      { name: 'ヴェルファイア買取', slug: 'velfire',     icon: '🖤', desc: 'アルファードの姉妹車。高級ミニバンとして高需要・高価買取。' },
+      { name: 'ノア・ヴォクシー買取', slug: 'noahvoxy',   icon: '🚐', desc: '定番ファミリーミニバン。中古需要が安定し高く売れます。' },
+      { name: 'N-BOX買取',          slug: 'nbox',        icon: '🚗', desc: '軽の販売台数トップ。台数が多くても安定査定で高価買取。' }
     ]},
     { cat: 'タイプ・区分で買取', icon: '🚗', catIco: 'cat-type.png', items: [
       { name: '軽自動車買取',        slug: 'kei',    icon: '🚗', desc: '人気の軽自動車を高価買取。ターボ・スライドドアも。' },
