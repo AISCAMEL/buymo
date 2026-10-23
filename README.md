@@ -11,6 +11,7 @@ site/       公開サイト（WPX FTPへ自動デプロイ）
   buymo-contact.html  お問い合わせ
   area/               都道府県別SEO LP（47件）
   genre/              買取ジャンルLP
+  liff/               LINE LIFF「オルタナティブライフ」（設定は BUYMO_LINE_LIFF_オルタナティブライフ_セットアップ.md）
   assets/             CSS / JS / 画像
 ```
 

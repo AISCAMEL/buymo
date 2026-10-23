@@ -22,3 +22,6 @@
 /portal-login.html
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+/liff/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store

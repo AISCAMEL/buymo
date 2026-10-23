@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="robots" content="noindex,nofollow" />
+<title>リッチメニュー画像（2500×1686）｜オルタナティブライフ</title>
+<!--
+  LINE公式アカウントのリッチメニュー画像の元データ。
+  ブラウザで 2500×1686 の範囲をスクリーンショットし、JPEG（1MB以下）で richmenu-large.jpg として保存する
+  （手順は BUYMO_LINE_LIFF_オルタナティブライフ_セットアップ.md）。
+  レイアウト：上1（2500×843）＋下3（833/834/833×843）＝ LINE Official Account Manager のテンプレート「上1・下3」
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&family=Outfit:wght@700;900&display=swap" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#333}
+  .menu{
+    width:2500px;height:1686px;display:grid;grid-template-columns:833px 834px 833px;grid-template-rows:843px 843px;
+    font-family:'Noto Sans JP',sans-serif;background:#0A1B3D;gap:0;
+  }
+  .tile{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;color:#fff;
+    border:3px solid rgba(255,255,255,.10)}
+  .ico{width:150px;height:150px;fill:none;stroke:#2DE1BC;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tile b{font-size:92px;font-weight:900;letter-spacing:.02em;line-height:1.2}
+  .tile span{font-size:50px;font-weight:500;color:rgba(255,255,255,.72)}
+
+  .top{grid-column:1 / 4;flex-direction:row;justify-content:flex-start;gap:0;padding:0 0 0 150px;overflow:hidden;
+    background:linear-gradient(160deg,#0A1B3D 0%,#0C3A44 55%,#0F766E 100%)}
+  .top .glow{position:absolute;right:120px;top:-260px;width:1000px;height:1000px;border-radius:50%;
+    background:radial-gradient(circle,rgba(45,225,188,.42),rgba(45,225,188,0) 70%)}
+  .top .txt{position:relative;display:flex;flex-direction:column;gap:22px}
+  .top .kicker{font-family:'Outfit',sans-serif;font-weight:900;font-size:54px;letter-spacing:.18em;color:#2DE1BC}
+  .top h1{font-size:168px;font-weight:900;line-height:1.15;letter-spacing:.01em}
+  .top .pill{display:inline-flex;align-items:center;gap:22px;align-self:flex-start;margin-top:14px;
+    background:#2DE1BC;color:#0A1B3D;font-size:66px;font-weight:900;padding:22px 60px;border-radius:999px}
+  .top .pill svg{width:72px;height:72px;stroke:#0A1B3D;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .top .sub{font-size:52px;font-weight:700;color:rgba(255,255,255,.85);margin-top:10px}
+  .top img{position:absolute;right:90px;bottom:-30px;width:760px;height:760px;object-fit:contain}
+
+  .b1{background:#13284F}
+  .b2{background:#0F2245}
+  .b3{background:#06C755}
+  .b3 .ico{stroke:#fff}
+  .b3 span{color:rgba(255,255,255,.9)}
+</style>
+</head>
+<body>
+<div class="menu" id="menu">
+  <div class="tile top">
+    <div class="glow"></div>
+    <div class="txt">
+      <p class="kicker">ALTERNATIVE LIFE</p>
+      <h1>写真で無料査定</h1>
+      <p class="sub">手数料0円・しつこい電話なし・全国対応</p>
+      <p class="pill"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>約3分で申し込む</p>
+    </div>
+    <img src="../../assets/img/buymo/mascot-cow-wave.png" alt="" />
+  </div>
+  <div class="tile b1">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+    <b>維持費診断</b><span>年間いくら自由になる？</span>
+  </div>
+  <div class="tile b2">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <b>マイページ</b><span>申し込み・診断の記録</span>
+  </div>
+  <div class="tile b3">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    <b>トーク相談</b><span>書類・ローンもお気軽に</span>
+  </div>
+</div>
+</body>
+</html>
