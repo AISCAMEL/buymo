@@ -2,6 +2,7 @@
    オルタナティブライフ（LINE LIFF）— アプリ本体
    副業を探している人の入口 → 資料請求・説明会 → BUYMO 加盟（パートナー）
    画面：home / apply（資料請求・説明会）/ done / check（副業スタイル診断）/ mypage
+   - ?view=home&sec=faq のように sec を付けると、ホームの該当セクション（#sec-faq）へスクロール
    - LIFF_ID 未設定 or LINE外のブラウザでも動作（LINE連携機能だけ無効）
    - 申込はサイトと同じ GAS に type:"join" で送信 → 「加盟店申込」シート →
      本部の「加盟店募集 教育ファネル」に載る（GAS改修不要）
@@ -120,7 +121,7 @@
     }
     var v = sp.get('view') || 'home';
     if (!VIEWS[v] || v === 'done') v = 'home';
-    return { view: v, step: parseInt(sp.get('step'), 10) || 1 };
+    return { view: v, step: parseInt(sp.get('step'), 10) || 1, sec: sp.get('sec') || '' };
   }
 
   function urlFor(r) {
@@ -713,5 +714,8 @@
     setDefaultReceive();
     var r = readRoute();
     nav(r.view, r.step, true);
+    // リッチメニューから ?view=home&sec=faq のように開いたら、その見出しまでスクロール
+    var target = r.sec && document.getElementById('sec-' + r.sec);
+    if (target) setTimeout(function () { target.scrollIntoView({ block: 'start' }); }, 60);
   });
 })();
