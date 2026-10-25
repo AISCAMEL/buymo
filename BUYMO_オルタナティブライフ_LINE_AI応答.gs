@@ -1,15 +1,15 @@
 /* ============================================================
    オルタナティブライフ — 公式LINE「中古車投資ビジネス」AI自動応答（GAS）
    ------------------------------------------------------------
-   LINE（Messaging API の Webhook）→ この GAS → Claude → LINE に返信。
+   LINE（Messaging API の Webhook）→ この GAS → AI（OpenRouter 経由）→ LINE に返信。
    BUYMO の本番 GAS とは別プロジェクトとして作る（車買取側に影響を出さない）。
 
    ■ スクリプトプロパティ（プロジェクトの設定 → スクリプト プロパティ）
-     ANTHROPIC_API_KEY         : Anthropic の API キー（必須）
+     OPENROUTER_API_KEY        : OpenRouter の API キー（必須。BUYMO の本番 GAS と同じ名前）
      LINE_CHANNEL_ACCESS_TOKEN : 「中古車投資ビジネス」のチャネルアクセストークン（長期）（必須）
      WEBHOOK_TOKEN             : Webhook URL の末尾 ?token= に付ける合言葉（setup() を実行すると自動で作られる）
      SLACK_WEBHOOK_URL         : 引き継ぎ・資料請求を本部に知らせる Slack の Incoming Webhook（任意）
-     AI_MODEL                  : 使うモデル（任意・既定 claude-opus-5-5。安くするなら claude-haiku-5-5）
+     AI_MODEL                  : 使うモデル（任意・既定 anthropic/claude-haiku-4-5＝BUYMO のチャットボットと同じ）
      LOG_SHEET_ID              : 会話ログのスプレッドシートID（setup() を実行すると自動で作られる）
 
    ■ 動き
@@ -24,7 +24,7 @@
 var APP_URL = 'https://miniapp.line.me/2012192113-CdcRu3Vi';   // ミニアプリ「オルタナティブライフ」
 var PARTNER_URL = 'https://buymo.me/buymo-partner.html';
 var SITE_URL = 'https://buymo.me/';
-var DEFAULT_MODEL = 'claude-opus-5-5';
+var DEFAULT_MODEL = 'anthropic/claude-haiku-4-5';
 var PAUSE_HOURS = 24;          // 担当者に引き継いだあと AI が返信しない時間
 var HISTORY_TURNS = 10;        // AI に渡す直近の会話（発言数）
 var APPLY_PREFIX = '【パートナー資料の請求】';   // ミニアプリが申込時にトークへ送る文の先頭
@@ -130,7 +130,7 @@ function handleEvent_(ev) {
   startLoading_(userId);
   var history = getHistory_(userId);
   history.push({ role: 'user', content: text });
-  var answer = askClaude_(history);
+  var answer = askAI_(history);
 
   if (answer === null) {
     var sorry = 'すみません、ただいまAIが混み合っています。少し時間をおいてもう一度送っていただくか、「担当者と話したい」と送ってください。';
@@ -192,54 +192,44 @@ function resumeAI(userId) {
 
 
 /* ============================================================
-   Claude（Anthropic Messages API）
+   AI（OpenRouter 経由。BUYMO の本番 GAS と同じ呼び出し方）
    ============================================================ */
-function askClaude_(messages) {
+function askAI_(messages) {
   var props = PropertiesService.getScriptProperties();
-  var apiKey = props.getProperty('ANTHROPIC_API_KEY');
-  if (!apiKey) { Logger.log('ANTHROPIC_API_KEY が未設定'); return null; }
+  var apiKey = props.getProperty('OPENROUTER_API_KEY');
+  if (!apiKey) { Logger.log('OPENROUTER_API_KEY が未設定'); return null; }
   var model = props.getProperty('AI_MODEL') || DEFAULT_MODEL;
 
-  var payload = {
-    model: model,
-    max_tokens: 16000,
-    output_config: { effort: 'low' },   // チャットの短い回答なので low（速く・安く）
-    system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-    messages: messages
-  };
-  var headers = {
-    'x-api-key': apiKey,
-    'anthropic-version': '2026-10-21'
-  };
-  // 安全上の理由で断られたとき、推奨モデルで自動的にやり直す（Haiku には無い機能なので付けない）
-  if (model.indexOf('haiku') < 0) {
-    payload.fallbacks = 'default';
-    headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
-  }
-
   try {
-    var res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+    var res = UrlFetchApp.fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'post',
       contentType: 'application/json',
-      headers: headers,
-      payload: JSON.stringify(payload),
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'HTTP-Referer': 'https://buymo.me',
+        'X-Title': 'Alternative Life LINE'
+      },
+      payload: JSON.stringify({
+        model: model,
+        max_tokens: 1000,
+        messages: [{ role: 'system', content: SYSTEM_PROMPT }].concat(messages)
+      }),
       muteHttpExceptions: true
     });
     if (res.getResponseCode() !== 200) {
-      Logger.log('Anthropic ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 500));
+      Logger.log('OpenRouter ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 500));
       return null;
     }
     var data = JSON.parse(res.getContentText());
-    if (data.stop_reason === 'refusal') {
+    var choice = data.choices && data.choices[0];
+    if (!choice) return null;
+    if (choice.finish_reason === 'content_filter' || choice.finish_reason === 'refusal') {
       return 'すみません、その内容にはお答えできません。副業パートナーの仕組みや始め方についてなら、お気軽にどうぞ。';
     }
-    var text = (data.content || [])
-      .filter(function (b) { return b.type === 'text'; })
-      .map(function (b) { return b.text; })
-      .join('\n').trim();
+    var text = String((choice.message && choice.message.content) || '').trim();
     return text || null;
   } catch (err) {
-    Logger.log('askClaude_: ' + err.message);
+    Logger.log('askAI_: ' + err.message);
     return null;
   }
 }
@@ -345,7 +335,7 @@ function setup() {
     props.setProperty('WEBHOOK_TOKEN', Utilities.getUuid().replace(/-/g, ''));
   }
   Logger.log('Webhook URL の末尾に付ける文字：?token=' + props.getProperty('WEBHOOK_TOKEN'));
-  ['ANTHROPIC_API_KEY', 'LINE_CHANNEL_ACCESS_TOKEN', 'SLACK_WEBHOOK_URL'].forEach(function (k) {
+  ['OPENROUTER_API_KEY', 'LINE_CHANNEL_ACCESS_TOKEN', 'SLACK_WEBHOOK_URL'].forEach(function (k) {
     Logger.log(k + ': ' + (props.getProperty(k) ? '設定済み' : '★未設定'));
   });
   Logger.log('AI_MODEL: ' + (props.getProperty('AI_MODEL') || DEFAULT_MODEL + '（既定）'));
@@ -353,5 +343,5 @@ function setup() {
 
 // AI の回答だけを試す（LINE には送らない）
 function testAI() {
-  Logger.log(askClaude_([{ role: 'user', content: '会社員ですが、副業として始められますか？初期費用はいくらですか？' }]));
+  Logger.log(askAI_([{ role: 'user', content: '会社員ですが、副業として始められますか？初期費用はいくらですか？' }]));
 }
