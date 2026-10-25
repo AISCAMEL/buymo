@@ -105,6 +105,10 @@
       .catch(function () { return false; });
   }
 
+  function applyOaName() {
+    $$('.oa-name').forEach(function (el) { el.textContent = oaLabel(); });
+  }
+
   function applyProfile() {
     var p = state.profile;
     if (!p) return;
@@ -487,7 +491,7 @@
         : 'ありがとうございます。担当者から3営業日以内にご連絡します。';
       $('#doneStep1').textContent = receive === 'LINE'
         ? '3営業日以内に、資料をLINEのトークでお送りします。' +
-          (state.friend === false ? '届くように、BUYMO公式LINEを友だち追加しておいてください。' : '')
+          (state.friend === false ? '届くように、' + oaLabel() + 'を友だち追加しておいてください。' : '')
         : '3営業日以内に、資料をメールでお送りします。';
       $('#doneCheck').hidden = !!lsGet(LS_CHECK, null);
       resetApply();
@@ -671,9 +675,19 @@
     openUrl('https://line.me/R/share?text=' + encodeURIComponent(title + '\n' + desc + '\n' + url), true);
   }
 
+  function oaLabel() { return CFG.OA_NAME ? '公式LINE「' + CFG.OA_NAME + '」' : '公式LINE'; }
+  function oaId() { return CFG.OA_BASIC_ID ? encodeURIComponent(CFG.OA_BASIC_ID.replace(/^@?/, '@')) : ''; }
+
   function openTalk() {
-    var id = (CFG.OA_BASIC_ID || '').replace(/^@?/, '@');
-    openUrl(CFG.OA_BASIC_ID ? 'https://line.me/R/oaMessage/' + encodeURIComponent(id) + '/' : CFG.OA_URL, false);
+    if (oaId()) { openUrl('https://line.me/R/oaMessage/' + oaId() + '/', false); return; }
+    if (CFG.OA_URL) { openUrl(CFG.OA_URL, false); return; }
+    // 公式アカウントのトーク（リッチメニュー）から開いている前提で、閉じてトークに戻す
+    if (state.liffReady && state.inClient) liff.closeWindow();
+  }
+
+  function addFriend() {
+    var url = CFG.OA_URL || (oaId() ? 'https://line.me/R/ti/p/' + oaId() : '');
+    if (url) openUrl(url, false);
   }
 
   /* =======================================================
@@ -704,7 +718,7 @@
       var a = act.getAttribute('data-action');
       if (a === 'talk') openTalk();
       else if (a === 'share') share();
-      else if (a === 'addFriend') openUrl(CFG.OA_URL, false);
+      else if (a === 'addFriend') addFriend();
       else if (a === 'back') {
         if (state.liffReady && state.inClient) liff.closeWindow();
         else openTalk();
@@ -720,6 +734,7 @@
      ======================================================= */
   setupApplyForm();
   restoreCheck();
+  applyOaName();
 
   initLiff().then(function () {
     applyProfile();

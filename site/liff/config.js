@@ -17,10 +17,12 @@ window.ALTLIFE_CONFIG = {
   // 本部の「加盟店募集 教育ファネル」（hq-recruit.html）に載る
   ENDPOINT: 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec',
 
-  // BUYMO 公式LINE（友だち追加・トーク相談）
-  OA_URL: 'https://lin.ee/yNz0Tl7',
-  // 公式アカウントのベーシックID（例: '@123abcde'）。設定すると「トークで質問」でトーク画面を直接開く
+  // つなげる公式LINE（プロバイダー「オルタナティブライフコーチ」の Messaging API チャネル）
+  OA_NAME: '中古車投資ビジネス',
+  // ベーシックID（例: '@123abcde'）。これだけ入れれば、友だち追加・トーク相談の両方に使われる
   OA_BASIC_ID: '',
+  // 友だち追加URL（例: 'https://lin.ee/xxxxxxx'）。あれば友だち追加はこちらを優先
+  OA_URL: '',
 
   PARTNER_URL: 'https://buymo.me/buymo-partner.html',
   PORTAL_URL: 'https://buymo.me/portal-login.html',
