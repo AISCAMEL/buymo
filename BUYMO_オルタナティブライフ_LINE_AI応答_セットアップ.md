@@ -105,6 +105,23 @@ LINE Developers →「中古車投資ビジネス」→「Messaging API設定」
 function resumeMe() { resumeAI('Uxxxxxxxxxxxxxxxx'); }
 ```
 
+### AIが返事をしないとき
+1. GASで関数 `diagnose` を選んで「実行」→ 実行ログの★の行が原因です（設定は何も変えません）
+
+| ログ | 直し方 |
+|---|---|
+| ① LINEトークン：★NG | 手順3でトークンを発行し直し、`LINE_CHANNEL_ACCESS_TOKEN` に入れ直す |
+| ② Webhook URL：★別のURL／★未設定 | 手順7で GAS のURL＋`?token=` に置き換える |
+| ② 合言葉：★不一致 | URL末尾の `?token=` を `setup` のログに出た値にする |
+| ② Webhookの利用：★オフ | 手順7の「Webhookの利用」をオン |
+| ③ ★GASが動いていません | 手順6の「アクセスできるユーザー」を **全員** にして新バージョンでデプロイ（「Googleアカウントを持つ全員」は不可） |
+| ④ に自分の userId | テストで「担当者と話したい」を送ったため。`resumeAI` で再開 |
+| ⑤ 最後のエラー | 内容を開発担当に送る |
+
+2. ★がないのに返事がないときは、LINE Official Account Manager の応答設定（手順8）で「Webhook」がオン、「応答メッセージ」がオフかを確認
+
+`diagnose` は公開中のウェブアプリの受信記録を見るため、このコードに入れ替えたあとは一度「新バージョン」でデプロイしてから実行してください。
+
 ---
 
 ## 運用

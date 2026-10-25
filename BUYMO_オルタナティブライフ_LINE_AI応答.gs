@@ -75,13 +75,18 @@ var SYSTEM_PROMPT = [
 function doPost(e) {
   var props = PropertiesService.getScriptProperties();
   // GAS はリクエストヘッダー（署名）を読めないため、URL の token で LINE 以外からの呼び出しを弾く
-  if (!e || !e.parameter || e.parameter.token !== props.getProperty('WEBHOOK_TOKEN')) return ok_();
+  var tokenOk = !!(e && e.parameter && e.parameter.token === props.getProperty('WEBHOOK_TOKEN'));
+  props.setProperty('LAST_WEBHOOK', Date.now() + (tokenOk ? '' : ' 合言葉不一致'));   // diagnose 用の受信記録
+  if (!tokenOk) return ok_();
 
   var body;
   try { body = JSON.parse(e.postData.contents); } catch (err) { return ok_(); }
   var events = (body && body.events) || [];
   for (var i = 0; i < events.length; i++) {
-    try { handleEvent_(events[i]); } catch (err) { Logger.log('handleEvent: ' + err.message); }
+    try { handleEvent_(events[i]); } catch (err) {
+      Logger.log('handleEvent: ' + err.message);
+      props.setProperty('LAST_ERROR', new Date().toLocaleString('ja-JP') + ' ' + err.message);
+    }
   }
   return ok_();
 }
@@ -344,6 +349,48 @@ function setup() {
 // AI の回答だけを試す（LINE には送らない）
 function testAI() {
   Logger.log(askAI_([{ role: 'user', content: '会社員ですが、副業として始められますか？初期費用はいくらですか？' }]));
+}
+
+// AI が返事をしないときの診断（トークン・Webhook 設定・LINE→GAS の到達・AI 停止中の人を確認。設定は変更しない）
+function diagnose() {
+  var props = PropertiesService.getScriptProperties();
+
+  var info = lineFetch_('/v2/bot/info', 'get');
+  if (info.getResponseCode() === 200) {
+    var bot = JSON.parse(info.getContentText());
+    Logger.log('① LINEトークン：OK（' + bot.displayName + ' / ' + bot.basicId + '／チャット：' + (bot.chatMode === 'chat' ? 'オン' : 'オフ') + '）');
+  } else {
+    Logger.log('① LINEトークン：★NG（' + info.getResponseCode() + '）→ LINE_CHANNEL_ACCESS_TOKEN を発行し直して入れ直す');
+  }
+
+  var ep = lineFetch_('/v2/bot/channel/webhook/endpoint', 'get');
+  if (ep.getResponseCode() === 200) {
+    var w = JSON.parse(ep.getContentText());
+    var url = w.endpoint || '';
+    var where = url.indexOf('script.google.com') >= 0 ? 'GAS' : (url ? '★別のURL（' + url.split('?')[0] + '）' : '★未設定');
+    var tokenOk = url.indexOf('token=' + props.getProperty('WEBHOOK_TOKEN')) >= 0;
+    Logger.log('② Webhook URL：' + where + '／合言葉：' + (tokenOk ? '一致' : '★不一致') + '／Webhookの利用：' + (w.active ? 'オン' : '★オフ'));
+  } else {
+    Logger.log('② Webhook の設定を取得できません（' + ep.getResponseCode() + '）');
+  }
+
+  // LINE から公開中の GAS へテスト送信し、doPost が受信記録を書いたかで判定する
+  // （GAS は正常でもログイン画面へ飛ばすときでも 302 を返すため、LINE の結果だけでは判断できない）
+  var before = Date.now();
+  var t = lineFetch_('/v2/bot/channel/webhook/test', 'post', {});
+  var r = {};
+  try { r = JSON.parse(t.getContentText()); } catch (err) {}
+  Utilities.sleep(2000);   // GAS の起動が遅く LINE 側が先に打ち切った場合に備えて少し待つ
+  var last = String(props.getProperty('LAST_WEBHOOK') || '');
+  var verdict = Number(last.split(' ')[0]) < before ? '★GASが動いていません → デプロイの「アクセスできるユーザー」が「全員」か、Webhook URL が最新のデプロイのURLかを確認'
+    : last.indexOf('合言葉不一致') >= 0 ? '★GASには届いていますが、URL末尾の ?token= が違います'
+    : 'OK（GASに届いています）';
+  Logger.log('③ LINE→GAS テスト送信：' + verdict + '（LINE側の結果 ' + (r.statusCode || t.getResponseCode()) + '）');
+
+  var paused = props.getKeys().filter(function (k) { return k.indexOf('pause_') === 0; });
+  Logger.log('④ AIが一時停止中の人：' + (paused.length ? paused.map(function (k) { return k.slice(6); }).join(', ') + ' → resumeAI で再開' : 'なし'));
+
+  Logger.log('⑤ 最後のエラー：' + (props.getProperty('LAST_ERROR') || 'なし'));
 }
 
 // リッチメニューの確認（以前つないでいたツールが API でメニューを設定していないか見るだけ。削除はしない）
