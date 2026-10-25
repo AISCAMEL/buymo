@@ -345,3 +345,11 @@ function setup() {
 function testAI() {
   Logger.log(askAI_([{ role: 'user', content: '会社員ですが、副業として始められますか？初期費用はいくらですか？' }]));
 }
+
+// リッチメニューの確認（以前つないでいたツールが API でメニューを設定していないか見るだけ。削除はしない）
+function checkRichMenus() {
+  var d = lineFetch_('/v2/bot/user/all/richmenu', 'get');
+  Logger.log('システム側の既定メニュー: ' + d.getResponseCode() + ' ' + d.getContentText());
+  var l = lineFetch_('/v2/bot/richmenu/list', 'get');
+  Logger.log('システム側で作られたメニュー一覧: ' + l.getContentText());
+}
