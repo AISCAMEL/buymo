@@ -8,7 +8,7 @@
    ============================================================ */
 window.ALTLIFE_CONFIG = {
   // LIFF ID（例: '2001234567-AbCdEfGh'）。LINEミニアプリで作った場合は「本番用」のLIFF ID
-  LIFF_ID: '',
+  LIFF_ID: '2012192113-CdcRu3Vi',
   // 友だちへのシェアに使うURLの頭。LINEミニアプリなら 'https://miniapp.line.me/'、
   // LINEログインチャネルのLIFFなら 'https://liff.line.me/'
   LIFF_URL_BASE: 'https://miniapp.line.me/',
@@ -20,7 +20,7 @@ window.ALTLIFE_CONFIG = {
   // つなげる公式LINE（プロバイダー「オルタナティブライフコーチ」の Messaging API チャネル）
   OA_NAME: '中古車投資ビジネス',
   // ベーシックID（例: '@123abcde'）。これだけ入れれば、友だち追加・トーク相談の両方に使われる
-  OA_BASIC_ID: '',
+  OA_BASIC_ID: '@603vfsfd',
   // 友だち追加URL（例: 'https://lin.ee/xxxxxxx'）。あれば友だち追加はこちらを優先
   OA_URL: '',
 
