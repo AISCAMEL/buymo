@@ -88,7 +88,7 @@
           <svg class="ico"><use href="#i-book"/></svg>まずは資料を受け取る
         </button>
       </div>
-      <p class="hero-sub">動画説明会は毎日開催・約<span class="sem-min">60</span>分。好きな日時を選べます。</p>
+      <p class="hero-sub">見たい日を選ぶだけ。その日の朝から夜中まで、好きな時間に見られます。</p>
       <ul class="hero-trust">
         <li>在庫ゼロ</li><li>ノルマなし</li><li>未経験OK</li><li>全国で募集</li>
       </ul>
@@ -202,9 +202,9 @@
     <div class="sec">
       <div class="cta-card">
         <p class="cta-kicker">まずは動画で、<br>仕組みを見てから決めてください。</p>
-        <p>約<span class="sem-min">60</span>分の動画説明会を毎日開催しています。録画の配信なので、顔出しや発言は必要ありません。しつこい勧誘は一切ありません。</p>
+        <p>約<span class="sem-min">60</span>分の動画説明会を、見たい日の朝から夜中まで、好きな時間に見られます。録画なので、顔出しや発言は必要ありません。しつこい勧誘は一切ありません。</p>
         <button type="button" class="btn btn-sun btn-block" data-go="seminar">
-          <svg class="ico"><use href="#i-calendar"/></svg>好きな日時で予約する（無料）
+          <svg class="ico"><use href="#i-calendar"/></svg>見たい日を予約する（無料）
         </button>
         <button type="button" class="cta-sub" data-go="apply">資料だけ受け取りたい方はこちら<svg class="ico"><use href="#i-right"/></svg></button>
       </div>
@@ -238,7 +238,7 @@
     <div class="page-head">
       <p class="sec-kicker">Online seminar</p>
       <h1 class="page-title">無料の動画説明会</h1>
-      <p class="page-lead">BUYMOの副業パートナーの仕組みを、約<span class="sem-min">60</span>分の動画でご説明します。好きな日時を予約すると、その時刻にこの画面で動画が始まります。</p>
+      <p class="page-lead">BUYMOの副業パートナーの仕組みを、約<span class="sem-min">60</span>分の動画でご説明します。見たい日を予約すると、その日の<span class="sem-hours">6:00〜24:00</span>の好きな時間に、この画面で見られます。</p>
     </div>
 
     <div class="sec sem-msg" id="semMsg" hidden>
@@ -252,7 +252,7 @@
         <ul class="sem-points">
           <li><svg class="ico"><use href="#i-monitor"/></svg><b>録画の配信</b><span>顔出し・発言なし</span></li>
           <li><svg class="ico"><use href="#i-phone"/></svg><b>スマホで視聴</b><span>LINEの中で見られます</span></li>
-          <li><svg class="ico"><use href="#i-calendar"/></svg><b>毎日開催</b><span>好きな日時を選べます</span></li>
+          <li><svg class="ico"><use href="#i-clock"/></svg><b>時間の指定なし</b><span>朝から夜中まで好きな時に</span></li>
         </ul>
       </div>
 
@@ -265,20 +265,15 @@
             <button type="button" class="cal-nav" id="calNext" aria-label="次の月"><svg class="ico"><use href="#i-right"/></svg></button>
           </div>
           <div class="cal-week" aria-hidden="true"><span class="sun">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sat">土</span></div>
-          <div class="cal-grid" id="calGrid" role="grid"></div>
+          <div class="cal-grid" id="calGrid"></div>
         </div>
-      </div>
-
-      <div class="sec">
-        <h2 class="sub-title"><span class="num">2</span>開始時刻を選ぶ</h2>
-        <div class="chips" id="calTimes"></div>
-        <p class="hint" id="calHint">日にちを選ぶと、開始時刻が表示されます。</p>
+        <p class="hint">毎日予約できます。今日も、<span class="sem-close">24:00</span>の30分前まで予約できます。</p>
       </div>
 
       <form id="semForm" novalidate>
         <div class="step">
-          <h2 class="step-title"><span class="num">3</span>お名前とメール</h2>
-          <p class="sem-picked" id="semPicked">日時を選んでください</p>
+          <h2 class="step-title"><span class="num">2</span>お名前とメール</h2>
+          <p class="sem-picked" id="semPicked">上のカレンダーで、見たい日を選んでください</p>
           <div class="field">
             <label for="s-name">お名前<span class="req">必須</span></label>
             <input id="s-name" type="text" maxlength="40" autocomplete="name" placeholder="例：山田 太郎" />
@@ -286,7 +281,7 @@
           <div class="field">
             <label for="s-email">メールアドレス<span class="req">必須</span></label>
             <input id="s-email" type="email" inputmode="email" autocomplete="email" placeholder="例：taro@example.com" />
-            <p class="hint">予約の確認と、前日・1時間前のお知らせをLINEとメールでお送りします。</p>
+            <p class="hint">予約の確認と、前日・当日の朝のお知らせをLINEとメールでお送りします。</p>
           </div>
           <label class="agree">
             <input type="checkbox" id="s-agree" />
@@ -295,7 +290,7 @@
         </div>
         <p class="form-note" id="semNote" role="status" aria-live="polite"></p>
         <button type="submit" class="btn btn-sun btn-block" id="semSubmit">
-          <svg class="ico"><use href="#i-calendar"/></svg>この日時で予約する（無料）
+          <svg class="ico"><use href="#i-calendar"/></svg>この日で予約する（無料）
         </button>
       </form>
     </div>
@@ -306,20 +301,21 @@
         <div class="ticket">
           <p class="ticket-kicker"><svg class="ico"><use href="#i-check"/></svg>ご予約済み</p>
           <p class="ticket-date" id="tkDate"></p>
-          <p class="ticket-time"><span id="tkTime"></span><small>約<span class="sem-min">60</span>分</small></p>
-          <p class="cd-label">開始まで</p>
+          <p class="ticket-time"><span class="sem-hours">6:00〜24:00</span></p>
+          <p class="ticket-sub">この時間の好きなときに見られます（約<span class="sem-min">60</span>分）</p>
+          <p class="cd-label">見られるようになるまで</p>
           <div class="countdown" role="timer" aria-live="off">
             <div><b id="cdD">0</b><span>日</span></div>
             <div><b id="cdH">00</b><span>時間</span></div>
             <div><b id="cdM">00</b><span>分</span></div>
             <div><b id="cdS">00</b><span>秒</span></div>
           </div>
-          <p class="ticket-note">開始時刻になると、この画面で動画が始まります。前日と1時間前に、LINEとメールでお知らせします。</p>
+          <p class="ticket-note">当日になったら、この画面の再生ボタンを押すと動画が始まります。前日と当日の朝に、LINEとメールでお知らせします。</p>
           <button type="button" class="btn btn-ghost btn-block" id="tkCal">
             <svg class="ico"><use href="#i-calendar"/></svg>Googleカレンダーに追加
           </button>
           <div class="ticket-links">
-            <button type="button" id="tkChange">日時を変更する</button>
+            <button type="button" id="tkChange">日にちを変更する</button>
             <button type="button" id="tkCancel">予約を取り消す</button>
           </div>
         </div>
@@ -334,20 +330,20 @@
       </div>
     </div>
 
-    <!-- 配信中 -->
+    <!-- 視聴できる日 -->
     <div id="semLive" hidden>
       <div class="sec">
-        <p class="live-bar"><span class="live-dot" aria-hidden="true"></span>録画を配信中<span class="live-time" id="liveTime"></span></p>
+        <p class="live-bar"><span class="live-dot" aria-hidden="true"></span>いま見られます<span class="live-time" id="liveTime"></span></p>
         <div class="player-wrap">
           <div id="ytPlayer"></div>
           <button type="button" class="player-start" id="playerStart">
             <span class="play-ico"><svg class="ico"><use href="#i-play"/></svg></span>
-            <b>視聴を始める</b>
+            <b>動画を再生する</b>
             <small id="playerStartSub"></small>
           </button>
           <p class="player-wait" id="playerWait" hidden>動画を準備しています。少し時間をおいて開き直してください。</p>
         </div>
-        <p class="hint">音が出ます。動画の最後に、加盟のお申し込み・個別相談のご案内があります。</p>
+        <p class="hint">音が出ます。<span class="sem-last">23:00</span>までに始めると、最後まで見られます。動画の最後に、加盟のお申し込み・個別相談のご案内があります。</p>
       </div>
     </div>
 
@@ -384,9 +380,9 @@
     <div id="semMissed" hidden>
       <div class="sec">
         <div class="decide">
-          <h2 class="sec-title">配信は終了しました</h2>
-          <p class="decide-lead">動画説明会は毎日開催しています。別の日時を選んで、予約し直せます。</p>
-          <button type="button" class="btn btn-sun btn-block" id="semRebook"><svg class="ico"><use href="#i-calendar"/></svg>別の日時で予約する</button>
+          <h2 class="sec-title">視聴できる日が終わりました</h2>
+          <p class="decide-lead">動画説明会は毎日予約できます。別の日を選んで、予約し直せます。</p>
+          <button type="button" class="btn btn-sun btn-block" id="semRebook"><svg class="ico"><use href="#i-calendar"/></svg>別の日で予約する</button>
         </div>
       </div>
     </div>
