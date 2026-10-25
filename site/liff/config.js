@@ -1,14 +1,17 @@
 /* ============================================================
    オルタナティブライフ（LINE LIFF）— 設定
    副業を探している人向けの入口。資料請求・説明会申込から BUYMO 加盟（パートナー）へつなげる。
-   LINE Developers で LIFF アプリを作成したら LIFF_ID を設定する。
+   LINE Developers で LINEミニアプリ（または LIFF アプリ）を作成したら LIFF_ID を設定する。
    空欄のままでもブラウザでは動作（プレビューモード：LINE連携機能のみ無効）。
    セットアップ手順はリポジトリ直下の
    「BUYMO_LINE_LIFF_オルタナティブライフ_セットアップ.md」を参照。
    ============================================================ */
 window.ALTLIFE_CONFIG = {
-  // LIFF ID（例: '2001234567-AbCdEfGh'）
+  // LIFF ID（例: '2001234567-AbCdEfGh'）。LINEミニアプリで作った場合は「本番用」のLIFF ID
   LIFF_ID: '',
+  // 友だちへのシェアに使うURLの頭。LINEミニアプリなら 'https://miniapp.line.me/'、
+  // LINEログインチャネルのLIFFなら 'https://liff.line.me/'
+  LIFF_URL_BASE: 'https://miniapp.line.me/',
 
   // 申込の送信先（サイトと共通の GAS Web App）。type:"join" で「加盟店申込」シート →
   // 本部の「加盟店募集 教育ファネル」（hq-recruit.html）に載る

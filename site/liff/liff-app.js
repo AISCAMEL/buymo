@@ -82,15 +82,27 @@
       state.loggedIn = liff.isLoggedIn();
       try { state.context = liff.getContext(); } catch (e) { /* noop */ }
       if (!state.loggedIn) return;
-      return Promise.all([
-        liff.getProfile().then(function (p) { state.profile = p; }).catch(function () {}),
-        liff.getFriendship().then(function (f) { state.friend = !!f.friendFlag; }).catch(function () {})
-      ]);
+      // LINEミニアプリの「チャネル同意の簡略化」では profile 権限が後回しになる。
+      // 起動直後に許可画面を出さないよう、許可済みのときだけプロフィール・友だち状態を取得する
+      return hasPermission('profile').then(function (ok) {
+        if (!ok) return;
+        return Promise.all([
+          liff.getProfile().then(function (p) { state.profile = p; }).catch(function () {}),
+          liff.getFriendship().then(function (f) { state.friend = !!f.friendFlag; }).catch(function () {})
+        ]);
+      });
     }).catch(function (err) {
       if (window.console) console.warn('[altlife] LIFF init failed:', err);
       banner.textContent = 'LINE連携を開始できませんでした。資料請求はこのままご利用いただけます。';
       banner.hidden = false;
     });
+  }
+
+  function hasPermission(scope) {
+    if (!liff.permission || !liff.permission.query) return Promise.resolve(true);
+    return liff.permission.query(scope)
+      .then(function (r) { return r.state === 'granted'; })
+      .catch(function () { return false; });
   }
 
   function applyProfile() {
@@ -620,7 +632,7 @@
      LINE 連携アクション
      ======================================================= */
   function liffUrl(q) {
-    return CFG.LIFF_ID ? 'https://liff.line.me/' + CFG.LIFF_ID + (q || '') : CFG.PARTNER_URL;
+    return CFG.LIFF_ID ? (CFG.LIFF_URL_BASE || 'https://liff.line.me/') + CFG.LIFF_ID + (q || '') : CFG.PARTNER_URL;
   }
 
   function share() {
