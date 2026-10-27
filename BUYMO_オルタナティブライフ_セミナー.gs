@@ -13,7 +13,7 @@
    ■ スクリプトプロパティ（すべて任意。空なら既定値）
      SEMINAR_YOUTUBE : 説明会動画の YouTube の URL（限定公開・「埋め込みを許可」をオン）。空の間は「動画を準備中」と表示
      SEMINAR_HOURS   : 予約した日に見られる時間（既定 6:00-24:00）
-     SEMINAR_MINUTES : 動画の長さ（分。既定 60）
+     SEMINAR_MINUTES : 動画の長さ（分。既定 7）
      SEMINAR_DAYS    : 何日先まで予約できるか（既定 14）
    ■ 最初に1回だけ setupSeminar() を実行する（ステップ配信を5分おきに動かすトリガーを作る）
    セットアップ手順：BUYMO_オルタナティブライフ_LINE_AI応答_セットアップ.md の「動画説明会」
@@ -53,7 +53,7 @@ function seminarConfig_() {
   return {
     openMin: open,
     closeMin: close,
-    minutes: Math.max(1, Number(p.getProperty('SEMINAR_MINUTES')) || 60),
+    minutes: Math.max(1, Number(p.getProperty('SEMINAR_MINUTES')) || 7),
     days: Math.min(60, Math.max(1, Number(p.getProperty('SEMINAR_DAYS')) || 14)),
     videoId: youtubeId_(p.getProperty('SEMINAR_YOUTUBE') || '')
   };

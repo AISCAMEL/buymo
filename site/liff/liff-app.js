@@ -536,19 +536,19 @@
      ======================================================= */
   var TIME_LABEL = { '0': '1日30分くらい', '1': '1日1〜2時間', '2': '平日夜と週末', '3': '日中も動ける' };
   var GOAL_LABEL = { '0': '小さく始めたい', '1': 'しっかり育てたい', '2': '独立・専業にしたい' };
-  // スタイルと目安は buymo-partner.html の「収益の考え方」と同じ
+  // スタイルと目安は本部の動画説明会・buymo-partner.html の「収益の考え方」と同じ（月2台・5台・10台）
   var STYLES = {
     light: {
-      name: '副業ライト', count: '数台〜', time: '1日数十分・スキマ時間',
-      desc: '本業を最優先に、スキマ時間で小さく始めるスタイル。まずは月数台から、仕組みに慣れていきましょう。'
+      name: '副業スタート', count: '月2台', time: '平日夜30分＋土日',
+      desc: '本業を最優先に、平日の夜と土日で小さく始めるスタイル。まずは月2台から、仕組みに慣れていきましょう。'
     },
     solid: {
-      name: '副業しっかり', count: '5〜10台', time: '平日夜＋週末に対応',
-      desc: '平日の夜と週末を使って、もう一つの収入源として育てていくスタイルです。'
+      name: '軌道に乗せる', count: '月5台', time: '平日夜＋土日をしっかり',
+      desc: '紹介やリピートが回り始めたら、月5台ほどへ。もう一つの収入源として育てていくスタイルです。'
     },
     pro: {
-      name: '本格・専業化', count: '10〜20台', time: '日中も対応・専業化',
-      desc: '日中も動ける強みを活かして、地域の“車の相談窓口”を目指すスタイルです。'
+      name: '独立・専業', count: '月10台', time: '本格稼働・エリアを広げる',
+      desc: '本格的に稼働して、月10台・エリアを広げていくスタイル。独立・専業も目指せます。'
     },
     addon: {
       name: '既存事業プラス', count: 'お客様の数に合わせて', time: 'いまの業務の流れの中で',
@@ -583,11 +583,11 @@
       key = LEVELS[Math.min(timeLevel, goal)];
       if (goal > timeLevel) notes.push('時間に余裕が出てきたら、次のスタイルへ段階的に広げられます。');
     }
-    if (c.qexp === '未経験') notes.push('未経験でも大丈夫。査定・接客・システムは研修とマニュアルで身につけられます。');
+    if (c.qexp === '未経験') notes.push('未経験でも大丈夫。査定・商談・オークションシステムは、本社での研修と動画研修で身につけられます。');
     else if (c.qexp === '車が好き・少し詳しい') notes.push('車好きの目線は査定でも活きます。相場の見方は研修で体系的に学べます。');
     else notes.push('業界経験は、査定やお客様対応でそのまま活かせます。');
     if (c.qwork === '会社員') notes.push('お勤め先の就業規則（副業の可否）は、事前にご確認ください。');
-    notes.push('ノルマや仕入れの義務はありません。在庫を持たないので、撤退時のリスクも小さく始められます。');
+    notes.push('買取台数のノルマはありません。店舗も在庫置き場もいらないので、小さく始められます。');
     var s = STYLES[key];
     return { key: key, name: s.name, desc: s.desc, count: s.count, time: s.time, notes: notes };
   }
@@ -661,7 +661,7 @@
   var JST_MS = 9 * 3600000;
   var WATCHED_PCT = 50;
   var sem = {
-    cfg: { openMin: 360, closeMin: 1440, minutes: 60, days: 14, ready: true },
+    cfg: { openMin: 360, closeMin: 1440, minutes: 7, days: 14, ready: true },
     loaded: false, loading: false, offset: 0, res: null, rebook: false, mode: '',
     month: null, day: '', timer: null,
     player: null, ended: false, watched: 0, pos: 0, sentPct: -1, lastPing: 0, watchKey: '',
@@ -1173,7 +1173,7 @@
     var r = chk && chk.result;
     var url = liffUrl('?view=check');
     var title = r ? 'わたしの副業スタイルは「' + r.name + '」でした' : '本業はそのまま。車買取で、もうひとつの生き方を。';
-    var desc = '在庫なし・スキマ時間ではじめるBUYMOの副業パートナー。4つの質問で、あなたに合う始め方がわかります。';
+    var desc = '店舗不要・平日の夜と土日ではじめるBUYMOの車買取の副業。4つの質問で、あなたに合う始め方がわかります。';
     track('share', { method: 'line', content_type: 'liff_style_check' });
 
     if (state.liffReady && liff.isApiAvailable('shareTargetPicker')) {
