@@ -514,6 +514,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);bac
 .play-ico .ico{width:28px;height:28px;fill:currentColor;margin-left:4px}
 .player-start b{font-family:var(--f-head);font-size:17px;font-weight:900}
 .player-start small{font-size:12px;color:rgba(255,255,255,.8)}
+.live-links{text-align:center;margin-top:12px}
+.live-links button{font-size:13px;font-weight:700;color:var(--sub);text-decoration:underline;text-underline-offset:3px;padding:6px 2px}
 .player-hint{margin-top:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--sun-wash);border:1.5px solid var(--sun);font-size:13px;font-weight:700;color:var(--navy);line-height:1.6}
 .player-wait{position:absolute;inset:0;display:grid;place-items:center;padding:16px;text-align:center;font-size:13.5px;color:#fff}
 
