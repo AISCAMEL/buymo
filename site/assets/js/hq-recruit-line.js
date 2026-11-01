@@ -225,14 +225,21 @@ window.RCLINE = (function () {
     }).join('') + '</ol>';
   }
 
+  // AIの状態と、押すと反対の状態になるボタンの文字
+  function aiStateText(p) {
+    return p.paused ? '■ いまAIは止まっています（担当者が対応中・あと' + (p.pauseLeft || 24) + '時間で自動で再開）'
+                    : '▶ いまAIが自動で返事をしています';
+  }
+  function aiBtnText(p) { return p.paused ? '▶ AIの返信を再開する' : '■ AIを止めて担当者が対応'; }
+
   function bodyHtml(l) {
     var p = l.line;
     var tl = !p ? '<p class="rc-hint">LINEのやり取りはまだありません。</p>'
       : p.timeline ? tlHtml(p.timeline) : '<p class="rc-hint">読み込み中…</p>';
     var actions = p ? (
       '<a class="la-btn" href="' + CHAT_URL + '" target="_blank" rel="noopener">LINEのチャットを開く</a>' +
-      (p.paused ? '<button type="button" class="la-btn la-btn-o" data-role="resume">AIの返信を再開する</button>'
-                : '<button type="button" class="la-btn la-btn-o" data-role="pause">AIを止めて担当者が対応</button>')) : '';
+      '<p class="la-ai-state' + (p.paused ? ' off' : '') + '" data-role="aistate">' + aiStateText(p) + '</p>' +
+      '<button type="button" class="la-btn ' + (p.paused ? '' : 'la-btn-o') + '" data-role="ai">' + aiBtnText(p) + '</button>') : '';
     return '<div class="lt-grid">' +
       '<div><div class="rc-sub-h">📜 これまでの流れ（新しい順）</div><div class="ltl-host">' + tl + '</div></div>' +
       '<div>' +
@@ -262,22 +269,29 @@ window.RCLINE = (function () {
         box.querySelector('.ltl-host').innerHTML = '<p class="rc-hint">読み込めませんでした。開き直してください。</p>';
       }).then(function () { p.loading = false; });
     });
-    function toggleAI(btn, pause) {
+    // 押すたびに「止める」⇔「再開する」が入れ替わる
+    var btn = box.querySelector('[data-role="ai"]'), st = box.querySelector('[data-role="aistate"]');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var pause = !p.paused;
       btn.disabled = true;
+      btn.textContent = pause ? 'AIを止めています…' : 'AIを再開しています…';
       function done() {
         p.paused = pause;
         p.pauseLeft = pause ? 24 : 0;
-        btn.textContent = (demo ? '（見本）' : '') + (pause ? 'AIを止めました' : 'AIを再開しました');
+        btn.disabled = false;
+        btn.textContent = aiBtnText(p);
+        btn.classList.toggle('la-btn-o', !pause);
+        st.textContent = (demo ? '（見本）' : '') + (pause ? '■ AIを止めました。担当者が対応してください（24時間たつと自動で再開）' : '▶ AIを再開しました。このあとはAIが自動で返事をします');
+        st.classList.toggle('off', pause);
         renderTop(state.leads);
       }
+      function fail(msg) { btn.disabled = false; btn.textContent = aiBtnText(p); window.alert(msg); }
       if (demo) { done(); return; }
       api(pause ? 'pause' : 'resume', { u: p.userId }).then(function (d) {
-        if (d.ok) done(); else { btn.disabled = false; window.alert('できませんでした（' + (d.error || '') + '）'); }
-      }).catch(function () { btn.disabled = false; window.alert('通信できませんでした。もう一度お試しください。'); });
-    }
-    var r = box.querySelector('[data-role="resume"]'), pz = box.querySelector('[data-role="pause"]');
-    if (r) r.addEventListener('click', function () { toggleAI(this, false); });
-    if (pz) pz.addEventListener('click', function () { toggleAI(this, true); });
+        if (d.ok) done(); else fail('できませんでした（' + (d.error || '') + '）');
+      }).catch(function () { fail('通信できませんでした。もう一度お試しください。'); });
+    });
   }
 
   // hq-recruit.js から呼ぶ：リードに LINE の人を合わせる（見本のときはサンプルのデータ）
