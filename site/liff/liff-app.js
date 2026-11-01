@@ -1074,7 +1074,24 @@
     var over = semNow() >= resEnd();
     $('#liveTitle').textContent = over ? 'まもなく終了します' : '説明会が始まりました';
     $('#liveTime').textContent = over ? '' : untilText() + 'まで再生できます';
+    // 再生ボタンを押したときにすぐ動画を作れるよう、YouTube の部品を先に読み込んでおく（iPhone では押した直後でないと再生できない）
+    if (ready && !DRY) loadYouTube().catch(function () {});
     updateWatch();
+  }
+
+  function playerHint(text) {
+    var el = $('#playerHint');
+    el.textContent = text || '';
+    el.hidden = !text;
+  }
+
+  // YouTube のエラー番号 → 表示する文
+  function ytErrorText(code) {
+    var why = code === 101 || code === 150 ? 'この動画はLINEの中での再生が許可されていません'
+      : code === 100 ? '動画が見つかりません（非公開・削除の可能性）'
+      : code === 5 ? 'この端末では再生できない形式です'
+      : '動画の情報が正しくありません';
+    return '動画を再生できませんでした（' + why + '・エラー' + code + '）。お手数ですが、トークでお知らせください。';
   }
 
   function updateWatch() {
@@ -1107,6 +1124,8 @@
     sem.player = null;
     sem.ended = false;
     sem.sentPct = -1;
+    sem.playErr = 0;
+    playerHint('');
     var old = $('#ytPlayer');
     if (old) old.parentNode.removeChild(old);
     var div = document.createElement('div');
@@ -1130,14 +1149,23 @@
     if (DRY) { toast('試し表示では動画は再生されません'); return; }
     var btn = $('#playerStart');
     btn.disabled = true;
-    loadYouTube().then(function () {
+    playerHint('');
+    function create() {
       var start = resumeSec();
       sem.player = new YT.Player('ytPlayer', {
         videoId: sem.res.videoId,
         playerVars: { start: start, autoplay: 1, playsinline: 1, rel: 0, modestbranding: 1 },
         events: {
-          onReady: function (e) { e.target.playVideo(); },
+          onReady: function (e) {
+            e.target.playVideo();
+            // iPhone・iPad などで自動で始まらないときは、動画の中の再生ボタンを押してもらう
+            setTimeout(function () {
+              var st = sem.player && sem.player.getPlayerState ? sem.player.getPlayerState() : -1;
+              if (st !== 1 && st !== 3 && st !== 0 && !sem.playErr) playerHint('動画が始まらないときは、動画の中の ▶（再生ボタン）を押してください。');
+            }, 2500);
+          },
           onStateChange: function (e) {
+            if (e.data === 1) playerHint('');
             if (e.data === 0) { // 再生が終わった
               sem.ended = true;
               sem.pos = 0;
@@ -1148,14 +1176,26 @@
               if (box) setTimeout(function () { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
             }
             if (e.data === 2) sendProgress(); // 一時停止
+          },
+          onError: function (e) {
+            sem.playErr = e.data;
+            playerHint(ytErrorText(e.data));
+            // 本部が気づけるよう、サーバーに記録する（診断 diagnose の「最後のエラー」に出る）
+            semApi('progress', { pct: watchedPct(), err: e.data }).catch(function () {});
+            track('seminar_error', { code: e.data });
           }
         }
       });
       btn.hidden = true;
+      btn.disabled = false;
       track('seminar_play', { resume_min: Math.floor(start / 60) });
-    }).catch(function () {
+    }
+    // 読み込み済みなら、押した直後に作る（iPhone で自動再生を許してもらうため）
+    if (window.YT && window.YT.Player) { create(); return; }
+    loadYouTube().then(create).catch(function () {
+      btn.disabled = false;
       toast('動画を読み込めませんでした。電波の良い場所でもう一度お試しください。');
-    }).then(function () { btn.disabled = false; });
+    });
   }
 
   /* ---------- 視聴後：加盟するかどうか ---------- */
