@@ -13,6 +13,7 @@
      AI_MODEL                  : 使うモデル（任意・既定 anthropic/claude-haiku-4-5＝BUYMO のチャットボットと同じ）
      LOG_SHEET_ID              : 会話ログのスプレッドシートID（setup() を実行すると自動で作られる）
      APP_SECRET                : 通知メールのリンクなどに付ける署名の鍵（自動で作られる。変えるとそれまでのリンクは無効）
+     ADMIN_KEY                 : 本部の「加盟店募集」画面から会話ログを読むための合言葉（showAdminKey() を実行すると作られる）
 
    ■ 動き
      ・ふつうの質問 → AI が返信（下にクイックリプライ：動画説明会を予約／資料を受け取る／スタイル診断／担当者と話したい）
@@ -22,7 +23,8 @@
      ・ミニアプリからの申込投稿（【パートナー資料の請求】）→ お礼と今後の流れを返信＋Slack 通知
      ・動画説明会（予約・リマインド・視聴・加盟の申込）は同じプロジェクトの「セミナー.gs」が担当
        （セミナー.gs がなくても AI 応答はそのまま動く）
-     ・会話はすべてスプレッドシートに記録
+     ・会話はすべてスプレッドシートに記録（友だち追加・ブロックも）
+     ・本部の「加盟店募集」画面（hq-recruit.html）が、会話・説明会・AIの停止状態を読み、AIの停止・再開をする（api=admin）
    セットアップ手順：BUYMO_オルタナティブライフ_LINE_AI応答_セットアップ.md
    ============================================================ */
 
@@ -98,6 +100,8 @@ var SYSTEM_PROMPT = [
 function doPost(e) {
   // ミニアプリ（動画説明会）からの呼び出し。本人確認は LINE のトークンで行う（セミナー.gs）
   if (e && e.parameter && e.parameter.api === 'seminar' && typeof seminarApi_ === 'function') return seminarApi_(e);
+  // 本部の「加盟店募集」画面からの呼び出し（ADMIN_KEY で確認）
+  if (e && e.parameter && e.parameter.api === 'admin') return adminApi_(e);
 
   var props = PropertiesService.getScriptProperties();
   // GAS はリクエストヘッダー（署名）を読めないため、URL の token で LINE 以外からの呼び出しを弾く
@@ -150,6 +154,11 @@ function htmlEsc_(s) {
 }
 
 function handleEvent_(ev) {
+  // 友だち追加・ブロックを記録する（本部の画面の「これまでの流れ」に出る）
+  if ((ev.type === 'follow' || ev.type === 'unfollow') && ev.source && ev.source.type === 'user') {
+    logRow_(ev.source.userId, ev.type === 'follow' ? '友だち追加' : 'ブロック', '');
+    return;
+  }
   if (ev.type !== 'message' || !ev.source || ev.source.type !== 'user') return;   // 1:1 トークのみ
   var userId = ev.source.userId;
   var msg = ev.message || {};
@@ -479,6 +488,124 @@ function notifySlack_(text) {
   try {
     UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: JSON.stringify({ text: text }), muteHttpExceptions: true });
   } catch (err) { Logger.log('Slack: ' + err.message); }
+}
+
+
+/* ============================================================
+   本部の「加盟店募集」画面から使う（POST ?api=admin、本文は JSON。ADMIN_KEY が合うときだけ）
+   action：people（LINEの人の一覧）／timeline（1人のこれまでの流れ）／pause・resume（AIの停止・再開）
+   ============================================================ */
+function adminApi_(e) {
+  var req = {};
+  try { req = JSON.parse((e.postData && e.postData.contents) || '{}'); } catch (err) {}
+  var out;
+  try {
+    var key = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
+    var u = String(req.u || '');
+    if (!key || req.key !== key) out = { ok: false, error: 'key' };
+    else if (req.action === 'people') out = { ok: true, now: Date.now(), people: adminPeople_() };
+    else if (req.action === 'timeline') out = { ok: true, timeline: adminTimeline_(u) };
+    else if (req.action === 'pause' && u) {
+      PropertiesService.getScriptProperties().setProperty('pause_' + u, String(Date.now() + PAUSE_HOURS * 3600 * 1000));
+      logRow_(u, '本部', '本部の画面からAIの返信を止めました');
+      out = { ok: true };
+    } else if (req.action === 'resume' && u) {
+      resumeAI(u);
+      logRow_(u, '本部', '本部の画面からAIの返信を再開しました');
+      out = { ok: true };
+    } else out = { ok: false, error: 'action' };
+  } catch (err) {
+    Logger.log('adminApi_: ' + err.message);
+    out = { ok: false, error: 'server' };
+  }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// 会話ログの直近 5,000 行（日時・userId・LINE表示名・発言者・本文）
+function logRows_() {
+  var id = PropertiesService.getScriptProperties().getProperty('LOG_SHEET_ID');
+  if (!id) return [];
+  var ss = SpreadsheetApp.openById(id);
+  var sh = ss.getSheetByName('会話ログ') || ss.getSheets()[0];
+  var last = sh.getLastRow();
+  if (last < 2) return [];
+  var from = Math.max(2, last - 4999);
+  return sh.getRange(from, 1, last - from + 1, 5).getValues();
+}
+
+// シートの日時（日付型にされていても、文字のままでも）→ ミリ秒
+function logTime_(v) {
+  if (v && typeof v.getTime === 'function') return v.getTime();
+  var t = Date.parse(String(v).replace(' ', 'T') + '+09:00');
+  return isNaN(t) ? 0 : t;
+}
+
+function adminPeople_() {
+  var map = {};
+  function person(u) { return map[u] || (map[u] = { userId: u, lineName: '', firstAt: 0, lastAt: 0, lastText: '', msgs: 0 }); }
+  logRows_().forEach(function (r) {
+    var u = String(r[1] || '');
+    if (u.charAt(0) !== 'U') return;
+    var t = logTime_(r[0]), p = person(u), who = String(r[3]);
+    if (r[2] && r[2] !== '（名前不明）') p.lineName = String(r[2]);
+    if (t && (!p.firstAt || t < p.firstAt)) p.firstAt = t;
+    if (t >= p.lastAt) p.lastAt = t;
+    if (who === 'お客様') { p.msgs++; p.lastText = String(r[4]).slice(0, 80); }
+    if (who === '友だち追加') p.blocked = false;
+    if (who === 'ブロック') p.blocked = true;
+  });
+  if (typeof seminarSheet_ === 'function') {
+    seminarRows_(seminarSheet_()).forEach(function (r, i) {
+      var res = toRes_(r, i);
+      if (!res.userId) return;
+      var p = person(res.userId);
+      if (!p.lineName) p.lineName = String(res.lineName || res.name || '');
+      p.seminar = { day: res.day, status: res.status, pct: res.pct, name: res.name, email: res.email };
+      var booked = toMs_(res.reservedAt), updated = toMs_(r[9]);
+      if (booked && (!p.firstAt || booked < p.firstAt)) p.firstAt = booked;
+      if (updated > p.lastAt) p.lastAt = updated;
+    });
+  }
+  var props = PropertiesService.getScriptProperties(), now = Date.now();
+  props.getKeys().forEach(function (k) {
+    if (k.indexOf('pause_') !== 0) return;
+    var until = Number(props.getProperty(k)) || 0;
+    if (until <= now) return;
+    var p = person(k.slice(6));
+    p.paused = true;
+    p.pauseLeft = Math.ceil((until - now) / 3600000);
+  });
+  return Object.keys(map).map(function (u) { return map[u]; });
+}
+
+function adminTimeline_(u) {
+  var KIND = { 'お客様': 'user', 'AI': 'ai', 'AI（エラー）': 'ai', '定型': 'auto', '引き継ぎ': 'handoff', '友だち追加': 'friend', 'ブロック': 'block', '本部': 'staff' };
+  var list = [];
+  logRows_().forEach(function (r) {
+    if (String(r[1]) !== u) return;
+    list.push({ at: logTime_(r[0]), kind: KIND[String(r[3])] || 'auto', text: String(r[4] || '').slice(0, 800) });
+  });
+  if (typeof seminarSheet_ === 'function') {
+    seminarRows_(seminarSheet_()).forEach(function (r, i) {
+      var res = toRes_(r, i);
+      if (res.userId !== u) return;
+      var d = dayStart_(res.day), updated = toMs_(r[9]);
+      list.push({ at: toMs_(res.reservedAt), kind: 'seminar_book', text: '説明会を予約（' + (d ? dayLabel_(d) : res.day) + '）' });
+      if (res.pct > 0) list.push({ at: updated, kind: 'seminar_watch', text: '説明会を視聴（' + res.pct + '%）' });
+      var DEC = { '申込': '「加盟を申し込む」を選択', '相談希望': '「個別相談で詳しく聞く」を選択', '検討中': '「もう少し考える」を選択', 'キャンセル': '説明会の予約を取り消し' };
+      if (DEC[res.status]) list.push({ at: updated + 1, kind: res.status === 'キャンセル' ? 'auto' : 'decide', text: DEC[res.status] });
+    });
+  }
+  list.sort(function (a, b) { return a.at - b.at; });
+  return list;
+}
+
+// 本部の画面に入れる合言葉を表示する（なければ作る）。エディタから実行してログを見る
+function showAdminKey() {
+  var props = PropertiesService.getScriptProperties();
+  var key = props.getProperty('ADMIN_KEY');
+  if (!key) { key = Utilities.getUuid().replace(/-/g, ''); props.setProperty('ADMIN_KEY', key); }
+  Logger.log('本部の「加盟店募集」画面に入れる合言葉：' + key);
 }
 
 

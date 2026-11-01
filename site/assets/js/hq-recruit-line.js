@@ -1,14 +1,37 @@
 /* 加盟店募集 教育ファネル × 公式LINE「中古車投資ビジネス」
    ・LINE の会話（AI応答 GAS の会話ログ）と動画説明会（予約・視聴）を、リードごとにまとめて表示する
    ・「いま対応が必要な人」と、友だち → 説明会 → 申込 → 加盟の人数を上に出す
-   ・いまは見本（?demo=1 で開いたときだけ、サンプルのデータで表示。保存はしない）
-     実データは AI応答 GAS に本部用の読み出し（api=admin）を足してからつなぐ */
+   ・データは「オルタナティブライフ LINE AI応答」の GAS（api=admin）から読む。合言葉（ADMIN_KEY）はこの端末に保存
+     （GAS で showAdminKey() を実行するとログに出る）
+   ・?demo=1 で開くと、サンプルのデータで見本を表示する（保存はしない） */
 window.RCLINE = (function () {
   'use strict';
   var demo = /[?&]demo=1\b/.test(location.search);
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var HOUR = 3600000, DAY = 24 * HOUR;
   var CHAT_URL = 'https://chat.line.biz/';
+  var LINE_API = 'https://script.google.com/macros/s/AKfycbzo97X1a5vzmsZITgeFdvpP97S8xgklpl3KxvJjixPoFSBPuNVN-RvDOXICVEIrel9w/exec';
+  var KEY_LS = 'buymo_line_admin_key';
+  var state = { connected: false, error: '', leads: [] };
+
+  function keyGet() { try { return localStorage.getItem(KEY_LS) || ''; } catch (e) { return ''; } }
+  function keySet(v) { try { if (v) localStorage.setItem(KEY_LS, v); else localStorage.removeItem(KEY_LS); } catch (e) {} }
+
+  function api(action, extra) {
+    var body = { action: action, key: keyGet() };
+    for (var k in extra) body[k] = extra[k];
+    return fetch(LINE_API + '?api=admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライト回避
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); });
+  }
+
+  // 説明会の日（'2026-11-03' または見本の '11/3'）
+  function dayText(d) {
+    var m = String(d || '').match(/^\d{4}-(\d{2})-(\d{2})$/);
+    return m ? Number(m[1]) + '/' + Number(m[2]) : String(d || '');
+  }
 
   function ago(t) {
     var d = Date.now() - t;
@@ -78,10 +101,14 @@ window.RCLINE = (function () {
       if (uid && byId[uid]) { l.line = byId[uid]; used[uid] = true; }
     });
     // まだ申込のない LINE の人も、リードとして並べる
+    // 名前は説明会の予約で入力されたものがあればそれを、なければ LINE の表示名を使う
     people.forEach(function (p) {
       if (used[p.userId]) return;
-      leads.push({ id: 'line_' + p.userId, manual: true, lineUserId: p.userId, name: p.lineName + '（LINE）', storeName: '', email: '', tel: '', pref: '',
-        date: new Date(p.firstAt).toLocaleDateString('ja-JP'), stage: p.seminar ? 'セミナー予約' : '新規', steps: {}, memo: '', seminarDate: '', care: {}, line: p });
+      var s = p.seminar || {};
+      var stage = s.status === '申込' || s.status === '相談希望' ? '商談' : p.seminar ? 'セミナー予約' : '新規';
+      leads.push({ id: 'line_' + p.userId, manual: true, lineUserId: p.userId, name: s.name || (p.lineName || 'LINEの方') + '（LINE）', storeName: '',
+        email: s.email || '', tel: '', pref: '', date: new Date(p.firstAt || Date.now()).toLocaleDateString('ja-JP'), stage: stage,
+        steps: {}, memo: '', seminarDate: '', care: {}, line: p });
     });
     leads.sort(function (a, b) { return lastAt(b) - lastAt(a); });
     return leads;
@@ -100,16 +127,26 @@ window.RCLINE = (function () {
     if (s && s.status === '予約' && s.pct === 0 && isPast(s.day)) return { lv: 'gray', label: '予約したのに見逃し', why: '見逃しのご案内は自動で送信済み' };
     return null;
   }
-  function isPast(dayMd) { var p = String(dayMd).split('/'); var d = new Date(); d.setMonth(+p[0] - 1, +p[1]); d.setHours(23, 59); return d.getTime() < Date.now(); }
+  function isPast(day) {
+    day = String(day || '');
+    if (/^\d{4}-\d{2}-\d{2}$/.test(day)) return Date.parse(day + 'T23:59:59+09:00') < Date.now();
+    var p = day.split('/'); if (p.length < 2) return false;
+    var d = new Date(); d.setMonth(+p[0] - 1, +p[1]); d.setHours(23, 59); return d.getTime() < Date.now();
+  }
   function isOverdue(dayMd) { return dayMd && isPast(dayMd); }
 
   function renderTop(leads) {
     var host = document.getElementById('rcLine');
     if (!host) return;
+    state.leads = leads;
+    if (!demo && !state.connected) { renderSetup(host); return; }
     var people = leads.filter(function (l) { return l.line; });
     var booked = people.filter(function (l) { return l.line.seminar; });
     var watched = booked.filter(function (l) { return l.line.seminar.pct >= 50; });
-    var applied = leads.filter(function (l) { return (l.line && l.line.seminar && l.line.seminar.status === '申込') || l.stage === '加盟' || l.stage === '商談'; });
+    var applied = leads.filter(function (l) {
+      var st = l.line && l.line.seminar && l.line.seminar.status;
+      return st === '申込' || st === '相談希望' || l.stage === '加盟' || l.stage === '商談';
+    });
     var joined = leads.filter(function (l) { return l.stage === '加盟'; });
     var steps = [['LINEの友だち・会話', people.length], ['説明会を予約', booked.length], ['説明会を視聴', watched.length], ['申込・商談', applied.length], ['加盟', joined.length]];
     var funnel = steps.map(function (st, i) {
@@ -133,7 +170,10 @@ window.RCLINE = (function () {
       (demo ? '<p class="rc-demo">見本の表示です（サンプルのデータ）。ここでの操作は保存されません。</p>' : '') +
       '<div class="lf">' + funnel + '</div>' +
       '<div class="la-head"><h2>🔔 いま対応が必要な人 <span>' + att.length + '人</span></h2></div>' +
-      '<div class="la-grid">' + cards + '</div>';
+      '<div class="la-grid">' + cards + '</div>' +
+      (demo ? '' : '<p class="lk-change"><button type="button" id="lkChange">LINE連携の合言葉を変える</button></p>');
+    var ch = document.getElementById('lkChange');
+    if (ch) ch.addEventListener('click', function () { if (window.confirm('この端末に保存した合言葉を消して、入れ直しますか？')) { keySet(''); location.reload(); } });
     host.querySelectorAll('[data-open]').forEach(function (c) {
       c.addEventListener('click', function () {
         var box = document.querySelector('.rc-lead[data-id="' + c.getAttribute('data-open') + '"]');
@@ -144,6 +184,24 @@ window.RCLINE = (function () {
     });
   }
 
+  // 合言葉がまだ・違う・つながらないとき
+  function renderSetup(host) {
+    var msg = state.error === 'key' ? '合言葉が違います。もう一度入れてください。'
+      : state.error ? 'LINEのデータを読み込めませんでした（' + esc(state.error) + '）。時間をおいて開き直してください。' : '';
+    host.innerHTML = '<div class="lk-box">' +
+      '<b>公式LINEの会話・動画説明会をここに表示するには、合言葉を入れてください</b>' +
+      '<p>GAS「オルタナティブライフ LINE AI応答」で関数 <code>showAdminKey</code> を実行すると、実行ログに合言葉が出ます。入れるのはこの端末で1回だけです。</p>' +
+      '<div class="lk-row"><input type="text" id="lkInput" placeholder="合言葉" autocomplete="off"><button type="button" id="lkSave">つなぐ</button></div>' +
+      (msg ? '<p class="lk-err">' + msg + '</p>' : '') +
+      '<p class="lk-demo"><a href="?demo=1">見本（サンプルのデータ）を見る</a></p></div>';
+    document.getElementById('lkSave').addEventListener('click', function () {
+      var v = document.getElementById('lkInput').value.trim();
+      if (!v) return;
+      keySet(v);
+      location.reload();
+    });
+  }
+
   /* ---------- リードのカードに足す部分 ---------- */
   function headBadges(l) {
     var p = l.line;
@@ -151,26 +209,32 @@ window.RCLINE = (function () {
     var s = p.seminar;
     return '<span class="lb-row"><span class="lb lb-line">LINE：' + esc(p.lineName) + '・' + ago(p.lastAt) + '</span>' +
       (p.paused ? '<span class="lb lb-pause">AI停止中</span>' : '') +
-      (s ? '<span class="lb lb-sem">説明会 ' + esc(s.day) + '・' + (s.pct ? s.pct + '%' : esc(s.status)) + '</span>' : '') + '</span>';
+      (s ? '<span class="lb lb-sem">説明会 ' + esc(dayText(s.day)) + '・' + (s.pct ? s.pct + '%' : esc(s.status)) + '</span>' : '') + '</span>';
   }
 
-  var ICON = { friend: '🤝', user: '💬', ai: '🤖', seminar_book: '📅', seminar_watch: '▶️', decide: '🤔', consult: '🙋', handoff: '🙋', apply: '📝', staff: '👤', step: '📨' };
-  var LABEL = { friend: '友だち追加', user: 'お客様', ai: 'AI', seminar_book: '説明会', seminar_watch: '説明会', decide: '説明会のあと', consult: '個別相談', handoff: '引き継ぎ', apply: '申込', staff: '本部', step: '自動配信' };
+  var ICON = { friend: '🤝', block: '🚫', user: '💬', ai: '🤖', auto: '📨', seminar_book: '📅', seminar_watch: '▶️', decide: '🤔', consult: '🙋', handoff: '🙋', apply: '📝', staff: '👤', step: '📨' };
+  var LABEL = { friend: '友だち追加', block: 'ブロック', user: 'お客様', ai: 'AI', auto: '自動の返信', seminar_book: '説明会', seminar_watch: '説明会', decide: '説明会のあと', consult: '個別相談', handoff: '引き継ぎ', apply: '申込', staff: '本部', step: '自動配信' };
+
+  function tlHtml(list) {
+    if (!list.length) return '<p class="rc-hint">LINEのやり取りはまだありません。</p>';
+    return '<ol class="ltl">' + list.slice().reverse().map(function (e) {
+      var bubble = e.kind === 'user' || e.kind === 'ai';
+      return '<li class="ltl-' + e.kind + '"><span class="ltl-ico">' + (ICON[e.kind] || '・') + '</span>' +
+        '<div><small>' + md(e.at) + ' ' + hm(e.at) + '・' + (LABEL[e.kind] || '') + '</small>' +
+        (bubble ? '<p class="ltl-bubble">' + esc(e.text) + '</p>' : '<p>' + esc(e.text || LABEL[e.kind] || '') + '</p>') + '</div></li>';
+    }).join('') + '</ol>';
+  }
 
   function bodyHtml(l) {
     var p = l.line;
-    var tl = p ? p.timeline.slice().reverse().map(function (e) {
-      var bubble = e.kind === 'user' || e.kind === 'ai';
-      return '<li class="ltl-' + e.kind + '"><span class="ltl-ico">' + (ICON[e.kind] || '・') + '</span>' +
-        '<div><small>' + md(e.at) + ' ' + hm(e.at) + '・' + LABEL[e.kind] + '</small>' +
-        (bubble ? '<p class="ltl-bubble">' + esc(e.text) + '</p>' : '<p>' + esc(e.text || LABEL[e.kind]) + '</p>') + '</div></li>';
-    }).join('') : '';
+    var tl = !p ? '<p class="rc-hint">LINEのやり取りはまだありません。</p>'
+      : p.timeline ? tlHtml(p.timeline) : '<p class="rc-hint">読み込み中…</p>';
     var actions = p ? (
       '<a class="la-btn" href="' + CHAT_URL + '" target="_blank" rel="noopener">LINEのチャットを開く</a>' +
       (p.paused ? '<button type="button" class="la-btn la-btn-o" data-role="resume">AIの返信を再開する</button>'
                 : '<button type="button" class="la-btn la-btn-o" data-role="pause">AIを止めて担当者が対応</button>')) : '';
     return '<div class="lt-grid">' +
-      '<div><div class="rc-sub-h">📜 これまでの流れ（新しい順）</div>' + (tl ? '<ol class="ltl">' + tl + '</ol>' : '<p class="rc-hint">LINEのやり取りはまだありません。</p>') + '</div>' +
+      '<div><div class="rc-sub-h">📜 これまでの流れ（新しい順）</div><div class="ltl-host">' + tl + '</div></div>' +
       '<div>' +
         '<div class="rc-sub-h">✅ 次にやること</div>' +
         '<label class="rc-field">内容<input type="text" data-role="next" value="' + esc(l.next || '') + '" placeholder="例：電話で個別相談の日程を決める"></label>' +
@@ -185,16 +249,50 @@ window.RCLINE = (function () {
       var el = box.querySelector('[data-role="' + k + '"]');
       if (el) el.addEventListener('change', function () { l[k] = this.value; persist(l); });
     });
+    var p = l.line;
+    if (!p) return;
+    // カードを開いたときに、その人の流れを読み込む（1回だけ）
+    box.querySelector('.rc-lead-head').addEventListener('click', function () {
+      if (p.timeline || p.loading || !box.classList.contains('open')) return;
+      p.loading = true;
+      api('timeline', { u: p.userId }).then(function (d) {
+        p.timeline = d.ok ? d.timeline : null;
+        box.querySelector('.ltl-host').innerHTML = d.ok ? tlHtml(d.timeline) : '<p class="rc-hint">読み込めませんでした。開き直してください。</p>';
+      }).catch(function () {
+        box.querySelector('.ltl-host').innerHTML = '<p class="rc-hint">読み込めませんでした。開き直してください。</p>';
+      }).then(function () { p.loading = false; });
+    });
+    function toggleAI(btn, pause) {
+      btn.disabled = true;
+      function done() {
+        p.paused = pause;
+        p.pauseLeft = pause ? 24 : 0;
+        btn.textContent = (demo ? '（見本）' : '') + (pause ? 'AIを止めました' : 'AIを再開しました');
+        renderTop(state.leads);
+      }
+      if (demo) { done(); return; }
+      api(pause ? 'pause' : 'resume', { u: p.userId }).then(function (d) {
+        if (d.ok) done(); else { btn.disabled = false; window.alert('できませんでした（' + (d.error || '') + '）'); }
+      }).catch(function () { btn.disabled = false; window.alert('通信できませんでした。もう一度お試しください。'); });
+    }
     var r = box.querySelector('[data-role="resume"]'), pz = box.querySelector('[data-role="pause"]');
-    if (r) r.addEventListener('click', function () { l.line.paused = false; this.textContent = demo ? '（見本）AIを再開しました' : 'AIを再開しました'; this.disabled = true; });
-    if (pz) pz.addEventListener('click', function () { l.line.paused = true; l.line.pauseLeft = 24; this.textContent = demo ? '（見本）AIを止めました' : 'AIを止めました'; this.disabled = true; });
+    if (r) r.addEventListener('click', function () { toggleAI(this, false); });
+    if (pz) pz.addEventListener('click', function () { toggleAI(this, true); });
   }
 
-  // hq-recruit.js から呼ぶ：見本のときはサンプルのリードと LINE の人を使う
+  // hq-recruit.js から呼ぶ：リードに LINE の人を合わせる（見本のときはサンプルのデータ）
   function load(leads, cb) {
-    if (!demo) { cb(leads); return; }   // 実データとの接続は、AI応答 GAS に本部用の読み出しを足してから
-    var d = demoData();
-    cb(merge(d.leads, d.people));
+    if (demo) { var d = demoData(); cb(merge(d.leads, d.people)); return; }
+    if (!keyGet()) { state.connected = false; cb(leads); return; }
+    api('people').then(function (d) {
+      if (!d.ok) { state.connected = false; state.error = d.error || 'error'; cb(leads); return; }
+      state.connected = true;
+      cb(merge(leads, d.people || []));
+    }).catch(function (e) {
+      state.connected = false;
+      state.error = '通信エラー';
+      cb(leads);
+    });
   }
 
   return { demo: demo, load: load, renderTop: renderTop, headBadges: headBadges, bodyHtml: bodyHtml, wire: wire, attentionOf: attentionOf };
