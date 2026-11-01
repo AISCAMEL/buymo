@@ -31,10 +31,18 @@
   /* ---- 永続化 ---- */
   function overlayOf(l) {
     return { manual: !!l.manual, name: l.name || '', storeName: l.storeName || '', email: l.email || '', tel: l.tel || '', pref: l.pref || '', date: l.date || '',
-      stage: l.stage || '新規', steps: l.steps || {}, memo: l.memo || '', seminarDate: l.seminarDate || '', care: l.care || {} };
+      stage: l.stage || '新規', steps: l.steps || {}, memo: l.memo || '', seminarDate: l.seminarDate || '', care: l.care || {},
+      lineUserId: l.lineUserId || '', next: l.next || '', nextDue: l.nextDue || '' };
   }
-  function persist(l) { HQ.saveRecruitLead(l.id, overlayOf(l)); flash('保存しました'); }
-  function persistCfg() { HQ.saveRecruitConfig(cfg); flash('設定を保存しました'); }
+  var LINE = window.RCLINE;   // 公式LINEの会話・動画説明会（hq-recruit-line.js）
+  function persist(l) {
+    if (LINE && LINE.demo) { flash('見本のため保存しません'); return; }
+    HQ.saveRecruitLead(l.id, overlayOf(l)); flash('保存しました');
+  }
+  function persistCfg() {
+    if (LINE && LINE.demo) { flash('見本のため保存しません'); return; }
+    HQ.saveRecruitConfig(cfg); flash('設定を保存しました');
+  }
 
   /* ---- KPI ---- */
   function renderKpis() {
@@ -134,13 +142,13 @@
       var stageOpts = STAGES.map(function (s) { return '<option' + (stageOf(l) === s ? ' selected' : '') + '>' + s + '</option>'; }).join('');
       return '<div class="rc-lead" data-id="' + esc(l.id) + '">' +
         '<div class="rc-lead-head">' +
-          '<div class="rc-lead-name">' + esc(l.name || l.storeName || '（無名）') + '<small>' + esc(l.storeName || '') + (l.pref ? '・' + esc(l.pref) : '') + '</small></div>' +
+          '<div class="rc-lead-name">' + esc(l.name || l.storeName || '（無名）') + '<small>' + esc(l.storeName || '') + (l.pref ? '・' + esc(l.pref) : '') + '</small>' + (LINE ? LINE.headBadges(l) : '') + '</div>' +
           '<div class="rc-lead-meta">' + esc(l.email || '') + '<br>' + esc(l.tel || '') + '<br><span style="color:#aaa;">' + esc(String(l.date || '').slice(0, 10)) + '</span></div>' +
           '<select class="rc-stage-sel" data-role="stage">' + stageOpts + '</select>' +
           '<div class="rc-prog">配信 ' + done + '/' + tot + '<span class="rc-bar-mini"><span style="width:' + pct + '%"></span></span>' + (l.seminarDate ? '<span style="display:block;margin-top:4px;color:#0284c7;">🎤 予約済</span>' : '') + '</div>' +
           '<span class="rc-toggle">開く ▾</span>' +
         '</div>' +
-        '<div class="rc-lead-body">' + bodyHtml(l) + '</div>' +
+        '<div class="rc-lead-body">' + (LINE ? LINE.bodyHtml(l) : '') + bodyHtml(l) + '</div>' +
         '</div>';
     }).join('');
     // イベント
@@ -152,8 +160,9 @@
         box.classList.toggle('open');
         box.querySelector('.rc-toggle').textContent = box.classList.contains('open') ? '閉じる ▴' : '開く ▾';
       });
-      box.querySelector('[data-role="stage"]').addEventListener('change', function () { l.stage = this.value; persist(l); renderKpis(); renderFilters(); });
+      box.querySelector('[data-role="stage"]').addEventListener('change', function () { l.stage = this.value; persist(l); renderKpis(); renderFilters(); if (LINE) LINE.renderTop(leads); });
       wireBody(box, l);
+      if (LINE) LINE.wire(box, l, persist);
     });
   }
 
@@ -235,8 +244,12 @@
     if (!cfg.steps || !cfg.steps.length) cfg.steps = defaultSteps();
     renderSteps(); renderSeminars();
     HQ.loadRecruitLeads(function (list) {
-      leads = list || [];
-      renderKpis(); renderFilters(); renderLeads();
+      function show(all) {
+        leads = all || [];
+        renderKpis(); renderFilters(); renderLeads();
+        if (LINE) LINE.renderTop(leads);
+      }
+      if (LINE) LINE.load(list || [], show); else show(list);
     });
   });
 })();

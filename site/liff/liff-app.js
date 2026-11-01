@@ -1,12 +1,15 @@
 /* ============================================================
    オルタナティブライフ（LINE LIFF）— アプリ本体
    副業を探している人の入口 → 資料請求・説明会 → BUYMO 加盟（パートナー）
-   画面：home / apply（資料請求・説明会）/ done / check（副業スタイル診断）/ mypage
+   画面：home / seminar（無料の動画説明会）/ apply（資料請求・説明会）/ done / check（副業スタイル診断）/ mypage
    - ?view=home&sec=faq のように sec を付けると、ホームの該当セクション（#sec-faq）へスクロール
    - LIFF_ID 未設定 or LINE外のブラウザでも動作（LINE連携機能だけ無効）
    - 申込はサイトと同じ GAS に type:"join" で送信 → 「加盟店申込」シート →
      本部の「加盟店募集 教育ファネル」に載る（GAS改修不要）
-   - ?dry=1 を付けて開くと送信せずに完了画面まで確認できる（動作確認用）
+   - 動画説明会は「オルタナティブライフ LINE AI応答」の GAS（CFG.SEMINAR_API）で予約・視聴記録・ステップ配信
+     （カレンダーで見たい日を予約 → カウントダウン → その日の朝から夜中まで好きな時間に録画を視聴
+       → 加盟を申し込む／個別相談／もう少し考える）
+   - ?dry=1 を付けて開くと送信せずに完了画面まで確認できる（動作確認用。説明会の予約もこの端末の中だけで試せる）
    ============================================================ */
 (function () {
   'use strict';
@@ -16,7 +19,7 @@
   var LS_HISTORY = 'altlife_history';
   var LS_CHECK = 'altlife_check';
   var LS_DRAFT = 'altlife_draft';
-  var VIEWS = { home: 1, apply: 1, check: 1, mypage: 1, done: 1 };
+  var VIEWS = { home: 1, seminar: 1, apply: 1, check: 1, mypage: 1, done: 1 };
   var LAST_STEP = 3;
 
   var state = {
@@ -164,6 +167,7 @@
     });
     if (view === 'apply') { applyCheckContext(); showStep(r.step); }
     if (view === 'mypage') renderMypage();
+    if (view === 'seminar') enterSeminar();
     window.scrollTo(0, 0);
     track('liff_view', { view: view, step: view === 'apply' ? r.step : 0 });
   }
@@ -267,6 +271,7 @@
   }
 
   function syncApplyFields() {
+    $('#wantJoin').hidden = !sem.canJoin && state.chips.want !== '加盟を申し込みたい';
     $('#slotField').hidden = state.chips.want === '資料がほしい';
     var needMail = state.chips.receive === 'メール';
     $('#receiveHint').hidden = !(state.chips.receive === 'LINE' && state.friend === false);
@@ -279,7 +284,10 @@
   function applyCheckContext() {
     var c = lsGet(LS_CHECK, null);
     var el = $('#applyContext');
-    if (c && c.result) {
+    if (state.chips.want === '加盟を申し込みたい') {
+      el.textContent = '動画説明会をご覧いただいた方の、加盟のお申し込みです。担当者から契約内容とエリアをご案内します。';
+      el.hidden = false;
+    } else if (c && c.result) {
       el.textContent = '診断結果「' + c.result.name + '」をもとにご案内します。';
       el.hidden = false;
       if (!state.chips.work && c.answers && c.answers.qwork) setChip('work', c.answers.qwork, true);
@@ -417,6 +425,7 @@
     if (r) {
       lines.push('副業スタイル診断：' + r.name + '（使える時間：' + TIME_LABEL[a.qtime] + '／目指したい形：' + GOAL_LABEL[a.qgoal] + '）');
     }
+    if (sem.res && sem.res.day) lines.push('動画説明会：' + dayLabel(sem.res.day) + ' に予約（視聴 ' + Math.max(sem.res.pct || 0, watchedPct()) + '%）');
     if (val('note')) lines.push('ご質問：\n' + val('note'));
     lines.push('LINE：' + (p ? p.displayName + '（userId: ' + p.userId + '）' : '未連携'));
     if (state.friend === false) lines.push('公式LINE：友だち未追加');
@@ -451,10 +460,14 @@
   }
 
   // 申込内容をトークにも残す（公式アカウントとのトークから開いたときだけ送れる）
-  function postToTalk(text) {
-    if (DRY || !state.liffReady || !state.inClient) return Promise.resolve(false);
+  function canPostToTalk() {
+    if (DRY || !state.liffReady || !state.inClient) return false;
     var t = state.context && state.context.type;
-    if (['utou', 'room', 'group', 'square_chat'].indexOf(t) < 0) return Promise.resolve(false);
+    return ['utou', 'room', 'group', 'square_chat'].indexOf(t) >= 0;
+  }
+
+  function postToTalk(text) {
+    if (!canPostToTalk()) return Promise.resolve(false);
     return liff.sendMessages([{ type: 'text', text: text }])
       .then(function () { return true; })
       .catch(function () { return false; });
@@ -484,6 +497,9 @@
       lsSet(userKey(LS_HISTORY), hist.slice(0, 20));
       lsSet(LS_DRAFT, { name: payload.name, tel: payload.phone, email: payload.email, pref: payload.prefecture, company: payload.storeName, work: state.chips.work });
       track('generate_lead', { source: 'liff', lead_type: 'partner', want: want });
+      if (want === '加盟を申し込みたい') {
+        semApi('decide', { decision: 'apply' }).then(function (d) { if (d.reservation) sem.res = d.reservation; }).catch(function () {});
+      }
       return postToTalk(talk);
     }).then(function (posted) {
       $('#doneLead').textContent = posted
@@ -520,19 +536,19 @@
      ======================================================= */
   var TIME_LABEL = { '0': '1日30分くらい', '1': '1日1〜2時間', '2': '平日夜と週末', '3': '日中も動ける' };
   var GOAL_LABEL = { '0': '小さく始めたい', '1': 'しっかり育てたい', '2': '独立・専業にしたい' };
-  // スタイルと目安は buymo-partner.html の「収益の考え方」と同じ
+  // スタイルと目安は本部の動画説明会・buymo-partner.html の「収益の考え方」と同じ（月2台・5台・10台）
   var STYLES = {
     light: {
-      name: '副業ライト', count: '数台〜', time: '1日数十分・スキマ時間',
-      desc: '本業を最優先に、スキマ時間で小さく始めるスタイル。まずは月数台から、仕組みに慣れていきましょう。'
+      name: '副業スタート', count: '月2台', time: '平日夜30分＋土日',
+      desc: '本業を最優先に、平日の夜と土日で小さく始めるスタイル。まずは月2台から、仕組みに慣れていきましょう。'
     },
     solid: {
-      name: '副業しっかり', count: '5〜10台', time: '平日夜＋週末に対応',
-      desc: '平日の夜と週末を使って、もう一つの収入源として育てていくスタイルです。'
+      name: '軌道に乗せる', count: '月5台', time: '平日夜＋土日をしっかり',
+      desc: '紹介やリピートが回り始めたら、月5台ほどへ。もう一つの収入源として育てていくスタイルです。'
     },
     pro: {
-      name: '本格・専業化', count: '10〜20台', time: '日中も対応・専業化',
-      desc: '日中も動ける強みを活かして、地域の“車の相談窓口”を目指すスタイルです。'
+      name: '独立・専業', count: '月10台', time: '本格稼働・エリアを広げる',
+      desc: '本格的に稼働して、月10台・エリアを広げていくスタイル。独立・専業も目指せます。'
     },
     addon: {
       name: '既存事業プラス', count: 'お客様の数に合わせて', time: 'いまの業務の流れの中で',
@@ -567,11 +583,11 @@
       key = LEVELS[Math.min(timeLevel, goal)];
       if (goal > timeLevel) notes.push('時間に余裕が出てきたら、次のスタイルへ段階的に広げられます。');
     }
-    if (c.qexp === '未経験') notes.push('未経験でも大丈夫。査定・接客・システムは研修とマニュアルで身につけられます。');
+    if (c.qexp === '未経験') notes.push('未経験でも大丈夫。査定・商談・オークションシステムは、本社での研修と動画研修で身につけられます。');
     else if (c.qexp === '車が好き・少し詳しい') notes.push('車好きの目線は査定でも活きます。相場の見方は研修で体系的に学べます。');
     else notes.push('業界経験は、査定やお客様対応でそのまま活かせます。');
     if (c.qwork === '会社員') notes.push('お勤め先の就業規則（副業の可否）は、事前にご確認ください。');
-    notes.push('ノルマや仕入れの義務はありません。在庫を持たないので、撤退時のリスクも小さく始められます。');
+    notes.push('買取台数のノルマはありません。店舗も在庫置き場もいらないので、小さく始められます。');
     var s = STYLES[key];
     return { key: key, name: s.name, desc: s.desc, count: s.count, time: s.time, notes: notes };
   }
@@ -633,6 +649,519 @@
   }
 
   /* =======================================================
+     無料の動画説明会
+     カレンダーで見たい日を選んで予約（時間の指定はなし）→ その日までのカウントダウン
+     → 当日の朝から夜中（GAS の設定。既定 6:00〜24:00）まで、好きな時間に録画を再生（途中で止めても続きから）
+     → 見終わったら「加盟を申し込む／個別相談／もう少し考える」
+     時刻はすべて日本時間。端末の時計のずれはサーバーの時刻で補正する
+     ======================================================= */
+  var LS_SEM_SK = 'altlife_sem_sk';
+  var LS_SEM_WATCH = 'altlife_sem_watch';
+  var DAY_MS = 86400000;
+  var JST_MS = 9 * 3600000;
+  var WATCHED_PCT = 50;
+  var sem = {
+    cfg: { openMin: 360, closeMin: 1440, minutes: 7, days: 14, ready: true },
+    loaded: false, loading: false, offset: 0, res: null, rebook: false, mode: '',
+    month: null, day: '', timer: null,
+    player: null, ended: false, watched: 0, pos: 0, sentPct: -1, lastPing: 0, watchKey: '',
+    canJoin: false   // 見終わった方だけ、資料請求フォームに「加盟を申し込みたい」を出す
+  };
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function semNow() { return Date.now() + sem.offset; }
+  function dayMs(day) { return Date.parse(day + 'T00:00:00+09:00'); }
+  function openMs(day) { return dayMs(day) + sem.cfg.openMin * 60000; }
+  function closeMs(day) { return dayMs(day) + sem.cfg.closeMin * 60000; }
+  function hm(min) { return Math.floor(min / 60) + ':' + pad2(min % 60); }
+  function hoursText() { return hm(sem.cfg.openMin) + '〜' + hm(sem.cfg.closeMin); }
+  function lastStartText() { return hm(Math.max(sem.cfg.openMin, sem.cfg.closeMin - sem.cfg.minutes)); }
+  function jstParts(ms) {
+    var d = new Date(ms + JST_MS);
+    return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), w: d.getUTCDay() };
+  }
+  function dayKey(p) { return p.y + '-' + pad2(p.m + 1) + '-' + pad2(p.d); }
+  function dayLabel(day) {
+    var p = jstParts(dayMs(day));
+    return (p.m + 1) + '月' + p.d + '日（' + '日月火水木金土'.charAt(p.w) + '）';
+  }
+  function todayKey() { return dayKey(jstParts(semNow())); }
+
+  /* ---------- サーバーとのやりとり ---------- */
+  function canAuth() { return DRY || !!lsGet(LS_SEM_SK, '') || (state.liffReady && state.loggedIn); }
+
+  function tokenSub() {
+    try { var t = liff.getDecodedIDToken(); return (t && t.sub) || ''; } catch (e) { return ''; }
+  }
+
+  function semApi(action, extra, retried) {
+    if (DRY) return Promise.resolve(semFake(action, extra || {}));
+    if (!CFG.SEMINAR_API) return Promise.reject(new Error('no_api'));
+    var body = { action: action };
+    for (var k in extra) body[k] = extra[k];
+    if (action !== 'config') {
+      var sk = lsGet(LS_SEM_SK, '');
+      var sub = state.liffReady && state.loggedIn ? tokenSub() : '';
+      // 前回の確認結果（sk）があれば使う。別の LINE アカウントで開いたときは使わない
+      if (sk && (!sub || sk.indexOf(sub + '.') === 0)) body.sk = sk;
+      else if (state.liffReady && state.loggedIn) {
+        body.idToken = liff.getIDToken();
+        body.accessToken = liff.getAccessToken();
+      }
+    }
+    return fetch(CFG.SEMINAR_API + (CFG.SEMINAR_API.indexOf('?') < 0 ? '?' : '&') + 'api=seminar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // プリフライト回避
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.now) sem.offset = d.now - Date.now();
+      if (d.config) sem.cfg = d.config;
+      if (d.sk) lsSet(LS_SEM_SK, d.sk);
+      // 保存していた sk が使えなくなっていたら、LINE のトークンでやり直す
+      if (d.error === 'auth' && body.sk && !retried) { lsSet(LS_SEM_SK, ''); return semApi(action, extra, true); }
+      return d;
+    });
+  }
+
+  // ?dry=1 のときの試し用（この端末の中だけで予約できる）
+  function semFake(action, x) {
+    var r = lsGet('altlife_sem_dry', null);
+    if (action === 'reserve') r = { day: x.day, name: x.name, email: x.email, status: '予約', pct: 0, videoId: '' };
+    else if (action === 'cancel') r = null;
+    else if (action === 'progress' && r) r.pct = Math.max(r.pct, x.pct || 0);
+    else if (action === 'decide' && r) r.status = { apply: '申込', consult: '相談希望', later: '検討中' }[x.decision] || r.status;
+    lsSet('altlife_sem_dry', r);
+    return { ok: true, now: Date.now(), config: { openMin: 360, closeMin: 1440, minutes: 60, days: 14, ready: false }, reservation: r };
+  }
+
+  function semLoad() {
+    if (sem.loading) return;
+    sem.loading = true;
+    semMessage('読み込んでいます…');
+    semApi(canAuth() ? 'state' : 'config').then(function (d) {
+      sem.loaded = true;
+      if (d.ok) sem.res = d.reservation || null;
+      restoreWatch();
+      semMessage('');
+      renderSeminar();
+    }).catch(function () {
+      semMessage(CFG.SEMINAR_API || DRY ? '読み込めませんでした。電波の良い場所で、もう一度お試しください。' : '動画説明会は準備中です。もうしばらくお待ちください。', !!(CFG.SEMINAR_API || DRY));
+    }).then(function () { sem.loading = false; });
+  }
+
+  function semMessage(text, retry) {
+    $('#semMsg').hidden = !text;
+    $('#semMsgText').textContent = text;
+    $('#semRetry').hidden = !retry;
+    if (text) $$('#semBook,#semTicket,#semLive,#semDecide,#semDone,#semMissed').forEach(function (el) { el.hidden = true; });
+  }
+
+  /* ---------- 表示の切り替え ---------- */
+  // 最後まで見た（またはサーバーで視聴完了・検討中になっている）
+  function finished() {
+    return sem.ended || (!!sem.res && (sem.res.status === '視聴完了' || sem.res.status === '検討中'));
+  }
+
+  function semMode() {
+    var r = sem.res;
+    if (!r || sem.rebook) return 'book';
+    if (r.status === '申込' || r.status === '相談希望') return 'done';
+    var now = semNow();
+    if (now < openMs(r.day)) return 'ticket';
+    // 見られる時間の終わり間際に再生を始めた方は、そのまま最後まで見られる
+    if (now < closeMs(r.day) || (sem.player && !sem.ended && now < closeMs(r.day) + (sem.cfg.minutes + 60) * 60000)) return 'watch';
+    if (finished() || Math.max(r.pct || 0, watchedPct()) >= WATCHED_PCT) return 'decide';
+    return 'missed';
+  }
+
+  function enterSeminar() {
+    fillSemText();
+    if (!sem.loaded) semLoad(); else renderSeminar();
+    if (!sem.timer) sem.timer = setInterval(semTick, 1000);
+  }
+
+  // 説明会の長さ・見られる時間を、GAS の設定にあわせて書き換える
+  function fillSemText() {
+    $$('.sem-min').forEach(function (el) { el.textContent = sem.cfg.minutes; });
+    $$('.sem-hours').forEach(function (el) { el.textContent = hoursText(); });
+    $$('.sem-close').forEach(function (el) { el.textContent = hm(sem.cfg.closeMin); });
+    $$('.sem-last').forEach(function (el) { el.textContent = lastStartText(); });
+  }
+
+  function renderSeminar() {
+    if (!sem.loaded) return;
+    var mode = semMode();
+    sem.mode = mode;
+    if (mode === 'decide' || finished()) sem.canJoin = true;
+    fillSemText();
+    $('#semBook').hidden = mode !== 'book';
+    $('#semTicket').hidden = mode !== 'ticket';
+    $('#semLive').hidden = mode !== 'watch';
+    $('#semDecide').hidden = !(mode === 'decide' || (mode === 'watch' && finished()));
+    $('#semDone').hidden = mode !== 'done';
+    $('#semMissed').hidden = mode !== 'missed';
+    $('#decideNote').hidden = !(sem.res && sem.res.status === '検討中');
+    if (mode === 'book') renderBook();
+    if (mode === 'ticket') renderTicket();
+    if (mode === 'watch') renderWatch();
+    if (mode === 'done') renderSemDone();
+  }
+
+  function semTick() {
+    if (state.view !== 'seminar') return;
+    if (!sem.loaded) return;
+    var mode = semMode();
+    if (mode !== sem.mode) {
+      // 見られる時間になったら、動画の情報を取り直してから切り替える
+      if (mode === 'watch' && sem.res && !sem.res.videoId && !DRY) { semRefresh(); return; }
+      renderSeminar();
+      return;
+    }
+    if (mode === 'ticket') updateCountdown();
+    if (mode === 'watch') updateWatch();
+  }
+
+  function semRefresh() {
+    if (sem.loading) return;
+    sem.loading = true;
+    semApi('state').then(function (d) { if (d.ok) sem.res = d.reservation || null; })
+      .catch(function () {}).then(function () { sem.loading = false; renderSeminar(); });
+  }
+
+  /* ---------- 予約（カレンダーで日にちを選ぶだけ） ---------- */
+  // 見られる時間の終わりまで30分以上ある日（GAS と同じ条件）
+  function bookableDays() {
+    var out = [], now = semNow();
+    for (var i = 0; i <= sem.cfg.days; i++) {
+      var dk = dayKey(jstParts(now + i * DAY_MS));
+      if (closeMs(dk) - 30 * 60000 > now && dayMs(dk) <= now + sem.cfg.days * DAY_MS) out.push(dk);
+    }
+    return out;
+  }
+
+  function renderBook() {
+    var days = bookableDays();
+    if (!days.length) { $('#calGrid').innerHTML = ''; $('#semPicked').textContent = '予約できる日がありません。'; return; }
+    if (sem.day && days.indexOf(sem.day) < 0) sem.day = '';
+    if (!sem.month) sem.month = (sem.day || days[0]).slice(0, 7);
+    var first = days[0].slice(0, 7), last = days[days.length - 1].slice(0, 7);
+    if (sem.month < first) sem.month = first;
+    if (sem.month > last) sem.month = last;
+
+    var y = Number(sem.month.slice(0, 4)), m = Number(sem.month.slice(5, 7)) - 1;
+    $('#calMonth').textContent = y + '年' + (m + 1) + '月';
+    $('#calPrev').disabled = sem.month <= first;
+    $('#calNext').disabled = sem.month >= last;
+    var startW = new Date(Date.UTC(y, m, 1)).getUTCDay();
+    var count = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    var today = todayKey();
+    var html = '';
+    for (var b = 0; b < startW; b++) html += '<span class="cal-blank"></span>';
+    for (var d = 1; d <= count; d++) {
+      var dk = sem.month + '-' + pad2(d);
+      var ok = days.indexOf(dk) >= 0;
+      var w = (startW + d - 1) % 7;
+      var cls = 'cal-day' + (w === 0 ? ' sun' : w === 6 ? ' sat' : '') + (dk === today ? ' today' : '') + (dk === sem.day ? ' is-on' : '');
+      html += '<button type="button" class="' + cls + '" data-day="' + dk + '"' + (ok ? '' : ' disabled') +
+        ' aria-pressed="' + (dk === sem.day) + '" aria-label="' + (m + 1) + '月' + d + '日' + (dk === today ? '（今日）' : '') + (ok ? '' : '（予約できません）') + '">' + d + '</button>';
+    }
+    $('#calGrid').innerHTML = html;
+
+    var picked = $('#semPicked');
+    if (sem.day) {
+      var now = semNow();
+      var when = sem.day === today && now >= openMs(sem.day)
+        ? '今日・いますぐ見られます（' + hm(sem.cfg.closeMin) + 'まで）'
+        : dayLabel(sem.day) + ' ' + hoursText() + 'の好きな時間に';
+      picked.innerHTML = '<svg class="ico"><use href="#i-calendar"/></svg>' + esc(when) + '（約' + sem.cfg.minutes + '分）';
+    } else {
+      picked.textContent = '上のカレンダーで、見たい日を選んでください';
+    }
+    picked.classList.toggle('is-set', !!sem.day);
+
+    var d0 = lsGet(LS_DRAFT, null) || {};
+    if (!$('#s-name').value) $('#s-name').value = (sem.res && sem.res.name) || d0.name || '';
+    if (!$('#s-email').value) $('#s-email').value = (sem.res && sem.res.email) || d0.email || '';
+  }
+
+  function semNote(msg, kind) {
+    var el = $('#semNote');
+    el.textContent = msg;
+    el.className = 'form-note' + (kind ? ' ' + kind : '');
+  }
+
+  function semReserve() {
+    var name = $('#s-name').value.trim(), email = $('#s-email').value.trim();
+    $$('#s-name,#s-email,#calGrid').forEach(function (el) { el.classList.remove('is-error'); });
+    $('#s-agree').closest('.agree').classList.remove('is-error');
+    var bad = !sem.day ? ['#calGrid', '見たい日を選んでください。']
+      : !name ? ['#s-name', 'お名前をご入力ください。']
+      : !MAIL_RE.test(email) ? ['#s-email', 'メールアドレスをご確認ください。']
+      : !$('#s-agree').checked ? ['#s-agree', 'プライバシーポリシーとご案内の受け取りへの同意が必要です。'] : null;
+    if (bad) {
+      var el = $(bad[0]);
+      (bad[0] === '#s-agree' ? el.closest('.agree') : el).classList.add('is-error');
+      semNote(bad[1], 'ng');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!canAuth()) {
+      if (state.liffReady && !state.loggedIn) { liff.login({ redirectUri: location.href }); return; }
+      semNote('予約は、LINEアプリから開いたときにご利用いただけます。', 'ng');
+      return;
+    }
+    var day = sem.day;
+    var talk = canPostToTalk();
+    var btn = $('#semSubmit');
+    btn.disabled = true;
+    semNote('予約しています…');
+    semApi('reserve', { day: day, name: name, email: email, talk: talk }).then(function (d) {
+      if (!d.ok) {
+        semNote({
+          day: 'その日は予約できなくなりました。別の日を選んでください。',
+          email: 'メールアドレスをご確認ください。',
+          name: 'お名前をご入力ください。',
+          auth: 'LINEの確認ができませんでした。LINEアプリから開き直してください。'
+        }[d.error] || '予約できませんでした。時間をおいてもう一度お試しください。', 'ng');
+        if (d.error === 'day') { sem.day = ''; renderBook(); }
+        return;
+      }
+      sem.res = d.reservation;
+      sem.rebook = false;
+      resetPlayer();
+      restoreWatch();
+      var draft = lsGet(LS_DRAFT, null) || {};
+      draft.name = name; draft.email = email;
+      lsSet(LS_DRAFT, draft);
+      track('generate_lead', { source: 'liff', lead_type: 'seminar' });
+      semNote('');
+      toast('予約しました');
+      renderSeminar();
+      window.scrollTo(0, 0);
+      if (talk) {
+        // 予約内容をトークにも残す。返信（無料）で予約の確認が届く。送れなかったら LINE で確認を送ってもらう
+        postToTalk('【説明会の予約】\n視聴日：' + dayLabel(day) + '（' + hoursText() + 'の好きな時間）\nお名前：' + name).then(function (ok) {
+          if (!ok) semApi('confirm').catch(function () {});
+        });
+      }
+    }).catch(function () {
+      semNote('予約できませんでした。電波の良い場所で、もう一度お試しください。', 'ng');
+    }).then(function () { btn.disabled = false; });
+  }
+
+  /* ---------- 予約済み（見られるようになるまでのカウントダウン） ---------- */
+  function renderTicket() {
+    var p = jstParts(dayMs(sem.res.day));
+    $('#tkDate').textContent = p.y + '年' + (p.m + 1) + '月' + p.d + '日（' + '日月火水木金土'.charAt(p.w) + '）';
+    updateCountdown();
+  }
+
+  function updateCountdown() {
+    var left = Math.max(0, openMs(sem.res.day) - semNow());
+    var s = Math.floor(left / 1000);
+    $('#cdD').textContent = Math.floor(s / 86400);
+    $('#cdH').textContent = pad2(Math.floor(s % 86400 / 3600));
+    $('#cdM').textContent = pad2(Math.floor(s % 3600 / 60));
+    $('#cdS').textContent = pad2(s % 60);
+  }
+
+  // Google カレンダーに終日の予定として登録
+  function gcalUrl() {
+    var f = function (ms) { var p = jstParts(ms); return '' + p.y + pad2(p.m + 1) + pad2(p.d); };
+    var d = dayMs(sem.res.day);
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('BUYMO 副業パートナー 動画説明会') +
+      '&dates=' + f(d) + '/' + f(d + DAY_MS) +
+      '&details=' + encodeURIComponent(hoursText() + 'の好きな時間に見られます（約' + sem.cfg.minutes + '分）\n説明会ページ：' + liffUrl('?view=seminar'));
+  }
+
+  function semCancel() {
+    if (!window.confirm('予約を取り消しますか？')) return;
+    semApi('cancel').then(function (d) {
+      if (!d.ok) { toast('取り消せませんでした'); return; }
+      sem.res = null;
+      sem.day = '';
+      toast('予約を取り消しました');
+      renderSeminar();
+    }).catch(function () { toast('取り消せませんでした'); });
+  }
+
+  /* ---------- 視聴（YouTube の録画。途中で止めても、この端末では続きから） ---------- */
+  function restoreWatch() {
+    var key = sem.res && sem.res.day ? sem.res.day : '';
+    if (key === sem.watchKey) return;
+    sem.watchKey = key;
+    var w = lsGet(LS_SEM_WATCH, null);
+    var same = !!w && w.key === key;
+    sem.watched = same ? w.sec || 0 : 0;
+    sem.pos = same ? w.pos || 0 : 0;
+    sem.ended = same && !!w.ended;
+  }
+
+  function saveWatch() { lsSet(LS_SEM_WATCH, { key: sem.watchKey, sec: sem.watched, pos: sem.pos, ended: sem.ended }); }
+
+  function durationSec() {
+    var d = sem.player && sem.player.getDuration ? sem.player.getDuration() : 0;
+    return d > 0 ? d : sem.cfg.minutes * 60;
+  }
+
+  function watchedPct() { return Math.min(100, Math.round(sem.watched / durationSec() * 100)); }
+
+  function resumeSec() { return sem.pos > 30 && sem.pos < durationSec() - 30 ? Math.floor(sem.pos) : 0; }
+
+  function renderWatch() {
+    var ready = !!sem.res.videoId || DRY;
+    $('#playerWait').hidden = ready;
+    $('#playerStart').hidden = !ready || !!sem.player;
+    var today = sem.res.day === todayKey();
+    $('#liveTime').textContent = today ? '今日の' + hm(sem.cfg.closeMin) + 'まで' : 'まもなく終了';
+    updateWatch();
+  }
+
+  function updateWatch() {
+    if (!sem.player) {
+      var r = resumeSec();
+      $('#playerStartSub').textContent = r ? '続き（' + Math.floor(r / 60) + '分ごろ）から再生します' : '約' + sem.cfg.minutes + '分・途中で止めても続きから見られます';
+      return;
+    }
+    // 再生中の秒数を数えて、視聴の割合をサーバーへ（30秒ごと）
+    var playing = sem.player.getPlayerState && sem.player.getPlayerState() === 1;
+    if (playing) {
+      sem.watched += 1;
+      if (sem.player.getCurrentTime) sem.pos = sem.player.getCurrentTime();
+      saveWatch();
+    }
+    if (playing && Date.now() - sem.lastPing > 30000) sendProgress();
+  }
+
+  function sendProgress(ended) {
+    sem.lastPing = Date.now();
+    var pct = watchedPct();
+    if (pct === sem.sentPct && !ended) return;
+    sem.sentPct = pct;
+    semApi('progress', { pct: pct, ended: !!ended }).then(function (d) { if (d.ok && d.reservation) sem.res = d.reservation; }).catch(function () {});
+  }
+
+  function resetPlayer() {
+    if (!sem.player) return;
+    try { sem.player.destroy(); } catch (e) { /* noop */ }
+    sem.player = null;
+    sem.ended = false;
+    sem.sentPct = -1;
+    var old = $('#ytPlayer');
+    if (old) old.parentNode.removeChild(old);
+    var div = document.createElement('div');
+    div.id = 'ytPlayer';
+    $('.player-wrap').insertBefore(div, $('.player-wrap').firstChild);
+  }
+
+  function loadYouTube() {
+    if (window.YT && window.YT.Player) return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      var prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function () { if (prev) prev(); resolve(); };
+      var sc = document.createElement('script');
+      sc.src = 'https://www.youtube.com/iframe_api';
+      sc.onerror = reject;
+      document.head.appendChild(sc);
+    });
+  }
+
+  function startPlayer() {
+    if (DRY) { toast('試し表示では動画は再生されません'); return; }
+    var btn = $('#playerStart');
+    btn.disabled = true;
+    loadYouTube().then(function () {
+      var start = resumeSec();
+      sem.player = new YT.Player('ytPlayer', {
+        videoId: sem.res.videoId,
+        playerVars: { start: start, autoplay: 1, playsinline: 1, rel: 0, modestbranding: 1 },
+        events: {
+          onReady: function (e) { e.target.playVideo(); },
+          onStateChange: function (e) {
+            if (e.data === 0) { // 再生が終わった
+              sem.ended = true;
+              sem.pos = 0;
+              saveWatch();
+              sendProgress(true);
+              renderSeminar();
+              var box = $('#semDecide');
+              if (box) setTimeout(function () { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+            }
+            if (e.data === 2) sendProgress(); // 一時停止
+          }
+        }
+      });
+      btn.hidden = true;
+      track('seminar_play', { resume_min: Math.floor(start / 60) });
+    }).catch(function () {
+      toast('動画を読み込めませんでした。電波の良い場所でもう一度お試しください。');
+    }).then(function () { btn.disabled = false; });
+  }
+
+  /* ---------- 視聴後：加盟するかどうか ---------- */
+  function semDecide(decision) {
+    track('seminar_decide', { decision: decision });
+    if (decision === 'apply') {
+      sem.canJoin = true;
+      setChip('want', '加盟を申し込みたい', true);
+      syncApplyFields();
+      if (sem.res) {
+        if (!$('#a-name').value) $('#a-name').value = sem.res.name || '';
+        if (!$('#a-email').value) $('#a-email').value = sem.res.email || '';
+      }
+      nav('apply', 1);
+      return;
+    }
+    var btns = $$('[data-sem]');
+    btns.forEach(function (b) { b.disabled = true; });
+    semApi('decide', { decision: decision }).then(function (d) {
+      if (!d.ok) throw new Error(d.error);
+      sem.res = d.reservation;
+      renderSeminar();
+    }).catch(function () {
+      toast('送信できませんでした。もう一度お試しください。');
+    }).then(function () { btns.forEach(function (b) { b.disabled = false; }); });
+  }
+
+  function renderSemDone() {
+    var consult = sem.res.status === '相談希望';
+    $('#semDoneTitle').textContent = consult ? '個別相談のご希望を受け付けました' : '加盟のお申し込みを受け付けました';
+    $('#semDoneText').textContent = consult
+      ? '担当者が、LINEのトークで順番にご連絡します（営業時間外は翌営業日になることがあります）。お待ちいただく間も、トークでAIに質問できます。'
+      : '担当者から3営業日以内に、契約内容とエリアのご案内をします。ご契約は、内容にご納得いただけた場合のみです。';
+  }
+
+  function setupSeminar() {
+    $('#semForm').addEventListener('submit', function (e) { e.preventDefault(); semReserve(); });
+    $('#semForm').addEventListener('input', function (e) {
+      e.target.classList.remove('is-error');
+      if (e.target.id === 's-agree') e.target.closest('.agree').classList.remove('is-error');
+    });
+    $('#calGrid').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-day]');
+      if (!b || b.disabled) return;
+      sem.day = b.getAttribute('data-day');
+      $('#calGrid').classList.remove('is-error');
+      if ($('#semNote').classList.contains('ng')) semNote('');
+      renderBook();
+    });
+    function shiftMonth(n) {
+      var y = Number(sem.month.slice(0, 4)), m = Number(sem.month.slice(5, 7)) - 1 + n;
+      sem.month = new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 7);
+      renderBook();
+    }
+    $('#calPrev').addEventListener('click', function () { shiftMonth(-1); });
+    $('#calNext').addEventListener('click', function () { shiftMonth(1); });
+    $('#tkCal').addEventListener('click', function () { openUrl(gcalUrl(), true); });
+    $('#tkChange').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
+    $('#tkCancel').addEventListener('click', semCancel);
+    $('#semRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
+    $('#semRetry').addEventListener('click', semLoad);
+    $('#playerStart').addEventListener('click', startPlayer);
+    document.addEventListener('visibilitychange', function () { if (document.hidden && sem.player) sendProgress(); });
+  }
+
+  /* =======================================================
      LINE 連携アクション
      ======================================================= */
   function liffUrl(q) {
@@ -644,7 +1173,7 @@
     var r = chk && chk.result;
     var url = liffUrl('?view=check');
     var title = r ? 'わたしの副業スタイルは「' + r.name + '」でした' : '本業はそのまま。車買取で、もうひとつの生き方を。';
-    var desc = '在庫なし・スキマ時間ではじめるBUYMOの副業パートナー。4つの質問で、あなたに合う始め方がわかります。';
+    var desc = '店舗不要・平日の夜と土日ではじめるBUYMOの車買取の副業。4つの質問で、あなたに合う始め方がわかります。';
     track('share', { method: 'line', content_type: 'liff_style_check' });
 
     if (state.liffReady && liff.isApiAvailable('shareTargetPicker')) {
@@ -707,8 +1236,13 @@
       var view = go.getAttribute('data-go');
       if (view !== state.view) track('cta_click', { cta: 'liff_' + view, from: state.view });
       nav(view);
+      var sec = go.getAttribute('data-sec') && document.getElementById('sec-' + go.getAttribute('data-sec'));
+      if (sec) setTimeout(function () { sec.scrollIntoView({ block: 'start' }); }, 60);
       return;
     }
+
+    var semBtn = t.closest('[data-sem]');
+    if (semBtn) { semDecide(semBtn.getAttribute('data-sem')); return; }
 
     var ext = t.closest('[data-ext]');
     if (ext) { e.preventDefault(); openUrl(CFG[ext.getAttribute('data-ext')], false); return; }
@@ -733,6 +1267,7 @@
      起動
      ======================================================= */
   setupApplyForm();
+  setupSeminar();
   restoreCheck();
   applyOaName();
 

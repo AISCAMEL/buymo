@@ -30,6 +30,8 @@
     </div>
     <p class="portal-sub">加盟店募集のお問い合わせ（加盟店申込）をリスト化し、ステップ配信で教育 → セミナー予約 → 加盟 → 加盟後ケアまでを一元管理します。ステージ・メモ・配信状況は自動保存され、本部内で共有されます。</p>
 
+    <section class="rc-line" id="rcLine"></section>
+
     <div class="rc-kpis" id="rcKpis"></div>
 
     <details class="rc-config">
@@ -118,10 +120,60 @@
 .rc-care-item input{width:17px;height:17px;accent-color:#0A6B3C;}
 .rc-care-link{display:inline-block;margin-top:8px;font-size:12px;color:#0A6B3C;font-weight:700;}
 .rc-empty{color:#999;padding:24px;text-align:center;}
+
+/* 公式LINE・動画説明会（hq-recruit-line.js） */
+.rc-demo{background:#fff7e6;border:1px solid #ffd591;color:#ad6800;border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:700;margin-bottom:12px;}
+.lf{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:16px;}
+.lf-step{flex:1;min-width:92px;text-align:center;}
+.lf-step b{display:block;font-size:24px;font-weight:900;color:var(--navy);line-height:1.1;}
+.lf-step span{font-size:11px;color:#888;font-weight:700;}
+.lf-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#b0b8c6;font-weight:900;font-size:14px;}
+.lf-arrow small{font-size:10.5px;color:#0A6B3C;}
+.la-head h2{font-size:15px;font-weight:900;color:var(--navy);margin:0 0 10px;}
+.la-head h2 span{font-size:12px;color:#c0392b;margin-left:6px;}
+.la-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:20px;}
+.la-card{position:relative;background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:12px 14px 12px 16px;cursor:pointer;border-left:5px solid #ccc;}
+.la-card b{display:block;font-size:14px;color:var(--navy);margin-top:6px;}
+.la-card small{display:block;font-size:12px;color:#667;line-height:1.5;margin-top:2px;}
+.la-badge{display:inline-block;font-size:11px;font-weight:900;border-radius:20px;padding:2px 9px;background:#eef1f6;color:#556;}
+.la-when{position:absolute;right:12px;top:12px;font-size:11px;color:#999;}
+.la-card.lv-red{border-left-color:#d93a2b}.la-card.lv-red .la-badge{background:#fdecea;color:#c0392b}
+.la-card.lv-orange{border-left-color:#f08c2a}.la-card.lv-orange .la-badge{background:#fff1e3;color:#b85c00}
+.la-card.lv-green{border-left-color:#0A6B3C}.la-card.lv-green .la-badge{background:#e6f4ec;color:#0A6B3C}
+.la-card.lv-gray{border-left-color:#b0b8c6}
+.lb-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.lb{font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 8px;background:#eef1f6;color:#556;}
+.lb-line{background:#e8f9ee;color:#06893a;}
+.lb-pause{background:#fdecea;color:#c0392b;}
+.lb-sem{background:#e8f1fb;color:#0261a5;}
+.lt-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding-bottom:16px;margin-bottom:16px;border-bottom:1px dashed #e3e8f0;}
+@media(max-width:820px){.lt-grid{grid-template-columns:1fr;}}
+.ltl{list-style:none;margin:0;padding:0;max-height:360px;overflow:auto;}
+.ltl li{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #f0f2f6;}
+.ltl-ico{flex:0 0 22px;text-align:center;}
+.ltl small{display:block;font-size:11px;color:#99a;font-weight:700;}
+.ltl p{margin:2px 0 0;font-size:13px;color:#334;line-height:1.6;}
+.ltl-bubble{display:inline-block;background:#f4f6fa;border-radius:10px;padding:6px 10px;}
+.ltl-user .ltl-bubble{background:#e8f9ee;}
+.la-actions{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.la-btn{display:block;text-align:center;background:#06C755;color:#fff;border:0;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;font-family:inherit;}
+.la-btn-o{background:#fff;color:#0A6B3C;border:1px solid #0A6B3C;}
+.la-btn:disabled{opacity:.6;cursor:default;}
+.lk-box{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:18px;border-left:5px solid #06C755;}
+.lk-box b{display:block;color:var(--navy);font-size:14px;}
+.lk-box p{font-size:12.5px;color:#667;margin:6px 0 0;line-height:1.7;}
+.lk-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.lk-row input{flex:1;min-width:200px;border:1px solid #dde3ee;border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;}
+.lk-row button{background:#06C755;color:#fff;border:0;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer;}
+.lk-err{color:#c0392b !important;font-weight:700;}
+.lk-demo a{color:#0A6B3C;font-weight:700;}
+.lk-change{text-align:right;margin:-10px 0 16px;}
+.lk-change button{background:none;border:0;color:#99a;font-size:11.5px;text-decoration:underline;cursor:pointer;}
 </style>
 
 <script src="assets/js/hq-common.js?v=16"></script>
-<script src="assets/js/hq-recruit.js?v=1" defer></script>
+<script src="assets/js/hq-recruit-line.js?v=2" defer></script>
+<script src="assets/js/hq-recruit.js?v=2" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>

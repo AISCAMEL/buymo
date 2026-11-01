@@ -17,6 +17,10 @@ window.ALTLIFE_CONFIG = {
   // 本部の「加盟店募集 教育ファネル」（hq-recruit.html）に載る
   ENDPOINT: 'https://script.google.com/macros/s/AKfycbxO8sl8moAF6lFwliBm-0JQAdJcv17TAcw_gq2KOt-2fPkLqsh1wP3CZE2NJKT62lVBsw/exec',
 
+  // 動画説明会の予約・視聴の送信先（「オルタナティブライフ LINE AI応答」の GAS ウェブアプリ。Webhook と同じ URL で ?token= は付けない）
+  // 開催時刻・動画などの設定は GAS のスクリプトプロパティで変える（セミナー.gs の先頭を参照）
+  SEMINAR_API: 'https://script.google.com/macros/s/AKfycbzo97X1a5vzmsZITgeFdvpP97S8xgklpl3KxvJjixPoFSBPuNVN-RvDOXICVEIrel9w/exec',
+
   // つなげる公式LINE（プロバイダー「オルタナティブライフコーチ」の Messaging API チャネル）
   OA_NAME: '中古車投資ビジネス',
   // ベーシックID（例: '@123abcde'）。これだけ入れれば、友だち追加・トーク相談の両方に使われる
