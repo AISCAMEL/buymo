@@ -71,7 +71,8 @@ function seminarConfig_() {
 
 function youtubeId_(s) {
   s = String(s).trim();
-  var m = s.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
+  // youtu.be/… ・watch?v=… ・YouTube Studio の studio.youtube.com/video/…/edit などから動画IDを取り出す
+  var m = s.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/|\/video\/)([\w-]{11})(?![\w-])/);
   return m ? m[1] : (/^[\w-]{11}$/.test(s) ? s : '');
 }
 
@@ -309,6 +310,11 @@ function seminarHandle_(req) {
     } else if (act === 'cancel') {
       if (res) { res.status = 'キャンセル'; saveRes_(sh, res); }
     } else if (act === 'progress') {
+      // ミニアプリで YouTube が再生できなかったとき（埋め込み不可・非公開など）は、診断の「最後のエラー」に残す
+      if (req.err) {
+        var why = { 2: '動画のIDが正しくない', 5: '再生できない形式', 100: '動画が見つからない（非公開・削除）', 101: '埋め込みが許可されていない', 150: '埋め込みが許可されていない' }[Number(req.err)] || '';
+        PropertiesService.getScriptProperties().setProperty('LAST_ERROR', new Date().toLocaleString('ja-JP') + ' 説明会の動画が再生できません：YouTube のエラー ' + Number(req.err) + (why ? '（' + why + '）' : ''));
+      }
       var tp = res && times_(res, cfg);
       if (tp && now >= tp.start - 10 * 60000 && !SEMINAR_CLOSED[res.status]) {
         var pct = Math.max(res.pct, Math.min(100, Math.round(Number(req.pct) || 0)));
