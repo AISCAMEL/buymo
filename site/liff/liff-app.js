@@ -691,8 +691,13 @@
   function resStart(r) { r = r || sem.res; return r.start || (timeMin(r.time) >= 0 ? dayMs(r.day) + timeMin(r.time) * 60000 : openMs(r.day)); }
   function resEnd(r) { r = r || sem.res; return r.end || (timeMin(r.time) >= 0 ? resStart(r) + (sem.cfg.windowMin || 60) * 60000 : closeMs(r.day)); }
   function clock(ms) { var d = new Date(ms + JST_MS); return d.getUTCHours() + ':' + pad2(d.getUTCMinutes()); }
-  // 例：21:30／翌0:30
-  function untilText(r) { r = r || sem.res; return (jstParts(resEnd(r)).d !== jstParts(resStart(r)).d ? '翌' : '') + clock(resEnd(r)); }
+  // 例：21:30／翌0:30／24:00
+  function untilText(r) {
+    r = r || sem.res;
+    var e = resEnd(r), next = jstParts(e).d !== jstParts(resStart(r)).d;
+    if (next && clock(e) === '0:00') return '24:00';
+    return (next ? '翌' : '') + clock(e);
+  }
   // 例：11月2日（月）20:30〜
   function whenText(r) { r = r || sem.res; return dayLabel(r.day) + ' ' + (timeMin(r.time) >= 0 ? hm(timeMin(r.time)) + '〜' : hoursText()); }
   function jstParts(ms) {
@@ -1266,6 +1271,7 @@
     $('#tkCal').addEventListener('click', function () { openUrl(gcalUrl(), true); });
     $('#tkChange').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
     $('#tkCancel').addEventListener('click', semCancel);
+    $('#liveRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; resetPlayer(); renderSeminar(); window.scrollTo(0, 0); });
     $('#semRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
     $('#semRetry').addEventListener('click', semLoad);
     $('#playerStart').addEventListener('click', startPlayer);

@@ -147,9 +147,11 @@ function whenLabel_(res, cfg) {
   return dayLabel_(d) + ' ' + (min >= 0 ? hm_(min) + '〜' : hoursLabel_(cfg));
 }
 
-// 再生できる時間の終わり。例：21:30／翌0:30
+// 再生できる時間の終わり。例：21:30／翌0:30／24:00
 function untilLabel_(t) {
-  return (jst_(t.end, 'yyyyMMdd') !== jst_(t.start, 'yyyyMMdd') ? '翌' : '') + jst_(t.end, 'H:mm');
+  var next = jst_(t.end, 'yyyyMMdd') !== jst_(t.start, 'yyyyMMdd');
+  if (next && jst_(t.end, 'H:mm') === '0:00') return '24:00';
+  return (next ? '翌' : '') + jst_(t.end, 'H:mm');
 }
 
 // 夜遅く（22時〜朝8時）になるときは、朝9:00 に送る
