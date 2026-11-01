@@ -450,6 +450,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);bac
   background:var(--bg);border:1.5px dashed var(--border);font-size:13.5px;font-weight:700;color:var(--sub)}
 .sem-picked.is-set{background:var(--sun-wash);border:1.5px solid var(--sun);color:var(--navy)}
 .sem-picked .ico{width:18px;height:18px;color:var(--sun)}
+.slot-day{font-size:13.5px;font-weight:700;color:var(--sub);margin-bottom:10px}
+.slot-day.is-set{color:var(--navy)}
+.slot-groups{display:grid;gap:12px}
+.slot-group{background:var(--card);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
+.slot-group h3{display:flex;align-items:center;gap:6px;font-family:var(--f-head);font-size:13px;font-weight:900;color:var(--navy);margin-bottom:8px}
+.slot-group h3 small{font-family:var(--f-body);font-size:11px;font-weight:700;color:var(--sub)}
+.slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.slot{
+  position:relative;min-height:44px;border-radius:10px;border:1.5px solid var(--border);background:#fff;
+  font-family:var(--f-latin);font-size:15px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;
+}
+.slot.is-on{background:var(--navy);border-color:var(--navy);color:#fff}
+.slot-soon{position:absolute;top:-8px;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-family:var(--f-body);font-size:9.5px;font-weight:800;line-height:1;padding:3px 6px;border-radius:999px;background:var(--sun);color:var(--navy)}
+.slot-groups.is-error .slot-group{box-shadow:0 0 0 1.5px var(--red)}
 #semForm{margin-top:20px}
 #semForm .step{margin-top:0}
 #semSubmit{margin:14px 0 8px}
@@ -464,7 +479,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);bac
 .ticket-kicker{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--navy);background:var(--mint);border-radius:999px;padding:3px 12px}
 .ticket-kicker .ico{width:14px;height:14px;stroke-width:3}
 .ticket-date{margin-top:12px;font-family:var(--f-head);font-size:19px;font-weight:900}
-.ticket-time{font-family:var(--f-latin);font-size:36px;font-weight:700;line-height:1.2;letter-spacing:.02em}
+.ticket-time{font-family:var(--f-latin);font-size:44px;font-weight:700;line-height:1.15;letter-spacing:.02em}
+.ticket-time small{font-family:var(--f-head);font-size:16px;font-weight:900;margin-left:6px;letter-spacing:0}
+.countdown.no-days{grid-template-columns:repeat(3,1fr)}
+.countdown.no-days > div:first-child{display:none}
+.ticket.is-soon .cd-label{color:var(--sun-2);font-size:13px}
+.ticket.is-soon .countdown div{border-color:rgba(255,176,77,.6);animation:soon 1.2s ease-in-out infinite}
+@keyframes soon{50%{background:rgba(255,176,77,.18)}}
 .ticket-sub{font-size:12.5px;font-weight:700;color:rgba(255,255,255,.85)}
 .cd-label{margin-top:14px;font-size:12px;font-weight:700;color:rgba(255,255,255,.8)}
 .countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
