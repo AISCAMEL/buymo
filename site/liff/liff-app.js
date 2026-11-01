@@ -7,7 +7,7 @@
    - 申込はサイトと同じ GAS に type:"join" で送信 → 「加盟店申込」シート →
      本部の「加盟店募集 教育ファネル」に載る（GAS改修不要）
    - 動画説明会は「オルタナティブライフ LINE AI応答」の GAS（CFG.SEMINAR_API）で予約・視聴記録・ステップ配信
-     （カレンダーで見たい日を予約 → カウントダウン → その日の朝から夜中まで好きな時間に録画を視聴
+     （カレンダーで見たい日と開始時刻を予約 → 開始までカウントダウン → 開始時刻に録画を再生
        → 加盟を申し込む／個別相談／もう少し考える）
    - ?dry=1 を付けて開くと送信せずに完了画面まで確認できる（動作確認用。説明会の予約もこの端末の中だけで試せる）
    ============================================================ */
@@ -425,7 +425,7 @@
     if (r) {
       lines.push('副業スタイル診断：' + r.name + '（使える時間：' + TIME_LABEL[a.qtime] + '／目指したい形：' + GOAL_LABEL[a.qgoal] + '）');
     }
-    if (sem.res && sem.res.day) lines.push('動画説明会：' + dayLabel(sem.res.day) + ' に予約（視聴 ' + Math.max(sem.res.pct || 0, watchedPct()) + '%）');
+    if (sem.res && sem.res.day) lines.push('動画説明会：' + whenText() + ' に予約（視聴 ' + Math.max(sem.res.pct || 0, watchedPct()) + '%）');
     if (val('note')) lines.push('ご質問：\n' + val('note'));
     lines.push('LINE：' + (p ? p.displayName + '（userId: ' + p.userId + '）' : '未連携'));
     if (state.friend === false) lines.push('公式LINE：友だち未追加');
@@ -650,8 +650,8 @@
 
   /* =======================================================
      無料の動画説明会
-     カレンダーで見たい日を選んで予約（時間の指定はなし）→ その日までのカウントダウン
-     → 当日の朝から夜中（GAS の設定。既定 6:00〜24:00）まで、好きな時間に録画を再生（途中で止めても続きから）
+     カレンダーで見たい日 → 開始時刻（GAS の設定。既定 8:00〜23:30 の30分ごと）を選んで予約
+     → 開始時刻までカウントダウン → 開始時刻になると録画を再生できる（開始から60分のあいだ。途中で止めても続きから）
      → 見終わったら「加盟を申し込む／個別相談／もう少し考える」
      時刻はすべて日本時間。端末の時計のずれはサーバーの時刻で補正する
      ======================================================= */
@@ -661,9 +661,9 @@
   var JST_MS = 9 * 3600000;
   var WATCHED_PCT = 50;
   var sem = {
-    cfg: { openMin: 360, closeMin: 1440, minutes: 7, days: 14, ready: true },
+    cfg: { openMin: 480, closeMin: 1440, slotMin: 30, windowMin: 60, leadMin: 5, minutes: 7, days: 14, ready: true },
     loaded: false, loading: false, offset: 0, res: null, rebook: false, mode: '',
-    month: null, day: '', timer: null,
+    month: null, day: '', time: '', timer: null,
     player: null, ended: false, watched: 0, pos: 0, sentPct: -1, lastPing: 0, watchKey: '',
     canJoin: false   // 見終わった方だけ、資料請求フォームに「加盟を申し込みたい」を出す
   };
@@ -674,8 +674,27 @@
   function openMs(day) { return dayMs(day) + sem.cfg.openMin * 60000; }
   function closeMs(day) { return dayMs(day) + sem.cfg.closeMin * 60000; }
   function hm(min) { return Math.floor(min / 60) + ':' + pad2(min % 60); }
+  function hm2(min) { return pad2(Math.floor(min / 60)) + ':' + pad2(min % 60); }
+  function timeMin(t) { var m = String(t || '').match(/^(\d{1,2}):(\d{2})$/); return m ? Number(m[1]) * 60 + Number(m[2]) : -1; }
   function hoursText() { return hm(sem.cfg.openMin) + '〜' + hm(sem.cfg.closeMin); }
-  function lastStartText() { return hm(Math.max(sem.cfg.openMin, sem.cfg.closeMin - sem.cfg.minutes)); }
+  // 選べる開始時刻（分）。例：8:00, 8:30, … 23:30
+  function slotMins() {
+    var out = [], c = sem.cfg, step = c.slotMin || 30;
+    for (var m = c.openMin; m < c.closeMin; m += step) out.push(m);
+    return out;
+  }
+  function slotText() { var n = sem.cfg.slotMin || 30; return n % 60 === 0 ? (n / 60) + '時間ごと' : n + '分ごと'; }
+  function windowText() { var n = sem.cfg.windowMin || 60; return n % 60 === 0 ? (n / 60) + '時間' : n + '分'; }
+  function slotsText() { var s = slotMins(); return hm(s[0]) + '〜' + hm(s[s.length - 1]) + 'の' + slotText(); }
+  function slotOk(day, min) { return dayMs(day) + min * 60000 - (sem.cfg.leadMin || 5) * 60000 > semNow() && dayMs(day) + min * 60000 <= semNow() + sem.cfg.days * DAY_MS; }
+  // 予約の開始時刻と、再生できる時間の終わり（サーバーの値。時刻のない以前の予約はその日の見られる時間）
+  function resStart(r) { r = r || sem.res; return r.start || (timeMin(r.time) >= 0 ? dayMs(r.day) + timeMin(r.time) * 60000 : openMs(r.day)); }
+  function resEnd(r) { r = r || sem.res; return r.end || (timeMin(r.time) >= 0 ? resStart(r) + (sem.cfg.windowMin || 60) * 60000 : closeMs(r.day)); }
+  function clock(ms) { var d = new Date(ms + JST_MS); return d.getUTCHours() + ':' + pad2(d.getUTCMinutes()); }
+  // 例：21:30／翌0:30
+  function untilText(r) { r = r || sem.res; return (jstParts(resEnd(r)).d !== jstParts(resStart(r)).d ? '翌' : '') + clock(resEnd(r)); }
+  // 例：11月2日（月）20:30〜
+  function whenText(r) { r = r || sem.res; return dayLabel(r.day) + ' ' + (timeMin(r.time) >= 0 ? hm(timeMin(r.time)) + '〜' : hoursText()); }
   function jstParts(ms) {
     var d = new Date(ms + JST_MS);
     return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), w: d.getUTCDay() };
@@ -726,12 +745,15 @@
   // ?dry=1 のときの試し用（この端末の中だけで予約できる）
   function semFake(action, x) {
     var r = lsGet('altlife_sem_dry', null);
-    if (action === 'reserve') r = { day: x.day, name: x.name, email: x.email, status: '予約', pct: 0, videoId: '' };
+    if (action === 'reserve') {
+      var st = Date.parse(x.slot.replace(' ', 'T') + ':00+09:00');
+      r = { day: x.slot.slice(0, 10), time: x.slot.slice(11), start: st, end: st + 60 * 60000, name: x.name, email: x.email, status: '予約', pct: 0, videoId: '' };
+    }
     else if (action === 'cancel') r = null;
     else if (action === 'progress' && r) r.pct = Math.max(r.pct, x.pct || 0);
     else if (action === 'decide' && r) r.status = { apply: '申込', consult: '相談希望', later: '検討中' }[x.decision] || r.status;
     lsSet('altlife_sem_dry', r);
-    return { ok: true, now: Date.now(), config: { openMin: 360, closeMin: 1440, minutes: 60, days: 14, ready: false }, reservation: r };
+    return { ok: true, now: Date.now(), config: { openMin: 480, closeMin: 1440, slotMin: 30, windowMin: 60, leadMin: 5, minutes: 7, days: 14, ready: false }, reservation: r };
   }
 
   function semLoad() {
@@ -767,9 +789,9 @@
     if (!r || sem.rebook) return 'book';
     if (r.status === '申込' || r.status === '相談希望') return 'done';
     var now = semNow();
-    if (now < openMs(r.day)) return 'ticket';
-    // 見られる時間の終わり間際に再生を始めた方は、そのまま最後まで見られる
-    if (now < closeMs(r.day) || (sem.player && !sem.ended && now < closeMs(r.day) + (sem.cfg.minutes + 60) * 60000)) return 'watch';
+    if (now < resStart(r)) return 'ticket';
+    // 再生できる時間の終わり間際に再生を始めた方は、そのまま最後まで見られる
+    if (now < resEnd(r) || (sem.player && !sem.ended && now < resEnd(r) + (sem.cfg.minutes + 60) * 60000)) return 'watch';
     if (finished() || Math.max(r.pct || 0, watchedPct()) >= WATCHED_PCT) return 'decide';
     return 'missed';
   }
@@ -780,12 +802,13 @@
     if (!sem.timer) sem.timer = setInterval(semTick, 1000);
   }
 
-  // 説明会の長さ・見られる時間を、GAS の設定にあわせて書き換える
+  // 説明会の長さ・開始時刻の選び方を、GAS の設定にあわせて書き換える
   function fillSemText() {
     $$('.sem-min').forEach(function (el) { el.textContent = sem.cfg.minutes; });
-    $$('.sem-hours').forEach(function (el) { el.textContent = hoursText(); });
-    $$('.sem-close').forEach(function (el) { el.textContent = hm(sem.cfg.closeMin); });
-    $$('.sem-last').forEach(function (el) { el.textContent = lastStartText(); });
+    $$('.sem-slots').forEach(function (el) { el.textContent = slotsText(); });
+    $$('.sem-slot').forEach(function (el) { el.textContent = slotText(); });
+    $$('.sem-window').forEach(function (el) { el.textContent = windowText(); });
+    $$('.sem-lead').forEach(function (el) { el.textContent = sem.cfg.leadMin || 5; });
   }
 
   function renderSeminar() {
@@ -812,7 +835,7 @@
     if (!sem.loaded) return;
     var mode = semMode();
     if (mode !== sem.mode) {
-      // 見られる時間になったら、動画の情報を取り直してから切り替える
+      // 開始時刻になったら、動画の情報を取り直してから切り替える
       if (mode === 'watch' && sem.res && !sem.res.videoId && !DRY) { semRefresh(); return; }
       renderSeminar();
       return;
@@ -828,13 +851,13 @@
       .catch(function () {}).then(function () { sem.loading = false; renderSeminar(); });
   }
 
-  /* ---------- 予約（カレンダーで日にちを選ぶだけ） ---------- */
-  // 見られる時間の終わりまで30分以上ある日（GAS と同じ条件）
+  /* ---------- 予約（カレンダーで日にち → 開始時刻） ---------- */
+  // まだ予約できる回が残っている日（GAS と同じ条件：開始の5分前まで）
   function bookableDays() {
-    var out = [], now = semNow();
+    var out = [], now = semNow(), mins = slotMins();
     for (var i = 0; i <= sem.cfg.days; i++) {
       var dk = dayKey(jstParts(now + i * DAY_MS));
-      if (closeMs(dk) - 30 * 60000 > now && dayMs(dk) <= now + sem.cfg.days * DAY_MS) out.push(dk);
+      if (mins.some(function (m) { return slotOk(dk, m); })) out.push(dk);
     }
     return out;
   }
@@ -842,7 +865,7 @@
   function renderBook() {
     var days = bookableDays();
     if (!days.length) { $('#calGrid').innerHTML = ''; $('#semPicked').textContent = '予約できる日がありません。'; return; }
-    if (sem.day && days.indexOf(sem.day) < 0) sem.day = '';
+    if (sem.day && days.indexOf(sem.day) < 0) { sem.day = ''; sem.time = ''; }
     if (!sem.month) sem.month = (sem.day || days[0]).slice(0, 7);
     var first = days[0].slice(0, 7), last = days[days.length - 1].slice(0, 7);
     if (sem.month < first) sem.month = first;
@@ -866,22 +889,49 @@
         ' aria-pressed="' + (dk === sem.day) + '" aria-label="' + (m + 1) + '月' + d + '日' + (dk === today ? '（今日）' : '') + (ok ? '' : '（予約できません）') + '">' + d + '</button>';
     }
     $('#calGrid').innerHTML = html;
+    renderSlots();
 
     var picked = $('#semPicked');
-    if (sem.day) {
-      var now = semNow();
-      var when = sem.day === today && now >= openMs(sem.day)
-        ? '今日・いますぐ見られます（' + hm(sem.cfg.closeMin) + 'まで）'
-        : dayLabel(sem.day) + ' ' + hoursText() + 'の好きな時間に';
-      picked.innerHTML = '<svg class="ico"><use href="#i-calendar"/></svg>' + esc(when) + '（約' + sem.cfg.minutes + '分）';
+    if (sem.day && sem.time) {
+      var st = dayMs(sem.day) + timeMin(sem.time) * 60000;
+      var soon = st - semNow() < 3 * 3600000 ? '（あと' + leftText(st - semNow()) + '）' : '';
+      picked.innerHTML = '<svg class="ico"><use href="#i-calendar"/></svg>' + esc(dayLabel(sem.day) + ' ' + hm(timeMin(sem.time)) + ' 開始' + soon);
     } else {
-      picked.textContent = '上のカレンダーで、見たい日を選んでください';
+      picked.textContent = sem.day ? '開始時刻を選んでください' : '日にちと開始時刻を選んでください';
     }
-    picked.classList.toggle('is-set', !!sem.day);
+    picked.classList.toggle('is-set', !!(sem.day && sem.time));
 
     var d0 = lsGet(LS_DRAFT, null) || {};
     if (!$('#s-name').value) $('#s-name').value = (sem.res && sem.res.name) || d0.name || '';
     if (!$('#s-email').value) $('#s-email').value = (sem.res && sem.res.email) || d0.email || '';
+  }
+
+  // 例：2時間15分／25分
+  function leftText(ms) {
+    var min = Math.max(1, Math.ceil(ms / 60000));
+    return min >= 60 ? Math.floor(min / 60) + '時間' + (min % 60 ? min % 60 + '分' : '') : min + '分';
+  }
+
+  // 開始時刻のボタン（朝・昼・夕方・夜に分ける。今日の過ぎた回は出さない）
+  var SLOT_GROUPS = [['朝', 0, 720], ['昼', 720, 1020], ['夕方', 1020, 1200], ['夜', 1200, 1440]];
+  function renderSlots() {
+    var box = $('#slotGrid'), head = $('#slotDay');
+    head.classList.toggle('is-set', !!sem.day);
+    if (!sem.day) { head.textContent = '先に、上のカレンダーで日にちを選んでください'; box.innerHTML = ''; return; }
+    var mins = slotMins().filter(function (m) { return slotOk(sem.day, m); });
+    if (sem.time && mins.indexOf(timeMin(sem.time)) < 0) sem.time = '';
+    head.textContent = dayLabel(sem.day) + (sem.day === todayKey() ? '（今日）' : '') + 'の開始時刻';
+    var firstToday = sem.day === todayKey() ? mins[0] : -1;
+    box.innerHTML = SLOT_GROUPS.map(function (g) {
+      var list = mins.filter(function (m) { return m >= g[1] && m < g[2]; });
+      if (!list.length) return '';
+      return '<div class="slot-group"><h3>' + g[0] + '<small>' + hm(list[0]) + '〜' + hm(list[list.length - 1]) + '</small></h3><div class="slot-grid">' +
+        list.map(function (m) {
+          var t = hm2(m), on = t === sem.time;
+          return '<button type="button" class="slot' + (on ? ' is-on' : '') + '" data-slot="' + t + '" aria-pressed="' + on + '">' +
+            (m === firstToday ? '<span class="slot-soon">いちばん早い回</span>' : '') + hm(m) + '</button>';
+        }).join('') + '</div></div>';
+    }).join('');
   }
 
   function semNote(msg, kind) {
@@ -892,9 +942,10 @@
 
   function semReserve() {
     var name = $('#s-name').value.trim(), email = $('#s-email').value.trim();
-    $$('#s-name,#s-email,#calGrid').forEach(function (el) { el.classList.remove('is-error'); });
+    $$('#s-name,#s-email,#calGrid,#slotGrid').forEach(function (el) { el.classList.remove('is-error'); });
     $('#s-agree').closest('.agree').classList.remove('is-error');
     var bad = !sem.day ? ['#calGrid', '見たい日を選んでください。']
+      : !sem.time ? ['#slotGrid', '開始時刻を選んでください。']
       : !name ? ['#s-name', 'お名前をご入力ください。']
       : !MAIL_RE.test(email) ? ['#s-email', 'メールアドレスをご確認ください。']
       : !$('#s-agree').checked ? ['#s-agree', 'プライバシーポリシーとご案内の受け取りへの同意が必要です。'] : null;
@@ -910,20 +961,20 @@
       semNote('予約は、LINEアプリから開いたときにご利用いただけます。', 'ng');
       return;
     }
-    var day = sem.day;
+    var day = sem.day, time = sem.time;
     var talk = canPostToTalk();
     var btn = $('#semSubmit');
     btn.disabled = true;
     semNote('予約しています…');
-    semApi('reserve', { day: day, name: name, email: email, talk: talk }).then(function (d) {
+    semApi('reserve', { slot: day + ' ' + time, name: name, email: email, talk: talk }).then(function (d) {
       if (!d.ok) {
         semNote({
-          day: 'その日は予約できなくなりました。別の日を選んでください。',
+          slot: 'その時刻は予約できなくなりました。別の時刻を選んでください。',
           email: 'メールアドレスをご確認ください。',
           name: 'お名前をご入力ください。',
           auth: 'LINEの確認ができませんでした。LINEアプリから開き直してください。'
         }[d.error] || '予約できませんでした。時間をおいてもう一度お試しください。', 'ng');
-        if (d.error === 'day') { sem.day = ''; renderBook(); }
+        if (d.error === 'slot') { sem.time = ''; renderBook(); }
         return;
       }
       sem.res = d.reservation;
@@ -940,7 +991,7 @@
       window.scrollTo(0, 0);
       if (talk) {
         // 予約内容をトークにも残す。返信（無料）で予約の確認が届く。送れなかったら LINE で確認を送ってもらう
-        postToTalk('【説明会の予約】\n視聴日：' + dayLabel(day) + '（' + hoursText() + 'の好きな時間）\nお名前：' + name).then(function (ok) {
+        postToTalk('【説明会の予約】\n日時：' + dayLabel(day) + ' ' + hm(timeMin(time)) + ' 開始\nお名前：' + name).then(function (ok) {
           if (!ok) semApi('confirm').catch(function () {});
         });
       }
@@ -949,29 +1000,36 @@
     }).then(function () { btn.disabled = false; });
   }
 
-  /* ---------- 予約済み（見られるようになるまでのカウントダウン） ---------- */
+  /* ---------- 予約済み（開始時刻までのカウントダウン） ---------- */
   function renderTicket() {
-    var p = jstParts(dayMs(sem.res.day));
+    var r = sem.res, p = jstParts(dayMs(r.day));
     $('#tkDate').textContent = p.y + '年' + (p.m + 1) + '月' + p.d + '日（' + '日月火水木金土'.charAt(p.w) + '）';
+    $('#tkTime').textContent = timeMin(r.time) >= 0 ? hm(timeMin(r.time)) : clock(resStart(r));
+    $('#tkUntil').textContent = untilText(r);
     updateCountdown();
   }
 
   function updateCountdown() {
-    var left = Math.max(0, openMs(sem.res.day) - semNow());
-    var s = Math.floor(left / 1000);
-    $('#cdD').textContent = Math.floor(s / 86400);
+    var left = Math.max(0, resStart() - semNow());
+    var s = Math.ceil(left / 1000);
+    var days = Math.floor(s / 86400);
+    $('#cdD').textContent = days;
     $('#cdH').textContent = pad2(Math.floor(s % 86400 / 3600));
     $('#cdM').textContent = pad2(Math.floor(s % 3600 / 60));
     $('#cdS').textContent = pad2(s % 60);
+    $('#cdBox').classList.toggle('no-days', days === 0);
+    var soon = left <= 10 * 60000;
+    $('#semTicket .ticket').classList.toggle('is-soon', soon);
+    $('#cdLabel').textContent = soon ? 'まもなく開始します' : '開始まで';
   }
 
-  // Google カレンダーに終日の予定として登録
+  // Google カレンダーに登録（開始時刻から動画の長さぶん）
   function gcalUrl() {
-    var f = function (ms) { var p = jstParts(ms); return '' + p.y + pad2(p.m + 1) + pad2(p.d); };
-    var d = dayMs(sem.res.day);
+    var f = function (ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
+    var st = resStart();
     return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('BUYMO 副業パートナー 動画説明会') +
-      '&dates=' + f(d) + '/' + f(d + DAY_MS) +
-      '&details=' + encodeURIComponent(hoursText() + 'の好きな時間に見られます（約' + sem.cfg.minutes + '分）\n説明会ページ：' + liffUrl('?view=seminar'));
+      '&dates=' + f(st) + '/' + f(st + sem.cfg.minutes * 60000) +
+      '&details=' + encodeURIComponent('開始時刻になったら、説明会ページで再生してください（約' + sem.cfg.minutes + '分。' + untilText() + 'まで再生できます）\n説明会ページ：' + liffUrl('?view=seminar'));
   }
 
   function semCancel() {
@@ -980,6 +1038,7 @@
       if (!d.ok) { toast('取り消せませんでした'); return; }
       sem.res = null;
       sem.day = '';
+      sem.time = '';
       toast('予約を取り消しました');
       renderSeminar();
     }).catch(function () { toast('取り消せませんでした'); });
@@ -987,7 +1046,7 @@
 
   /* ---------- 視聴（YouTube の録画。途中で止めても、この端末では続きから） ---------- */
   function restoreWatch() {
-    var key = sem.res && sem.res.day ? sem.res.day : '';
+    var key = sem.res && sem.res.day ? sem.res.day + (sem.res.time ? ' ' + sem.res.time : '') : '';
     if (key === sem.watchKey) return;
     sem.watchKey = key;
     var w = lsGet(LS_SEM_WATCH, null);
@@ -1012,15 +1071,16 @@
     var ready = !!sem.res.videoId || DRY;
     $('#playerWait').hidden = ready;
     $('#playerStart').hidden = !ready || !!sem.player;
-    var today = sem.res.day === todayKey();
-    $('#liveTime').textContent = today ? '今日の' + hm(sem.cfg.closeMin) + 'まで' : 'まもなく終了';
+    var over = semNow() >= resEnd();
+    $('#liveTitle').textContent = over ? 'まもなく終了します' : '説明会が始まりました';
+    $('#liveTime').textContent = over ? '' : untilText() + 'まで再生できます';
     updateWatch();
   }
 
   function updateWatch() {
     if (!sem.player) {
       var r = resumeSec();
-      $('#playerStartSub').textContent = r ? '続き（' + Math.floor(r / 60) + '分ごろ）から再生します' : '約' + sem.cfg.minutes + '分・途中で止めても続きから見られます';
+      $('#playerStartSub').textContent = r ? '続き（' + Math.floor(r / 60) + '分ごろ）から再生します' : '約' + sem.cfg.minutes + '分・' + untilText() + 'までに再生を始めてください';
       return;
     }
     // 再生中の秒数を数えて、視聴の割合をサーバーへ（30秒ごと）
@@ -1140,10 +1200,21 @@
     $('#calGrid').addEventListener('click', function (e) {
       var b = e.target.closest('[data-day]');
       if (!b || b.disabled) return;
+      var changed = sem.day !== b.getAttribute('data-day');
       sem.day = b.getAttribute('data-day');
       $('#calGrid').classList.remove('is-error');
       if ($('#semNote').classList.contains('ng')) semNote('');
       renderBook();
+      if (changed) $('#slotSec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $('#slotGrid').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-slot]');
+      if (!b) return;
+      sem.time = b.getAttribute('data-slot');
+      $('#slotGrid').classList.remove('is-error');
+      if ($('#semNote').classList.contains('ng')) semNote('');
+      renderBook();
+      $('#semForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     function shiftMonth(n) {
       var y = Number(sem.month.slice(0, 4)), m = Number(sem.month.slice(5, 7)) - 1 + n;
@@ -1153,9 +1224,9 @@
     $('#calPrev').addEventListener('click', function () { shiftMonth(-1); });
     $('#calNext').addEventListener('click', function () { shiftMonth(1); });
     $('#tkCal').addEventListener('click', function () { openUrl(gcalUrl(), true); });
-    $('#tkChange').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
+    $('#tkChange').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
     $('#tkCancel').addEventListener('click', semCancel);
-    $('#semRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
+    $('#semRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
     $('#semRetry').addEventListener('click', semLoad);
     $('#playerStart').addEventListener('click', startPlayer);
     document.addEventListener('visibilitychange', function () { if (document.hidden && sem.player) sendProgress(); });

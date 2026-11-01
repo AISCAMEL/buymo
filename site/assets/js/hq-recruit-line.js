@@ -27,10 +27,11 @@ window.RCLINE = (function () {
     }).then(function (r) { return r.json(); });
   }
 
-  // 説明会の日（'2026-11-03' または見本の '11/3'）
-  function dayText(d) {
+  // 説明会の日時（'2026-11-03' と '20:30'、または見本の '11/3'）→ 11/3 20:30
+  function dayText(d, time) {
     var m = String(d || '').match(/^\d{4}-(\d{2})-(\d{2})$/);
-    return m ? Number(m[1]) + '/' + Number(m[2]) : String(d || '');
+    var t = String(time || '').match(/^(\d{1,2}):(\d{2})$/);
+    return (m ? Number(m[1]) + '/' + Number(m[2]) : String(d || '')) + (t ? ' ' + Number(t[1]) + ':' + t[2] : '');
   }
 
   function ago(t) {
@@ -64,11 +65,11 @@ window.RCLINE = (function () {
         timeline: [ev(216, 'friend'), ev(200, 'seminar_book', '説明会を予約（' + md(now - DAY) + '）'), ev(21, 'seminar_watch', '説明会を視聴（92%）'),
           ev(20, 'decide', '「もう少し考える」を選択'), ev(20, 'user', '土日だけで本当に回せますか？'), ev(20, 'ai', '会社員で月2台なら、平日は夜30分、土日で週6時間ほどが目安です…')] },
       { userId: 'U005', lineName: 'なおこ', firstAt: now - 5 * DAY, lastAt: now - 3 * DAY, paused: false,
-        seminar: { day: md(now - 2 * DAY), status: '予約', pct: 0 },
-        timeline: [ev(120, 'friend'), ev(72, 'seminar_book', '説明会を予約（' + md(now - 2 * DAY) + '）'), ev(33, 'step', '当日の朝のお知らせ（LINE・メール）'), ev(9, 'step', '見逃した方へのご案内（LINE・メール）')] },
+        seminar: { day: md(now - 2 * DAY), time: '21:00', status: '予約', pct: 0 },
+        timeline: [ev(120, 'friend'), ev(72, 'seminar_book', '説明会を予約（' + md(now - 2 * DAY) + ' 21:00〜）'), ev(49, 'step', '開始1時間前のお知らせ（LINE・メール）'), ev(9, 'step', '見逃した方へのご案内（LINE・メール）')] },
       { userId: 'U006', lineName: 'しょう', firstAt: now - 2 * DAY, lastAt: now - 1 * DAY, paused: false,
-        seminar: { day: md(now + DAY), status: '予約', pct: 0 },
-        timeline: [ev(48, 'friend'), ev(24, 'seminar_book', '説明会を予約（' + md(now + DAY) + '）')] },
+        seminar: { day: md(now + DAY), time: '20:30', status: '予約', pct: 0 },
+        timeline: [ev(48, 'friend'), ev(24, 'seminar_book', '説明会を予約（' + md(now + DAY) + ' 20:30〜）')] },
       { userId: 'U007', lineName: 'さくら', firstAt: now - 3 * DAY, lastAt: now - 6 * HOUR, paused: false,
         timeline: [ev(72, 'friend'), ev(7, 'user', '車の知識がなくても大丈夫？'), ev(7, 'ai', '大丈夫です。福島の本社での3日間の研修と、いつでも見られる動画研修で…'),
           ev(6, 'user', '女性でもできますか？'), ev(6, 'ai', 'はい、性別に関係なく始められます。出張査定は…')] },
@@ -124,7 +125,7 @@ window.RCLINE = (function () {
     if (s && s.status === '申込' && l.stage !== '加盟') return { lv: 'orange', label: '加盟の申込', why: '3営業日以内に、契約内容とエリアのご案内を' };
     if (l.nextDue && isOverdue(l.nextDue)) return { lv: 'red', label: '期限切れ', why: '次にやること：' + l.next };
     if (s && (s.status === '検討中' || s.status === '視聴完了')) return { lv: 'green', label: '説明会を視聴・未決定', why: '視聴 ' + s.pct + '%。疑問を聞いてみるタイミングです' };
-    if (s && s.status === '予約' && s.pct === 0 && isPast(s.day)) return { lv: 'gray', label: '予約したのに見逃し', why: '見逃しのご案内は自動で送信済み' };
+    if (s && s.status === '予約' && s.pct === 0 && (s.end ? s.end < Date.now() : isPast(s.day))) return { lv: 'gray', label: '予約したのに見逃し', why: '見逃しのご案内は自動で送信済み' };
     return null;
   }
   function isPast(day) {
@@ -209,7 +210,7 @@ window.RCLINE = (function () {
     var s = p.seminar;
     return '<span class="lb-row"><span class="lb lb-line">LINE：' + esc(p.lineName) + '・' + ago(p.lastAt) + '</span>' +
       (p.paused ? '<span class="lb lb-pause">AI停止中</span>' : '') +
-      (s ? '<span class="lb lb-sem">説明会 ' + esc(dayText(s.day)) + '・' + (s.pct ? s.pct + '%' : esc(s.status)) + '</span>' : '') + '</span>';
+      (s ? '<span class="lb lb-sem">説明会 ' + esc(dayText(s.day, s.time)) + '・' + (s.pct ? s.pct + '%' : esc(s.status)) + '</span>' : '') + '</span>';
   }
 
   var ICON = { friend: '🤝', block: '🚫', user: '💬', ai: '🤖', auto: '📨', seminar_book: '📅', seminar_watch: '▶️', decide: '🤔', consult: '🙋', handoff: '🙋', apply: '📝', staff: '👤', step: '📨' };
