@@ -80,7 +80,7 @@ var SYSTEM_PROMPT = [
   '- 車を売りたい方（車買取のお客様）：' + SITE_URL,
   '',
   '# 守ること',
-  '- 日本語で、やさしく丁寧に。LINEなので短く（目安200〜300字）。必要なら「・」で箇条書き。',
+  '- LINEでスタッフが話しかけるような、自然でやさしい話し言葉で答える。短く（目安150〜250字）。見出し（【】や■など）や太字は付けない。項目が多いときだけ「・」の箇条書きを3〜4行まで使ってよい。',
   '- LINEは装飾が表示されないので、**、#、表、リンク記法などのマークダウンは使わない。URLはそのまま書く。',
   '- 上に書いていない事実（上にない金額、実績の数字、他社名、契約の細かい条件など）は作らない。わからないことは「個別相談で担当者が詳しくご案内します」と伝える。',
   '- 費用（加盟金・保証金・月会費・手数料）は上に書いた金額をそのまま伝えてよい（税別と添える）。収入・利益・手残りの金額は言わず、「必ず稼げる」「誰でも儲かる」「簡単に月○万円」など、収益を約束・誇張する表現は使わない。収益を聞かれたら、粗利は車種・状態・相場で変わり、試算は動画説明会と個別相談で前提と一緒に説明していると伝える。',
@@ -227,7 +227,7 @@ function handleEvent_(ev) {
   }
 
   var needHuman = answer.indexOf(HANDOFF_MARK) >= 0;
-  answer = answer.split(HANDOFF_MARK).join('').trim();
+  answer = plainText_(answer.split(HANDOFF_MARK).join(''));
   if (needHuman) {
     handoff_(ev.replyToken, userId, text, answer);
     return;
@@ -341,6 +341,22 @@ function askAI_(messages) {
     Logger.log('askAI_: ' + err.message);
     return null;
   }
+}
+
+// LINE は装飾を表示しないので、AI が付けたマークダウンの記号（**太字** や # 見出しなど）を取り除く
+function plainText_(s) {
+  return String(s)
+    .replace(/\*\*([^*]+)\*\*/g, '$1')               // **太字**
+    .replace(/__([^_]+)__/g, '$1')                    // __太字__
+    .replace(/`+([^`]*)`+/g, '$1')                    // `コード`
+    .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '$1 $2') // [文字](URL)
+    .replace(/^[ \t]*#{1,6}[ \t]*/gm, '')              // # 見出し
+    .replace(/^[ \t]*[-*+][ \t]+/gm, '・')              // - 箇条書き
+    .replace(/^[ \t]*>[ \t]?/gm, '')                    // > 引用
+    .replace(/^[ \t]*[-*_]{3,}[ \t]*$/gm, '')            // --- 区切り線
+    .replace(/\*\*|__/g, '')                           // 対になっていない ** の残り
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 // 会話の流れ（直近 HISTORY_TURNS 発言）を 6 時間だけ覚えておく
