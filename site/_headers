@@ -25,3 +25,6 @@
 /liff/*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+/kaitori/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
