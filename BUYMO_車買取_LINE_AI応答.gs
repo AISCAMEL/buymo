@@ -11,6 +11,7 @@
      WEBHOOK_TOKEN             : Webhook URL の末尾 ?token= に付ける合言葉（setup() を実行すると自動で作られる）
      MINIAPP_URL               : 車買取ミニアプリのURL（例 https://miniapp.line.me/xxxxxxxxxx-XXXXXXXX）。空ならサイト版 https://buymo.me/kaitori/
      SLACK_WEBHOOK_URL         : 引き継ぎ・査定申込・写真の受信を本部に知らせる Slack の Incoming Webhook（任意）
+     LINEWORKS_WEBHOOK_URL     : 同じ通知を LINE WORKS のトークルームに送る「Incoming Webhook」アプリの URL（任意）
      NOTIFY_EMAIL              : 引き継ぎを知らせるメールアドレス（任意・空ならこの GAS の持ち主）
      AI_MODEL                  : 使うモデル（任意・既定 anthropic/claude-haiku-4-5＝サイトのチャットと同じ）
      LOG_SHEET_ID              : 会話ログのスプレッドシートID（setup() を実行すると自動で作られる）
@@ -170,7 +171,7 @@ function handleEvent_(ev) {
   if (msg.type !== 'text') {
     var photo = msg.type === 'image';
     logRow_(userId, 'お客様', photo ? '（写真）' : '（' + msg.type + '）');
-    if (photo) notifySlack_(':camera: *LINEに写真が届きました*（' + displayName_(userId) + '）');
+    if (photo) notifySlack_(':camera: *LINEに写真が届きました*（' + displayName_(userId) + '）\nトークで写真を確認して、案件に追加してください。', { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
     if (isPaused_(userId)) return;
     // 写真を何枚も続けて送られたときに返信が並ばないよう、10分に1回だけ返す
     var cache = CacheService.getScriptCache(), ck = 'photo_' + userId;
@@ -193,7 +194,7 @@ function handleEvent_(ev) {
     reply_(ev.replyToken, thanks, DEFAULT_QUICK);
     logRow_(userId, 'お客様', text);
     logRow_(userId, '定型', thanks);
-    notifySlack_(':car: *LINEミニアプリから査定の申込*（' + displayName_(userId) + '）\n```' + text + '```');
+    notifySlack_(':car: *LINEミニアプリから査定の申込*（' + displayName_(userId) + '）\n```' + text + '```', { label: '案件ボードを開く', url: 'https://buymo.me/hq-leads.html' });
     return;
   }
 
@@ -492,7 +493,7 @@ function logRow_(userId, who, text) {
 
 // 本部に知らせる：Slack（設定があれば）＋メール
 function notifyStaff_(title, body) {
-  notifySlack_('*' + title + '*\n' + body);
+  notifySlack_('*' + title + '*\n' + body, { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
   try {
     var to = PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL') || Session.getEffectiveUser().getEmail();
     if (to) MailApp.sendEmail({ to: to, subject: '【BUYMO 車買取 LINE】' + title, body: body + '\n\n— BUYMO 車買取 LINE（自動送信）', name: 'BUYMO 車買取 LINE' });
@@ -521,12 +522,42 @@ function sign_(text) {
   return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(text, secret)).replace(/=+$/, '').slice(0, 22);
 }
 
-function notifySlack_(text) {
+// 本部への通知：Slack と LINE WORKS（どちらも、スクリプトプロパティに URL が入っているときだけ送る）
+// button：LINE WORKS の通知に付けるボタン {label, url}（任意）
+function notifySlack_(text, button) {
   var url = PropertiesService.getScriptProperties().getProperty('SLACK_WEBHOOK_URL');
+  if (url) {
+    try {
+      UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: JSON.stringify({ text: text }), muteHttpExceptions: true });
+    } catch (err) { Logger.log('Slack: ' + err.message); }
+  }
+  notifyWorks_(text, button);
+}
+
+// LINE WORKS の「Incoming Webhook」アプリ（通知を受けたいトークルームに追加すると発行される URL）へ送る
+// 送る形：{ title, body: { text }, button: { label, url } }。Slack 用の記号（*太字*、```、:絵文字:）は取り除く
+function notifyWorks_(text, button) {
+  var url = PropertiesService.getScriptProperties().getProperty('LINEWORKS_WEBHOOK_URL');
   if (!url) return;
+  var EMOJI = { ':camera:': '📷', ':car:': '🚗', ':page_facing_up:': '📄', ':new:': '🆕', ':handshake:': '🤝', ':bell:': '🔔' };
+  var plain = String(text)
+    .replace(/:[a-z_]+:/g, function (m) { return EMOJI[m] || ''; })
+    .replace(/```/g, '').replace(/\*([^*\n]+)\*/g, '$1').trim();
+  var lines = plain.split('\n');
+  var title = lines.shift().trim().slice(0, 100);
+  var payload = { title: title, body: { text: (lines.join('\n').trim() || title).slice(0, 1900) } };
+  if (button && button.url) payload.button = { label: String(button.label || '開く').slice(0, 20), url: button.url };
   try {
-    UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: JSON.stringify({ text: text }), muteHttpExceptions: true });
-  } catch (err) { Logger.log('Slack: ' + err.message); }
+    var res = UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true });
+    if (res.getResponseCode() !== 200) Logger.log('LINE WORKS: ' + res.getResponseCode() + ' ' + res.getContentText().slice(0, 200));
+  } catch (err) { Logger.log('LINE WORKS: ' + err.message); }
+}
+
+// 本部への通知（Slack・LINE WORKS）を試しに送る（エディタから実行）
+function testNotify() {
+  var p = PropertiesService.getScriptProperties();
+  notifySlack_('🔔 *通知のテスト*\nこの通知が届いていれば、本部への通知は設定できています。', { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
+  Logger.log('Slack: ' + (p.getProperty('SLACK_WEBHOOK_URL') ? '送りました' : '未設定') + '／LINE WORKS: ' + (p.getProperty('LINEWORKS_WEBHOOK_URL') ? '送りました' : '★未設定（LINEWORKS_WEBHOOK_URL）'));
 }
 
 
@@ -674,7 +705,7 @@ function setup() {
     props.setProperty('WEBHOOK_TOKEN', Utilities.getUuid().replace(/-/g, ''));
   }
   Logger.log('Webhook URL の末尾に付ける文字：?token=' + props.getProperty('WEBHOOK_TOKEN'));
-  ['OPENROUTER_API_KEY', 'LINE_CHANNEL_ACCESS_TOKEN', 'SLACK_WEBHOOK_URL'].forEach(function (k) {
+  ['OPENROUTER_API_KEY', 'LINE_CHANNEL_ACCESS_TOKEN', 'SLACK_WEBHOOK_URL', 'LINEWORKS_WEBHOOK_URL'].forEach(function (k) {
     Logger.log(k + ': ' + (props.getProperty(k) ? '設定済み' : '★未設定'));
   });
   Logger.log('通知メールの送り先: ' + (props.getProperty('NOTIFY_EMAIL') || Session.getEffectiveUser().getEmail() + '（このGASの持ち主）'));

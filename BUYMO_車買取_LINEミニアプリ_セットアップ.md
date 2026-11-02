@@ -63,6 +63,7 @@
    | `LINE_CHANNEL_ACCESS_TOKEN` | 手順2のトークン |
    | `MINIAPP_URL` | ミニアプリURL（手順1。未作成なら空でよい → `https://buymo.me/kaitori/` を案内） |
    | `SLACK_WEBHOOK_URL` | 本部の Slack 通知（任意） |
+   | `LINEWORKS_WEBHOOK_URL` | 本部の LINE WORKS 通知（任意。下の「LINE WORKS で受け取る」） |
    | `NOTIFY_EMAIL` | 引き継ぎの通知先（任意） |
 5. 関数 `setup` を実行 → 権限を許可 → ログに出る `?token=…` を控える
 6. デプロイ → 新しいデプロイ → 種類「ウェブアプリ」→ 実行ユーザー「自分」・アクセスできるユーザー「**全員**」→ URL（`…/exec`）を控える
@@ -71,6 +72,24 @@
 9. 関数 `testAI` で AI の答えを確認、`diagnose` で接続を確認
 
 コードを直したときは「デプロイを管理」→ 鉛筆 →「新バージョン」（URL は変わりません）。
+
+---
+
+## 本部への通知を LINE WORKS で受け取る
+
+引き継ぎ・査定の申込・写真の受信・説明会の予約などの通知を、LINE WORKS のトークルームに届けられます（Slack と両方でも、LINE WORKS だけでも可）。
+
+1. LINE WORKS で、通知を受けたいトークルームを作る（例「BUYMO 通知」。本部のメンバーを入れる）
+2. LINE WORKS のアプリディレクトリで「**Incoming Webhook**」を追加し、そのトークルームを選ぶ → 発行された **URL**（`https://webhook.worksmobile.com/message/…`）をコピー
+   （フリー・スタンダード・アドバンストの各プランで使えます。管理者の許可が必要な場合があります）
+3. 各 GAS のスクリプトプロパティに `LINEWORKS_WEBHOOK_URL` としてその URL を入れる
+   - 「オルタナティブライフ LINE AI応答」：引き継ぎ・資料請求・説明会の予約・個別相談
+   - 「BUYMO 車買取 LINE AI応答」：引き継ぎ・ミニアプリからの査定申込・写真の受信
+   - 本番 GAS（サイト・案件ボード）：新規お問い合わせ・ステージ変更・加盟店申込。
+     `BUYMO_本番GAS_LINEWORKS通知.gs` の先頭の手順どおり、ファイルを1つ足して1行書き足す
+4. 関数 `testNotify`（本番 GAS は `testWorksNotify`）を実行 → トークルームに届けば完了
+
+通知には「LINEのチャットを開く」「案件ボードを開く」のボタンが付きます。
 
 ## 4. 確認
 

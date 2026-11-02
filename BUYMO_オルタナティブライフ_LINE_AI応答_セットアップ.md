@@ -55,6 +55,7 @@ GASの左の歯車「プロジェクトの設定」→ 下の「スクリプト 
 | `OPENROUTER_API_KEY` | 手順1のキー |
 | `LINE_CHANNEL_ACCESS_TOKEN` | 手順3のトークン |
 | `SLACK_WEBHOOK_URL` | 任意。BUYMOのGASの同じ名前のプロパティと同じ値を入れると、いつものSlackに通知されます |
+| `LINEWORKS_WEBHOOK_URL` | 任意。LINE WORKS のトークルームに通知（下の「本部への通知を LINE WORKS で受け取る」） |
 | `AI_MODEL` | 任意。空なら `anthropic/claude-haiku-4-5`。別のモデルにしたいときだけ、OpenRouter のモデル名を入れる |
 
 `WEBHOOK_TOKEN` と `LOG_SHEET_ID` は次の手順で自動的に作られます。
@@ -244,3 +245,21 @@ LINE Developers →「中古車投資ビジネス」→「Messaging API設定」
 
 - GASはLINEの署名を確認できないため、Webhook URL に付けた `?token=` が合言葉の役割をします。URLを外部に公開しないでください。
 - AIは誤ることがあります。契約・費用など大事な内容は、必ず説明会や担当者から正式に案内してください（AIにもそう案内させています）。
+
+---
+
+## 本部への通知を LINE WORKS で受け取る
+
+引き継ぎ・査定の申込・写真の受信・説明会の予約などの通知を、LINE WORKS のトークルームに届けられます（Slack と両方でも、LINE WORKS だけでも可）。
+
+1. LINE WORKS で、通知を受けたいトークルームを作る（例「BUYMO 通知」。本部のメンバーを入れる）
+2. LINE WORKS のアプリディレクトリで「**Incoming Webhook**」を追加し、そのトークルームを選ぶ → 発行された **URL**（`https://webhook.worksmobile.com/message/…`）をコピー
+   （フリー・スタンダード・アドバンストの各プランで使えます。管理者の許可が必要な場合があります）
+3. 各 GAS のスクリプトプロパティに `LINEWORKS_WEBHOOK_URL` としてその URL を入れる
+   - 「オルタナティブライフ LINE AI応答」：引き継ぎ・資料請求・説明会の予約・個別相談
+   - 「BUYMO 車買取 LINE AI応答」：引き継ぎ・ミニアプリからの査定申込・写真の受信
+   - 本番 GAS（サイト・案件ボード）：新規お問い合わせ・ステージ変更・加盟店申込。
+     `BUYMO_本番GAS_LINEWORKS通知.gs` の先頭の手順どおり、ファイルを1つ足して1行書き足す
+4. 関数 `testNotify`（本番 GAS は `testWorksNotify`）を実行 → トークルームに届けば完了
+
+通知には「LINEのチャットを開く」「案件ボードを開く」のボタンが付きます。
