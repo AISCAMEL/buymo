@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>BUYMO 車買取｜LINEで写真査定・AI相談</title>
+<meta name="description" content="BUYMOの車買取をLINEで。30秒の相場チェック、写真で無料査定、24時間のAI相談、売りどきチェック。査定料・手数料0円、最短3営業日入金、全国47都道府県対応。" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#0F766E" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/img/buymo-favicon-32.png?v=2" />
+<link rel="apple-touch-icon" href="../assets/img/buymo-favicon-180.png?v=2" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Outfit:wght@500;700;900&display=swap" />
+<link rel="stylesheet" href="kaitori.css?v=1" />
+</head>
+<body>
+
+<!-- アイコン（Lucide 準拠のストロークアイコン） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></symbol>
+    <symbol id="i-caravan" viewBox="0 0 24 24"><path d="M18 19V9a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v8a2 2 0 0 0 2 2h2"/><path d="M2 9h3a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2"/><path d="M22 17v1a1 1 0 0 1-1 1H10v-9a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v9"/><circle cx="8" cy="19" r="2"/></symbol>
+    <symbol id="i-trees" viewBox="0 0 24 24"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></symbol>
+    <symbol id="i-bike" viewBox="0 0 24 24"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-phone-off" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="22" x2="2" y1="2" y2="22"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-login" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></symbol>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-calc" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+    <symbol id="i-yen" viewBox="0 0 24 24"><path d="M12 9.5V21m0-11.5L6 3m6 6.5L18 3"/><path d="M6 15h12"/><path d="M6 11h12"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <a class="brand" href="?view=home" data-go="home" aria-label="BUYMO 車買取 ホーム">
+    <img class="brand-logo" src="../assets/img/buymo/logo-mark.png?v=2" alt="" width="28" height="28" />
+    <span class="brand-mark">BUYMO</span>
+    <span class="brand-by">車買取 × LINE</span>
+  </a>
+  <button type="button" class="topbar-avatar" data-go="mypage" aria-label="マイページ">
+    <img id="topAvatar" alt="" hidden />
+    <svg class="ico" id="topAvatarIco"><use href="#i-user"/></svg>
+  </button>
+</header>
+
+<div class="preview-banner" id="previewBanner" hidden>
+  プレビューモード：LIFF ID が未設定のため、LINE連携（プロフィール・トーク送信・シェア）は無効です。
+</div>
+
+<main id="app">
+
+  <!-- ===================== ホーム ===================== -->
+  <section class="view" data-view="home" aria-label="ホーム">
+    <div class="hero">
+      <p class="hero-hello" id="heroHello" hidden></p>
+      <p class="hero-eyebrow">まずは今の相場をチェック</p>
+      <h1 class="hero-title">まずは30秒で、<br><span class="hl">今の買取額</span>を知る。</h1>
+      <p class="hero-lead">車種・年式・走行・状態を選ぶだけ。おおよその買取額がその場で分かります。もちろん無料・しつこい電話なし・全国47都道府県対応。</p>
+      <ul class="hero-chips">
+        <li>手数料0円</li><li>無料引取り</li><li>最短3営業日入金</li><li>写真査定でネット完結</li>
+      </ul>
+    </div>
+
+    <!-- 30秒で相場チェック -->
+    <div class="sec sim-sec" id="simSec">
+      <div class="sim-card">
+        <div class="sim-head"><svg class="ico"><use href="#i-calc"/></svg><b>30秒で相場チェック</b><span>無料・登録不要</span></div>
+        <div class="field">
+          <span class="label">車種クラス</span>
+          <div class="chips chips-3" data-chips="scls" id="simCls"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="simYear">年式</label>
+            <select id="simYear"></select>
+          </div>
+          <div class="field">
+            <label for="simKm">走行距離</label>
+            <select id="simKm"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="simCond">状態</label>
+          <select id="simCond"></select>
+        </div>
+        <button type="button" class="btn btn-gold btn-block" id="simCalc"><svg class="ico"><use href="#i-calc"/></svg>概算をみる</button>
+        <div class="sim-result" id="simResult" hidden>
+          <p class="sim-cap">概算の買取目安</p>
+          <p class="sim-range" id="simRange"></p>
+          <p class="sim-note">※ AIによる概算の目安です。実際の金額は車両状態により異なります。正確な金額は無料査定で。</p>
+          <button type="button" class="btn btn-primary btn-block" id="simToSatei"><svg class="ico"><use href="#i-camera"/></svg>この内容で写真査定（無料）</button>
+          <button type="button" class="btn btn-ghost btn-block" data-go="ai" data-ask="この概算より高く売るコツはありますか？"><svg class="ico"><use href="#i-sparkles"/></svg>高く売るコツをAIに聞く</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="actions">
+        <button type="button" class="action action-main" data-go="satei">
+          <svg class="ico"><use href="#i-camera"/></svg>
+          <span><b>写真で無料査定</b><small>約3分・スマホで撮って送るだけ</small></span>
+          <svg class="ico end"><use href="#i-right"/></svg>
+        </button>
+        <button type="button" class="action" data-go="ai">
+          <svg class="ico"><use href="#i-sparkles"/></svg>
+          <span><b>AIに相談する</b><small>24時間・何度でも無料</small></span>
+          <svg class="ico end"><use href="#i-right"/></svg>
+        </button>
+        <button type="button" class="action" data-go="check">
+          <svg class="ico"><use href="#i-gauge"/></svg>
+          <span><b>売りどきチェック</b><small>5問・約30秒</small></span>
+          <svg class="ico end"><use href="#i-right"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <ul class="stats">
+        <li><b>0<small>円</small></b><span>査定料</span></li>
+        <li><b>0<small>円</small></b><span>手数料</span></li>
+        <li><b>写真</b><span>だけで査定</span></li>
+        <li><b>47</b><span>都道府県</span></li>
+      </ul>
+    </div>
+
+    <div class="sec">
+      <p class="sec-kicker">PROMISE</p>
+      <h2 class="sec-title">BUYMOの3つの約束</h2>
+      <ul class="promises">
+        <li><svg class="ico"><use href="#i-chat"/></svg><div><b>LINEで相談</b><p>友だち追加で、かんたん査定・ご相談。写真もそのまま送れます。</p></div></li>
+        <li><svg class="ico"><use href="#i-bolt"/></svg><div><b>スピード入金</b><p>書類・車両を確認後、3営業日以内に確実にお振込みします。</p></div></li>
+        <li><svg class="ico"><use href="#i-pin"/></svg><div><b>全国出張査定</b><p>北海道から沖縄まで、全国47都道府県に対応しています。</p></div></li>
+      </ul>
+    </div>
+
+    <div class="sec">
+      <p class="sec-kicker">FLOW</p>
+      <h2 class="sec-title">お取引の流れ</h2>
+      <ol class="flow">
+        <li><span>1</span><div><b>写真を送る</b><p>このアプリで車の情報と写真を送るだけ。写真はあとからトークで送ってもOKです。</p></div></li>
+        <li><span>2</span><div><b>査定額をメールで受け取る</b><p>AIと専任査定士が価格を提示します。お電話は売却ご決断後の最終確認時のみです。</p></div></li>
+        <li><span>3</span><div><b>ご契約・書類の郵送</b><p>必要書類はアプリのチェックリストで確認できます。</p></div></li>
+        <li><span>4</span><div><b>引き取り・現車確認</b><p>業者がお伺いして、実車を確認します。引取りは無料です。</p></div></li>
+        <li><span>5</span><div><b>ご入金</b><p>書類・車両を確認後、3営業日以内に確実にお振込みします。</p></div></li>
+      </ol>
+    </div>
+
+    <div class="sec">
+      <p class="sec-kicker">ANY CAR</p>
+      <h2 class="sec-title">こんなクルマもご相談ください</h2>
+      <div class="genres">
+        <button type="button" data-go="satei" data-genre="事故車">事故車・修復歴あり</button>
+        <button type="button" data-go="satei" data-genre="不動車">動かない車</button>
+        <button type="button" data-go="satei" data-genre="車検切れ">車検切れ</button>
+        <button type="button" data-go="satei" data-genre="ローン中">ローンが残っている</button>
+        <button type="button" data-go="satei" data-genre="廃車">廃車予定</button>
+        <button type="button" data-go="satei" data-genre="複数台">複数台まとめて</button>
+      </div>
+    </div>
+
+    <div class="sec">
+      <button type="button" class="banner-docs" data-go="docs">
+        <svg class="ico"><use href="#i-file"/></svg>
+        <span><b>売却に必要な書類チェックリスト</b><small>普通車・軽自動車別。今のうちに準備するとスムーズです</small></span>
+        <svg class="ico end"><use href="#i-right"/></svg>
+      </button>
+    </div>
+
+    <div class="sec" id="faq">
+      <p class="sec-kicker">FAQ</p>
+      <h2 class="sec-title">よくある質問</h2>
+      <div class="faq">
+        <details><summary>査定は写真だけで大丈夫ですか？</summary><p>はい、スマホで撮影した写真をお送りいただくだけで査定いたします。外観・内装・メーター（走行距離）などをご撮影ください。実車確認は成約後に業者が引き取りに伺う際に行います。</p></details>
+        <details><summary>車検証が必要ですか？</summary><p>査定時には車検証をご用意いただくとスムーズです。ご契約時には車検証・自賠責保険証・印鑑などが必要になります。詳しくはスタッフがご案内します。</p></details>
+        <details><summary>買取金額はいつ振り込まれますか？</summary><p>ご契約と必要書類の確認後、書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みいたします。</p></details>
+        <details><summary>査定料はかかりますか？</summary><p>査定料・手続き代行料などの手数料は一切いただきません。完全無料です。</p></details>
+        <details><summary>キャンセルは可能ですか？</summary><p>査定後のキャンセルはもちろん無料です。ご契約後のキャンセルについては規定がございますので、契約前にスタッフへご確認ください。</p></details>
+        <details><summary>電話でしつこく連絡されませんか？</summary><p>一切ございません。査定結果はメールでお届けし、しつこいお電話や追客は行いません。お断りの際も同様です。ご安心ください。</p></details>
+        <details><summary>ローンが残っている車でも売れますか？</summary><p>ローン残債がある場合でも買取可能です。残債の精算手続きについてもスタッフがサポートいたします。</p></details>
+        <details><summary>複数台まとめて査定できますか？</summary><p>複数台のまとめ査定も歓迎です。お申し込み時に台数をお知らせください。</p></details>
+      </div>
+      <button type="button" class="btn btn-ghost btn-block faq-more" data-go="ai"><svg class="ico"><use href="#i-sparkles"/></svg>ほかの質問はAIに聞く（24時間）</button>
+    </div>
+
+    <div class="sec">
+      <div class="cta-card">
+        <img class="cta-mascot" src="../assets/img/buymo/mascot-guide.png" alt="" width="88" height="88" loading="lazy" />
+        <p class="cta-kicker">スマホで撮って、送るだけ。</p>
+        <p>査定料・手数料0円。査定後のキャンセルも無料です。</p>
+        <button type="button" class="btn btn-gold btn-block" data-go="satei"><svg class="ico"><use href="#i-camera"/></svg>写真で無料査定をはじめる</button>
+        <button type="button" class="cta-sub" data-action="talk">トークで担当者に相談する<svg class="ico"><use href="#i-right"/></svg></button>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <p><b>BUYMO（バイモ）</b>　買取センター：福島県いわき市若葉台1丁目31-11</p>
+      <p>古物商許可：福島県公安委員会許可 第25121A010859号</p>
+      <p>運営：合同会社アイズ</p>
+      <p class="foot-links">
+        <a href="#" data-ext="SITE_URL">BUYMO公式サイト</a>
+        <a href="#" data-ext="PRIVACY_URL">プライバシーポリシー</a>
+        <a href="#" data-ext="TOKUSHOHO_URL">特定商取引法・古物商表記</a>
+      </p>
+    </footer>
+  </section>
+
+  <!-- ===================== 写真で無料査定 ===================== -->
+  <section class="view" data-view="satei" aria-label="写真で無料査定" hidden>
+    <div class="page-head">
+      <p class="sec-kicker">FREE APPRAISAL</p>
+      <h1 class="page-title">写真で無料査定</h1>
+      <p class="page-lead">約3分で完了。査定額はメールでお届けします（最短翌日）。わからないことは、いつでもAI相談やトークでどうぞ。</p>
+      <p class="ctx-note" id="sateiEst" hidden></p>
+      <p class="ctx-note" id="sateiContext" hidden></p>
+    </div>
+
+    <ol class="stepper" id="stepper" aria-label="入力の進み具合">
+      <li data-s="1"><span>1</span>クルマ</li>
+      <li data-s="2"><span>2</span>写真</li>
+      <li data-s="3"><span>3</span>ご連絡先</li>
+      <li data-s="4"><span>4</span>確認</li>
+    </ol>
+
+    <form id="sateiForm" novalidate>
+      <!-- Step 1 -->
+      <fieldset class="step" data-step="1">
+        <legend class="step-title">売りたいクルマについて</legend>
+
+        <div class="field">
+          <label for="s-maker">メーカー<span class="req">必須</span></label>
+          <select id="s-maker" name="maker" required>
+            <option value="">選択してください</option>
+            <option>トヨタ</option><option>レクサス</option><option>日産</option><option>ホンダ</option>
+            <option>マツダ</option><option>スバル</option><option>スズキ</option><option>ダイハツ</option>
+            <option>三菱</option><option>いすゞ</option><option>日野</option><option>三菱ふそう</option>
+            <option>メルセデス・ベンツ</option><option>BMW</option><option>アウディ</option><option>フォルクスワーゲン</option>
+            <option>ポルシェ</option><option>ボルボ</option><option>ミニ</option><option>ジープ</option>
+            <option>テスラ</option><option>その他（輸入車）</option><option>その他</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="s-model">車種名<span class="req">必須</span></label>
+          <input id="s-model" name="model" type="text" required maxlength="60" placeholder="例：アルファード、N-BOX、ハイエース" autocomplete="off" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="s-year">年式<span class="req">必須</span></label>
+            <select id="s-year" name="year" required><option value="">選択</option></select>
+          </div>
+          <div class="field">
+            <label for="s-km">走行距離<span class="req">必須</span></label>
+            <select id="s-km" name="km" required>
+              <option value="">選択</option>
+              <option>1万km未満</option><option>1〜3万km</option><option>3〜5万km</option>
+              <option>5〜7万km</option><option>7〜10万km</option><option>10〜15万km</option>
+              <option>15〜20万km</option><option>20万km以上</option><option>わからない</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">クルマの状態<span class="opt">あてはまるものすべて</span></span>
+          <div class="chips" data-chips="cond" data-multi="1">
+            <button type="button" class="chip" data-v="問題なく走れる">問題なく走れる</button>
+            <button type="button" class="chip" data-v="事故歴・修復歴あり">事故歴・修復歴あり</button>
+            <button type="button" class="chip" data-v="キズ・凹みあり">キズ・凹みあり</button>
+            <button type="button" class="chip" data-v="動かない">動かない</button>
+            <button type="button" class="chip" data-v="車検切れ">車検切れ</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">ローンの残り<span class="opt">任意</span></span>
+          <div class="chips" data-chips="loan">
+            <button type="button" class="chip" data-v="なし">なし</button>
+            <button type="button" class="chip" data-v="あり">あり</button>
+            <button type="button" class="chip" data-v="わからない">わからない</button>
+          </div>
+          <p class="hint">ローン中のクルマも売却できます。残債の精算もおまかせください。</p>
+        </div>
+      </fieldset>
+
+      <!-- Step 2 -->
+      <fieldset class="step" data-step="2" hidden>
+        <legend class="step-title">クルマの写真</legend>
+        <p class="step-lead">4枚あると査定がぐっと正確になります。あとからトークで送ることもできます。</p>
+        <div class="shots" id="shots"></div>
+        <p class="hint">写真は送信前に自動で軽くしてから送ります（最大1280px）。</p>
+      </fieldset>
+
+      <!-- Step 3 -->
+      <fieldset class="step" data-step="3" hidden>
+        <legend class="step-title">ご連絡先</legend>
+
+        <div class="field">
+          <label for="s-name">お名前<span class="req">必須</span></label>
+          <input id="s-name" name="name" type="text" required maxlength="40" autocomplete="name" placeholder="例：山田 太郎" />
+        </div>
+
+        <div class="field">
+          <label for="s-tel">電話番号<span class="opt">任意</span></label>
+          <input id="s-tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="例：090-1234-5678" />
+          <p class="hint">お電話は、売却をご決断いただいたあとの最終確認のときだけです。</p>
+        </div>
+
+        <div class="field">
+          <label for="s-email">メールアドレス<span class="req">必須</span></label>
+          <input id="s-email" name="email" type="email" required inputmode="email" autocomplete="email" placeholder="例：taro@example.com" />
+          <p class="hint">査定額のご連絡と、進み具合を確認できる会員マイページのご案内をお送りします。</p>
+        </div>
+
+        <div class="field">
+          <label for="s-pref">お住まいの都道府県<span class="req">必須</span></label>
+          <select id="s-pref" name="pref" required><option value="">選択してください</option></select>
+        </div>
+
+        <div class="field">
+          <span class="label">売却の時期</span>
+          <div class="chips" data-chips="timing">
+            <button type="button" class="chip" data-v="すぐにでも">すぐにでも</button>
+            <button type="button" class="chip" data-v="1ヶ月以内">1ヶ月以内</button>
+            <button type="button" class="chip" data-v="3ヶ月以内">3ヶ月以内</button>
+            <button type="button" class="chip" data-v="価格を知りたいだけ">価格を知りたいだけ</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">ご連絡方法の希望</span>
+          <div class="chips" data-chips="contact">
+            <button type="button" class="chip is-on" data-v="LINE" aria-pressed="true">LINE</button>
+            <button type="button" class="chip" data-v="電話">電話</button>
+            <button type="button" class="chip" data-v="メール">メール</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="s-note">ご要望・気になること<span class="opt">任意</span></label>
+          <textarea id="s-note" name="note" rows="3" maxlength="800" placeholder="例：来月の車検前に手放したい／引取りは土日希望"></textarea>
+        </div>
+
+        <label class="agree">
+          <input type="checkbox" id="s-agree" required />
+          <span><a href="#" data-ext="PRIVACY_URL">プライバシーポリシー</a>に同意します</span>
+        </label>
+      </fieldset>
+
+      <!-- Step 4 -->
+      <fieldset class="step" data-step="4" hidden>
+        <legend class="step-title">内容の確認</legend>
+        <div class="confirm" id="confirmBox"></div>
+        <p class="hint">送信すると、BUYMOの担当者が内容を確認して、査定額をメールでお届けします。査定料・手数料は0円、査定後のキャンセルも無料です。</p>
+      </fieldset>
+
+      <p class="form-note" id="formNote" role="status" aria-live="polite"></p>
+
+      <div class="wizard-bar">
+        <button type="button" class="btn btn-ghost" id="btnPrev">
+          <svg class="ico"><use href="#i-left"/></svg>戻る
+        </button>
+        <button type="button" class="btn btn-gold" id="btnNext">
+          次へ<svg class="ico"><use href="#i-right"/></svg>
+        </button>
+        <button type="submit" class="btn btn-gold" id="btnSubmit" hidden>
+          無料で査定を申し込む
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===================== 申込完了 ===================== -->
+  <section class="view" data-view="done" aria-label="申込完了" hidden>
+    <div class="done">
+      <div class="done-mark"><svg class="ico"><use href="#i-check"/></svg></div>
+      <h1 class="page-title">お申し込みを受け付けました</h1>
+      <p class="done-lead" id="doneLead">ありがとうございます。担当者が内容を確認して、ご連絡します。</p>
+      <ol class="done-next">
+        <li><b>査定額をメールでお届け</b><span>最短翌日。確認メールに会員マイページのご案内があります</span></li>
+        <li><b>気になることはいつでも</b><span>このアプリのAI相談（24時間）か、トークで担当者へ</span></li>
+        <li><b>書類を準備しておく</b><span>チェックリストで、ご契約がスムーズになります</span></li>
+      </ol>
+      <div class="done-btns">
+        <button type="button" class="btn btn-primary btn-block" data-go="docs"><svg class="ico"><use href="#i-file"/></svg>必要書類をチェック</button>
+        <button type="button" class="btn btn-ghost btn-block" data-go="ai"><svg class="ico"><use href="#i-sparkles"/></svg>AIに質問する</button>
+        <button type="button" class="btn btn-ghost btn-block" id="doneFriend" data-action="addFriend" hidden><svg class="ico"><use href="#i-chat"/></svg>公式LINEを友だち追加（査定結果の相談に便利）</button>
+        <button type="button" class="btn btn-ghost btn-block" data-action="share"><svg class="ico"><use href="#i-share"/></svg>家族・友だちにBUYMOを教える</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== AI相談 ===================== -->
+  <section class="view view-ai" data-view="ai" aria-label="AI相談" hidden>
+    <div class="ai-head">
+      <img src="../assets/img/buymo/chatbot-avatar.png" alt="" width="40" height="40" />
+      <div><b>あゆか｜買取サポート</b><small><span class="ai-dot"></span>AIが24時間お答えします</small></div>
+      <div class="ai-mode" role="group" aria-label="相談の相手">
+        <button type="button" class="is-on" aria-pressed="true">AI</button>
+        <button type="button" id="aiToHuman" aria-pressed="false">担当者</button>
+      </div>
+    </div>
+    <div class="ai-log" id="aiLog" role="log" aria-live="polite"></div>
+    <div class="ai-chips" id="aiChips"></div>
+    <form class="ai-form" id="aiForm" autocomplete="off">
+      <textarea id="aiInput" rows="1" maxlength="300" placeholder="車の売却について質問する" aria-label="AIへの質問"></textarea>
+      <button type="submit" class="ai-send" id="aiSend" aria-label="送信"><svg class="ico"><use href="#i-send"/></svg></button>
+    </form>
+    <p class="ai-foot">会話はこの端末に保存され、次に開いたときも続きから話せます。<button type="button" id="aiClear">会話を消す</button></p>
+  </section>
+
+  <!-- ===================== 売りどきチェック ===================== -->
+  <section class="view" data-view="check" aria-label="売りどきチェック" hidden>
+    <div class="page-head">
+      <p class="sec-kicker">TIMING CHECK</p>
+      <h1 class="page-title">売りどきチェック</h1>
+      <p class="page-lead">5つの質問で、あなたのクルマの「売りどき」を判定します。約30秒・入力した内容は送信されません。</p>
+    </div>
+    <div class="sec">
+      <div class="q"><p class="q-title"><span>Q1</span>年式（登録からの年数）は？</p>
+        <div class="chips" data-chips="cage"><button type="button" class="chip" data-v="3年以内">3年以内</button><button type="button" class="chip" data-v="3〜5年">3〜5年</button><button type="button" class="chip" data-v="5〜7年">5〜7年</button><button type="button" class="chip" data-v="7〜10年">7〜10年</button><button type="button" class="chip" data-v="10年以上">10年以上</button></div></div>
+      <div class="q"><p class="q-title"><span>Q2</span>走行距離は？</p>
+        <div class="chips" data-chips="ckm"><button type="button" class="chip" data-v="3万km未満">3万km未満</button><button type="button" class="chip" data-v="3〜5万km">3〜5万km</button><button type="button" class="chip" data-v="5〜8万km">5〜8万km</button><button type="button" class="chip" data-v="8〜10万km">8〜10万km</button><button type="button" class="chip" data-v="10万km以上">10万km以上</button></div></div>
+      <div class="q"><p class="q-title"><span>Q3</span>次の車検は？</p>
+        <div class="chips" data-chips="cshaken"><button type="button" class="chip" data-v="3ヶ月以内">3ヶ月以内</button><button type="button" class="chip" data-v="半年以内">半年以内</button><button type="button" class="chip" data-v="1年以内">1年以内</button><button type="button" class="chip" data-v="1年以上先">1年以上先</button><button type="button" class="chip" data-v="車検切れ">車検切れ</button></div></div>
+      <div class="q"><p class="q-title"><span>Q4</span>乗る頻度は？</p>
+        <div class="chips" data-chips="cfreq"><button type="button" class="chip" data-v="ほぼ毎日">ほぼ毎日</button><button type="button" class="chip" data-v="週に数回">週に数回</button><button type="button" class="chip" data-v="月に数回">月に数回</button><button type="button" class="chip" data-v="ほとんど乗らない">ほとんど乗らない</button></div></div>
+      <div class="q"><p class="q-title"><span>Q5</span>ローンは残っていますか？</p>
+        <div class="chips" data-chips="cloan"><button type="button" class="chip" data-v="なし">なし</button><button type="button" class="chip" data-v="あり">あり</button><button type="button" class="chip" data-v="わからない">わからない</button></div></div>
+      <p class="form-note" id="checkNote" role="status" aria-live="polite"></p>
+      <button type="button" class="btn btn-gold btn-block" id="checkRun"><svg class="ico"><use href="#i-gauge"/></svg>売りどきを判定する</button>
+    </div>
+    <div class="sec" id="checkResult" hidden>
+      <div class="result">
+        <p class="result-kicker">あなたのクルマは</p>
+        <p class="result-level" id="checkLevel"></p>
+        <div class="meter" aria-hidden="true"><span id="checkMeter"></span></div>
+        <ul class="result-reasons" id="checkReasons"></ul>
+        <p class="hint">一般的な目安です。実際の買取額は、車種・状態・相場で変わります。正確な金額は無料査定でお伝えします。</p>
+        <div class="result-btns">
+          <button type="button" class="btn btn-gold btn-block" data-go="satei"><svg class="ico"><use href="#i-camera"/></svg>写真で無料査定</button>
+          <button type="button" class="btn btn-ghost btn-block" data-go="ai" data-ask="売りどきチェックの結果について相談したいです"><svg class="ico"><use href="#i-sparkles"/></svg>結果をAIに相談する</button>
+          <button type="button" class="btn btn-ghost btn-block" data-action="share"><svg class="ico"><use href="#i-share"/></svg>家族に共有する</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 必要書類 ===================== -->
+  <section class="view" data-view="docs" aria-label="必要書類チェックリスト" hidden>
+    <div class="page-head">
+      <p class="sec-kicker">DOCUMENTS</p>
+      <h1 class="page-title">売却に必要な書類</h1>
+      <p class="page-lead">成約後のお手続きに必要な書類です。今のうちにご準備いただくとスムーズです（チェックはこの端末に保存されます）。</p>
+    </div>
+    <div class="sec">
+      <div class="seg" role="tablist" aria-label="車の種類">
+        <button type="button" role="tab" class="is-on" aria-selected="true" data-doc="futsu">普通車</button>
+        <button type="button" role="tab" aria-selected="false" data-doc="kei">軽自動車</button>
+      </div>
+      <ul class="docs" id="docList"></ul>
+      <p class="docs-progress" id="docProgress"></p>
+      <ul class="notes">
+        <li>売買契約書・委任状・譲渡証明書は当社で作成し、ご案内します（お客様のご準備は不要です）。</li>
+        <li>ローンが残っている場合は所有権解除の手続きをご案内します。書類の紛失時も再発行をサポートします。</li>
+      </ul>
+      <button type="button" class="btn btn-ghost btn-block" data-go="ai" data-ask="書類をなくしてしまった場合はどうすればいいですか？"><svg class="ico"><use href="#i-sparkles"/></svg>書類のことをAIに聞く</button>
+    </div>
+  </section>
+
+  <!-- ===================== マイページ ===================== -->
+  <section class="view" data-view="mypage" aria-label="マイページ" hidden>
+    <div class="page-head mp-head">
+      <div class="mp-avatar"><img id="mpAvatar" alt="" hidden /><svg class="ico" id="mpAvatarIco"><use href="#i-user"/></svg></div>
+      <div><p class="mp-name" id="mpName">ゲスト</p><p class="mp-status" id="mpStatus"></p></div>
+    </div>
+    <button type="button" class="btn btn-primary btn-block mp-login" id="btnLogin" hidden><svg class="ico"><use href="#i-login"/></svg>LINEでログイン</button>
+
+    <div class="sec">
+      <h2 class="sub-title">査定の進み具合</h2>
+      <div id="mpCases"><p class="empty">まだお申し込みはありません。</p></div>
+    </div>
+
+    <div class="sec">
+      <h2 class="sub-title">このアプリから送ったお申し込み</h2>
+      <ul class="history" id="historyList"></ul>
+      <p class="empty" id="historyEmpty">まだありません。<button type="button" class="link" data-go="satei">写真で無料査定をはじめる</button></p>
+    </div>
+
+    <div class="sec">
+      <h2 class="sub-title">売りどきチェック</h2>
+      <div id="mpCheck"></div>
+    </div>
+
+    <div class="sec friend-card" id="friendCard" hidden>
+      <b>公式LINEを友だち追加しませんか？</b>
+      <p>査定結果のご相談や、写真の追加がトークでかんたんにできます。</p>
+      <button type="button" class="btn btn-line btn-block" data-action="addFriend"><svg class="ico"><use href="#i-plus"/></svg>友だち追加</button>
+    </div>
+
+    <div class="sec">
+      <ul class="menu">
+        <li><button type="button" data-ext="MEMBER_URL"><svg class="ico"><use href="#i-login"/></svg><span>会員マイページ（査定額・ご契約の確認）</span><svg class="ico end"><use href="#i-external"/></svg></button></li>
+        <li><button type="button" data-go="docs"><svg class="ico"><use href="#i-file"/></svg><span>必要書類チェックリスト</span><svg class="ico end"><use href="#i-right"/></svg></button></li>
+        <li><button type="button" data-action="talk"><svg class="ico"><use href="#i-chat"/></svg><span>トークで担当者に相談</span><svg class="ico end"><use href="#i-right"/></svg></button></li>
+        <li><button type="button" data-action="share"><svg class="ico"><use href="#i-share"/></svg><span>家族・友だちにBUYMOを教える</span><svg class="ico end"><use href="#i-right"/></svg></button></li>
+        <li><button type="button" data-ext="SITE_URL"><svg class="ico"><use href="#i-external"/></svg><span>BUYMO公式サイト</span><svg class="ico end"><use href="#i-external"/></svg></button></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabbar" aria-label="メニュー">
+  <button type="button" data-go="home" data-tab="home"><svg class="ico"><use href="#i-home"/></svg><span>ホーム</span></button>
+  <button type="button" data-go="satei" data-tab="satei"><svg class="ico"><use href="#i-camera"/></svg><span>無料査定</span></button>
+  <button type="button" data-go="ai" data-tab="ai"><svg class="ico"><use href="#i-sparkles"/></svg><span>AI相談</span></button>
+  <button type="button" data-go="check" data-tab="check"><svg class="ico"><use href="#i-gauge"/></svg><span>売りどき</span></button>
+  <button type="button" data-go="mypage" data-tab="mypage"><svg class="ico"><use href="#i-user"/></svg><span>マイページ</span></button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle"></h2>
+    <p id="modalText"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="modalCancel"></button>
+      <button type="button" class="btn btn-primary" id="modalOk"></button>
+    </div>
+  </div>
+</div>
+
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=1"></script>
+<script src="../assets/js/analytics.js"></script>
+<script src="../assets/js/simulator-buy.js?v=1"></script>
+<script src="kaitori.js?v=1"></script>
+</body>
+</html>
