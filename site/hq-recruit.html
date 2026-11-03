@@ -155,6 +155,33 @@
 .ltl p{margin:2px 0 0;font-size:13px;color:#334;line-height:1.6;}
 .ltl-bubble{display:inline-block;background:#f4f6fa;border-radius:10px;padding:6px 10px;}
 .ltl-user .ltl-bubble{background:#e8f9ee;}
+/* システムの状態（hq-recruit-line.js） */
+.lh{margin:0 0 14px;border-radius:12px;background:#fff;box-shadow:var(--shadow);border-left:6px solid #9AA4B2;overflow:hidden;}
+.lh.lh-ok{border-left-color:#1E9E5A;}.lh.lh-warn{border-left-color:#E89B1A;}.lh.lh-ng{border-left-color:#D93A2B;}
+.lh-wait{margin:0;padding:12px 16px;font-size:13px;color:#667;}
+.lh-head{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;background:none;border:0;text-align:left;cursor:pointer;font-family:inherit;}
+.lh-dot{width:12px;height:12px;border-radius:50%;flex:none;background:#9AA4B2;}
+.lh-ok .lh-dot{background:#1E9E5A;}.lh-warn .lh-dot{background:#E89B1A;}.lh-ng .lh-dot{background:#D93A2B;animation:lhblink 1.2s infinite;}
+@keyframes lhblink{50%{opacity:.35}}
+.lh-title{flex:1;min-width:0;display:flex;flex-direction:column;}
+.lh-title b{font-size:15px;color:var(--navy);}
+.lh-title small{font-size:11.5px;color:#889;}
+.lh-more{font-size:12px;font-weight:700;color:#0A6B3C;flex:none;}
+.lh-body{padding:0 16px 14px;}
+.lh-items{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px;}
+.lh-items li{display:grid;grid-template-columns:22px 110px 1fr;gap:6px;font-size:13px;line-height:1.6;padding:6px 8px;border-radius:8px;background:#F6F8FA;}
+.lh-items li.lv-warn{background:#FFF6E5;}.lh-items li.lv-ng{background:#FDECEA;}
+.lh-items b{color:var(--navy);}
+.lh-stats{font-size:12.5px;color:#556;margin:0 0 10px;line-height:1.7;}
+.lh-stats b{display:block;color:var(--navy);font-size:13px;}
+.lh-sub{font-size:13px;font-weight:700;color:var(--navy);margin:0 0 4px;}
+.lh-errors{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px;}
+.lh-errors li{display:grid;grid-template-columns:78px 150px 1fr;gap:6px;font-size:12.5px;padding:5px 8px;border-radius:8px;background:#FDECEA;}
+.lh-errors time{color:#889;font-variant-numeric:tabular-nums;}
+.lh-errors b{color:#9B2C20;}
+.lh-none{font-size:12.5px;color:#1E7A48;margin:0 0 10px;}
+.lh-reload{background:none;border:1px solid #CBD5E1;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;color:var(--navy);}
+@media(max-width:600px){.lh-items li{grid-template-columns:22px 1fr;}.lh-items li span:last-child{grid-column:2;}.lh-errors li{grid-template-columns:1fr;}}
 .la-actions{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
 .la-btn{display:block;text-align:center;background:#06C755;color:#fff;border:0;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;font-family:inherit;}
 .la-btn-o{background:#fff;color:#0A6B3C;border:1px solid #0A6B3C;}
@@ -174,7 +201,7 @@
 </style>
 
 <script src="assets/js/hq-common.js?v=16"></script>
-<script src="assets/js/hq-recruit-line.js?v=4" defer></script>
+<script src="assets/js/hq-recruit-line.js?v=5" defer></script>
 <script src="assets/js/hq-recruit.js?v=5" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
