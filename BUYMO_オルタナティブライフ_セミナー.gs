@@ -7,8 +7,17 @@
    流れ：ミニアプリのカレンダーで、見たい日と開始時刻（既定 8:00〜23:30 の30分ごと）を選んで予約
          → 開始時刻までカウントダウン。LINE とメールでステップ配信（予約の確認・前日・1時間前・開始・終わる前・終了後・2日後・4日後）
          → 開始時刻になると、ミニアプリで録画の動画を再生できる（開始から60分のあいだ）
-         → 見終わったら「加盟を申し込む／個別相談したい／もう少し考える」を選ぶ
+         → 見終わったら、その場で「代表との個別相談（Google Meet・30分）」の日時を選んで予約（加盟の申込・もう少し考える も選べる）
+         → 最後まで見た瞬間に本部へ通知。予約しなかった方には、15分後・2日後・4日後に代表からのご案内
+         → 個別相談の前日・10分前にお知らせ（10分前は Meet の入室ボタンつき）
+         → 相談のあと、本部の画面で「加盟決定／検討中／見送り／来なかった」を押すと、次のご案内が自動で届く
    予約はスプレッドシート「オルタナティブライフ LINE会話ログ」の「説明会予約」シートに記録する。
+
+   ■ 個別相談の枠（代表の Google カレンダー）
+     代表のカレンダーに「相談OK」という名前の予定を入れた時間だけが、予約できる枠になる（毎週くり返しの予定でよい）。
+     そのあいだに別の予定が入っている時間は、自動で外れる。予約が入ると、Meet つきの予定がカレンダーに入る。
+     Meet の URL を自動で作るには、エディタ左の「サービス」の＋から「Google Calendar API」を追加する。
+     確認は setupConsult() を実行して、実行ログを見る。
 
    ■ スクリプトプロパティ（すべて任意。空なら既定値）
      SEMINAR_YOUTUBE : 説明会動画の YouTube の URL（限定公開・「埋め込みを許可」をオン）。空の間は「動画を準備中」と表示
@@ -17,17 +26,33 @@
      SEMINAR_WINDOW  : 開始から何分のあいだ再生できるか（既定 60）
      SEMINAR_MINUTES : 動画の長さ（分。既定 7）
      SEMINAR_DAYS    : 何日先まで予約できるか（既定 14）
+     HOST_NAME       : 個別相談で話す人の名前（既定 吉田 一平）
+     HOST_TITLE      : 肩書き（既定 代表）
+     HOST_PHOTO      : 顔写真の URL（https の JPEG か PNG。空なら名前の頭文字を表示）
+     HOST_MESSAGE    : 見終わった方への、代表からのひとこと（空なら既定の文）
+     CONSULT_CALENDAR: 枠を読むカレンダーの ID（空ならこの GAS を作った Google アカウントのカレンダー）
+     CONSULT_MARK    : 枠にする予定の名前（既定 相談OK）
+     CONSULT_MINUTES : 個別相談の長さ（分。既定 30）
+     CONSULT_LEAD_HOURS : 何時間後の枠から予約できるか（既定 3）
+     CONSULT_DAYS    : 何日先まで予約できるか（既定 14）
+     CONSULT_MEET_URL: Google Calendar API を追加しないときに使う、固定の Meet の URL（任意）
    ■ 最初に1回だけ setupSeminar() を実行する（ステップ配信を5分おきに動かすトリガーを作る）
    セットアップ手順：BUYMO_オルタナティブライフ_LINE_AI応答_セットアップ.md の「動画説明会」
    ============================================================ */
 
 var MINIAPP_CHANNEL_ID = '2012192113';       // LINEミニアプリ「オルタナティブライフ」のチャネルID（LIFF ID の前半）
 var SEMINAR_SHEET = '説明会予約';
-var SEMINAR_COLS = ['予約日時', 'userId', 'LINE表示名', 'お名前', 'メール', '視聴日時', '状態', '視聴(%)', '配信済み', '更新日時', 'メール停止'];
+var SEMINAR_COLS = ['予約日時', 'userId', 'LINE表示名', 'お名前', 'メール', '視聴日時', '状態', '視聴(%)', '配信済み', '更新日時', 'メール停止',
+  '視聴完了日時', '個別相談日時', '相談の回答', 'MeetのURL', 'カレンダーの予定ID'];
 var LEAD_MIN = 5;                            // 開始の5分前まで予約できる
 var WATCHED_PCT = 50;                        // これ以上見た方は「視聴した」として、そのあとの案内を分ける
+var DONE_PCT = 90;                           // これ以上見た方（または最後まで再生した方）は「視聴完了」
 var STEP_STALE_MS = 3 * 3600 * 1000;         // トリガーが止まっていたなどで、予定より3時間以上遅れた配信は送らない
-var SEMINAR_CLOSED = { '申込': 1, '相談希望': 1, '見送り': 1, 'キャンセル': 1 };   // ステップ配信を止める状態
+// 説明会のステップ配信を止める状態（個別相談の予約から先は、個別相談のお知らせに切り替わる）
+var SEMINAR_CLOSED = { '申込': 1, '相談希望': 1, '見送り': 1, 'キャンセル': 1, '相談予約': 1, '相談後検討': 1, '相談欠席': 1, '加盟決定': 1 };
+var CONSULT_LIVE = { '相談予約': 1, '相談後検討': 1 };   // 個別相談のお知らせを送る状態
+var CONSULT_PREFIX = '【個別相談の予約】';     // ミニアプリが個別相談の予約時にトークへ送る文の先頭
+var CONSULT_PAGE = SEMINAR_PAGE + '&c=1';    // ミニアプリの個別相談の予約画面
 var HOUR_MS = 3600000;
 
 // ステップ配信の予定。t.start＝開始時刻、t.end＝再生できる時間の終わり、t.day＝視聴日の 0:00（すべてミリ秒）
@@ -38,9 +63,19 @@ var SEMINAR_STEPS = [
     skip: function (t, due) { return Number(jst_(due, 'H')) < 7; } },                                    //  （朝7時より前なら送らない）
   { id: 'start', due: function (t) { return t.start; } },                                                // 開始時刻
   { id: 'late', due: function (t) { return Math.max(t.start + 15 * 60000, t.end - 30 * 60000); } },      // 終わる30分前（まだ見ていない方だけ）
+  { id: 'w15', due: function (t, res) { var d = toMs_(res.doneAt); return d ? morning_(d + 15 * 60000) : Infinity; } },  // 見終わって15分（個別相談をまだ予約していない方だけ）
   { id: 'end', due: function (t) { return morning_(t.end + 10 * 60000); } },                             // 終わったあと（夜遅いときは翌朝 9:00）
   { id: 'd1', due: function (t) { return t.day + 68 * HOUR_MS; } },                                      // 2日後 20:00
   { id: 'd3', due: function (t) { return t.day + 105 * HOUR_MS; } }                                      // 4日後 9:00
+];
+
+// 個別相談のお知らせの予定。t.start＝相談の開始、t.day＝相談の日の 0:00
+var CONSULT_STEPS = [
+  { id: 'c1', due: function (t) { return t.day - 4 * HOUR_MS; },                                          // 前日 20:00（予約がその2時間前より後なら送らない）
+    skip: function (t, due, res) { return res.status !== '相談予約'; } },
+  { id: 'c0', due: function (t) { return t.start - 10 * 60000; },                                         // 10分前（Meet の入室ボタンつき）
+    skip: function (t, due, res) { return res.status !== '相談予約'; } },
+  { id: 'cf3', due: function (t, res) { return res.status === '相談後検討' ? t.day + (3 * 24 + 19) * HOUR_MS : Infinity; } }  // 「検討中」の3日後 19:00
 ];
 
 
@@ -188,8 +223,15 @@ function seminarSheet_() {
     sh.getRange('A:B').setNumberFormat('@');
     sh.getRange('F:F').setNumberFormat('@');
     sh.getRange('I:J').setNumberFormat('@');
-  } else if (sh.getRange(1, 6).getValue() === '視聴日') {
-    sh.getRange(1, 6).setValue('視聴日時');   // 日にちだけの予約だったころのシート
+    sh.getRange('L:P').setNumberFormat('@');
+  } else {
+    if (sh.getRange(1, 6).getValue() === '視聴日') sh.getRange(1, 6).setValue('視聴日時');   // 日にちだけの予約だったころのシート
+    // 個別相談の列がまだないシートには、見出しを足す
+    if (sh.getRange(1, 12).getValue() !== SEMINAR_COLS[11]) {
+      sh.getRange(1, 12, 1, 5).setValues([SEMINAR_COLS.slice(11)])
+        .setFontWeight('bold').setBackground('#0F2A4D').setFontColor('#ffffff');
+      sh.getRange('L:P').setNumberFormat('@');
+    }
   }
   return sh;
 }
@@ -206,8 +248,16 @@ function toRes_(r, i) {
   return {
     row: i + 2, reservedAt: r[0], userId: String(r[1]), lineName: r[2], name: String(r[3]), email: String(r[4]),
     day: at.slice(0, 10), time: tm ? hm2_(Number(tm[1]) * 60 + Number(tm[2])) : '',
-    status: String(r[6] || '予約'), pct: Number(r[7]) || 0, sent: String(r[8] || ''), mailStop: !!r[10]
+    status: String(r[6] || '予約'), pct: Number(r[7]) || 0, sent: String(r[8] || ''), mailStop: !!r[10],
+    doneAt: cellText_(r[11]), consultAt: cellText_(r[12]).slice(0, 16), consultInfo: String(r[13] || ''),
+    meetUrl: String(r[14] || ''), eventId: String(r[15] || '')
   };
+}
+
+// 日付型にされたセルも「2026-11-02 20:30:00」の文字にそろえる
+function cellText_(v) {
+  if (v instanceof Date) return jst_(v.getTime(), 'yyyy-MM-dd HH:mm:ss');
+  return String(v == null ? '' : v).trim();
 }
 
 function findRes_(sh, userId) {
@@ -218,7 +268,8 @@ function findRes_(sh, userId) {
 
 function saveRes_(sh, res) {
   var row = [res.reservedAt, res.userId, res.lineName, res.name, res.email, res.time ? res.day + ' ' + res.time : res.day, res.status, res.pct,
-    res.sent, jst_(Date.now(), 'yyyy-MM-dd HH:mm:ss'), res.mailStop ? '停止' : ''];
+    res.sent, jst_(Date.now(), 'yyyy-MM-dd HH:mm:ss'), res.mailStop ? '停止' : '',
+    res.doneAt || '', res.consultAt || '', res.consultInfo || '', res.meetUrl || '', res.eventId || ''];
   if (res.row) sh.getRange(res.row, 1, 1, row.length).setValues([row]);
   else { sh.appendRow(row); res.row = sh.getLastRow(); }
 }
@@ -260,12 +311,20 @@ function seminarHandle_(req) {
   var now = Date.now();
   var out = { ok: true, now: now, config: { openMin: cfg.openMin, closeMin: cfg.closeMin, slotMin: cfg.slotMin, windowMin: cfg.windowMin,
     leadMin: LEAD_MIN, minutes: cfg.minutes, days: cfg.days, ready: !!cfg.videoId } };
+  out.host = consultCfg_().host;   // 個別相談で話す人（名前・肩書き・写真・ひとこと）
   if (req.action === 'config') return out;
 
   var user = seminarUser_(req);
   if (!user) { out.ok = false; out.error = 'auth'; return out; }
   out.sk = user.userId + '.' + sign_('sk:' + user.userId);   // 次回からはこれで本人確認（LINE への問い合わせを省く）
   webAppUrl_();
+
+  // 個別相談の空いている枠（代表のカレンダーの「相談OK」の時間から、ほかの予定を除いたもの）。読むだけなのでロックしない
+  if (req.action === 'slots') {
+    var cc0 = consultCfg_();
+    out.consult = { minutes: cc0.minutes, slots: consultSlots_(cc0, now, false) };
+    return out;
+  }
 
   var after = [];   // ロックを外してから送る LINE・メール
   var lock = LockService.getScriptLock();
@@ -293,6 +352,7 @@ function seminarHandle_(req) {
       res.time = hm2_(slot.min);
       res.status = '予約';
       res.pct = 0;
+      res.doneAt = '';
       res.sent = req.talk ? 'book' : 'book,bookline';   // トークに投稿できるときは、その返信（無料）で確認を送る
       res.mailStop = false;
       saveRes_(sh, res);
@@ -324,8 +384,15 @@ function seminarHandle_(req) {
       if (tp && now >= tp.start - 10 * 60000 && !SEMINAR_CLOSED[res.status]) {
         var pct = Math.max(res.pct, Math.min(100, Math.round(Number(req.pct) || 0)));
         // 最後まで再生した方は「視聴完了」
-        var st = res.status === '予約' || res.status === '視聴中' ? (pct >= 90 || req.ended ? '視聴完了' : '視聴中') : res.status;
-        if (pct !== res.pct || st !== res.status) { res.pct = pct; res.status = st; saveRes_(sh, res); }
+        var st = res.status === '予約' || res.status === '視聴中' ? (pct >= DONE_PCT || req.ended ? '視聴完了' : '視聴中') : res.status;
+        // 見終わった瞬間：本部に知らせる（熱いうちに声をかけられるよう）。15分後の代表からのご案内は seminarTick が送る
+        var justDone = st === '視聴完了' && !res.doneAt;
+        if (justDone) res.doneAt = jst_(now, 'yyyy-MM-dd HH:mm:ss');
+        if (pct !== res.pct || st !== res.status || justDone) { res.pct = pct; res.status = st; saveRes_(sh, res); }
+        if (justDone) {
+          var c4 = JSON.parse(JSON.stringify(res));
+          after.push(function () { notifyStaff_('🔥 説明会を最後まで見ました（' + (c4.name || c4.lineName) + ' さん）', doneNote_(c4, cfg)); });
+        }
       }
     } else if (act === 'decide') {
       var dc = req.decision;
@@ -340,6 +407,59 @@ function seminarHandle_(req) {
             push_(c3.userId, [textMessage_('個別相談のご希望を受け付けました。\n担当者がこのトークで順番にご連絡します（営業時間外は翌営業日になることがあります）。\n\nお待ちいただく間にAIへ質問したいときは、下の「' + RESUME_TEXT + '」を押してください。', [RESUME_TEXT])]);
           });
         }
+      }
+    } else if (act === 'consult') {
+      // 個別相談を予約する（日時を変えるときも同じ）
+      var cc = consultCfg_();
+      var at = Number(req.start) || 0;
+      if (!res || res.status === 'キャンセル') return fail_(out, 'nores');
+      if (CONSULT_DONE_[res.status]) return fail_(out, 'closed');
+      if (consultSlots_(cc, now, true).indexOf(at) < 0) {
+        out.consult = { minutes: cc.minutes, slots: consultSlots_(cc, now, false) };
+        return fail_(out, 'taken');   // ほかの方が先に予約した・代表の予定が入った
+      }
+      var info = consultInfo_(req.answers || {});
+      if (!info.area || !info.when) return fail_(out, 'answers');
+      var moved = res.status === '相談予約' && !!res.eventId;
+      if (moved) consultDeleteEvent_(cc, res.eventId);
+      var ev = consultCreateEvent_(cc, res, at, info.text);
+      res.consultAt = jst_(at, 'yyyy-MM-dd HH:mm');
+      res.consultInfo = info.text;
+      res.meetUrl = ev.url;
+      res.eventId = ev.id;
+      res.status = '相談予約';
+      // 個別相談のお知らせは、予約（日時の変更）ごとに送り直す
+      res.sent = (res.sent ? res.sent.split(',') : []).filter(function (x) { return !/^c/.test(x); }).concat(req.talk ? ['cbook'] : ['cbook', 'cbookline']).join(',');
+      // 前日のお知らせの時刻がもうすぐ（2時間以内）・過ぎているときは、予約の確認と重なるので送らない
+      if (consultTimes_(res).day - 4 * HOUR_MS < now + 2 * HOUR_MS) addSent_(res, 'c1');
+      saveRes_(sh, res);
+      consultCacheClear_();
+      var c5 = JSON.parse(JSON.stringify(res));
+      after.push(function () {
+        deliver_('cbook', c5, cfg, { line: !req.talk, mail: true });
+        notifyStaff_('🗓 個別相談の' + (moved ? '日時の変更' : '予約') + '（' + c5.name + ' さん）', consultNote_(c5, cc));
+      });
+    } else if (act === 'cconfirm') {
+      // トークへの投稿ができなかったときだけ、個別相談の予約の確認を LINE で送る
+      if (res && res.status === '相談予約' && res.sent.split(',').indexOf('cbookline') < 0) {
+        addSent_(res, 'cbookline');
+        saveRes_(sh, res);
+        var c6 = JSON.parse(JSON.stringify(res));
+        after.push(function () { deliver_('cbook', c6, cfg, { line: true, mail: false }); });
+      }
+    } else if (act === 'consultCancel') {
+      if (res && res.status === '相談予約') {
+        var cc2 = consultCfg_();
+        consultDeleteEvent_(cc2, res.eventId);
+        var was = consultLabel_(res, cc2);
+        res.status = '視聴完了';
+        res.consultAt = '';
+        res.meetUrl = '';
+        res.eventId = '';
+        saveRes_(sh, res);
+        consultCacheClear_();
+        var c7 = JSON.parse(JSON.stringify(res));
+        after.push(function () { notifyStaff_('個別相談の取り消し（' + c7.name + ' さん）', '取り消した日時：' + was + '\nお名前：' + c7.name + '\nLINE：' + c7.lineName); });
       }
     }
 
@@ -363,8 +483,10 @@ function publicRes_(res, cfg, now) {
   var t = times_(res, cfg);
   // 動画の情報は開始の5分前から渡す（再生ボタンは開始時刻に出す）。終わりぎりぎりに始めた方も最後まで見られるよう、動画の長さ＋1時間あける
   var open = !!t && now >= t.start - 5 * 60000 && now < t.end + (cfg.minutes + 60) * 60000;
+  var ct = consultTimes_(res);
   return { day: res.day, time: res.time || '', start: t ? t.start : 0, end: t ? t.end : 0,
-    name: res.name, email: res.email, status: res.status, pct: res.pct, videoId: open ? cfg.videoId : '' };
+    name: res.name, email: res.email, status: res.status, pct: res.pct, videoId: open ? cfg.videoId : '',
+    consult: ct ? { start: ct.start, end: ct.end, url: res.meetUrl || '', info: res.consultInfo || '' } : null };
 }
 
 // 本人確認：前回渡した署名つき sk → LIFF の ID トークン → アクセストークン の順に試す
@@ -400,22 +522,24 @@ function seminarUser_(req) {
    ============================================================ */
 function seminarTalkReply_(replyToken, userId, text) {
   var cfg = seminarConfig_();
+  var consult = text.indexOf(CONSULT_PREFIX) === 0;   // 【個別相談の予約】
+  var want = consult ? '相談予約' : '予約';
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   var res;
   try {
     var sh = seminarSheet_();
     res = findRes_(sh, userId);
-    if (res && res.status === '予約') { addSent_(res, 'bookline'); saveRes_(sh, res); }
+    if (res && res.status === want) { addSent_(res, consult ? 'cbookline' : 'bookline'); saveRes_(sh, res); }
   } finally {
     lock.releaseLock();
   }
-  var msg = res && res.status === '予約'
-    ? stepMessage_('book', res, cfg).line
-    : textMessage_('ご予約ありがとうございます。日時は説明会ページでご確認ください。\n' + SEMINAR_PAGE, DEFAULT_QUICK);
+  var msg = res && res.status === want
+    ? stepMessage_(consult ? 'cbook' : 'book', res, cfg).line
+    : textMessage_('ご予約ありがとうございます。日時は' + (consult ? '個別相談' : '説明会') + 'のページでご確認ください。\n' + (consult ? CONSULT_PAGE : SEMINAR_PAGE), DEFAULT_QUICK);
   lineFetch_('/v2/bot/message/reply', 'post', { replyToken: replyToken, messages: [msg] });
   logRow_(userId, 'お客様', text);
-  logRow_(userId, '定型', '説明会の予約確認');
+  logRow_(userId, '定型', consult ? '個別相談の予約確認' : '説明会の予約確認');
 }
 
 // 案内メールの停止（メールのリンクから。doGet）
@@ -446,30 +570,41 @@ function seminarTick() {
     var sh = seminarSheet_();
     seminarRows_(sh).forEach(function (r, i) {
       var res = toRes_(r, i);
-      if (!res.userId || SEMINAR_CLOSED[res.status]) return;
-      var t = times_(res, cfg);
+      if (!res.userId) return;
+      // 個別相談を予約した方は個別相談のお知らせ、それ以外は説明会のお知らせ
+      var consult = !!CONSULT_LIVE[res.status];
+      if (!consult && SEMINAR_CLOSED[res.status]) return;
+      var t = consult ? consultTimes_(res) : times_(res, cfg);
       if (!t) return;
-      var reservedAt = toMs_(res.reservedAt);
+      var steps = consult ? CONSULT_STEPS : SEMINAR_STEPS;
+      var since = consult ? 0 : toMs_(res.reservedAt);
       var sent = res.sent ? res.sent.split(',') : [];
-      var next = null;
-      SEMINAR_STEPS.forEach(function (st) {
+      var cands = [];
+      steps.forEach(function (st) {
         if (sent.indexOf(st.id) >= 0) return;
-        var due = st.due(t);
+        var due = st.due(t, res);
         if (now < due) return;
         sent.push(st.id);   // 送る前に記録する（二重に送らない）
-        // 同時にいくつも期限が来ていたら（トリガーの遅れなど）、いちばん新しいものだけ送る
-        next = now - due > STEP_STALE_MS || (st.minLead && reservedAt > due - st.minLead) || (st.skip && st.skip(t, due)) ? null : st.id;
+        var ng = now - due > STEP_STALE_MS || (st.minLead && since > due - st.minLead) || (st.skip && st.skip(t, due, res));
+        if (!ng) cands.unshift(st.id);
       });
       if (sent.join(',') !== res.sent) { res.sent = sent.join(','); saveRes_(sh, res); }
-      if (next) jobs.push({ id: next, res: res });
+      // 同時にいくつも期限が来ていたら（トリガーの遅れなど）、いちばん新しいものだけ送る（送る文がないときは、その前のもの）
+      if (cands.length) jobs.push({ ids: cands, res: res });
     });
   } finally {
     lock.releaseLock();
   }
   jobs.forEach(function (j) {
-    try { deliver_(j.id, j.res, cfg, { line: true, mail: true }); } catch (err) {
-      Logger.log('seminarTick ' + j.id + ': ' + err.message);
-      if (typeof reportError_ === 'function') reportError_('説明会のお知らせ', err, j.id + '：' + (j.res.name || j.res.userId));
+    var id = '';
+    try {
+      for (var k = 0; k < j.ids.length; k++) {
+        if (stepMessage_(j.ids[k], j.res, cfg)) { id = j.ids[k]; break; }
+      }
+      if (id) deliver_(id, j.res, cfg, { line: true, mail: true });
+    } catch (err) {
+      Logger.log('seminarTick ' + id + ': ' + err.message);
+      if (typeof reportError_ === 'function') reportError_('説明会のお知らせ', err, id + '：' + (j.res.name || j.res.userId));
     }
   });
 }
@@ -511,8 +646,8 @@ function mailFooter_(res) {
     webAppUrl_() + '?a=unsub&u=' + encodeURIComponent(res.userId) + '&s=' + sign_('unsub:' + res.userId);
 }
 
-// LINE のカード（Flex Message）。buttons：[[ラベル, URL], ...]
-function card_(title, text, buttons) {
+// LINE のカード（Flex Message）。buttons：[[ラベル, URL], ...]（URL の代わりに文を入れると、その文をトークに送るボタン）
+function card_(title, text, buttons, kicker) {
   return {
     type: 'flex',
     altText: title,
@@ -521,25 +656,60 @@ function card_(title, text, buttons) {
       body: {
         type: 'box', layout: 'vertical', spacing: 'md',
         contents: [
-          { type: 'text', text: '無料の動画説明会', size: 'xs', weight: 'bold', color: '#17795D' },
+          { type: 'text', text: kicker || '無料の動画説明会', size: 'xs', weight: 'bold', color: '#17795D' },
           { type: 'text', text: title, size: 'lg', weight: 'bold', wrap: true, color: '#0F2A4D' },
           { type: 'text', text: text, size: 'sm', wrap: true, color: '#475467' }
         ]
       },
-      footer: {
-        type: 'box', layout: 'vertical', spacing: 'sm',
-        contents: buttons.map(function (b, i) {
-          var btn = { type: 'button', style: i === 0 ? 'primary' : 'secondary', height: 'sm', action: { type: 'uri', label: b[0], uri: b[1] } };
-          if (i === 0) btn.color = '#0F2A4D';
-          return btn;
-        })
-      }
+      footer: cardButtons_(buttons)
+    }
+  };
+}
+
+function cardButtons_(buttons) {
+  return {
+    type: 'box', layout: 'vertical', spacing: 'sm',
+    contents: buttons.map(function (b, i) {
+      var act = /^https?:/.test(b[1]) ? { type: 'uri', label: b[0], uri: b[1] } : { type: 'message', label: b[0], text: b[1] };
+      var btn = { type: 'button', style: i === 0 ? 'primary' : 'secondary', height: 'sm', action: act };
+      if (i === 0) btn.color = '#0F2A4D';
+      return btn;
+    })
+  };
+}
+
+// 代表から届くカード（顔写真・名前つき）
+function hostCard_(title, text, buttons) {
+  var h = consultCfg_().host;
+  var avatar = h.photo
+    ? { type: 'box', layout: 'vertical', width: '52px', height: '52px', cornerRadius: '26px', flex: 0,
+        contents: [{ type: 'image', url: h.photo, aspectMode: 'cover', aspectRatio: '1:1', size: 'full' }] }
+    : { type: 'box', layout: 'vertical', width: '52px', height: '52px', cornerRadius: '26px', flex: 0, backgroundColor: '#17795D', justifyContent: 'center',
+        contents: [{ type: 'text', text: h.name.charAt(0) || '代', align: 'center', color: '#ffffff', weight: 'bold', size: 'xl' }] };
+  return {
+    type: 'flex',
+    altText: title,
+    contents: {
+      type: 'bubble',
+      body: {
+        type: 'box', layout: 'vertical', spacing: 'md',
+        contents: [
+          { type: 'box', layout: 'horizontal', spacing: 'md', contents: [avatar,
+            { type: 'box', layout: 'vertical', justifyContent: 'center', contents: [
+              { type: 'text', text: h.title + '　' + h.name, size: 'sm', weight: 'bold', color: '#0F2A4D', wrap: true },
+              { type: 'text', text: 'BUYMO 副業パートナー（合同会社アイズ）', size: 'xxs', color: '#667085', wrap: true }] }] },
+          { type: 'text', text: title, size: 'lg', weight: 'bold', wrap: true, color: '#0F2A4D' },
+          { type: 'text', text: text, size: 'sm', wrap: true, color: '#475467' }
+        ]
+      },
+      footer: cardButtons_(buttons)
     }
   };
 }
 
 // 各ステップの文面。null を返すと送らない
 function stepMessage_(id, res, cfg) {
+  if (/^c/.test(id)) return consultMessage_(id, res, cfg);   // 個別相談のお知らせ（cbook・c1・c0 など）
   var t = times_(res, cfg);
   if (!t) return null;
   var timed = timeMin_(res.time) >= 0;
@@ -607,57 +777,435 @@ function stepMessage_(id, res, cfg) {
 
   var rebook = ['別の日時で予約する', SEMINAR_PAGE];
   var anyTime = '動画説明会は毎日、' + slotsLabel_(cfg) + 'に始まります。';
-  if (id === 'end') return watched ? {
-    line: card_('ご視聴ありがとうございました',
-      '加盟をご希望の方は、説明会ページからそのままお申し込みいただけます。迷っていることがあれば、個別相談やトークでの質問もお気軽にどうぞ。',
-      [['申込・個別相談はこちら', SEMINAR_PAGE]]),
-    mail: {
-      subject: '【ご視聴ありがとうございました】これからの進め方',
-      body: '動画説明会をご視聴いただき、ありがとうございました。\n\nこの先は、次の3つから選べます。\n\n' +
-        '1. 加盟を申し込む：説明会ページの「加盟を申し込む」から。担当者から、契約内容とエリアのご案内をします。\n' +
-        '2. 個別相談で詳しく聞く：本業との両立や費用のことなど、担当者に直接相談できます。\n' +
-        '3. トークで質問する：公式LINEのトークに送ると、AIがすぐにお答えします。\n\n' +
-        '説明会ページ：' + SEMINAR_PAGE + '\n\nしつこい勧誘はしません。ご自身のペースでご検討ください。'
+  var open = res.status === '視聴完了' || res.status === '検討中' || res.status === '視聴中' || res.status === '予約';   // 個別相談をまだ予約していない
+  var h = consultCfg_().host, hostName = h.title + 'の' + h.name;
+  var pick = ['個別相談の日時を選ぶ', CONSULT_PAGE];
+  var ask = ['まずはトークで質問する', '説明会について質問があります'];
+  var invite = function (lead) {
+    return {
+      line: hostCard_(lead, h.message, [pick, ask]),
+      mail: {
+        subject: '【' + hostName + 'より】説明会のご視聴ありがとうございました',
+        body: hostName + 'です。\n' + lead + '\n\n' + h.message + '\n\n' +
+          '■ 個別相談（無料・' + consultCfg_().minutes + '分・Google Meet）\n' +
+          '日時は、こちらから空いている時間を選んで予約できます：\n' + CONSULT_PAGE + '\n\n' +
+          '本業との両立、費用、エリアのことなど、なんでもご相談ください。\n' +
+          '気になることを先に聞きたいときは、公式LINEのトークに送ると、AIがすぐにお答えします。'
+      }
+    };
+  };
+
+  // 見終わって15分：代表からのご案内（その場で個別相談を予約した方には送らない）
+  if (id === 'w15') return open ? invite('説明会を最後までご覧いただき、ありがとうございました。') : null;
+
+  if (id === 'end') {
+    if (res.doneAt) return null;   // 最後まで見た方には、見終わって15分のご案内を送っている
+    if (watched) return open ? invite('説明会をご覧いただき、ありがとうございました。') : null;
+    return {
+      line: card_('見逃してしまった方へ', 'ご都合が合わなかったようでしたら、別の日時で予約し直せます。' + anyTime, [rebook]),
+      mail: {
+        subject: '動画説明会、別の日時でもご覧いただけます',
+        body: 'ご予約の動画説明会（' + when + '）の再生できる時間は終わりました。\nご都合が合わなかったようでしたら、説明会ページから別の日時を選んで予約し直せます。' + anyTime + '\n\n説明会ページ：' + SEMINAR_PAGE
+      }
+    };
+  }
+
+  if (id === 'd1') {
+    if (watched && !open) return null;
+    if (watched) return {
+      line: hostCard_('気になっていることは、ありませんか？',
+        '説明会のあとによくいただくご質問です。\n・本業と両立できる？ → 平日は夜30分、動くのは土日が目安です\n・初期費用は？ → 加盟金と仕入れ資金。融資の相談もできます\n・ノルマは？ → 買取台数のノルマはありません\n\nくわしくは、' + consultCfg_().minutes + '分の個別相談で、あなたの状況に合わせてお話しします。',
+        [pick, ask]),
+      mail: {
+        subject: '説明会のあとによくいただくご質問',
+        body: '先日は動画説明会をご覧いただき、ありがとうございました。' + hostName + 'です。\n\n説明会のあとによくいただくご質問をまとめました。\n\n' +
+          '・本業と両立できますか？\n　平日は夜30分（問い合わせの確認・電話）、動くのは土日が目安です。今の仕事を辞めずに始められます。\n' +
+          '・初期費用はどのくらい？\n　加盟金と仕入れ資金がかかります。融資のご相談もできます。\n' +
+          '・ノルマはありますか？\n　買取台数のノルマはありません。月2台から、ご自身のペースで始められます。\n\n' +
+          'あなたのエリアや働き方に合わせた話は、個別相談（無料・' + consultCfg_().minutes + '分・Google Meet）でお伝えします。\n' +
+          '日時を選ぶ：' + CONSULT_PAGE
+      }
+    };
+    return {
+      mail: {
+        subject: '動画説明会は毎日ご予約いただけます',
+        body: anyTime + 'ご都合のよい日時を選んで、予約し直せます。\n\n説明会ページ：' + SEMINAR_PAGE
+      }
+    };
+  }
+
+  if (id === 'd3') {
+    if (watched && !open) return null;
+    if (watched) {
+      var left = consultLeft_(7);
+      return {
+        mail: {
+          subject: '【最後のご案内】' + hostName + 'との個別相談',
+          body: '動画説明会のご案内は、このメールで最後です。\n\n' +
+            '加盟するかどうかは、実際に話して、納得してから決めていただきたいと思っています。\n' +
+            'エリアの状況やご自身の働き方に合わせて詳しく知りたい方は、個別相談をご利用ください（無料・' + consultCfg_().minutes + '分・Google Meet）。\n' +
+            (left > 0 ? 'この1週間の個別相談の空き：あと' + left + '枠\n' : '') +
+            '日時を選ぶ：' + CONSULT_PAGE + '\n\nご質問は、公式LINEのトークでいつでも受け付けています。'
+        }
+      };
     }
-  } : {
-    line: card_('見逃してしまった方へ', 'ご都合が合わなかったようでしたら、別の日時で予約し直せます。' + anyTime, [rebook]),
+    return {
+      mail: {
+        subject: '【最後のご案内】動画説明会のご予約',
+        body: '動画説明会のご案内は、このメールで最後です。\nまたご興味が出てきたときは、説明会ページからいつでも予約できます。\n\n説明会ページ：' + SEMINAR_PAGE
+      }
+    };
+  }
+  return null;
+}
+
+
+/* ============================================================
+   代表との個別相談（Google カレンダー・Google Meet）
+   枠：代表のカレンダーで「相談OK」（CONSULT_MARK）という名前の予定を入れた時間。
+       そのあいだに別の予定（ほかの個別相談も）が入っている時間は外す。
+       「予定なし」にした予定・「いいえ」と返事した招待は、予定に数えない。
+       終日の予定は数えない（名前に「休」が入った終日の予定の日は、まるごと予約できない）。
+   ============================================================ */
+var CONSULT_DONE_ = { '加盟決定': 1 };   // もう個別相談を予約できない状態
+var CONSULT_WHEN = ['すぐにでも', '1〜3か月以内', '半年以内', 'まだ決めていない'];
+var CONSULT_WORRY = ['収入の目安', '初期費用・資金', '本業との両立', '仕事の内容', '契約・エリア', 'その他'];
+var HOST_MESSAGE_DEFAULT = '加盟するかどうかは、実際に話してから決めていただきたいと思っています。' +
+  '30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）';
+
+function consultCfg_() {
+  var p = PropertiesService.getScriptProperties();
+  var min = Number(p.getProperty('CONSULT_MINUTES')) || 30;
+  if ([15, 20, 30, 45, 60, 90].indexOf(min) < 0) min = 30;
+  var photo = String(p.getProperty('HOST_PHOTO') || '').trim();
+  return {
+    calId: String(p.getProperty('CONSULT_CALENDAR') || '').trim(),
+    mark: String(p.getProperty('CONSULT_MARK') || '相談OK').trim() || '相談OK',
+    minutes: min,
+    leadH: Math.min(72, Math.max(1, Number(p.getProperty('CONSULT_LEAD_HOURS')) || 3)),
+    days: Math.min(60, Math.max(1, Number(p.getProperty('CONSULT_DAYS')) || 14)),
+    meetUrl: String(p.getProperty('CONSULT_MEET_URL') || '').trim(),
+    host: {
+      name: String(p.getProperty('HOST_NAME') || '吉田 一平').trim(),
+      title: String(p.getProperty('HOST_TITLE') || '代表').trim(),
+      photo: /^https:\/\//.test(photo) ? photo : '',
+      message: String(p.getProperty('HOST_MESSAGE') || HOST_MESSAGE_DEFAULT).trim()
+    }
+  };
+}
+
+function consultCal_(cc) {
+  var cal = cc.calId ? CalendarApp.getCalendarById(cc.calId) : CalendarApp.getDefaultCalendar();
+  if (!cal) throw new Error('個別相談のカレンダー（CONSULT_CALENDAR）が見つかりません。代表のカレンダーをこの Google アカウントに「予定の変更」の権限で共有してください');
+  return cal;
+}
+
+// Meet の URL を自動で作れるか（エディタの「サービス」に Google Calendar API を追加したとき）
+function hasCalendarApi_() {
+  return typeof Calendar !== 'undefined' && !!Calendar.Events;
+}
+
+// 予約できる枠（開始時刻のミリ秒の一覧）。fresh：キャッシュを使わない（予約の直前の確認）
+function consultSlots_(cc, now, fresh) {
+  var from = now + cc.leadH * HOUR_MS;
+  var cache = CacheService.getScriptCache();
+  if (!fresh) {
+    var hit = cache.get('consult_slots');
+    if (hit) return JSON.parse(hit).filter(function (t) { return t >= from; });
+  }
+  var to = now + cc.days * 86400000;
+  var evs = consultCal_(cc).getEvents(new Date(now), new Date(to + HOUR_MS * 24));
+  var open = [], busy = [], off = {};
+  evs.forEach(function (ev) {
+    var title = String(ev.getTitle() || '');
+    var mark = title.indexOf(cc.mark) >= 0;
+    if (ev.isAllDayEvent()) {
+      if (!mark && /休/.test(title)) {
+        for (var d = ev.getAllDayStartDate().getTime(); d < ev.getAllDayEndDate().getTime(); d += 86400000) off[jst_(d + 12 * HOUR_MS, 'yyyy-MM-dd')] = 1;
+      }
+      return;
+    }
+    var s = ev.getStartTime().getTime(), e = ev.getEndTime().getTime();
+    if (mark) open.push([s, e]);
+    else if (!freeEvent_(ev)) busy.push([s, e]);
+  });
+  var step = 30 * 60000, len = cc.minutes * 60000, out = [];
+  open.forEach(function (b) {
+    for (var t = Math.ceil(b[0] / step) * step; t + len <= b[1]; t += step) {
+      if (t < from || t > to || off[jst_(t, 'yyyy-MM-dd')] || out.indexOf(t) >= 0) continue;
+      if (busy.some(function (x) { return x[0] < t + len && x[1] > t; })) continue;
+      out.push(t);
+    }
+  });
+  out.sort(function (a, b) { return a - b; });
+  out = out.slice(0, 400);
+  try { cache.put('consult_slots', JSON.stringify(out), 120); } catch (err) { /* 大きすぎるときは覚えない */ }
+  return out;
+}
+
+// 「予定なし」にした予定・「いいえ」と返事した招待
+function freeEvent_(ev) {
+  try { if (ev.getTransparency && ev.getTransparency() === CalendarApp.EventTransparency.TRANSPARENT) return true; } catch (e) { /* noop */ }
+  try { if (ev.getMyStatus && ev.getMyStatus() === CalendarApp.GuestStatus.NO) return true; } catch (e) { /* noop */ }
+  return false;
+}
+
+function consultCacheClear_() {
+  try { CacheService.getScriptCache().remove('consult_slots'); } catch (e) { /* noop */ }
+}
+
+// この先 n 日の空き枠の数（最後のご案内メールに入れる）
+function consultLeft_(n) {
+  try {
+    var now = Date.now();
+    return consultSlots_(consultCfg_(), now, false).filter(function (t) { return t < now + n * 86400000; }).length;
+  } catch (e) { return 0; }
+}
+
+// 個別相談の開始・終わり・その日の 0:00（ミリ秒）
+function consultTimes_(res) {
+  var p = parseSlot_(res.consultAt);
+  if (!p) return null;
+  var min = consultCfg_().minutes;
+  return { start: p.start, end: p.start + min * 60000, day: dayStart_(p.day) };
+}
+
+// 例：11月5日（水）19:00〜19:30
+function consultLabel_(res, cc) {
+  var t = consultTimes_(res);
+  return t ? dayLabel_(t.start) + ' ' + jst_(t.start, 'H:mm') + '〜' + jst_(t.end, 'H:mm') : '';
+}
+
+// 予約のときの質問への答え → 表示・保存する文
+function consultInfo_(a) {
+  var area = String(a.area || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+  var when = CONSULT_WHEN.indexOf(String(a.when)) >= 0 ? String(a.when) : '';
+  var worry = (Array.isArray(a.worry) ? a.worry : []).map(String).filter(function (w) { return CONSULT_WORRY.indexOf(w) >= 0; });
+  var note = String(a.note || '').trim().slice(0, 300);
+  var tel = String(a.tel || '').replace(/[^\d+\-]/g, '').slice(0, 20);
+  var lines = ['エリア：' + area, '始めたい時期：' + when];
+  if (worry.length) lines.push('気になること：' + worry.join('・'));
+  if (note) lines.push('ひとこと：' + note);
+  if (tel) lines.push('電話（つながらないとき用）：' + tel);
+  return { area: area, when: when, text: lines.join('\n') };
+}
+
+// 代表のカレンダーに予定を入れる（Meet の URL つき。お客様にも Google カレンダーの招待が届く）
+function consultCreateEvent_(cc, res, start, info) {
+  var end = start + cc.minutes * 60000;
+  var h = cc.host;
+  var title = '個別相談｜' + res.name + ' 様（BUYMO オルタナティブライフ）';
+  var desc = 'BUYMO 副業パートナー（オルタナティブライフ）の個別相談です。\n' +
+    'お話しする人：' + h.title + ' ' + h.name + '\n' +
+    '時間：' + cc.minutes + '分（Google Meet・顔出しなしでもOK）\n\n' +
+    '■ 事前にお聞きしたこと\n' + info + '\n\n' +
+    '日時の変更・取り消し：' + CONSULT_PAGE;
+  if (hasCalendarApi_()) {
+    var calId = cc.calId || 'primary';
+    var ev = Calendar.Events.insert({
+      summary: title,
+      description: desc,
+      start: { dateTime: new Date(start).toISOString(), timeZone: 'Asia/Tokyo' },
+      end: { dateTime: new Date(end).toISOString(), timeZone: 'Asia/Tokyo' },
+      attendees: res.email ? [{ email: res.email, displayName: res.name }] : [],
+      conferenceData: { createRequest: { requestId: Utilities.getUuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } },
+      reminders: { useDefault: true }
+    }, calId, { conferenceDataVersion: 1, sendUpdates: 'all' });
+    var url = meetOf_(ev);
+    for (var i = 0; !url && i < 3; i++) { Utilities.sleep(1000); ev = Calendar.Events.get(calId, ev.id); url = meetOf_(ev); }
+    return { id: ev.id, url: url || cc.meetUrl };
+  }
+  var opts = { description: desc + (cc.meetUrl ? '\n\nGoogle Meet：' + cc.meetUrl : ''), sendInvites: !!res.email };
+  if (res.email) opts.guests = res.email;
+  var e2 = consultCal_(cc).createEvent(title, new Date(start), new Date(end), opts);
+  if (cc.meetUrl) { try { e2.setLocation(cc.meetUrl); } catch (e) { /* noop */ } }
+  return { id: e2.getId(), url: cc.meetUrl };
+}
+
+function meetOf_(ev) {
+  if (ev.hangoutLink) return ev.hangoutLink;
+  var eps = (ev.conferenceData && ev.conferenceData.entryPoints) || [];
+  for (var i = 0; i < eps.length; i++) if (eps[i].entryPointType === 'video') return eps[i].uri;
+  return '';
+}
+
+function consultDeleteEvent_(cc, id) {
+  if (!id) return;
+  try {
+    if (id.indexOf('@') < 0 && hasCalendarApi_()) Calendar.Events.remove(cc.calId || 'primary', id, { sendUpdates: 'all' });
+    else { var ev = consultCal_(cc).getEventById(id); if (ev) ev.deleteEvent(); }
+  } catch (err) {
+    Logger.log('consultDeleteEvent_: ' + err.message);
+    if (typeof reportError_ === 'function') reportError_('個別相談の予定の削除', err, '代表のカレンダーから手で消してください：' + id);
+  }
+}
+
+// 本部への通知の本文
+function doneNote_(res, cfg) {
+  return '動画説明会（' + whenLabel_(res, cfg) + '）を最後まで見ました（視聴 ' + res.pct + '%）。\n' +
+    'お名前：' + res.name + '\nメール：' + res.email + '\nLINE：' + res.lineName + '\n\n' +
+    'いまミニアプリに、代表との個別相談の予約画面が出ています。15分たっても予約がなければ、代表からのご案内が LINE とメールで自動で届きます。\n' +
+    '熱いうちに、チャットでひとこと声をかけるのもおすすめです。';
+}
+
+function consultNote_(res, cc) {
+  return '日時：' + consultLabel_(res, cc) + '\nお名前：' + res.name + '\nメール：' + res.email + '\nLINE：' + res.lineName + '\n\n' +
+    '■ 事前の回答\n' + res.consultInfo + '\n\n' +
+    'Google Meet：' + (res.meetUrl || '（自動で作れませんでした。お客様に入室の URL を送ってください）') + '\n' +
+    (cc.calId ? 'カレンダー（' + cc.calId + '）' : '代表の Google カレンダー') + 'に予定を入れました。前日と10分前に、お客様へ自動でお知らせします。\n' +
+    '相談が終わったら、本部の画面で「加盟決定／検討中／見送り／来なかった」を押してください。';
+}
+
+// 個別相談のお知らせの文面（stepMessage_ から呼ぶ）
+function consultMessage_(id, res, cfg) {
+  var cc = consultCfg_(), h = cc.host, t = consultTimes_(res);
+  var hostName = h.title + 'の' + h.name;
+  var label = consultLabel_(res, cc);
+  var meet = res.meetUrl || '';
+  var page = ['予約内容を見る', CONSULT_PAGE];
+  var how = meet
+    ? '当日は、LINEのお知らせ・メールの「Google Meet に入る」から入室してください（スマホの方は Google Meet アプリを入れておくとスムーズです）。\n入室URL：' + meet
+    : '入室用の URL は、当日までに担当者からこのトークでお送りします。';
+  var K = '代表との個別相談';
+
+  if (id === 'cbook' && t) return {
+    line: card_('個別相談のご予約を受け付けました', '日時：' + label + '\nお相手：' + h.title + ' ' + h.name + '\nGoogle Meet でお話しします（顔出しなしでもOK）。前日と10分前にお知らせします。', [page], K),
     mail: {
-      subject: '動画説明会、別の日時でもご覧いただけます',
-      body: 'ご予約の動画説明会（' + when + '）の再生できる時間は終わりました。\nご都合が合わなかったようでしたら、説明会ページから別の日時を選んで予約し直せます。' + anyTime + '\n\n説明会ページ：' + SEMINAR_PAGE
+      subject: '【個別相談のご予約】' + label,
+      body: hostName + 'との個別相談をご予約いただき、ありがとうございます。\n\n' +
+        '■ 日時：' + label + '（' + cc.minutes + '分）\n' +
+        '■ 方法：Google Meet（オンライン・顔出しなしでもOK）\n' + how + '\n\n' +
+        '■ 事前にお聞きしたこと\n' + res.consultInfo + '\n\n' +
+        '日時の変更・取り消しは、こちらからできます：' + CONSULT_PAGE + '\n\n' +
+        '当日は、気になっていることをそのまま聞いてください。その場で決めていただく必要はありません。'
     }
   };
 
-  if (id === 'd1') return watched ? {
-    line: card_('ご検討の状況はいかがですか？',
-      '説明会でわからなかったこと・不安なことは、このトークに送るとAIがすぐにお答えします。担当者と直接話したい方は、個別相談もできます。',
-      [['申込・個別相談はこちら', SEMINAR_PAGE]]),
+  if (id === 'c1' && t && res.status === '相談予約') return {
+    line: card_('明日は個別相談の日です', '明日 ' + jst_(t.start, 'H:mm') + ' から、' + hostName + 'と Google Meet でお話しします（' + cc.minutes + '分）。\n開始の10分前に、入室ボタンつきのお知らせをお送りします。', [page], K),
     mail: {
-      subject: 'ご検討の状況はいかがですか？',
-      body: '先日は動画説明会をご視聴いただき、ありがとうございました。\n\n' +
-        'わからなかったこと・不安なことは、公式LINEのトークに送るとAIがすぐにお答えします。担当者と直接話したい方は、説明会ページから個別相談を申し込めます。\n\n' +
-        '説明会ページ：' + SEMINAR_PAGE
-    }
-  } : {
-    mail: {
-      subject: '動画説明会は毎日ご予約いただけます',
-      body: anyTime + 'ご都合のよい日時を選んで、予約し直せます。\n\n説明会ページ：' + SEMINAR_PAGE
+      subject: '【明日 ' + jst_(t.start, 'H:mm') + '〜】個別相談のご案内',
+      body: '明日 ' + label + ' は、' + hostName + 'との個別相談です（' + cc.minutes + '分）。\n' + how + '\n\n' +
+        'ご都合が悪くなったときは、こちらから日時を変更できます：' + CONSULT_PAGE
     }
   };
 
-  if (id === 'd3') return watched ? {
+  if (id === 'c0' && t && res.status === '相談予約') return {
+    line: card_('まもなく個別相談が始まります', jst_(t.start, 'H:mm') + ' から、' + hostName + 'とお話しします。' +
+      (meet ? '下のボタンから入室してください。' : '入室用の URL は、担当者からこのトークでお送りします。'),
+      meet ? [['Google Meet に入る', meet], page] : [page], K),
     mail: {
-      subject: '【最後のご案内】個別相談のご案内',
-      body: '動画説明会のご案内は、このメールで最後です。\n\n' +
-        '加盟について、エリアの状況やご自身の働き方に合わせて詳しく知りたい方は、個別相談をご利用ください。\n' +
-        '説明会ページ：' + SEMINAR_PAGE + '\n\nご質問は、公式LINEのトークでいつでも受け付けています。'
+      subject: '【まもなく開始】個別相談 ' + jst_(t.start, 'H:mm') + '〜',
+      body: 'まもなく ' + label + ' から、' + hostName + 'との個別相談です。\n' + how
     }
-  } : {
+  };
+
+  if (id === 'cthanks') return {
+    line: hostCard_('本日はありがとうございました', 'お時間をいただき、ありがとうございました。ゆっくりご検討ください。\n気になることは、このトークに送るとAIがすぐにお答えします。もう一度話したいときは、いつでも予約できます。',
+      [['もう一度相談する', CONSULT_PAGE], ['トークで質問する', '個別相談のあとで質問があります']]),
     mail: {
-      subject: '【最後のご案内】動画説明会のご予約',
-      body: '動画説明会のご案内は、このメールで最後です。\nまたご興味が出てきたときは、説明会ページからいつでも予約できます。\n\n説明会ページ：' + SEMINAR_PAGE
+      subject: '本日はありがとうございました（' + hostName + '）',
+      body: hostName + 'です。本日は個別相談のお時間をいただき、ありがとうございました。\n\n' +
+        'ゆっくりご検討ください。気になることは、公式LINEのトークに送るとAIがすぐにお答えします。\n' +
+        'もう一度話したいときは、こちらから予約できます：' + CONSULT_PAGE
+    }
+  };
+
+  if (id === 'cf3' && res.status === '相談後検討') return {
+    line: hostCard_('その後、いかがですか？', '先日は個別相談のお時間をいただき、ありがとうございました。\n迷っていること・ご家族に聞かれたことなどがあれば、もう一度お話しすることもできます。',
+      [['もう一度相談する', CONSULT_PAGE], ['トークで質問する', '個別相談のあとで質問があります']]),
+    mail: {
+      subject: 'その後、いかがですか？（' + hostName + '）',
+      body: '先日は個別相談のお時間をいただき、ありがとうございました。' + hostName + 'です。\n\n' +
+        '迷っていること・ご家族に聞かれたことなどがあれば、もう一度お話しすることもできます。\n' +
+        '予約はこちら：' + CONSULT_PAGE + '\n\nご質問は、公式LINEのトークでいつでも受け付けています。'
+    }
+  };
+
+  if (id === 'cnoshow') return {
+    line: hostCard_('本日はお会いできませんでしたね', 'ご都合が合わなかったようでしたら、別の日時で予約し直せます。お気軽にどうぞ。',
+      [['別の日時を選ぶ', CONSULT_PAGE], ['トークで連絡する', '個別相談の日時について相談したいです']]),
+    mail: {
+      subject: '個別相談、別の日時でも予約できます',
+      body: '本日 ' + label + ' の個別相談は、お会いできませんでした。\n' +
+        'ご都合が合わなかったようでしたら、こちらから別の日時で予約し直せます：' + CONSULT_PAGE
+    }
+  };
+
+  if (id === 'cjoin') return {
+    line: card_('ご加盟のご決断、ありがとうございます', '契約内容とエリアのご案内を、担当者から3営業日以内にお送りします。ご不明な点は、このトークでいつでもどうぞ。', [['トークで質問する', '加盟の手続きについて質問があります']], K),
+    mail: {
+      subject: 'ご加盟のご決断、ありがとうございます',
+      body: 'BUYMO 副業パートナーへのご加盟をご決断いただき、ありがとうございます。\n\n' +
+        '契約内容とエリアのご案内を、担当者から3営業日以内にお送りします。\n' +
+        'ご契約は、書面で内容をご確認いただき、ご納得いただけた場合のみです。\n\n' +
+        'ご不明な点は、公式LINEのトークでいつでも受け付けています。'
     }
   };
   return null;
+}
+
+// トークで「個別相談したい」と送られたとき（コード.gs から呼ぶ）。返信なので無料
+function consultTalk_(replyToken, userId, text) {
+  var res = null;
+  try { res = findRes_(seminarSheet_(), userId); } catch (e) { /* noop */ }
+  var cc = consultCfg_(), h = cc.host, msg, note;
+  if (res && res.status === '相談予約' && consultTimes_(res) && consultTimes_(res).end > Date.now()) {
+    msg = card_('個別相談はご予約済みです', '日時：' + consultLabel_(res, cc) + '\nお相手：' + h.title + ' ' + h.name + '\n日時の変更も、下のボタンからできます。', [['予約内容を見る', CONSULT_PAGE]], '代表との個別相談');
+    note = '個別相談の予約済みのご案内';
+  } else if (res && res.status !== 'キャンセル' && (res.pct >= WATCHED_PCT || res.doneAt || CONSULT_LIVE[res.status] || res.status === '相談欠席' || res.status === '検討中')) {
+    msg = hostCard_('個別相談のご希望、ありがとうございます', h.title + 'の' + h.name + 'と' + cc.minutes + '分、Google Meet でお話しします（無料・顔出しなしでもOK）。\n下のボタンから、空いている日時を選んで予約してください。',
+      [['個別相談の日時を選ぶ', CONSULT_PAGE], ['担当者と話したい', '担当者と話したい']]);
+    note = '個別相談の予約のご案内';
+  } else {
+    msg = textMessage_(h.title + 'の' + h.name + 'との個別相談（無料・' + cc.minutes + '分・Google Meet）は、約' + seminarConfig_().minutes + '分の動画説明会をご覧いただいたあとに、ミニアプリから日時を選んで予約できます。\n仕組みと費用を先に知っておくと、相談の時間をあなたのことに使えます。まずは説明会をご予約ください。',
+      [{ label: '説明会を予約する', uri: SEMINAR_PAGE }, '担当者と話したい']);
+    note = '個別相談の前に説明会のご案内';
+  }
+  lineFetch_('/v2/bot/message/reply', 'post', { replyToken: replyToken, messages: [msg] });
+  logRow_(userId, 'お客様', text);
+  logRow_(userId, '定型', note);
+}
+
+// 本部の画面から：個別相談の結果（join 加盟決定／think 検討中／decline 見送り／noshow 来なかった）
+function consultResult_(userId, result) {
+  var MAP = { join: ['加盟決定', 'cjoin'], think: ['相談後検討', 'cthanks'], decline: ['見送り', ''], noshow: ['相談欠席', 'cnoshow'] };
+  var m = MAP[result];
+  if (!m) return { ok: false, error: 'result' };
+  var cfg = seminarConfig_();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  var copy;
+  try {
+    var sh = seminarSheet_();
+    var res = findRes_(sh, userId);
+    if (!res) return { ok: false, error: 'nores' };
+    res.status = m[0];
+    res.sent = (res.sent ? res.sent.split(',') : []).filter(function (x) { return x !== 'cf3' && x !== m[1]; }).join(',');
+    if (m[1]) addSent_(res, m[1]);
+    saveRes_(sh, res);
+    copy = JSON.parse(JSON.stringify(res));
+  } finally {
+    lock.releaseLock();
+  }
+  if (m[1]) { try { deliver_(m[1], copy, cfg, { line: true, mail: true }); } catch (err) { reportError_('個別相談の結果のお知らせ', err); } }
+  logRow_(userId, '本部', '個別相談の結果：' + { join: '加盟決定', think: '検討中', decline: '見送り', noshow: '来なかった' }[result]);
+  return { ok: true, status: m[0] };
+}
+
+// 毎朝の点検（コード.gs の healthReport_ から呼ぶ）
+function consultHealth_() {
+  var out = [];
+  try {
+    var cc = consultCfg_(), now = Date.now();
+    var slots = consultSlots_(cc, now, true).filter(function (t) { return t < now + 7 * 86400000; });
+    if (!slots.length) out.push({ level: 'warn', label: '個別相談の枠', text: 'この7日に予約できる枠がありません。代表の Google カレンダーに「' + cc.mark + '」の予定を入れてください' });
+    else out.push({ level: 'ok', label: '個別相談の枠', text: 'この7日で ' + slots.length + ' 枠（いちばん早い枠：' + dayLabel_(slots[0]) + ' ' + jst_(slots[0], 'H:mm') + '）' });
+    if (!hasCalendarApi_() && !cc.meetUrl) out.push({ level: 'warn', label: 'Google Meet', text: 'Meet の URL を自動で作れません。エディタの「サービス」に Google Calendar API を追加してください' });
+  } catch (e) {
+    out.push({ level: 'ng', label: '個別相談の枠', text: 'カレンダーを読めません：' + e.message });
+  }
+  return out;
 }
 
 
@@ -686,4 +1234,26 @@ function testSeminarMail() {
   deliver_('book', res, cfg, { line: false, mail: true });
   deliver_('end', res, cfg, { line: false, mail: true });
   Logger.log(to + ' にテストメールを2通送りました');
+}
+
+// 個別相談の設定を確かめる（エディタから実行して、実行ログを見る）。カレンダーを読む許可もここで出す
+function setupConsult() {
+  seminarSheet_();   // 予約シートに個別相談の列を足す
+  var cc = consultCfg_();
+  Logger.log('話す人：' + cc.host.title + ' ' + cc.host.name + '（写真：' + (cc.host.photo || '未設定。HOST_PHOTO に https の画像の URL を入れると表示') + '）');
+  var cal = consultCal_(cc);
+  Logger.log('カレンダー：' + cal.getName() + (cc.calId ? '（' + cc.calId + '）' : '（この Google アカウントのカレンダー）'));
+  Logger.log('枠にする予定の名前：「' + cc.mark + '」／長さ ' + cc.minutes + '分／' + cc.leadH + '時間後〜' + cc.days + '日先まで予約できる');
+  Logger.log('Google Meet：' + (hasCalendarApi_() ? '予約ごとに自動で作る'
+    : cc.meetUrl ? '固定の URL を使う（' + cc.meetUrl + '）'
+    : '★作れません。エディタ左の「サービス」の＋ →「Google Calendar API」→「追加」をしてください'));
+  var now = Date.now();
+  consultCacheClear_();
+  var slots = consultSlots_(cc, now, true);
+  if (!slots.length) {
+    Logger.log('★予約できる枠がありません。代表の Google カレンダーに「' + cc.mark + '」という名前の予定を入れてください（例：毎週 月〜金 19:00〜21:00 をくり返し）');
+    return;
+  }
+  Logger.log('予約できる枠：' + slots.length + ' 枠。はじめの10枠：');
+  slots.slice(0, 10).forEach(function (t) { Logger.log('　' + dayLabel_(t) + ' ' + jst_(t, 'H:mm') + '〜' + jst_(t + cc.minutes * 60000, 'H:mm')); });
 }

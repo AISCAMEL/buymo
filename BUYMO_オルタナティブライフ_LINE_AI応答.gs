@@ -67,7 +67,8 @@ var SYSTEM_PROMPT = [
   '- 売り先と加盟店の特典：全国130会場のオートオークションへ出品できる。本部系列の業者オークション（ふつうは実績や信用が必要）に加盟初日から参加できる。出品手数料は本来1台20,000円のところ加盟店は10,000円（半額）。売れなかったら別の会場に再出品でき、本部や提携業者への売却ルートもある。',
   '- 費用（税別）：加盟金500,000円（1名分の研修費用を含む。研修の交通費・宿泊費は実費）、保証金105,000円（月会費3ヶ月分、消費税対象外）、月会費35,000円、オークションシステム利用料 月5,000円（毎月の固定費は合計40,000円）。ロイヤリティはなく、売上に応じた徴収もない。売れたときだけ、成約手数料（1台あたり粗利の5%）と出品手数料（1台10,000円）。オークション会場に支払う手数料は別にかかる。査定依頼情報の購入も有料。',
   '- 開業までの流れ（最短約2ヶ月、勤めながら準備できる）：説明会・個別提案 → オンライン面談（自宅から参加できる）→ 仮契約 → 本審査 → 活動エリア（商圏テリトリー）の選定 → ご加盟契約 → 営業研修・査定研修（福島県の本社で3日間）→ 事業融資サポート → 開業。エリアごとに加盟の枠には限りがある。',
-  '- 無料の動画説明会：仕組み・1台の仕事・費用・開業までを約6分の録画の動画で説明する。ミニアプリのカレンダーで、見たい日と開始時刻（{SEMINAR_TIMES}）を選んで予約する。開始時刻になるとミニアプリで再生でき、開始から{SEMINAR_WINDOW}のあいだは最初から見られる。毎日予約できる。顔出し・発言は不要。前日と開始の1時間前にLINEとメールでお知らせが届く。視聴後にそのまま加盟の申込や個別相談ができる。',
+  '- 無料の動画説明会：仕組み・1台の仕事・費用・開業までを約6分の録画の動画で説明する。ミニアプリのカレンダーで、見たい日と開始時刻（{SEMINAR_TIMES}）を選んで予約する。開始時刻になるとミニアプリで再生でき、開始から{SEMINAR_WINDOW}のあいだは最初から見られる。毎日予約できる。顔出し・発言は不要。前日と開始の1時間前にLINEとメールでお知らせが届く。視聴後に、そのまま代表との個別相談を予約したり、加盟を申し込んだりできる。',
+  '- 個別相談：{HOST}と{CONSULT_MIN}分、Google Meet でオンラインで話せる（無料・顔出しなしでもよい・その場で決めなくてよい）。本業との両立・費用・エリアなど、その人の状況に合わせて話す。動画説明会を見たあと、ミニアプリで代表の空いている日時を選んで予約する（予約ページ：{CONSULT_PAGE}）。前日と10分前にLINEとメールでお知らせが届き、10分前のお知らせのボタンから入室できる。',
   '- 買取台数のノルマはない。月2台から、自分のペースで始められる。',
   '- 契約：契約期間・更新の条件は個別相談で説明する。条件は書面で事前に確認でき、内容に納得した場合のみ契約。',
   '- 会社員の方は、お勤め先の就業規則（副業の可否）を事前に確認してもらう。',
@@ -96,11 +97,15 @@ var SYSTEM_PROMPT = [
 
 // 説明会の開始時刻など、セミナー.gs の設定（スクリプトプロパティ）にあわせて差し込む
 function systemPrompt_() {
-  var times = '朝から夜まで30分ごと', win = '1時間';
+  var times = '朝から夜まで30分ごと', win = '1時間', host = '代表', min = '30', page = SEMINAR_PAGE;
   if (typeof seminarConfig_ === 'function') {
     try { var c = seminarConfig_(); times = slotsLabel_(c); win = windowText_(c); } catch (e) { /* 既定の文のまま */ }
   }
-  return SYSTEM_PROMPT.replace('{SEMINAR_TIMES}', times).replace('{SEMINAR_WINDOW}', win);
+  if (typeof consultCfg_ === 'function') {
+    try { var k = consultCfg_(); host = k.host.title + 'の' + k.host.name; min = String(k.minutes); page = CONSULT_PAGE; } catch (e) { /* 既定の文のまま */ }
+  }
+  return SYSTEM_PROMPT.replace('{SEMINAR_TIMES}', times).replace('{SEMINAR_WINDOW}', win)
+    .replace('{HOST}', host).replace('{CONSULT_MIN}', min).replace('{CONSULT_PAGE}', page);
 }
 
 
@@ -204,7 +209,8 @@ function handleEvent_(ev) {
   }
 
   // ミニアプリで説明会を予約したときの投稿：予約内容の確認を返信（返信は無料。セミナー.gs）
-  if (text.indexOf(SEMINAR_PREFIX) === 0 && typeof seminarTalkReply_ === 'function') {
+  // 個別相談の予約（【個別相談の予約】）も同じ：予約内容の確認を返信
+  if ((text.indexOf(SEMINAR_PREFIX) === 0 || (typeof CONSULT_PREFIX !== 'undefined' && text.indexOf(CONSULT_PREFIX) === 0)) && typeof seminarTalkReply_ === 'function') {
     seminarTalkReply_(ev.replyToken, userId, text);
     return;
   }
@@ -228,6 +234,12 @@ function handleEvent_(ev) {
   // 担当者が対応中（引き継ぎから 24 時間）は AI は黙る
   if (isPaused_(userId)) {
     logRow_(userId, 'お客様', text);
+    return;
+  }
+
+  // 「個別相談したい」「代表と話したい」：代表との個別相談の予約へ案内する（セミナー.gs）
+  if (CONSULT_RE.test(text) && typeof consultTalk_ === 'function') {
+    consultTalk_(ev.replyToken, userId, text);
     return;
   }
 
@@ -263,7 +275,9 @@ function handleEvent_(ev) {
 /* ============================================================
    担当者への引き継ぎ
    ============================================================ */
-var HUMAN_RE = /(担当(者|の方)?|スタッフ|人間|有人|オペレーター)(さん)?(と|に|へ)(話|相談|つな|繋|代わ|かわ|変わ|お願い)|担当者と話したい|個別相談(を|に)?(希望|したい|お願い|申し込)|電話(で話|で相談|してほしい|して欲しい|ください|下さい|希望)/;
+var HUMAN_RE = /(担当(者|の方)?|スタッフ|人間|有人|オペレーター)(さん)?(と|に|へ)(話|相談|つな|繋|代わ|かわ|変わ|お願い)|担当者と話したい|電話(で話|で相談|してほしい|して欲しい|ください|下さい|希望)/;
+// 個別相談の希望（担当者への引き継ぎではなく、代表との個別相談の予約へ案内する）
+var CONSULT_RE = /個別相談(を|に|が|の)?(希望|したい|お願い|申し込|申込|予約|受け|でき)|代表(の方)?(と|に)(話|相談|会)|面談(を|が)?(希望|したい|お願い|でき)/;
 
 function wantsHuman_(text) {
   return HUMAN_RE.test(text);
@@ -541,7 +555,7 @@ function testNotify() {
 
 /* ============================================================
    本部の「加盟店募集」画面から使う（POST ?api=admin、本文は JSON。ADMIN_KEY が合うときだけ）
-   action：people（LINEの人の一覧）／timeline（1人のこれまでの流れ）／pause・resume（AIの停止・再開）
+   action：people（LINEの人の一覧）／timeline（1人のこれまでの流れ）／pause・resume（AIの停止・再開）／consult（個別相談の結果）／health（点検）
    ============================================================ */
 function adminApi_(e) {
   var req = {};
@@ -566,6 +580,8 @@ function adminApi_(e) {
       resumeAI(u);
       logRow_(u, '本部', '本部の画面からAIの返信を再開しました');
       out = { ok: true };
+    } else if (req.action === 'consult' && u && typeof consultResult_ === 'function') {
+      out = consultResult_(u, String(req.result || ''));   // 個別相談の結果（加盟決定／検討中／見送り／来なかった）
     } else out = { ok: false, error: 'action' };
   } catch (err) {
     Logger.log('adminApi_: ' + err.message);
@@ -616,8 +632,10 @@ function adminPeople_() {
       var p = person(res.userId);
       if (!p.lineName) p.lineName = String(res.lineName || res.name || '');
       var tt = hasTimes ? times_(res, semCfg) : null;
+      var ct = typeof consultTimes_ === 'function' ? consultTimes_(res) : null;
       p.seminar = { day: res.day, time: res.time || '', start: tt ? tt.start : 0, end: tt ? tt.end : 0,
-        status: res.status, pct: res.pct, name: res.name, email: res.email };
+        status: res.status, pct: res.pct, name: res.name, email: res.email, doneAt: toMs_(res.doneAt || ''),
+        consultAt: ct ? ct.start : 0, consultEnd: ct ? ct.end : 0, consultInfo: res.consultInfo || '', meetUrl: res.meetUrl || '' };
       var booked = toMs_(res.reservedAt), updated = toMs_(r[9]);
       if (booked && (!p.firstAt || booked < p.firstAt)) p.firstAt = booked;
       if (updated > p.lastAt) p.lastAt = updated;
@@ -650,8 +668,13 @@ function adminTimeline_(u) {
       var updated = toMs_(r[9]);
       var when = typeof whenLabel_ === 'function' ? whenLabel_(res, semCfg) : res.day;
       list.push({ at: toMs_(res.reservedAt), kind: 'seminar_book', text: '説明会を予約（' + when + '）' });
-      if (res.pct > 0) list.push({ at: updated, kind: 'seminar_watch', text: '説明会を視聴（' + res.pct + '%）' });
-      var DEC = { '申込': '「加盟を申し込む」を選択', '相談希望': '「個別相談で詳しく聞く」を選択', '検討中': '「もう少し考える」を選択', 'キャンセル': '説明会の予約を取り消し' };
+      var doneAt = toMs_(res.doneAt || '');
+      if (doneAt) list.push({ at: doneAt, kind: 'seminar_watch', text: '説明会を最後まで視聴（' + res.pct + '%）' });
+      else if (res.pct > 0) list.push({ at: updated, kind: 'seminar_watch', text: '説明会を視聴（' + res.pct + '%）' });
+      var ct = typeof consultTimes_ === 'function' ? consultTimes_(res) : null;
+      if (ct) list.push({ at: Math.min(ct.start, updated), kind: 'consult', text: '代表との個別相談：' + consultLabel_(res, consultCfg_()) + (res.consultInfo ? '\n' + res.consultInfo : '') });
+      var DEC = { '申込': '「加盟を申し込む」を選択', '相談希望': '「個別相談で詳しく聞く」を選択（日程はチャットで調整）', '検討中': '「もう少し考える」を選択', 'キャンセル': '説明会の予約を取り消し',
+        '加盟決定': '個別相談のあと：加盟決定', '相談後検討': '個別相談のあと：検討中', '相談欠席': '個別相談：来られなかった', '見送り': '見送り' };
       if (DEC[res.status]) list.push({ at: updated + 1, kind: res.status === 'キャンセル' ? 'auto' : 'decide', text: DEC[res.status] });
     });
   }
@@ -875,14 +898,18 @@ function healthReport_(withAI) {
       else if (lastTick && now - lastTick > 30 * 60000) add('ng', '説明会のお知らせ', '自動配信が ' + Math.round((now - lastTick) / 60000) + ' 分動いていません');
       else add('ok', '説明会のお知らせ', '5分おきに動いています');
       var rows = seminarRows_(seminarSheet_()).map(toRes_);
-      sem = { booked24: 0, upcoming: 0, today: 0, watched24: 0, decided24: 0 };
+      sem = { booked24: 0, upcoming: 0, today: 0, watched24: 0, decided24: 0, done24: 0, consults: 0 };
       var todayKey = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
       rows.forEach(function (r) {
         var t = times_(r, cfg);
         if (toMs_(r.reservedAt) >= since) sem.booked24++;
         if (t && t.start > now && r.status !== 'キャンセル') sem.upcoming++;
         if (r.day === todayKey && r.status !== 'キャンセル') sem.today++;
+        if (toMs_(r.doneAt || '') >= since) sem.done24++;
+        var ct = typeof consultTimes_ === 'function' ? consultTimes_(r) : null;
+        if (ct && ct.start > now && r.status === '相談予約') sem.consults++;
       });
+      if (typeof consultHealth_ === 'function') consultHealth_().forEach(function (x) { add(x.level, x.label, x.text); });
     } catch (e) { add('warn', '説明会', '確認できませんでした：' + e.message); }
   }
 
@@ -922,7 +949,7 @@ function dailyCheck() {
   var lines = r.items.map(function (x) { return mark[x.level] + ' ' + x.label + '：' + x.text; });
   var s = r.stats;
   lines.push('', '■ 直近24時間', 'お客様のメッセージ ' + s.msgs + '／AIの返事 ' + s.ai + '／担当者への引き継ぎ ' + s.handoff + '／友だち追加 ' + s.follow + '／ブロック ' + s.block);
-  if (r.seminar) lines.push('説明会の予約 ' + r.seminar.booked24 + '件／今日の回 ' + r.seminar.today + '件／これからの予約 ' + r.seminar.upcoming + '件／自動で送ったお知らせ ' + s.step + '件');
+  if (r.seminar) lines.push('説明会の予約 ' + r.seminar.booked24 + '件／今日の回 ' + r.seminar.today + '件／これからの予約 ' + r.seminar.upcoming + '件／最後まで視聴 ' + (r.seminar.done24 || 0) + '人／これからの個別相談 ' + (r.seminar.consults || 0) + '件／自動で送ったお知らせ ' + s.step + '件');
   if (r.paused) lines.push('いま AI を止めている人：' + r.paused + '人');
   var title = (bad.length ? '要確認 ' + bad.length + '件' : '異常なし') + '（毎朝の点検）';
   notifyStaff_(title, lines.join('\n'));
