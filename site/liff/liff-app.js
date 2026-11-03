@@ -766,7 +766,7 @@
     else if (action === 'consultCancel' && r) { r.status = '視聴完了'; r.consult = null; }
     lsSet('altlife_sem_dry', r);
     var out = { ok: true, now: Date.now(), config: { openMin: 480, closeMin: 1440, slotMin: 30, windowMin: 60, leadMin: 5, minutes: 7, days: 14, ready: false }, reservation: r,
-      host: { name: '吉田 一平', title: '代表', photo: '', message: '加盟するかどうかは、実際に話してから決めていただきたいと思っています。30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）' } };
+      host: { name: '吉田 一平', title: '代表', photo: CFG.HOST_PHOTO, message: '加盟するかどうかは、実際に話してから決めていただきたいと思っています。30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）' } };
     if (action === 'slots') {
       // 試し用：この先7日の 19:00〜21:00（3時間後から）
       var list = [], base = Date.parse(todayKey() + 'T19:00:00+09:00');
@@ -1287,9 +1287,11 @@
   // 代表の名前・写真・ひとことを、画面のあちこちに入れる
   function fillHost() {
     var h = sem.host || {};
+    // 写真は GAS の設定（HOST_PHOTO）。GAS が前の版で host が来ないときは、サイトに置いた写真
+    var photo = sem.host ? h.photo : CFG.HOST_PHOTO;
     $$('.host-name').forEach(function (el) { el.textContent = hostName(); });
     $$('.host-ph').forEach(function (el) {
-      if (h.photo) { el.style.backgroundImage = 'url("' + String(h.photo).replace(/"/g, '') + '")'; el.textContent = ''; el.classList.add('has-photo'); }
+      if (photo) { el.style.backgroundImage = 'url("' + String(photo).replace(/"/g, '') + '")'; el.textContent = ''; el.classList.add('has-photo'); }
       else { el.style.backgroundImage = ''; el.textContent = (h.name || '吉').charAt(0); el.classList.remove('has-photo'); }
     });
     $$('.cs-min').forEach(function (el) { el.textContent = sem.csMin || 30; });

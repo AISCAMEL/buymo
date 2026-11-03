@@ -248,7 +248,7 @@ LINE Developers →「中古車投資ビジネス」→「Messaging API設定」
 |---|---|
 | `HOST_NAME` | 話す人の名前。空なら `吉田 一平` |
 | `HOST_TITLE` | 肩書き。空なら `代表` |
-| `HOST_PHOTO` | 顔写真の URL（`https://` で始まる JPEG か PNG）。空なら名前の頭文字の丸 |
+| `HOST_PHOTO` | 顔写真の URL（`https://` で始まる JPEG か PNG）。空なら代表の写真（`https://buymo.me/liff/img/host.jpg`、設定済み）。写真を出さないときは `none` |
 | `HOST_MESSAGE` | 見終わった方へのひとこと。空なら「加盟するかどうかは、実際に話してから決めていただきたいと思っています。30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）」 |
 | `CONSULT_MINUTES` | 個別相談の長さ（分）。空なら `30` |
 | `CONSULT_LEAD_HOURS` | 何時間後の枠から予約できるか。空なら `3` |
