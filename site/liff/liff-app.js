@@ -1324,8 +1324,9 @@
     $('#csLoading').textContent = '空いている日時を読み込んでいます…';
     semApi('slots').then(function (d) {
       if (!d.ok) throw new Error(d.error);
-      sem.slots = d.consult.slots || [];
-      sem.csMin = d.consult.minutes || 30;
+      // GAS が個別相談の入る前の版のときは、枠なしとして「担当者に日程を相談する」を出す
+      sem.slots = (d.consult && d.consult.slots) || [];
+      sem.csMin = (d.consult && d.consult.minutes) || 30;
     }).catch(function () {
       $('#csLoading').textContent = '読み込めませんでした。電波の良い場所で、開き直してください。';
     }).then(function () { sem.slotsLoading = false; if (sem.consulting) renderConsult(); });
