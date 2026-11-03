@@ -36,6 +36,8 @@ window.ALTLIFE_CONFIG = {
 
   // 個別相談で話す代表の顔写真（GAS の HOST_PHOTO が優先。GAS が前の版のときにこちらを使う）
   HOST_PHOTO: 'img/host.jpg',
+  // 代表の Google の予約ページ（予約スケジュール）。GAS の CONSULT_BOOKING_URL が優先。GAS が前の版のときにこちらを開く
+  CONSULT_BOOKING_URL: 'https://calendar.app.google/fv5c7oosaiKT3MheA',
 
   // 友だちへのシェア（Flex Message）に使う画像（https の絶対URL・1.91:1）
   SHARE_IMAGE: 'https://buymo.me/assets/img/buymo-ogp.png'

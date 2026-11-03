@@ -601,6 +601,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);bac
 #csForm .step{margin-top:0}
 #csSubmit{margin:14px 0 8px}
 .cs-after{text-align:center}
+.cs-google{background:var(--card);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow-md)}
+.cs-steps{display:grid;gap:12px;margin:4px 0 16px}
+.cs-steps li{display:flex;gap:10px;align-items:flex-start}
+.cs-steps .num{flex:none;margin:1px 0 0}
+.cs-steps p{font-size:14px;font-weight:700;color:var(--navy);line-height:1.6}
+.cs-steps small{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:2px}
+.cs-steps small b{color:var(--navy);font-weight:800;word-break:break-all}
+.cs-check{margin-top:10px}
 .ct-join{margin:16px 0 0}
 .ticket.is-soon .ct-join{animation:soon-btn 1.2s ease-in-out infinite}
 @keyframes soon-btn{50%{box-shadow:0 0 0 6px rgba(255,176,77,.35)}}

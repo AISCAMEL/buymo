@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Fraunces:ital,wght@1,600&family=Outfit:wght@600;700&display=swap" />
-<link rel="stylesheet" href="liff.css?v=8" />
+<link rel="stylesheet" href="liff.css?v=9" />
 </head>
 <body>
 
@@ -447,6 +447,21 @@
           <p class="hint cs-after">予約すると、Google Meet の入室URLをLINEとメールでお送りします。前日と10分前にもお知らせします。</p>
         </form>
       </div>
+      <!-- 代表の Google の予約ページ（予約スケジュール）で日時を選ぶ -->
+      <div class="sec" id="csGoogle" hidden>
+        <div class="cs-google">
+          <h2 class="sub-title">代表の予約ページで日時を選ぶ</h2>
+          <ol class="cs-steps">
+            <li><span class="num">1</span><p>下のボタンで、代表の予約ページを開きます。<small>代表が対応できる時間だけが出ます</small></p></li>
+            <li><span class="num">2</span><p>日時を選び、お名前とメールアドレスを入れて予約します。<small class="cs-mail-wrap" id="csMailWrap">メールアドレスは、説明会のご予約と同じ <b id="csMail"></b> を入れてください（LINE のお知らせにつながります）</small></p></li>
+            <li><span class="num">3</span><p>予約が終わったら、この画面に戻ってきてください。<small>予約の日時と「Google Meet に入る」ボタンが出ます。LINE にも確認が届きます</small></p></li>
+          </ol>
+          <button type="button" class="btn btn-sun btn-block" id="csOpenBook"><svg class="ico"><use href="#i-calendar"/></svg>予約ページで日時を選ぶ</button>
+          <button type="button" class="btn btn-ghost btn-block cs-check" id="csCheck"><svg class="ico"><use href="#i-check"/></svg>予約しました（この画面に出す）</button>
+          <p class="form-note" id="csCheckNote" role="status" aria-live="polite"></p>
+          <p class="hint">Google Meet の URL と、日時の変更・取り消しのリンクは、Google から届く予約確認のメールにも書いてあります。</p>
+        </div>
+      </div>
       <div class="sec" id="csEmpty" hidden>
         <div class="decide">
           <h2 class="sec-title">いま予約できる日時がありません</h2>
@@ -814,8 +829,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=5"></script>
+<script src="config.js?v=6"></script>
 <script src="../assets/js/analytics.js"></script>
-<script src="liff-app.js?v=10"></script>
+<script src="liff-app.js?v=11"></script>
 </body>
 </html>
