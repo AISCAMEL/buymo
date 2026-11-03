@@ -28,7 +28,7 @@
      SEMINAR_DAYS    : 何日先まで予約できるか（既定 14）
      HOST_NAME       : 個別相談で話す人の名前（既定 吉田 一平）
      HOST_TITLE      : 肩書き（既定 代表）
-     HOST_PHOTO      : 顔写真の URL（https の JPEG か PNG。空なら名前の頭文字を表示）
+     HOST_PHOTO      : 顔写真の URL（https の JPEG か PNG。空なら https://buymo.me/liff/img/host.jpg。写真を出さないときは none）
      HOST_MESSAGE    : 見終わった方への、代表からのひとこと（空なら既定の文）
      CONSULT_CALENDAR: 枠を読むカレンダーの ID（空ならこの GAS を作った Google アカウントのカレンダー）
      CONSULT_MARK    : 枠にする予定の名前（既定 相談OK）
@@ -870,6 +870,7 @@ function stepMessage_(id, res, cfg) {
 var CONSULT_DONE_ = { '加盟決定': 1 };   // もう個別相談を予約できない状態
 var CONSULT_WHEN = ['すぐにでも', '1〜3か月以内', '半年以内', 'まだ決めていない'];
 var CONSULT_WORRY = ['収入の目安', '初期費用・資金', '本業との両立', '仕事の内容', '契約・エリア', 'その他'];
+var HOST_PHOTO_DEFAULT = 'https://buymo.me/liff/img/host.jpg';   // 代表の顔写真（サイトに置いた JPEG）
 var HOST_MESSAGE_DEFAULT = '加盟するかどうかは、実際に話してから決めていただきたいと思っています。' +
   '30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）';
 
@@ -877,7 +878,7 @@ function consultCfg_() {
   var p = PropertiesService.getScriptProperties();
   var min = Number(p.getProperty('CONSULT_MINUTES')) || 30;
   if ([15, 20, 30, 45, 60, 90].indexOf(min) < 0) min = 30;
-  var photo = String(p.getProperty('HOST_PHOTO') || '').trim();
+  var photo = String(p.getProperty('HOST_PHOTO') || HOST_PHOTO_DEFAULT).trim();   // none にすると写真を出さない
   return {
     calId: String(p.getProperty('CONSULT_CALENDAR') || '').trim(),
     mark: String(p.getProperty('CONSULT_MARK') || '相談OK').trim() || '相談OK',
@@ -1245,7 +1246,7 @@ function testSeminarMail() {
 function setupConsult() {
   seminarSheet_();   // 予約シートに個別相談の列を足す
   var cc = consultCfg_();
-  Logger.log('話す人：' + cc.host.title + ' ' + cc.host.name + '（写真：' + (cc.host.photo || '未設定。HOST_PHOTO に https の画像の URL を入れると表示') + '）');
+  Logger.log('話す人：' + cc.host.title + ' ' + cc.host.name + '（写真：' + (cc.host.photo || 'なし。HOST_PHOTO に https の画像の URL を入れると表示') + '）');
   var cal = consultCal_(cc);
   Logger.log('カレンダー：' + cal.getName() + (cc.calId ? '（' + cc.calId + '）' : '（この Google アカウントのカレンダー）'));
   Logger.log('枠にする予定の名前：「' + cc.mark + '」／長さ ' + cc.minutes + '分／' + cc.leadH + '時間後〜' + cc.days + '日先まで予約できる');

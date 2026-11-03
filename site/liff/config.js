@@ -34,6 +34,9 @@ window.ALTLIFE_CONFIG = {
   PRIVACY_URL: 'https://buymo.me/privacy.html',
   TOKUSHOHO_URL: 'https://buymo.me/tokushoho.html',
 
+  // 個別相談で話す代表の顔写真（GAS の HOST_PHOTO が優先。GAS が前の版のときにこちらを使う）
+  HOST_PHOTO: 'img/host.jpg',
+
   // 友だちへのシェア（Flex Message）に使う画像（https の絶対URL・1.91:1）
   SHARE_IMAGE: 'https://buymo.me/assets/img/buymo-ogp.png'
 };
