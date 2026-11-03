@@ -915,10 +915,10 @@ function consultSlots_(cc, now, fresh) {
   }
   var to = now + cc.days * 86400000;
   var evs = consultCal_(cc).getEvents(new Date(now), new Date(to + HOUR_MS * 24));
-  var open = [], busy = [], off = {};
+  var open = [], busy = [], off = {}, want = halfUpper_(cc.mark);
   evs.forEach(function (ev) {
     var title = String(ev.getTitle() || '');
-    var mark = title.indexOf(cc.mark) >= 0;
+    var mark = halfUpper_(title).indexOf(want) >= 0;   // 「相談ＯＫ」「相談ok」でもよい
     if (ev.isAllDayEvent()) {
       if (!mark && /休/.test(title)) {
         for (var d = ev.getAllDayStartDate().getTime(); d < ev.getAllDayEndDate().getTime(); d += 86400000) off[jst_(d + 12 * HOUR_MS, 'yyyy-MM-dd')] = 1;
@@ -941,6 +941,11 @@ function consultSlots_(cc, now, fresh) {
   out = out.slice(0, 400);
   try { cache.put('consult_slots', JSON.stringify(out), 120); } catch (err) { /* 大きすぎるときは覚えない */ }
   return out;
+}
+
+// 全角の英数字を半角に、英字を大文字にそろえる（iPad の日本語入力で「相談ＯＫ」となっても読めるように）
+function halfUpper_(t) {
+  return String(t || '').replace(/[Ａ-Ｚａ-ｚ０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }).replace(/\s+/g, '').toUpperCase();
 }
 
 // 「予定なし」にした予定・「いいえ」と返事した招待
