@@ -407,7 +407,11 @@ function seminarHandle_(req) {
           after.push(function () {
             pauseAndNotify_(c3.userId, '説明会後の個別相談の希望',
               '動画説明会（' + whenLabel_(c3, cfg) + '）を視聴して、個別相談を希望しています。\nお名前：' + c3.name + '\nメール：' + c3.email + '\n視聴：' + c3.pct + '%');
-            push_(c3.userId, [textMessage_('個別相談のご希望を受け付けました。\n担当者がこのトークで順番にご連絡します（営業時間外は翌営業日になることがあります）。\n\nお待ちいただく間にAIへ質問したいときは、下の「' + RESUME_TEXT + '」を押してください。', [RESUME_TEXT])]);
+            var paused = typeof AUTO_PAUSE !== 'undefined' && AUTO_PAUSE;   // 引き継ぎで AI を止める設定のときだけ「AIに戻る」を出す
+            push_(c3.userId, [textMessage_('個別相談のご希望を受け付けました。\n担当者がこのトークで日程をご連絡します（営業時間外は翌営業日になることがあります）。\n\n' +
+              (paused ? 'お待ちいただく間にAIへ質問したいときは、下の「' + RESUME_TEXT + '」を押してください。' : 'そのあいだも、気になることはAIがお答えします。そのまま送ってください。'),
+              paused ? [RESUME_TEXT] : EXAMPLE_QUESTIONS)]);
+            logRow_(c3.userId, '引き継ぎ', '説明会のあと、個別相談の日程を担当者に相談');
           });
         }
       }

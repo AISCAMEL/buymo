@@ -147,6 +147,8 @@ window.RCLINE = (function () {
     if (s && s.status === '視聴完了' && s.doneAt && now - s.doneAt < DAY) return { lv: 'orange', label: '🔥 最後まで視聴・相談はまだ', why: '見終わったばかりです。代表からのご案内は自動で送ります。チャットでひとこと声をかけるチャンス' };
     if (p && p.paused && s && s.status === '相談希望') return { lv: 'red', label: '個別相談を希望', why: '説明会のあと個別相談を選択。AIの返信を止めています（あと' + p.pauseLeft + '時間）' };
     if (p && p.paused) return { lv: 'red', label: '担当者を希望', why: 'チャットで返信してください。AIの返信を止めています（あと' + p.pauseLeft + '時間）' };
+    // AI を止めずに本部へ知らせた引き継ぎ（24時間。本部の画面で操作すると消える）
+    if (p && p.handoffAt && now - p.handoffAt < DAY) return { lv: 'red', label: (s && s.status === '相談希望') ? '個別相談を希望' : '担当者を希望', why: 'LINEのチャットで返信してください（AIも返事を続けています）' + (p.handoffText ? '：「' + p.handoffText + '」' : '') };
     if (s && s.status === '申込' && l.stage !== '加盟') return { lv: 'orange', label: '加盟の申込', why: '3営業日以内に、契約内容とエリアのご案内を' };
     if (l.nextDue && isOverdue(l.nextDue)) return { lv: 'red', label: '期限切れ', why: '次にやること：' + l.next };
     if (s && (s.status === '検討中' || s.status === '視聴完了')) return { lv: 'green', label: '説明会を視聴・未決定', why: '視聴 ' + s.pct + '%。疑問を聞いてみるタイミングです' };

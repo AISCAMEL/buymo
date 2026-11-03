@@ -18,9 +18,9 @@
 
    ■ 動き
      ・ふつうの質問 → AI が返信（下にクイックリプライ：動画説明会を予約／資料を受け取る／スタイル診断／担当者と話したい）
-     ・「担当者と話したい」など、または AI が人の対応が必要と判断 → 引き継ぎの返信＋本部にメール（と Slack）で通知、
-       その人への AI 返信を 24 時間止める（担当者が LINE Official Account Manager のチャットで対応）。
-       お客様が「AIに戻る」を押すか、通知メールの「AIを再開する」リンクを押すとすぐ再開
+     ・「担当者と話したい」など、または AI が人の対応が必要と判断 → 「担当者にも知らせました」の返信＋本部に通知。
+       AI はそのまま返事を続ける（AUTO_PAUSE = false）。担当者は LINE Official Account Manager のチャットで返信できる。
+       じっくり担当者だけで対応したいときは、本部の画面の「AIを止めて担当者が対応」で、その方への AI を止める
      ・ミニアプリからの申込投稿（【パートナー資料の請求】）→ お礼と今後の流れを返信＋Slack 通知
      ・動画説明会（予約・リマインド・視聴・加盟の申込）は同じプロジェクトの「セミナー.gs」が担当
        （セミナー.gs がなくても AI 応答はそのまま動く）
@@ -33,7 +33,10 @@ var APP_URL = 'https://miniapp.line.me/2012192113-CdcRu3Vi';   // ミニアプ�
 var PARTNER_URL = 'https://buymo.me/buymo-partner.html';
 var SITE_URL = 'https://buymo.me/';
 var DEFAULT_MODEL = 'anthropic/claude-haiku-4-5';
-var PAUSE_HOURS = 24;          // 担当者に引き継いだあと AI が返信しない時間
+var PAUSE_HOURS = 24;          // 本部の画面で「AIを止めて担当者が対応」を押したとき、AI が返信しない時間
+// 引き継ぎ（「担当者と話したい」など）のときに AI を止めるか。false：止めない（本部に知らせるだけで、AI はそのまま返事を続ける）
+// true にすると以前の動き（引き継ぐと、その方への AI の返信を PAUSE_HOURS 時間止める）
+var AUTO_PAUSE = false;
 var HISTORY_TURNS = 10;        // AI に渡す直近の会話（発言数）
 var APPLY_PREFIX = '【パートナー資料の請求】';   // ミニアプリが申込時にトークへ送る文の先頭
 var SEMINAR_PREFIX = '【説明会の予約】';         // ミニアプリが説明会の予約時にトークへ送る文の先頭
@@ -283,9 +286,13 @@ function wantsHuman_(text) {
   return HUMAN_RE.test(text);
 }
 
-var HANDOFF_TEXT = '担当者におつなぎします。\n担当者がこのトークで順番にご返信します（営業時間外は翌営業日になることがあります）。\n\n' +
-  'お待ちいただく間にAIへ質問したいときは、下の「' + RESUME_TEXT + '」を押してください。';
-var HANDOFF_QUICK = [RESUME_TEXT, { label: '動画説明会を予約', uri: SEMINAR_PAGE }];
+var HANDOFF_TEXT = AUTO_PAUSE
+  ? '担当者におつなぎします。\n担当者がこのトークで順番にご返信します（営業時間外は翌営業日になることがあります）。\n\n' +
+    'お待ちいただく間にAIへ質問したいときは、下の「' + RESUME_TEXT + '」を押してください。'
+  : '担当者にもお知らせしました。必要なときは、担当者からこのトークでご連絡します（営業時間外は翌営業日になることがあります）。\n\n' +
+    'そのあいだも、AIがお答えします。気になることは、そのまま送ってください。';
+var HANDOFF_QUICK = AUTO_PAUSE ? [RESUME_TEXT, { label: '動画説明会を予約', uri: SEMINAR_PAGE }]
+  : [{ label: '動画説明会を予約', uri: SEMINAR_PAGE }].concat(EXAMPLE_QUESTIONS);
 
 function handoff_(replyToken, userId, text, aiAnswer) {
   var msg = (aiAnswer ? aiAnswer + '\n\n' : '') + HANDOFF_TEXT;
@@ -295,16 +302,28 @@ function handoff_(replyToken, userId, text, aiAnswer) {
   pauseAndNotify_(userId, '担当者への引き継ぎ', 'お客様のメッセージ：\n' + text);
 }
 
-// AI を止めて担当者に知らせる（トークでの引き継ぎ・説明会後の個別相談の両方で使う）
+// 担当者に知らせる（トークでの引き継ぎ・説明会後の個別相談の両方で使う）。AUTO_PAUSE のときだけ AI も止める
 function pauseAndNotify_(userId, title, detail) {
+  var name = displayName_(userId);
+  if (!AUTO_PAUSE) {
+    notifyStaff_(title + '（' + name + ' さん）', [
+      detail,
+      '',
+      '■ 対応のしかた',
+      '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
+      '2. ' + name + ' さんのトークを開いて返信する',
+      '※ AI はそのまま返事を続けています。担当者だけでじっくり話したいときは、本部の「加盟店募集」画面で、その方の「■ AIを止めて担当者が対応」を押してください'
+    ].join('\n'));
+    return;
+  }
   PropertiesService.getScriptProperties()
     .setProperty('pause_' + userId, String(Date.now() + PAUSE_HOURS * 3600 * 1000));
-  notifyStaff_(title + '（' + displayName_(userId) + ' さん）', [
+  notifyStaff_(title + '（' + name + ' さん）', [
     detail,
     '',
     '■ 対応のしかた',
     '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
-    '2. ' + displayName_(userId) + ' さんのトークを開いて返信する',
+    '2. ' + name + ' さんのトークを開いて返信する',
     '3. 対応が終わったら、下のリンクを押すとAIの自動返信がすぐ再開します（押さなくても' + PAUSE_HOURS + '時間後に自動で再開）',
     'AIを再開する：' + webAppUrl_() + '?a=resume&u=' + encodeURIComponent(userId) + '&s=' + sign_('resume:' + userId)
   ].join('\n'));
@@ -623,6 +642,9 @@ function adminPeople_() {
     if (who === 'お客様') { p.msgs++; p.lastText = String(r[4]).slice(0, 80); }
     if (who === '友だち追加') p.blocked = false;
     if (who === 'ブロック') p.blocked = true;
+    // 担当者を希望した時刻（AI を止めないので、本部の画面の「いま対応が必要な人」はこれで出す）。本部が操作したら済み
+    if (who === '引き継ぎ') { p.handoffAt = t; p.handoffText = p.lastText; }
+    if (who === '本部' && t >= (p.handoffAt || 0)) p.handoffAt = 0;
   });
   if (typeof seminarSheet_ === 'function') {
     var hasTimes = typeof times_ === 'function', semCfg = seminarConfig_();
