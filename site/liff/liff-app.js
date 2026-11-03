@@ -1277,11 +1277,13 @@
     var st = sem.res.status;
     var t = mode === 'cafter' ? ['ご相談ありがとうございました', 'お時間をいただき、ありがとうございました。気になることは、トークに送るとAIがすぐにお答えします。加盟を決めたら、ここからお申し込みいただけます。']
       : st === '加盟決定' ? ['ご加盟のご決断、ありがとうございます', '契約内容とエリアのご案内を、担当者から3営業日以内にお送りします。ご契約は、書面で内容をご確認いただき、ご納得いただけた場合のみです。']
-      : st === '相談希望' ? ['個別相談のご希望を受け付けました', '担当者が、LINEのトークで日程をご連絡します（営業時間外は翌営業日になることがあります）。お待ちいただく間も、トークでAIに質問できます。']
+      : st === '相談希望' ? ['個別相談のご希望を受け付けました', '担当者が、LINEのトークで日程をご連絡します（営業時間外は翌営業日になることがあります）。待たずに、代表の予約ページからご都合のよい日時を選んでいただくこともできます。']
       : ['加盟のお申し込みを受け付けました', '担当者から3営業日以内に、契約内容とエリアのご案内をします。ご契約は、内容にご納得いただけた場合のみです。'];
     $('#semDoneTitle').textContent = t[0];
     $('#semDoneText').textContent = t[1];
     $('#semDoneApply').hidden = mode !== 'cafter';
+    $('#semDoneConsult').hidden = st !== '相談希望';   // 担当者からの連絡を待たずに、自分で日時を選べる
+    $('#semDoneRebook').hidden = st === '加盟決定';    // 行き止まりにしない：説明会はいつでも予約し直せる
   }
 
   /* ---------- 代表との個別相談（Google Meet） ---------- */
@@ -1556,6 +1558,7 @@
     $('#tkCancel').addEventListener('click', semCancel);
     $('#liveRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; resetPlayer(); renderSeminar(); window.scrollTo(0, 0); });
     $('#semRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
+    $('#semDoneRebook').addEventListener('click', function () { sem.rebook = true; sem.consulting = false; sem.day = ''; sem.time = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
     $('#semRetry').addEventListener('click', semLoad);
     // 個別相談
     $('#csBack').addEventListener('click', function () { sem.consulting = false; csNote(''); renderSeminar(); window.scrollTo(0, 0); });
