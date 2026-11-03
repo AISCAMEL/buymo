@@ -16,6 +16,7 @@
 
   var CFG = window.ALTLIFE_CONFIG || {};
   var DRY = /[?&]dry=1\b/.test(location.search) || /dry%3D1/.test(location.search);
+  var DRY_BOOK = DRY && /[?&]book=1\b|book%3D1/.test(location.search);   // 試し用：Google の予約ページで受け付ける形
   var LS_HISTORY = 'altlife_history';
   var LS_CHECK = 'altlife_check';
   var LS_DRAFT = 'altlife_draft';
@@ -764,6 +765,7 @@
     else if (action === 'decide' && r) r.status = { apply: '申込', consult: '相談希望', later: '検討中' }[x.decision] || r.status;
     else if (action === 'consult' && r) { r.status = '相談予約'; r.consult = { start: x.start, end: x.start + 30 * 60000, url: 'https://meet.google.com/', info: '' }; }
     else if (action === 'consultCancel' && r) { r.status = '視聴完了'; r.consult = null; }
+    else if (action === 'cscan' && r && sem.bookOpened) { r.status = '相談予約'; var c0 = Date.parse(todayKey() + 'T19:00:00+09:00') + DAY_MS; r.consult = { start: c0, end: c0 + 30 * 60000, url: 'https://meet.google.com/', info: '', via: 'google' }; }
     lsSet('altlife_sem_dry', r);
     var out = { ok: true, now: Date.now(), config: { openMin: 480, closeMin: 1440, slotMin: 30, windowMin: 60, leadMin: 5, minutes: 7, days: 14, ready: false }, reservation: r,
       host: { name: '吉田 一平', title: '代表', photo: CFG.HOST_PHOTO, message: '加盟するかどうかは、実際に話してから決めていただきたいと思っています。30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）' } };
@@ -771,7 +773,8 @@
       // 試し用：この先7日の 19:00〜21:00（3時間後から）
       var list = [], base = Date.parse(todayKey() + 'T19:00:00+09:00');
       for (var d = 0; d < 8; d++) for (var k = 0; k < 4; k++) { var at = base + d * DAY_MS + k * 30 * 60000; if (at > Date.now() + 3 * 3600000 && (d + k) % 5) list.push(at); }
-      out.consult = { minutes: 30, slots: list };
+      // ?book=1 を付けると、Google の予約ページで受け付ける形を試せる
+      out.consult = { minutes: 30, slots: DRY_BOOK ? [] : list, bookingUrl: CFG.CONSULT_BOOKING_URL || '' };
     }
     return out;
   }
@@ -1326,9 +1329,11 @@
     $('#csLoading').textContent = '空いている日時を読み込んでいます…';
     semApi('slots').then(function (d) {
       if (!d.ok) throw new Error(d.error);
-      // GAS が個別相談の入る前の版のときは、枠なしとして「担当者に日程を相談する」を出す
+      // GAS が個別相談の入る前の版のときは枠なし。Google の予約ページがあればそれを開く（予約の確認は GAS が新しくなってから）
       sem.slots = (d.consult && d.consult.slots) || [];
       sem.csMin = (d.consult && d.consult.minutes) || 30;
+      sem.bookingUrl = d.consult ? d.consult.bookingUrl || '' : CFG.CONSULT_BOOKING_URL || '';
+      sem.canScan = !!d.consult;
     }).catch(function () {
       $('#csLoading').textContent = '読み込めませんでした。電波の良い場所で、開き直してください。';
     }).then(function () { sem.slotsLoading = false; if (sem.consulting) renderConsult(); });
@@ -1342,10 +1347,19 @@
     $('#csNote').hidden = !(st === '相談予約' || st === '相談欠席');
     if (st === '相談予約' && sem.res.consult) $('#csNote').textContent = 'いまのご予約：' + consultWhen(sem.res.consult) + '。新しい日時を選ぶと、こちらに変わります。';
     else if (st === '相談欠席') $('#csNote').textContent = '前回はお会いできませんでした。別の日時を選んでください。';
+    var google = !!list && !list.length && !!sem.bookingUrl;   // 「相談OK」の枠がなく、Google の予約ページで受け付ける
+    $('#csGoogle').hidden = !google;
     if (!list) { $('#csPick').hidden = true; $('#csEmpty').hidden = true; return; }
     $('#csLoading').hidden = true;
-    $('#csEmpty').hidden = list.length > 0;
+    $('#csEmpty').hidden = list.length > 0 || google;
     $('#csPick').hidden = !list.length;
+    if (google) {
+      var em = sem.res && sem.res.email;
+      $('#csMailWrap').hidden = !em;
+      $('#csMail').textContent = em || '';
+      $('#csCheck').hidden = !sem.canScan;
+      if (st === '相談予約') $('#csNote').textContent = 'いまのご予約：' + consultWhen(sem.res.consult) + '。日時の変更・取り消しは、Google から届いた予約確認のメールのリンクからできます。';
+    }
     if (!list.length) return;
     var days = [];
     list.forEach(function (ms) { var k = slotDayKey(ms); if (days.indexOf(k) < 0) days.push(k); });
@@ -1434,11 +1448,42 @@
     $('#ctDate').textContent = p.y + '年' + (p.m + 1) + '月' + p.d + '日（' + '日月火水木金土'.charAt(p.w) + '）';
     $('#ctTime').textContent = clock(c.start);
     $('#ctEnd').textContent = clock(c.end);
+    var google = c.via === 'google';   // Google の予約ページで入った予約：変更・取り消しは Google のメールから
     $('#ctJoin').hidden = !c.url;
     $('#ctNote').textContent = c.url
-      ? '開始の少し前に、上のボタンから入室してください。前日と10分前にも、LINEとメールでお知らせします。'
+      ? '開始の少し前に、上のボタンから入室してください。前日と10分前にも、LINEとメールでお知らせします。' + (google ? '日時の変更・取り消しは、Google から届いた予約確認のメールのリンクからできます。' : '')
+      : google ? '当日は、Google から届いた予約確認のメールの「Google Meet」のリンクから入室してください。日時の変更・取り消しも、そのメールからできます。'
       : '入室用のURLは、当日までに担当者からトークでお送りします。前日と10分前にもお知らせします。';
+    $('#ctChange').hidden = google;
+    $('#ctCancel').hidden = google;
+    $('#ctCal').hidden = google;   // Google カレンダーの招待はもう届いている
     updateCCountdown();
+  }
+
+  // Google の予約ページで予約したあと：GAS に、この方の予約を代表のカレンダーから探してもらう
+  function checkBooked(quiet) {
+    if (!sem.canScan || sem.scanning) return;
+    sem.scanning = true;
+    var btn = $('#csCheck');
+    btn.disabled = true;
+    if (!quiet) $('#csCheckNote').textContent = '予約を確かめています…';
+    semApi('cscan').then(function (d) {
+      if (d.ok && d.reservation && d.reservation.status === '相談予約' && d.reservation.consult) {
+        sem.res = d.reservation;
+        sem.consulting = false;
+        sem.bookOpened = false;
+        $('#csCheckNote').textContent = '';
+        track('consult_book', { via: 'google' });
+        renderSeminar();
+        window.scrollTo(0, 0);
+        toast('個別相談のご予約を確認しました');
+      } else if (!quiet) {
+        $('#csCheckNote').className = 'form-note ng';
+        $('#csCheckNote').textContent = 'まだ予約が見つかりません。説明会と同じメールアドレス（' + ((sem.res && sem.res.email) || '') + '）で予約したか確かめてください。予約の直後は、表示まで1〜2分かかることがあります。';
+      }
+    }).catch(function () {
+      if (!quiet) $('#csCheckNote').textContent = '確かめられませんでした。電波の良い場所で、もう一度押してください。';
+    }).then(function () { sem.scanning = false; btn.disabled = false; });
   }
 
   function updateCCountdown() {
@@ -1545,8 +1590,21 @@
     $('#ctCal').addEventListener('click', function () { openUrl(consultGcal(), true); });
     $('#ctChange').addEventListener('click', function () { openConsult(); });
     $('#ctCancel').addEventListener('click', consultCancel);
+    $('#csOpenBook').addEventListener('click', function () {
+      if (!sem.bookingUrl) return;
+      sem.bookOpened = true;
+      $('#csCheckNote').className = 'form-note';
+      $('#csCheckNote').textContent = '';
+      track('consult_open_booking', {});
+      openUrl(sem.bookingUrl, false);
+    });
+    $('#csCheck').addEventListener('click', function () { checkBooked(false); });
     $('#playerStart').addEventListener('click', startPlayer);
-    document.addEventListener('visibilitychange', function () { if (document.hidden && sem.player) sendProgress(); });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && sem.player) sendProgress();
+      // 予約ページから戻ってきたら、予約が入ったか確かめる
+      if (!document.hidden && sem.bookOpened && sem.consulting) checkBooked(true);
+    });
   }
 
   /* =======================================================
