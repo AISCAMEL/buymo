@@ -136,6 +136,82 @@ window.RCLINE = (function () {
   }
   function isOverdue(dayMd) { return dayMd && isPast(dayMd); }
 
+  /* ---------- システムの状態（GAS の点検結果・最近のエラー） ---------- */
+  function demoHealth() {
+    var now = Date.now();
+    var items = [
+      { level: 'ok', label: 'LINE', text: '中古車投資ビジネス（@603vfsfd）につながっています' },
+      { level: 'ok', label: 'Webhook', text: 'この GAS に届く設定です' },
+      { level: 'ok', label: '配信通数', text: '今月 46 / 200 通（23%）' },
+      { level: 'ok', label: 'メール', text: '今日あと 97 通送れます' },
+      { level: 'warn', label: '説明会の動画', text: '未設定です（SEMINAR_YOUTUBE）。開始時刻になっても「動画を準備しています」と出ます' },
+      { level: 'ok', label: '説明会のお知らせ', text: '5分おきに動いています' }
+    ];
+    return { ok: true, now: now, live: { at: now, level: 'warn', items: items, stats: { msgs: 18, ai: 15, aiErr: 0, handoff: 1, follow: 3, block: 0, step: 7 }, seminar: { booked24: 2, today: 1, upcoming: 4 }, paused: 1 },
+      last: { at: now - 3 * 3600000, level: 'ok', items: [{ level: 'ok', label: 'AI', text: 'AI が返事をしています' }] },
+      errors: [{ at: now - 26 * 3600000, where: 'LINEへの送信（push）', text: 'HTTP 429' }] };
+  }
+
+  function loadHealth() {
+    if (state.health || state.healthLoading) return;
+    if (demo) { state.health = demoHealth(); renderHealth(); return; }
+    state.healthLoading = true;
+    api('health').then(function (d) { state.health = d.ok ? d : { ok: false }; })
+      .catch(function () { state.health = { ok: false }; })
+      .then(function () { state.healthLoading = false; renderHealth(); });
+  }
+
+  function hmText(t) { var d = new Date(t); return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2); }
+
+  function renderHealth() {
+    var box = document.getElementById('lhHealth');
+    if (!box) return;
+    var h = state.health;
+    if (!h) { box.className = 'lh'; box.innerHTML = '<p class="lh-wait">システムの状態を確認しています…</p>'; loadHealth(); return; }
+    if (!h.ok) {
+      box.className = 'lh lh-warn';
+      box.innerHTML = '<p class="lh-wait">システムの状態を読み込めませんでした。GAS を最新のコードにしてから、もう一度開いてください。</p>';
+      return;
+    }
+    var live = h.live || { items: [], stats: {} };
+    var items = (live.items || []).slice();
+    var aiLast = h.last && (h.last.items || []).filter(function (x) { return x.label === 'AI'; })[0];
+    if (aiLast) items.push({ level: aiLast.level, label: 'AI', text: aiLast.text + '（' + hmText(h.last.at) + ' の点検）' });
+    var LV = { ok: 0, warn: 1, ng: 2 }, worst = items.reduce(function (m, x) { return Math.max(m, LV[x.level] || 0); }, 0);
+    var level = ['ok', 'warn', 'ng'][worst];
+    var bad = items.filter(function (x) { return x.level !== 'ok'; }).length;
+    var title = level === 'ok' ? '異常なし' : '要確認 ' + bad + '件';
+    var MARK = { ok: '✅', warn: '⚠️', ng: '❌' };
+    var s = live.stats || {}, sem = live.seminar;
+    var stats = 'お客様のメッセージ ' + (s.msgs || 0) + '／AIの返事 ' + (s.ai || 0) + '／引き継ぎ ' + (s.handoff || 0) +
+      '／友だち追加 ' + (s.follow || 0) + '／ブロック ' + (s.block || 0) +
+      (sem ? '／説明会の予約 ' + sem.booked24 + '（これからの予約 ' + sem.upcoming + '・今日の回 ' + sem.today + '）／自動で送ったお知らせ ' + (s.step || 0) : '');
+    var errs = (h.errors || []).map(function (e) {
+      return '<li><time>' + hmText(e.at) + '</time><b>' + esc(e.where) + '</b><span>' + esc(e.text) + '</span></li>';
+    }).join('');
+    var open = !!state.healthOpen || level === 'ng';
+    box.className = 'lh lh-' + level;
+    box.innerHTML =
+      '<button type="button" class="lh-head" aria-expanded="' + open + '">' +
+        '<span class="lh-dot" aria-hidden="true"></span>' +
+        '<span class="lh-title"><b>システムの状態：' + esc(title) + '</b><small>' + hmText(live.at || h.now) + ' 時点' +
+          (h.last ? '・毎朝の点検 ' + hmText(h.last.at) : '・毎朝の点検はまだありません（GAS で setupMonitoring を実行）') + '</small></span>' +
+        '<span class="lh-more">' + (open ? '閉じる' : 'くわしく') + '</span>' +
+      '</button>' +
+      '<div class="lh-body"' + (open ? '' : ' hidden') + '>' +
+        '<ul class="lh-items">' + items.map(function (x) {
+          return '<li class="lv-' + x.level + '"><span>' + MARK[x.level] + '</span><b>' + esc(x.label) + '</b><span>' + esc(x.text) + '</span></li>';
+        }).join('') + '</ul>' +
+        '<p class="lh-stats"><b>直近24時間</b>' + esc(stats) + (live.paused ? '／いまAIを止めている人 ' + live.paused + '人' : '') + '</p>' +
+        '<p class="lh-sub">最近のエラー</p>' +
+        (errs ? '<ul class="lh-errors">' + errs + '</ul>' : '<p class="lh-none">エラーはありません。</p>') +
+        '<button type="button" class="lh-reload" id="lhReload">いまの状態を確認し直す</button>' +
+      '</div>';
+    box.querySelector('.lh-head').addEventListener('click', function () { state.healthOpen = !open; renderHealth(); });
+    var rl = document.getElementById('lhReload');
+    if (rl) rl.addEventListener('click', function () { state.health = null; state.healthOpen = true; renderHealth(); });
+  }
+
   function renderTop(leads) {
     var host = document.getElementById('rcLine');
     if (!host) return;
@@ -169,10 +245,12 @@ window.RCLINE = (function () {
 
     host.innerHTML =
       (demo ? '<p class="rc-demo">見本の表示です（サンプルのデータ）。ここでの操作は保存されません。</p>' : '') +
+      '<div class="lh" id="lhHealth"></div>' +
       '<div class="lf">' + funnel + '</div>' +
       '<div class="la-head"><h2>🔔 いま対応が必要な人 <span>' + att.length + '人</span></h2></div>' +
       '<div class="la-grid">' + cards + '</div>' +
       (demo ? '' : '<p class="lk-change"><button type="button" id="lkChange">LINE連携の合言葉を変える</button></p>');
+    renderHealth();
     var ch = document.getElementById('lkChange');
     if (ch) ch.addEventListener('click', function () { if (window.confirm('この端末に保存した合言葉を消して、入れ直しますか？')) { keySet(''); location.reload(); } });
     host.querySelectorAll('[data-open]').forEach(function (c) {

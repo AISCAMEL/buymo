@@ -121,7 +121,7 @@ function doPost(e) {
   for (var i = 0; i < events.length; i++) {
     try { handleEvent_(events[i]); } catch (err) {
       Logger.log('handleEvent: ' + err.message);
-      props.setProperty('LAST_ERROR', new Date().toLocaleString('ja-JP') + ' ' + err.message);
+      reportError_('LINEの返信', err);
     }
   }
   return ok_();
@@ -352,6 +352,7 @@ function askAI_(messages) {
     });
     if (res.getResponseCode() !== 200) {
       Logger.log('OpenRouter ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 500));
+      reportError_('AIの返事（OpenRouter）', 'HTTP ' + res.getResponseCode(), res.getContentText().slice(0, 300));
       return null;
     }
     var data = JSON.parse(res.getContentText());
@@ -364,6 +365,7 @@ function askAI_(messages) {
     return text || null;
   } catch (err) {
     Logger.log('askAI_: ' + err.message);
+    reportError_('AIの返事', err);
     return null;
   }
 }
@@ -431,7 +433,13 @@ function lineFetch_(path, method, body) {
   var opt = { method: method, headers: { Authorization: 'Bearer ' + token }, muteHttpExceptions: true };
   if (body) { opt.contentType = 'application/json'; opt.payload = JSON.stringify(body); }
   var res = UrlFetchApp.fetch('https://api.line.me' + path, opt);
-  if (res.getResponseCode() >= 300) Logger.log('LINE ' + path + ' ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
+  if (res.getResponseCode() >= 300) {
+    Logger.log('LINE ' + path + ' ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
+    // お客様へのメッセージが送れなかったときだけ知らせる（ブロックした人のプロフィール取得などは除く）
+    if (/^\/v2\/bot\/message\/(push|reply)/.test(path)) {
+      reportError_('LINEへの送信（' + path.split('/').pop() + '）', 'HTTP ' + res.getResponseCode(), res.getContentText().slice(0, 300));
+    }
+  }
   return res;
 }
 
@@ -575,6 +583,11 @@ function adminApi_(e) {
     if (!key || req.key !== key) out = { ok: false, error: 'key' };
     else if (req.action === 'people') out = { ok: true, now: Date.now(), people: adminPeople_() };
     else if (req.action === 'timeline') out = { ok: true, timeline: adminTimeline_(u) };
+    else if (req.action === 'health') {
+      var last = null;
+      try { last = JSON.parse(PropertiesService.getScriptProperties().getProperty('HEALTH_LAST') || 'null'); } catch (e2) { /* noop */ }
+      out = { ok: true, now: Date.now(), live: healthReport_(false), last: last, errors: recentErrors_(10) };
+    }
     else if (req.action === 'pause' && u) {
       PropertiesService.getScriptProperties().setProperty('pause_' + u, String(Date.now() + PAUSE_HOURS * 3600 * 1000));
       logRow_(u, '本部', '本部の画面からAIの返信を止めました');
@@ -586,6 +599,7 @@ function adminApi_(e) {
     } else out = { ok: false, error: 'action' };
   } catch (err) {
     Logger.log('adminApi_: ' + err.message);
+    reportError_('本部の画面', err);
     out = { ok: false, error: 'server' };
   }
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
@@ -652,7 +666,7 @@ function adminPeople_() {
 }
 
 function adminTimeline_(u) {
-  var KIND = { 'お客様': 'user', 'AI': 'ai', 'AI（エラー）': 'ai', '定型': 'auto', '引き継ぎ': 'handoff', '友だち追加': 'friend', 'ブロック': 'block', '本部': 'staff' };
+  var KIND = { 'お客様': 'user', 'AI': 'ai', 'AI（エラー）': 'ai', '定型': 'auto', '引き継ぎ': 'handoff', '友だち追加': 'friend', 'ブロック': 'block', '本部': 'staff', '自動配信': 'step' };
   var list = [];
   logRows_().forEach(function (r) {
     if (String(r[1]) !== u) return;
@@ -757,6 +771,8 @@ function diagnose() {
   Logger.log('④ AIが一時停止中の人：' + (paused.length ? paused.map(function (k) { return k.slice(6); }).join(', ') + ' → resumeAllAI で再開' : 'なし'));
 
   Logger.log('⑤ 最後のエラー：' + (props.getProperty('LAST_ERROR') || 'なし'));
+  var trig = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'dailyCheck'; });
+  Logger.log('⑥ 毎朝の点検：' + (trig ? 'オン' : '★オフ（setupMonitoring を実行するとオンになります）'));
 }
 
 // リッチメニューの確認（以前つないでいたツールが API でメニューを設定していないか見るだけ。削除はしない）
@@ -765,4 +781,189 @@ function checkRichMenus() {
   Logger.log('システム側の既定メニュー: ' + d.getResponseCode() + ' ' + d.getContentText());
   var l = lineFetch_('/v2/bot/richmenu/list', 'get');
   Logger.log('システム側で作られたメニュー一覧: ' + l.getContentText());
+}
+
+
+/* ============================================================
+   監視：エラーの即時通知・毎朝の自動点検（結果は本部の画面にも出る）
+   最初に1回だけ setupMonitoring() を実行する（毎朝8時台に dailyCheck が動く）
+   ============================================================ */
+var ERROR_SHEET = 'エラー記録';
+var HEALTH_LEVEL = { ok: 0, warn: 1, ng: 2 };
+
+// エラーを「エラー記録」シートに残して、本部にすぐ知らせる（同じ場所のエラーは30分に1回まで）
+function reportError_(where, err, detail) {
+  var msg = String((err && err.message) || err || '');
+  var now = new Date();
+  try { PropertiesService.getScriptProperties().setProperty('LAST_ERROR', now.toLocaleString('ja-JP') + ' ' + where + '：' + msg); } catch (e) { /* noop */ }
+  try {
+    var sh = errorSheet_();
+    if (sh) sh.appendRow([Utilities.formatDate(now, 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss'), where, msg.slice(0, 500), String(detail || '').slice(0, 500)]);
+  } catch (e) { /* noop */ }
+  try {
+    var cache = CacheService.getScriptCache(), key = ('errnote_' + encodeURIComponent(where)).slice(0, 200);
+    if (cache.get(key)) return;
+    cache.put(key, '1', 1800);
+    notifyStaff_('⚠ エラーが起きました：' + where, msg + (detail ? '\n' + String(detail).slice(0, 500) : '') +
+      '\n\n同じ場所のエラーは30分に1回だけ知らせます。これまでのエラーは、会話ログのスプレッドシートの「' + ERROR_SHEET + '」シートと、本部の画面で見られます。');
+  } catch (e) { Logger.log('reportError_: ' + e.message); }
+}
+
+function errorSheet_() {
+  var id = PropertiesService.getScriptProperties().getProperty('LOG_SHEET_ID');
+  if (!id) return null;
+  var ss = SpreadsheetApp.openById(id);
+  var sh = ss.getSheetByName(ERROR_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(ERROR_SHEET, ss.getNumSheets());
+    sh.appendRow(['日時', '場所', '内容', 'くわしく']);
+    sh.getRange(1, 1, 1, 4).setFontWeight('bold').setBackground('#7A1F1F').setFontColor('#ffffff');
+    sh.setFrozenRows(1);
+    sh.getRange('A:A').setNumberFormat('@');
+  }
+  return sh;
+}
+
+// 直近のエラー（新しい順）
+function recentErrors_(limit, sinceMs) {
+  var sh = errorSheet_();
+  if (!sh) return [];
+  var n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  var from = Math.max(2, sh.getLastRow() - 199);
+  var rows = sh.getRange(from, 1, sh.getLastRow() - from + 1, 4).getValues();
+  return rows.map(function (r) { return { at: logTime_(r[0]), where: String(r[1]), text: String(r[2]) }; })
+    .filter(function (x) { return !sinceMs || x.at >= sinceMs; })
+    .sort(function (a, b) { return b.at - a.at; })
+    .slice(0, limit || 10);
+}
+
+// 点検：LINE・Webhook・配信通数・AI・説明会・直近24時間の動き・エラー
+// withAI：AI に短い質問を1回送って答えるか確かめる（毎朝の点検だけ。費用はごくわずか）
+function healthReport_(withAI) {
+  var props = PropertiesService.getScriptProperties();
+  var items = [];
+  function add(level, label, text) { items.push({ level: level, label: label, text: text }); }
+  var now = Date.now(), since = now - 86400000;
+
+  // LINE
+  try {
+    var info = lineFetch_('/v2/bot/info', 'get');
+    if (info.getResponseCode() === 200) {
+      var bot = JSON.parse(info.getContentText());
+      add(bot.chatMode === 'chat' ? 'ok' : 'warn', 'LINE', bot.displayName + '（' + bot.basicId + '）につながっています' +
+        (bot.chatMode === 'chat' ? '' : '。チャットがオフなので、引き継いだあと担当者が返信できません'));
+    } else add('ng', 'LINE', 'LINE につながりません（' + info.getResponseCode() + '）。チャネルアクセストークンを確認してください');
+  } catch (e) { add('ng', 'LINE', 'LINE の確認でエラー：' + e.message); }
+
+  // Webhook
+  try {
+    var ep = lineFetch_('/v2/bot/channel/webhook/endpoint', 'get');
+    if (ep.getResponseCode() === 200) {
+      var w = JSON.parse(ep.getContentText()), url = w.endpoint || '';
+      var tokenOk = url.indexOf('token=' + props.getProperty('WEBHOOK_TOKEN')) >= 0;
+      if (w.active && url.indexOf('script.google.com') >= 0 && tokenOk) add('ok', 'Webhook', 'この GAS に届く設定です');
+      else add('ng', 'Webhook', !w.active ? 'Webhook の利用がオフです（AI が返事をしません）' : !tokenOk ? 'Webhook URL の ?token= が違います' : 'Webhook URL が別の場所になっています');
+    }
+  } catch (e) { add('warn', 'Webhook', '確認できませんでした：' + e.message); }
+
+  // 配信通数（プッシュの残り）
+  try {
+    var q = lineFetch_('/v2/bot/message/quota', 'get'), c = lineFetch_('/v2/bot/message/quota/consumption', 'get');
+    if (q.getResponseCode() === 200 && c.getResponseCode() === 200) {
+      var qj = JSON.parse(q.getContentText()), used = Number(JSON.parse(c.getContentText()).totalUsage) || 0;
+      if (qj.type === 'limited') {
+        var lim = Number(qj.value) || 0, pct = lim ? Math.round(used / lim * 100) : 0;
+        add(pct >= 95 ? 'ng' : pct >= 80 ? 'warn' : 'ok', '配信通数', '今月 ' + used + ' / ' + lim + ' 通（' + pct + '%）' +
+          (pct >= 80 ? '。上限に近いので、プランの見直しを検討してください（上限を超えると、説明会のお知らせが LINE で届きません）' : ''));
+      } else add('ok', '配信通数', '今月 ' + used + ' 通（上限なし）');
+    }
+  } catch (e) { add('warn', '配信通数', '確認できませんでした：' + e.message); }
+
+  // AI
+  if (withAI) {
+    var ans = askAI_([{ role: 'user', content: '動作確認です。「OK」とだけ答えてください。' }]);
+    add(ans ? 'ok' : 'ng', 'AI', ans ? 'AI が返事をしています' : 'AI が返事をしません。OpenRouter の残高・API キーを確認してください');
+  }
+  if (!props.getProperty('OPENROUTER_API_KEY')) add('ng', 'AI', 'OPENROUTER_API_KEY が未設定です');
+
+  // メールの残り送信数
+  try {
+    var mq = MailApp.getRemainingDailyQuota();
+    add(mq < 10 ? 'ng' : mq < 30 ? 'warn' : 'ok', 'メール', '今日あと ' + mq + ' 通送れます');
+  } catch (e) { /* 権限がないときは省く */ }
+
+  // 説明会（セミナー.gs があるときだけ）
+  var sem = null;
+  if (typeof seminarSheet_ === 'function') {
+    try {
+      var cfg = seminarConfig_();
+      add(cfg.videoId ? 'ok' : 'warn', '説明会の動画', cfg.videoId ? 'https://youtu.be/' + cfg.videoId : '未設定です（SEMINAR_YOUTUBE）。開始時刻になっても「動画を準備しています」と出ます');
+      var hasTrig = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === 'seminarTick'; });
+      var lastTick = Number(props.getProperty('LAST_TICK')) || 0;
+      if (!hasTrig) add('ng', '説明会のお知らせ', '自動配信が止まっています。setupSeminar を実行してください');
+      else if (lastTick && now - lastTick > 30 * 60000) add('ng', '説明会のお知らせ', '自動配信が ' + Math.round((now - lastTick) / 60000) + ' 分動いていません');
+      else add('ok', '説明会のお知らせ', '5分おきに動いています');
+      var rows = seminarRows_(seminarSheet_()).map(toRes_);
+      sem = { booked24: 0, upcoming: 0, today: 0, watched24: 0, decided24: 0 };
+      var todayKey = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
+      rows.forEach(function (r) {
+        var t = times_(r, cfg);
+        if (toMs_(r.reservedAt) >= since) sem.booked24++;
+        if (t && t.start > now && r.status !== 'キャンセル') sem.upcoming++;
+        if (r.day === todayKey && r.status !== 'キャンセル') sem.today++;
+      });
+    } catch (e) { add('warn', '説明会', '確認できませんでした：' + e.message); }
+  }
+
+  // 直近24時間の動き（会話ログ）
+  var stats = { msgs: 0, ai: 0, aiErr: 0, handoff: 0, follow: 0, block: 0, step: 0 };
+  try {
+    logRows_().forEach(function (r) {
+      if (logTime_(r[0]) < since) return;
+      var who = String(r[3]);
+      if (who === 'お客様') stats.msgs++;
+      else if (who === 'AI') stats.ai++;
+      else if (who === 'AI（エラー）') stats.aiErr++;
+      else if (who === '引き継ぎ') stats.handoff++;
+      else if (who === '友だち追加') stats.follow++;
+      else if (who === 'ブロック') stats.block++;
+      else if (who === '自動配信') stats.step++;
+    });
+    if (stats.aiErr) add('warn', 'AIの返事', '24時間で ' + stats.aiErr + ' 回、AI が返事できずにお詫びを返しました');
+  } catch (e) { /* noop */ }
+
+  var paused = props.getKeys().filter(function (k) { return k.indexOf('pause_') === 0 && Number(props.getProperty(k)) > now; }).length;
+
+  var errors = [];
+  try { errors = recentErrors_(5, since); } catch (e) { /* noop */ }
+  if (errors.length) add('warn', 'エラー', '24時間で ' + errors.length + ' 件（最新：' + errors[0].where + '：' + errors[0].text.slice(0, 80) + '）');
+
+  var worst = items.reduce(function (m, x) { return Math.max(m, HEALTH_LEVEL[x.level]); }, 0);
+  return { at: now, level: ['ok', 'warn', 'ng'][worst], items: items, stats: stats, seminar: sem, paused: paused, errors: errors };
+}
+
+// 毎朝の点検（トリガーで動く）：結果をメール・Slack／LINE WORKS で知らせて、本部の画面用に保存する
+function dailyCheck() {
+  var r = healthReport_(true);
+  PropertiesService.getScriptProperties().setProperty('HEALTH_LAST', JSON.stringify(r));
+  var bad = r.items.filter(function (x) { return x.level !== 'ok'; });
+  var mark = { ok: '✅', warn: '⚠', ng: '❌' };
+  var lines = r.items.map(function (x) { return mark[x.level] + ' ' + x.label + '：' + x.text; });
+  var s = r.stats;
+  lines.push('', '■ 直近24時間', 'お客様のメッセージ ' + s.msgs + '／AIの返事 ' + s.ai + '／担当者への引き継ぎ ' + s.handoff + '／友だち追加 ' + s.follow + '／ブロック ' + s.block);
+  if (r.seminar) lines.push('説明会の予約 ' + r.seminar.booked24 + '件／今日の回 ' + r.seminar.today + '件／これからの予約 ' + r.seminar.upcoming + '件／自動で送ったお知らせ ' + s.step + '件');
+  if (r.paused) lines.push('いま AI を止めている人：' + r.paused + '人');
+  var title = (bad.length ? '要確認 ' + bad.length + '件' : '異常なし') + '（毎朝の点検）';
+  notifyStaff_(title, lines.join('\n'));
+  Logger.log(title + '\n' + lines.join('\n'));
+}
+
+// 1回だけ実行：毎朝の点検（8時台）のトリガーを作り、すぐに1回点検する
+function setupMonitoring() {
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'dailyCheck') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('dailyCheck').timeBased().everyDays(1).atHour(8).inTimezone('Asia/Tokyo').create();
+  errorSheet_();
+  Logger.log('毎朝8時台に点検して、メール（と Slack／LINE WORKS）で知らせる設定にしました。いまから1回点検します');
+  dailyCheck();
 }

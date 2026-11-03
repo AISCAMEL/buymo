@@ -248,7 +248,8 @@ function seminarApi_(e) {
     out = seminarHandle_(req);
   } catch (err) {
     Logger.log('seminarApi_: ' + err.message);
-    PropertiesService.getScriptProperties().setProperty('LAST_ERROR', new Date().toLocaleString('ja-JP') + ' 説明会: ' + err.message);
+    if (typeof reportError_ === 'function') reportError_('説明会の予約・視聴', err);
+    else PropertiesService.getScriptProperties().setProperty('LAST_ERROR', new Date().toLocaleString('ja-JP') + ' 説明会: ' + err.message);
     out = { ok: false, error: 'server' };
   }
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
@@ -315,7 +316,9 @@ function seminarHandle_(req) {
       // ミニアプリで YouTube が再生できなかったとき（埋め込み不可・非公開など）は、診断の「最後のエラー」に残す
       if (req.err) {
         var why = { 2: '動画のIDが正しくない', 5: '再生できない形式', 100: '動画が見つからない（非公開・削除）', 101: '埋め込みが許可されていない', 150: '埋め込みが許可されていない' }[Number(req.err)] || '';
-        PropertiesService.getScriptProperties().setProperty('LAST_ERROR', new Date().toLocaleString('ja-JP') + ' 説明会の動画が再生できません：YouTube のエラー ' + Number(req.err) + (why ? '（' + why + '）' : ''));
+        var ytMsg = '説明会の動画が再生できません：YouTube のエラー ' + Number(req.err) + (why ? '（' + why + '）' : '');
+        if (typeof reportError_ === 'function') reportError_('説明会の動画', ytMsg, 'YouTube Studio で、動画が「限定公開」で「埋め込みを許可」になっているか確認してください');
+        else PropertiesService.getScriptProperties().setProperty('LAST_ERROR', new Date().toLocaleString('ja-JP') + ' ' + ytMsg);
       }
       var tp = res && times_(res, cfg);
       if (tp && now >= tp.start - 10 * 60000 && !SEMINAR_CLOSED[res.status]) {
@@ -435,6 +438,7 @@ function seminarUnsubscribe_(userId) {
 function seminarTick() {
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(5000)) return;
+  PropertiesService.getScriptProperties().setProperty('LAST_TICK', String(Date.now()));   // 毎朝の点検で「動いているか」を見る
   var cfg = seminarConfig_();
   var jobs = [];
   try {
@@ -463,14 +467,21 @@ function seminarTick() {
     lock.releaseLock();
   }
   jobs.forEach(function (j) {
-    try { deliver_(j.id, j.res, cfg, { line: true, mail: true }); } catch (err) { Logger.log('seminarTick ' + j.id + ': ' + err.message); }
+    try { deliver_(j.id, j.res, cfg, { line: true, mail: true }); } catch (err) {
+      Logger.log('seminarTick ' + j.id + ': ' + err.message);
+      if (typeof reportError_ === 'function') reportError_('説明会のお知らせ', err, j.id + '：' + (j.res.name || j.res.userId));
+    }
   });
 }
 
 function deliver_(id, res, cfg, via) {
   var m = stepMessage_(id, res, cfg);
   if (!m) return;
-  if (via.line && m.line && !push_(res.userId, [m.line])) Logger.log('LINE を送れませんでした（' + id + '）：' + res.userId);
+  var sentVia = [];
+  if (via.line && m.line) {
+    if (push_(res.userId, [m.line])) sentVia.push('LINE');
+    else Logger.log('LINE を送れませんでした（' + id + '）：' + res.userId);
+  }
   if (via.mail && m.mail && res.email && !res.mailStop) {
     try {
       MailApp.sendEmail({
@@ -479,7 +490,15 @@ function deliver_(id, res, cfg, via) {
         body: (res.name || 'お客様') + ' 様\n\n' + m.mail.body + mailFooter_(res),
         name: 'オルタナティブライフ（BUYMO）'
       });
-    } catch (err) { Logger.log('メールを送れませんでした（' + id + '）：' + err.message); }
+      sentVia.push('メール');
+    } catch (err) {
+      Logger.log('メールを送れませんでした（' + id + '）：' + err.message);
+      if (typeof reportError_ === 'function') reportError_('説明会のメール', err, id + '：' + (res.name || '') + ' さん');
+    }
+  }
+  // 送ったお知らせを会話ログに残す（本部の画面の「これまでの流れ」に出る）
+  if (sentVia.length && typeof logRow_ === 'function') {
+    logRow_(res.userId, '自動配信', (m.line ? m.line.altText : m.mail.subject) + '（' + sentVia.join('・') + '）');
   }
 }
 
