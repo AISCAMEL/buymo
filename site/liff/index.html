@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Fraunces:ital,wght@1,600&family=Outfit:wght@600;700&display=swap" />
-<link rel="stylesheet" href="liff.css?v=7" />
+<link rel="stylesheet" href="liff.css?v=8" />
 </head>
 <body>
 
@@ -236,9 +236,10 @@
   <!-- ===================== 動画説明会 ===================== -->
   <section class="view" data-view="seminar" aria-label="無料の動画説明会" hidden>
     <div class="page-head">
-      <p class="sec-kicker">Online seminar</p>
-      <h1 class="page-title">無料の動画説明会</h1>
-      <p class="page-lead">加盟を考えている方向けに、仕組み・1台の仕事の流れ・費用・開業までを、約<span class="sem-min">7</span>分の動画で具体的にご説明します。見たい日と開始時刻（毎日<span class="sem-slots">8:00〜23:30の30分ごと</span>）を選んで予約すると、その時刻にこの画面で始まります。</p>
+      <p class="sec-kicker" id="semKicker">Online seminar</p>
+      <h1 class="page-title" id="semTitle">無料の動画説明会</h1>
+      <p class="page-lead" id="semLeadC" hidden>加盟するかどうかは、代表と<span class="cs-min">30</span>分お話ししてから決められます。無料・Google Meet・顔出しなしでもOKです。</p>
+      <p class="page-lead" id="semLead">加盟を考えている方向けに、仕組み・1台の仕事の流れ・費用・開業までを、約<span class="sem-min">7</span>分の動画で具体的にご説明します。見たい日と開始時刻（毎日<span class="sem-slots">8:00〜23:30の30分ごと</span>）を選んで予約すると、その時刻にこの画面で始まります。</p>
     </div>
 
     <div class="sec sem-msg" id="semMsg" hidden>
@@ -356,20 +357,141 @@
       </div>
     </div>
 
-    <!-- 視聴後：加盟するかどうか -->
+    <!-- 視聴後：代表との個別相談へ -->
     <div id="semDecide" hidden>
       <div class="sec">
         <div class="decide">
           <p class="sec-kicker">Next step</p>
-          <h2 class="sec-title">ご視聴ありがとうございました</h2>
-          <p class="decide-lead">BUYMOの副業パートナーとして、一緒に始めませんか。ご契約は、担当者から条件をご説明し、内容にご納得いただけた場合のみです。</p>
-          <div class="decide-btns">
-            <button type="button" class="btn btn-sun btn-block" data-sem="apply"><svg class="ico"><use href="#i-store"/></svg>加盟を申し込む</button>
-            <button type="button" class="btn btn-primary btn-block" data-sem="consult"><svg class="ico"><use href="#i-chat"/></svg>個別相談で詳しく聞く</button>
-            <button type="button" class="btn btn-ghost btn-block" data-sem="later">もう少し考える</button>
+          <h2 class="sec-title" id="decideTitle">ご視聴ありがとうございました</h2>
+          <div class="host">
+            <span class="host-ph" aria-hidden="true"></span>
+            <div class="host-who"><b class="host-name">代表　吉田 一平</b><small>BUYMO 副業パートナー（合同会社アイズ）</small></div>
           </div>
-          <p class="decide-note" id="decideNote" hidden>ゆっくりご検討ください。気になることは、トークに送るとAIがすぐにお答えします。決まったら、この画面からいつでもお申し込みいただけます。</p>
+          <p class="host-msg" id="hostMsg">加盟するかどうかは、実際に話してから決めていただきたいと思っています。30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）</p>
+          <ul class="host-tags"><li>無料</li><li><span class="cs-min">30</span>分</li><li>Google Meet</li><li>顔出しなしでもOK</li></ul>
+          <div class="decide-btns">
+            <button type="button" class="btn btn-sun btn-block" data-sem="consult" id="decideConsult"><svg class="ico"><use href="#i-calendar"/></svg><span id="decideConsultText">代表と話す日時を選ぶ</span></button>
+            <button type="button" class="btn btn-ghost btn-block" data-sem="apply"><svg class="ico"><use href="#i-store"/></svg>加盟を申し込む</button>
+            <button type="button" class="link-more decide-later" data-sem="later">もう少し考える</button>
+          </div>
+          <p class="decide-note" id="decideNote" hidden>ゆっくりご検討ください。気になることは、トークに送るとAIがすぐにお答えします。決まったら、この画面からいつでも予約・お申し込みができます。</p>
         </div>
+      </div>
+    </div>
+
+    <!-- 代表との個別相談：日時を選んで予約 -->
+    <div id="semConsult" hidden>
+      <div class="sec">
+        <button type="button" class="cs-back" id="csBack"><svg class="ico"><use href="#i-left"/></svg>戻る</button>
+        <div class="host host-card">
+          <span class="host-ph" aria-hidden="true"></span>
+          <div class="host-who"><small>個別相談（無料・<span class="cs-min">30</span>分・Google Meet）</small><b class="host-name">代表　吉田 一平</b></div>
+        </div>
+        <p class="cs-note" id="csNote" hidden></p>
+        <p class="cs-loading" id="csLoading">空いている日時を読み込んでいます…</p>
+      </div>
+      <div id="csPick" hidden>
+        <div class="sec">
+          <h2 class="sub-title"><span class="num">1</span>日にちを選ぶ</h2>
+          <div class="cs-days" id="csDays"></div>
+        </div>
+        <div class="sec" id="csTimeSec">
+          <h2 class="sub-title"><span class="num">2</span>時刻を選ぶ</h2>
+          <p class="slot-day" id="csDayLabel"></p>
+          <div class="slot-grid cs-times" id="csTimes"></div>
+          <p class="hint"><span class="cs-min">30</span>分お話しします。代表のカレンダーで空いている時間だけを出しています。</p>
+        </div>
+        <form id="csForm" novalidate>
+          <div class="step">
+            <h2 class="step-title"><span class="num">3</span>事前にお聞かせください</h2>
+            <p class="sem-picked" id="csPicked">日にちと時刻を選んでください</p>
+            <div class="field">
+              <label for="c-area">活動したいエリア<span class="req">必須</span></label>
+              <input id="c-area" type="text" maxlength="40" autocomplete="address-level2" placeholder="例：福島県いわき市" />
+            </div>
+            <div class="field">
+              <span class="label">始めたい時期<span class="req">必須</span></span>
+              <div class="chips" data-cs="when" tabindex="-1">
+                <button type="button" class="chip" data-v="すぐにでも">すぐにでも</button>
+                <button type="button" class="chip" data-v="1〜3か月以内">1〜3か月以内</button>
+                <button type="button" class="chip" data-v="半年以内">半年以内</button>
+                <button type="button" class="chip" data-v="まだ決めていない">まだ決めていない</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="label">気になっていること<span class="opt">いくつでも</span></span>
+              <div class="chips" data-cs="worry" data-multi="1">
+                <button type="button" class="chip" data-v="収入の目安">収入の目安</button>
+                <button type="button" class="chip" data-v="初期費用・資金">初期費用・資金</button>
+                <button type="button" class="chip" data-v="本業との両立">本業との両立</button>
+                <button type="button" class="chip" data-v="仕事の内容">仕事の内容</button>
+                <button type="button" class="chip" data-v="契約・エリア">契約・エリア</button>
+                <button type="button" class="chip" data-v="その他">その他</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="c-note">代表に聞きたいこと<span class="opt">任意</span></label>
+              <textarea id="c-note" maxlength="300" placeholder="例：家族にどう説明すればいいか知りたいです"></textarea>
+            </div>
+            <div class="field">
+              <label for="c-tel">電話番号<span class="opt">任意</span></label>
+              <input id="c-tel" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="例：090-1234-5678" />
+              <p class="hint">Google Meet がつながらないときだけ、お電話します。</p>
+            </div>
+            <p class="cs-who" id="csWho"></p>
+          </div>
+          <p class="form-note" id="csFormNote" role="status" aria-live="polite"></p>
+          <button type="submit" class="btn btn-sun btn-block" id="csSubmit">
+            <svg class="ico"><use href="#i-calendar"/></svg>この日時で予約する（無料）
+          </button>
+          <p class="hint cs-after">予約すると、Google Meet の入室URLをLINEとメールでお送りします。前日と10分前にもお知らせします。</p>
+        </form>
+      </div>
+      <div class="sec" id="csEmpty" hidden>
+        <div class="decide">
+          <h2 class="sec-title">いま予約できる日時がありません</h2>
+          <p class="decide-lead">代表の予定が埋まっています。トークで「個別相談の日程を相談したい」と送っていただければ、担当者が日程を調整します。</p>
+          <button type="button" class="btn btn-sun btn-block" data-sem="ask"><svg class="ico"><use href="#i-chat"/></svg>担当者に日程を相談する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 個別相談のご予約済み（開始までのカウントダウン・Meet の入室） -->
+    <div id="semCTicket" hidden>
+      <div class="sec">
+        <div class="ticket" id="ctTicket">
+          <p class="ticket-kicker"><svg class="ico"><use href="#i-check"/></svg>個別相談のご予約済み</p>
+          <p class="ticket-date" id="ctDate"></p>
+          <p class="ticket-time"><span id="ctTime"></span><small>〜<span id="ctEnd"></span></small></p>
+          <div class="host host-dark">
+            <span class="host-ph" aria-hidden="true"></span>
+            <div class="host-who"><b class="host-name">代表　吉田 一平</b><small>Google Meet でお話しします</small></div>
+          </div>
+          <p class="cd-label" id="ctLabel">開始まで</p>
+          <div class="countdown" id="ctBox" role="timer" aria-live="off">
+            <div><b id="ctD">0</b><span>日</span></div>
+            <div><b id="ctH">00</b><span>時間</span></div>
+            <div><b id="ctM">00</b><span>分</span></div>
+            <div><b id="ctS">00</b><span>秒</span></div>
+          </div>
+          <button type="button" class="btn btn-sun btn-block ct-join" id="ctJoin"><svg class="ico"><use href="#i-monitor"/></svg>Google Meet に入る</button>
+          <p class="ticket-note" id="ctNote"></p>
+          <button type="button" class="btn btn-ghost btn-block" id="ctCal">
+            <svg class="ico"><use href="#i-calendar"/></svg>Googleカレンダーに追加
+          </button>
+          <div class="ticket-links">
+            <button type="button" id="ctChange">日時を変更する</button>
+            <button type="button" id="ctCancel">予約を取り消す</button>
+          </div>
+        </div>
+      </div>
+      <div class="sec">
+        <h2 class="sub-title">当日までに</h2>
+        <ul class="menu prep">
+          <li><button type="button" data-action="talk"><svg class="ico"><use href="#i-chat"/></svg><span>聞きたいことを、先にトークで送っておく<small>AIがすぐに答えます。相談の時間をあなたのことに使えます</small></span><svg class="ico end"><use href="#i-right"/></svg></button></li>
+          <li><button type="button" data-go="home" data-sec="faq"><svg class="ico"><use href="#i-book"/></svg><span>よくある質問を読む<small>初期費用・ノルマ・続けられるか</small></span><svg class="ico end"><use href="#i-right"/></svg></button></li>
+        </ul>
+        <p class="hint">スマホで参加する方は、Google Meet のアプリを入れておくとスムーズです。パソコンならブラウザだけで入れます。</p>
       </div>
     </div>
 
@@ -380,7 +502,10 @@
           <div class="done-mark"><svg class="ico"><use href="#i-check"/></svg></div>
           <h2 class="sec-title" id="semDoneTitle"></h2>
           <p class="decide-lead" id="semDoneText"></p>
-          <button type="button" class="btn btn-line btn-block" data-action="talk"><svg class="ico"><use href="#i-chat"/></svg>トークを開く</button>
+          <div class="decide-btns">
+            <button type="button" class="btn btn-sun btn-block" data-sem="apply" id="semDoneApply" hidden><svg class="ico"><use href="#i-store"/></svg>加盟を申し込む</button>
+            <button type="button" class="btn btn-line btn-block" data-action="talk"><svg class="ico"><use href="#i-chat"/></svg>トークを開く</button>
+          </div>
         </div>
       </div>
     </div>
@@ -691,6 +816,6 @@
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=4"></script>
 <script src="../assets/js/analytics.js"></script>
-<script src="liff-app.js?v=7"></script>
+<script src="liff-app.js?v=8"></script>
 </body>
 </html>

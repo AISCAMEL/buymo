@@ -47,6 +47,7 @@ window.RCLINE = (function () {
   function demoData() {
     var now = Date.now();
     function ev(h, kind, text, who) { return { at: now - h * HOUR, kind: kind, text: text || '', who: who || '' }; }
+    function at30(ms) { return Math.round(ms / (HOUR / 2)) * (HOUR / 2); }   // 見本の個別相談は 30分きざみ
     var people = [
       { userId: 'U001', lineName: 'けんた', firstAt: now - 6 * DAY, lastAt: now - 2 * HOUR, paused: true, pauseLeft: 22,
         seminar: { day: md(now - DAY), status: '相談希望', pct: 100 },
@@ -73,6 +74,17 @@ window.RCLINE = (function () {
       { userId: 'U007', lineName: 'さくら', firstAt: now - 3 * DAY, lastAt: now - 6 * HOUR, paused: false,
         timeline: [ev(72, 'friend'), ev(7, 'user', '車の知識がなくても大丈夫？'), ev(7, 'ai', '大丈夫です。福島の本社での3日間の研修と、いつでも見られる動画研修で…'),
           ev(6, 'user', '女性でもできますか？'), ev(6, 'ai', 'はい、性別に関係なく始められます。出張査定は…')] },
+      { userId: 'U009', lineName: 'ゆうき', firstAt: now - 3 * DAY, lastAt: now - 4 * HOUR, paused: false,
+        seminar: { day: md(now - 0.5 * DAY), status: '相談予約', pct: 100, doneAt: now - 5 * HOUR, consultAt: at30(now + 20 * HOUR), consultEnd: at30(now + 20 * HOUR) + HOUR / 2,
+          meetUrl: 'https://meet.google.com/', consultInfo: 'エリア：福島県郡山市\n始めたい時期：1〜3か月以内\n気になること：初期費用・資金・本業との両立\nひとこと：妻にどう説明すればいいか' },
+        timeline: [ev(72, 'friend'), ev(30, 'seminar_book', '説明会を予約'), ev(5, 'seminar_watch', '説明会を最後まで視聴（100%）'), ev(4, 'consult', '代表との個別相談を予約（明日）')] },
+      { userId: 'U010', lineName: 'あやか', firstAt: now - 5 * DAY, lastAt: now - 1 * HOUR, paused: false,
+        seminar: { day: md(now - 2 * DAY), status: '相談予約', pct: 100, doneAt: now - 2 * DAY, consultAt: at30(now - 1.5 * HOUR), consultEnd: at30(now - 1.5 * HOUR) + HOUR / 2,
+          meetUrl: 'https://meet.google.com/', consultInfo: 'エリア：栃木県宇都宮市\n始めたい時期：すぐにでも\n気になること：収入の目安' },
+        timeline: [ev(120, 'friend'), ev(48, 'seminar_watch', '説明会を最後まで視聴（100%）'), ev(47, 'consult', '代表との個別相談を予約'), ev(1.6, 'step', 'まもなく個別相談が始まります（LINE・メール）')] },
+      { userId: 'U011', lineName: 'こうじ', firstAt: now - 1 * DAY, lastAt: now - 0.2 * HOUR, paused: false,
+        seminar: { day: md(now), time: '20:30', status: '視聴完了', pct: 100, doneAt: now - 0.2 * HOUR },
+        timeline: [ev(24, 'friend'), ev(20, 'seminar_book', '説明会を予約'), ev(0.2, 'seminar_watch', '説明会を最後まで視聴（100%）')] },
       { userId: 'U008', lineName: 'だいすけ', firstAt: now - 40 * DAY, lastAt: now - 10 * DAY, paused: false,
         seminar: { day: md(now - 30 * DAY), status: '申込', pct: 100 },
         timeline: [ev(960, 'friend'), ev(740, 'seminar_watch', '説明会を最後まで視聴（100%）'), ev(738, 'apply', '加盟を申し込み'), ev(240, 'staff', 'ご加盟契約')] }
@@ -106,7 +118,7 @@ window.RCLINE = (function () {
     people.forEach(function (p) {
       if (used[p.userId]) return;
       var s = p.seminar || {};
-      var stage = s.status === '申込' || s.status === '相談希望' ? '商談' : p.seminar ? 'セミナー予約' : '新規';
+      var stage = s.status === '加盟決定' ? '加盟' : CONSULTING[s.status] ? '商談' : p.seminar ? 'セミナー予約' : '新規';
       leads.push({ id: 'line_' + p.userId, manual: true, lineUserId: p.userId, name: s.name || (p.lineName || 'LINEの方') + '（LINE）', storeName: '',
         email: s.email || '', tel: '', pref: '', date: new Date(p.firstAt || Date.now()).toLocaleDateString('ja-JP'), stage: stage,
         steps: {}, memo: '', seminarDate: '', care: {}, line: p });
@@ -115,11 +127,24 @@ window.RCLINE = (function () {
     return leads;
   }
 
+  // 個別相談・申込まで進んだ状態
+  var CONSULTING = { '申込': 1, '相談希望': 1, '相談予約': 1, '相談後検討': 1, '相談欠席': 1, '加盟決定': 1 };
+  function consultText(s) {
+    var d = new Date(s.consultAt), e = new Date(s.consultEnd || s.consultAt + 30 * 60000);
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var diff = Math.round((new Date(d).setHours(0, 0, 0, 0) - today.getTime()) / DAY);
+    var day = diff === 0 ? '今日' : diff === 1 ? '明日' : (d.getMonth() + 1) + '/' + d.getDate();
+    return day + ' ' + hm(d.getTime()) + '〜' + hm(e.getTime());
+  }
+
   function lastAt(l) { return (l.line && l.line.lastAt) || Date.parse(l.date) || 0; }
 
   /* ---------- いま対応が必要な人 ---------- */
   function attentionOf(l) {
-    var p = l.line, s = p && p.seminar;
+    var p = l.line, s = p && p.seminar, now = Date.now();
+    if (s && s.status === '相談予約' && s.consultEnd && s.consultEnd < now) return { lv: 'red', label: '個別相談の結果を入力', why: consultText(s) + ' の相談が終わりました。「加盟決定／検討中／見送り／来なかった」を押してください' };
+    if (s && s.status === '相談予約' && s.consultAt && s.consultAt - now < 36 * HOUR) return { lv: 'orange', label: '個別相談 ' + consultText(s), why: firstLine(s.consultInfo, 2) };
+    if (s && s.status === '視聴完了' && s.doneAt && now - s.doneAt < DAY) return { lv: 'orange', label: '🔥 最後まで視聴・相談はまだ', why: '見終わったばかりです。代表からのご案内は自動で送ります。チャットでひとこと声をかけるチャンス' };
     if (p && p.paused && s && s.status === '相談希望') return { lv: 'red', label: '個別相談を希望', why: '説明会のあと個別相談を選択。AIの返信を止めています（あと' + p.pauseLeft + '時間）' };
     if (p && p.paused) return { lv: 'red', label: '担当者を希望', why: 'チャットで返信してください。AIの返信を止めています（あと' + p.pauseLeft + '時間）' };
     if (s && s.status === '申込' && l.stage !== '加盟') return { lv: 'orange', label: '加盟の申込', why: '3営業日以内に、契約内容とエリアのご案内を' };
@@ -128,6 +153,7 @@ window.RCLINE = (function () {
     if (s && s.status === '予約' && s.pct === 0 && (s.end ? s.end < Date.now() : isPast(s.day))) return { lv: 'gray', label: '予約したのに見逃し', why: '見逃しのご案内は自動で送信済み' };
     return null;
   }
+  function firstLine(text, n) { return String(text || '').split('\n').slice(0, n || 1).join('／'); }
   function isPast(day) {
     day = String(day || '');
     if (/^\d{4}-\d{2}-\d{2}$/.test(day)) return Date.parse(day + 'T23:59:59+09:00') < Date.now();
@@ -185,7 +211,7 @@ window.RCLINE = (function () {
     var s = live.stats || {}, sem = live.seminar;
     var stats = 'お客様のメッセージ ' + (s.msgs || 0) + '／AIの返事 ' + (s.ai || 0) + '／引き継ぎ ' + (s.handoff || 0) +
       '／友だち追加 ' + (s.follow || 0) + '／ブロック ' + (s.block || 0) +
-      (sem ? '／説明会の予約 ' + sem.booked24 + '（これからの予約 ' + sem.upcoming + '・今日の回 ' + sem.today + '）／自動で送ったお知らせ ' + (s.step || 0) : '');
+      (sem ? '／説明会の予約 ' + sem.booked24 + '（これからの予約 ' + sem.upcoming + '・今日の回 ' + sem.today + '）／最後まで視聴 ' + (sem.done24 || 0) + '／これからの個別相談 ' + (sem.consults || 0) + '／自動で送ったお知らせ ' + (s.step || 0) : '');
     var errs = (h.errors || []).map(function (e) {
       return '<li><time>' + hmText(e.at) + '</time><b>' + esc(e.where) + '</b><span>' + esc(e.text) + '</span></li>';
     }).join('');
@@ -222,10 +248,10 @@ window.RCLINE = (function () {
     var watched = booked.filter(function (l) { return l.line.seminar.pct >= 50; });
     var applied = leads.filter(function (l) {
       var st = l.line && l.line.seminar && l.line.seminar.status;
-      return st === '申込' || st === '相談希望' || l.stage === '加盟' || l.stage === '商談';
+      return CONSULTING[st] || l.stage === '加盟' || l.stage === '商談';
     });
-    var joined = leads.filter(function (l) { return l.stage === '加盟'; });
-    var steps = [['LINEの友だち・会話', people.length], ['説明会を予約', booked.length], ['説明会を視聴', watched.length], ['申込・商談', applied.length], ['加盟', joined.length]];
+    var joined = leads.filter(function (l) { return l.stage === '加盟' || (l.line && l.line.seminar && l.line.seminar.status === '加盟決定'); });
+    var steps = [['LINEの友だち・会話', people.length], ['説明会を予約', booked.length], ['説明会を視聴', watched.length], ['個別相談・申込', applied.length], ['加盟', joined.length]];
     var funnel = steps.map(function (st, i) {
       var rate = i ? (steps[i - 1][1] ? Math.round(st[1] / steps[i - 1][1] * 100) + '%' : '—') : '';
       return (i ? '<span class="lf-arrow">→<small>' + rate + '</small></span>' : '') +
@@ -288,7 +314,8 @@ window.RCLINE = (function () {
     var s = p.seminar;
     return '<span class="lb-row"><span class="lb lb-line">LINE：' + esc(p.lineName) + '・' + ago(p.lastAt) + '</span>' +
       (p.paused ? '<span class="lb lb-pause">AI停止中</span>' : '') +
-      (s ? '<span class="lb lb-sem">説明会 ' + esc(dayText(s.day, s.time)) + '・' + (s.pct ? s.pct + '%' : esc(s.status)) + '</span>' : '') + '</span>';
+      (s ? '<span class="lb lb-sem">説明会 ' + esc(dayText(s.day, s.time)) + '・' + (s.pct ? s.pct + '%' : esc(s.status)) + '</span>' : '') +
+      (s && s.consultAt ? '<span class="lb lb-consult">個別相談 ' + esc(consultText(s)) + (RESULT_TEXT[s.status] ? '・' + RESULT_TEXT[s.status] : '') + '</span>' : '') + '</span>';
   }
 
   var ICON = { friend: '🤝', block: '🚫', user: '💬', ai: '🤖', auto: '📨', seminar_book: '📅', seminar_watch: '▶️', decide: '🤔', consult: '🙋', handoff: '🙋', apply: '📝', staff: '👤', step: '📨' };
@@ -302,6 +329,23 @@ window.RCLINE = (function () {
         '<div><small>' + md(e.at) + ' ' + hm(e.at) + '・' + (LABEL[e.kind] || '') + '</small>' +
         (bubble ? '<p class="ltl-bubble">' + esc(e.text) + '</p>' : '<p>' + esc(e.text || LABEL[e.kind] || '') + '</p>') + '</div></li>';
     }).join('') + '</ol>';
+  }
+
+  var RESULT_TEXT = { '加盟決定': '加盟決定', '相談後検討': '検討中', '見送り': '見送り', '相談欠席': '来なかった' };
+  var RESULTS = [['join', '🎉 加盟決定'], ['think', '🤔 検討中'], ['decline', '見送り'], ['noshow', '来なかった']];
+
+  // 個別相談の予約内容と、相談のあとに押す結果のボタン
+  function consultHtml(s) {
+    if (!s || !s.consultAt) return '';
+    var res = RESULT_TEXT[s.status];
+    return '<div class="lc">' +
+      '<div class="rc-sub-h">🗓 代表との個別相談</div>' +
+      '<p class="lc-when"><b>' + esc(consultText(s)) + '</b>' + (s.meetUrl ? '<a href="' + esc(s.meetUrl) + '" target="_blank" rel="noopener">Google Meet を開く</a>' : '<span class="lc-nourl">Meet の URL なし（お客様に送ってください）</span>') + '</p>' +
+      (s.consultInfo ? '<p class="lc-info">' + esc(s.consultInfo).replace(/\n/g, '<br>') + '</p>' : '') +
+      '<p class="lc-res" data-role="cres-state">' + (res ? '結果：' + esc(res) : '相談が終わったら、結果を押してください。お客様に次のご案内が自動で届きます。') + '</p>' +
+      '<div class="lc-btns">' + RESULTS.map(function (r) {
+        return '<button type="button" class="lc-btn' + (RESULT_TEXT[s.status] === r[1].replace(/^\S+ /, '') ? ' on' : '') + '" data-cres="' + r[0] + '">' + r[1] + '</button>';
+      }).join('') + '</div></div>';
   }
 
   // AIの状態と、押すと反対の状態になるボタンの文字
@@ -326,6 +370,7 @@ window.RCLINE = (function () {
         '<label class="rc-field">内容<input type="text" data-role="next" value="' + esc(l.next || '') + '" placeholder="例：電話で個別相談の日程を決める"></label>' +
         '<label class="rc-field">期限<input type="text" data-role="nextDue" value="' + esc(l.nextDue || '') + '" placeholder="例：11/5"></label>' +
         '<div class="la-actions">' + actions + '</div>' +
+        (p ? consultHtml(p.seminar) : '') +
       '</div>' +
     '</div>';
   }
@@ -347,6 +392,27 @@ window.RCLINE = (function () {
       }).catch(function () {
         box.querySelector('.ltl-host').innerHTML = '<p class="rc-hint">読み込めませんでした。開き直してください。</p>';
       }).then(function () { p.loading = false; });
+    });
+    // 個別相談の結果（加盟決定／検討中／見送り／来なかった）→ お客様に次のご案内が自動で届く
+    box.querySelectorAll('[data-cres]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var result = b.getAttribute('data-cres');
+        var label = b.textContent.replace(/^\S+ /, '');
+        var sendText = { join: '加盟の手続きのご案内', think: 'お礼と、3日後のフォロー', noshow: '別の日時のご案内', decline: '' }[result];
+        if (!window.confirm('「' + label + '」にしますか？' + (sendText ? '\nお客様に「' + sendText + '」が LINE とメールで自動で届きます。' : '')) ) return;
+        var all = box.querySelectorAll('[data-cres]');
+        all.forEach(function (x) { x.disabled = true; });
+        function done(st) {
+          p.seminar.status = st;
+          all.forEach(function (x) { x.disabled = false; x.classList.toggle('on', x === b); });
+          box.querySelector('[data-role="cres-state"]').textContent = (demo ? '（見本）' : '') + '結果：' + label + (sendText ? '（お客様にご案内を送りました）' : '');
+          renderTop(state.leads);
+        }
+        if (demo) { done({ join: '加盟決定', think: '相談後検討', decline: '見送り', noshow: '相談欠席' }[result]); return; }
+        api('consult', { u: p.userId, result: result }).then(function (d) {
+          if (d.ok) done(d.status); else { all.forEach(function (x) { x.disabled = false; }); window.alert('できませんでした（' + (d.error || '') + '）'); }
+        }).catch(function () { all.forEach(function (x) { x.disabled = false; }); window.alert('通信できませんでした。もう一度お試しください。'); });
+      });
     });
     // 押すたびに「止める」⇔「再開する」が入れ替わる
     var btn = box.querySelector('[data-role="ai"]'), st = box.querySelector('[data-role="aistate"]');

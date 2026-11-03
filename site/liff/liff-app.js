@@ -140,7 +140,7 @@
     }
     var v = sp.get('view') || 'home';
     if (!VIEWS[v] || v === 'done') v = 'home';
-    return { view: v, step: parseInt(sp.get('step'), 10) || 1, sec: sp.get('sec') || '' };
+    return { view: v, step: parseInt(sp.get('step'), 10) || 1, sec: sp.get('sec') || '', c: sp.get('c') === '1' };
   }
 
   function urlFor(r) {
@@ -656,6 +656,7 @@
      時刻はすべて日本時間。端末の時計のずれはサーバーの時刻で補正する
      ======================================================= */
   var LS_SEM_SK = 'altlife_sem_sk';
+  var CONSULT_PREFIX = '【個別相談の予約】';   // GAS（セミナー.gs）と同じ。トークへの投稿の先頭
   var LS_SEM_WATCH = 'altlife_sem_watch';
   var DAY_MS = 86400000;
   var JST_MS = 9 * 3600000;
@@ -665,7 +666,10 @@
     loaded: false, loading: false, offset: 0, res: null, rebook: false, mode: '',
     month: null, day: '', time: '', timer: null,
     player: null, ended: false, watched: 0, pos: 0, sentPct: -1, lastPing: 0, watchKey: '',
-    canJoin: false   // 見終わった方だけ、資料請求フォームに「加盟を申し込みたい」を出す
+    canJoin: false,  // 見終わった方だけ、資料請求フォームに「加盟を申し込みたい」を出す
+    // 代表との個別相談（見終わったあと、代表のカレンダーの空いている日時を選んで予約。Google Meet）
+    host: null, consulting: false, wantConsult: false, slots: null, slotsLoading: false, csMin: 30,
+    csDay: '', csAt: 0, cs: { when: '', worry: [] }, csSending: false
   };
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
@@ -740,6 +744,7 @@
     }).then(function (r) { return r.json(); }).then(function (d) {
       if (d.now) sem.offset = d.now - Date.now();
       if (d.config) sem.cfg = d.config;
+      if (d.host) sem.host = d.host;
       if (d.sk) lsSet(LS_SEM_SK, d.sk);
       // 保存していた sk が使えなくなっていたら、LINE のトークンでやり直す
       if (d.error === 'auth' && body.sk && !retried) { lsSet(LS_SEM_SK, ''); return semApi(action, extra, true); }
@@ -757,8 +762,18 @@
     else if (action === 'cancel') r = null;
     else if (action === 'progress' && r) r.pct = Math.max(r.pct, x.pct || 0);
     else if (action === 'decide' && r) r.status = { apply: '申込', consult: '相談希望', later: '検討中' }[x.decision] || r.status;
+    else if (action === 'consult' && r) { r.status = '相談予約'; r.consult = { start: x.start, end: x.start + 30 * 60000, url: 'https://meet.google.com/', info: '' }; }
+    else if (action === 'consultCancel' && r) { r.status = '視聴完了'; r.consult = null; }
     lsSet('altlife_sem_dry', r);
-    return { ok: true, now: Date.now(), config: { openMin: 480, closeMin: 1440, slotMin: 30, windowMin: 60, leadMin: 5, minutes: 7, days: 14, ready: false }, reservation: r };
+    var out = { ok: true, now: Date.now(), config: { openMin: 480, closeMin: 1440, slotMin: 30, windowMin: 60, leadMin: 5, minutes: 7, days: 14, ready: false }, reservation: r,
+      host: { name: '吉田 一平', title: '代表', photo: '', message: '加盟するかどうかは、実際に話してから決めていただきたいと思っています。30分、オンラインでお話ししませんか？（無料・顔出しなしでもOK・その場で決めなくて大丈夫です）' } };
+    if (action === 'slots') {
+      // 試し用：この先7日の 19:00〜21:00（3時間後から）
+      var list = [], base = Date.parse(todayKey() + 'T19:00:00+09:00');
+      for (var d = 0; d < 8; d++) for (var k = 0; k < 4; k++) { var at = base + d * DAY_MS + k * 30 * 60000; if (at > Date.now() + 3 * 3600000 && (d + k) % 5) list.push(at); }
+      out.consult = { minutes: 30, slots: list };
+    }
+    return out;
   }
 
   function semLoad() {
@@ -768,6 +783,8 @@
     semApi(canAuth() ? 'state' : 'config').then(function (d) {
       sem.loaded = true;
       if (d.ok) sem.res = d.reservation || null;
+      // LINE のお知らせの「個別相談の日時を選ぶ」（?view=seminar&c=1）から開いたときは、予約画面から
+      if (sem.wantConsult) { sem.wantConsult = false; if (canConsult()) openConsult(true); }
       restoreWatch();
       semMessage('');
       renderSeminar();
@@ -780,7 +797,7 @@
     $('#semMsg').hidden = !text;
     $('#semMsgText').textContent = text;
     $('#semRetry').hidden = !retry;
-    if (text) $$('#semBook,#semTicket,#semLive,#semDecide,#semDone,#semMissed').forEach(function (el) { el.hidden = true; });
+    if (text) $$('#semBook,#semTicket,#semLive,#semDecide,#semConsult,#semCTicket,#semDone,#semMissed').forEach(function (el) { el.hidden = true; });
   }
 
   /* ---------- 表示の切り替え ---------- */
@@ -789,10 +806,20 @@
     return sem.ended || (!!sem.res && (sem.res.status === '視聴完了' || sem.res.status === '検討中'));
   }
 
+  // 個別相談を予約できる（説明会を見た・検討中・相談のあと・来られなかった）
+  function canConsult() {
+    var r = sem.res;
+    if (!r || r.status === '加盟決定' || r.status === 'キャンセル') return false;
+    return r.status === '相談予約' || r.status === '相談後検討' || r.status === '相談欠席' || finished() || Math.max(r.pct || 0, watchedPct()) >= WATCHED_PCT;
+  }
+
   function semMode() {
     var r = sem.res;
     if (!r || sem.rebook) return 'book';
-    if (r.status === '申込' || r.status === '相談希望') return 'done';
+    if (sem.consulting) return 'consult';
+    if (r.status === '申込' || r.status === '相談希望' || r.status === '加盟決定') return 'done';
+    if (r.status === '相談予約' && r.consult) return semNow() < r.consult.end + 30 * 60000 ? 'cticket' : 'cafter';
+    if (r.status === '相談後検討' || r.status === '相談欠席') return 'decide';
     var now = semNow();
     if (now < resStart(r)) return 'ticket';
     // 再生できる時間の終わり間際に再生を始めた方は、そのまま最後まで見られる
@@ -826,13 +853,25 @@
     $('#semTicket').hidden = mode !== 'ticket';
     $('#semLive').hidden = mode !== 'watch';
     $('#semDecide').hidden = !(mode === 'decide' || (mode === 'watch' && finished()));
-    $('#semDone').hidden = mode !== 'done';
+    $('#semConsult').hidden = mode !== 'consult';
+    $('#semCTicket').hidden = mode !== 'cticket';
+    $('#semDone').hidden = !(mode === 'done' || mode === 'cafter');
     $('#semMissed').hidden = mode !== 'missed';
     $('#decideNote').hidden = !(sem.res && sem.res.status === '検討中');
+    // 個別相談の画面では、上の見出しも個別相談にする
+    var cMode = mode === 'consult' || mode === 'cticket';
+    $('#semKicker').textContent = cMode ? 'Consultation' : 'Online seminar';
+    $('#semTitle').textContent = cMode ? '代表との個別相談' : '無料の動画説明会';
+    $('#semLead').hidden = cMode;
+    $('#semLeadC').hidden = !cMode;
+    fillHost();
     if (mode === 'book') renderBook();
     if (mode === 'ticket') renderTicket();
     if (mode === 'watch') renderWatch();
-    if (mode === 'done') renderSemDone();
+    if (mode === 'decide' || mode === 'watch') renderDecide();
+    if (mode === 'consult') renderConsult();
+    if (mode === 'cticket') renderCTicket();
+    if (mode === 'done' || mode === 'cafter') renderSemDone(mode);
   }
 
   function semTick() {
@@ -847,6 +886,7 @@
     }
     if (mode === 'ticket') updateCountdown();
     if (mode === 'watch') updateWatch();
+    if (mode === 'cticket') updateCCountdown();
   }
 
   function semRefresh() {
@@ -1206,6 +1246,8 @@
   /* ---------- 視聴後：加盟するかどうか ---------- */
   function semDecide(decision) {
     track('seminar_decide', { decision: decision });
+    if (decision === 'consult') { openConsult(); return; }
+    if (decision === 'ask') decision = 'consult';   // 予約できる枠がないとき：担当者が日程を調整する
     if (decision === 'apply') {
       sem.canJoin = true;
       setChip('want', '加盟を申し込みたい', true);
@@ -1228,12 +1270,205 @@
     }).then(function () { btns.forEach(function (b) { b.disabled = false; }); });
   }
 
-  function renderSemDone() {
-    var consult = sem.res.status === '相談希望';
-    $('#semDoneTitle').textContent = consult ? '個別相談のご希望を受け付けました' : '加盟のお申し込みを受け付けました';
-    $('#semDoneText').textContent = consult
-      ? '担当者が、LINEのトークで順番にご連絡します（営業時間外は翌営業日になることがあります）。お待ちいただく間も、トークでAIに質問できます。'
-      : '担当者から3営業日以内に、契約内容とエリアのご案内をします。ご契約は、内容にご納得いただけた場合のみです。';
+  function renderSemDone(mode) {
+    var st = sem.res.status;
+    var t = mode === 'cafter' ? ['ご相談ありがとうございました', 'お時間をいただき、ありがとうございました。気になることは、トークに送るとAIがすぐにお答えします。加盟を決めたら、ここからお申し込みいただけます。']
+      : st === '加盟決定' ? ['ご加盟のご決断、ありがとうございます', '契約内容とエリアのご案内を、担当者から3営業日以内にお送りします。ご契約は、書面で内容をご確認いただき、ご納得いただけた場合のみです。']
+      : st === '相談希望' ? ['個別相談のご希望を受け付けました', '担当者が、LINEのトークで日程をご連絡します（営業時間外は翌営業日になることがあります）。お待ちいただく間も、トークでAIに質問できます。']
+      : ['加盟のお申し込みを受け付けました', '担当者から3営業日以内に、契約内容とエリアのご案内をします。ご契約は、内容にご納得いただけた場合のみです。'];
+    $('#semDoneTitle').textContent = t[0];
+    $('#semDoneText').textContent = t[1];
+    $('#semDoneApply').hidden = mode !== 'cafter';
+  }
+
+  /* ---------- 代表との個別相談（Google Meet） ---------- */
+  function hostName() { var h = sem.host || {}; return (h.title || '代表') + '　' + (h.name || '吉田 一平'); }
+
+  // 代表の名前・写真・ひとことを、画面のあちこちに入れる
+  function fillHost() {
+    var h = sem.host || {};
+    $$('.host-name').forEach(function (el) { el.textContent = hostName(); });
+    $$('.host-ph').forEach(function (el) {
+      if (h.photo) { el.style.backgroundImage = 'url("' + String(h.photo).replace(/"/g, '') + '")'; el.textContent = ''; el.classList.add('has-photo'); }
+      else { el.style.backgroundImage = ''; el.textContent = (h.name || '吉').charAt(0); el.classList.remove('has-photo'); }
+    });
+    $$('.cs-min').forEach(function (el) { el.textContent = sem.csMin || 30; });
+    if (h.message) $('#hostMsg').textContent = h.message;
+  }
+
+  // 見終わったあとの画面（説明会のすぐあと・相談のあと・来られなかったとき）
+  function renderDecide() {
+    var st = sem.res && sem.res.status;
+    var who = (sem.host && sem.host.title) || '代表';
+    $('#decideTitle').textContent = st === '相談後検討' ? 'ご相談ありがとうございました'
+      : st === '相談欠席' ? '別の日時で予約し直せます' : 'ご視聴ありがとうございました';
+    $('#decideConsultText').textContent = st === '相談後検討' ? 'もう一度' + who + 'と話す' : who + 'と話す日時を選ぶ';
+    if (st === '相談後検討') $('#hostMsg').textContent = 'ゆっくりご検討ください。迷っていること・ご家族に聞かれたことなどがあれば、もう一度お話しすることもできます。';
+    else if (st === '相談欠席') $('#hostMsg').textContent = '前回の個別相談はお会いできませんでした。ご都合が合わなかったようでしたら、別の日時を選んでください。';
+  }
+
+  function openConsult(fromLink) {
+    sem.consulting = true;
+    sem.csAt = 0;
+    if (!fromLink) renderSeminar();
+    window.scrollTo(0, 0);
+    loadSlots();
+    track('consult_open', { from: fromLink ? 'link' : state.view });
+  }
+
+  function loadSlots() {
+    if (sem.slotsLoading) return;
+    sem.slotsLoading = true;
+    sem.slots = null;
+    $('#csLoading').hidden = false;
+    $('#csLoading').textContent = '空いている日時を読み込んでいます…';
+    semApi('slots').then(function (d) {
+      if (!d.ok) throw new Error(d.error);
+      sem.slots = d.consult.slots || [];
+      sem.csMin = d.consult.minutes || 30;
+    }).catch(function () {
+      $('#csLoading').textContent = '読み込めませんでした。電波の良い場所で、開き直してください。';
+    }).then(function () { sem.slotsLoading = false; if (sem.consulting) renderConsult(); });
+  }
+
+  function slotDayKey(ms) { return dayKey(jstParts(ms)); }
+
+  function renderConsult() {
+    var list = sem.slots;
+    var st = sem.res && sem.res.status;
+    $('#csNote').hidden = !(st === '相談予約' || st === '相談欠席');
+    if (st === '相談予約' && sem.res.consult) $('#csNote').textContent = 'いまのご予約：' + consultWhen(sem.res.consult) + '。新しい日時を選ぶと、こちらに変わります。';
+    else if (st === '相談欠席') $('#csNote').textContent = '前回はお会いできませんでした。別の日時を選んでください。';
+    if (!list) { $('#csPick').hidden = true; $('#csEmpty').hidden = true; return; }
+    $('#csLoading').hidden = true;
+    $('#csEmpty').hidden = list.length > 0;
+    $('#csPick').hidden = !list.length;
+    if (!list.length) return;
+    var days = [];
+    list.forEach(function (ms) { var k = slotDayKey(ms); if (days.indexOf(k) < 0) days.push(k); });
+    if (days.indexOf(sem.csDay) < 0) sem.csDay = days[0];
+    if (sem.csAt && list.indexOf(sem.csAt) < 0) sem.csAt = 0;
+    $('#csDays').innerHTML = days.map(function (k) {
+      var p = jstParts(dayMs(k)), n = list.filter(function (ms) { return slotDayKey(ms) === k; }).length;
+      var cls = 'cs-day' + (k === sem.csDay ? ' is-on' : '') + (p.w === 0 ? ' sun' : p.w === 6 ? ' sat' : '');
+      return '<button type="button" class="' + cls + '" data-csday="' + k + '"><small>' + (k === todayKey() ? '今日' : '日月火水木金土'.charAt(p.w)) + '</small>' +
+        '<b>' + (p.m + 1) + '/' + p.d + '</b><span>' + n + '枠</span></button>';
+    }).join('');
+    $('#csDayLabel').textContent = dayLabel(sem.csDay) + ' の空いている時間';
+    $('#csDayLabel').classList.add('is-set');
+    var first = list[0];
+    $('#csTimes').innerHTML = list.filter(function (ms) { return slotDayKey(ms) === sem.csDay; }).map(function (ms) {
+      return '<button type="button" class="slot' + (ms === sem.csAt ? ' is-on' : '') + '" data-csat="' + ms + '">' + clock(ms) +
+        (ms === first ? '<span class="slot-soon">いちばん早い</span>' : '') + '</button>';
+    }).join('');
+    var picked = $('#csPicked');
+    picked.textContent = sem.csAt ? consultWhen({ start: sem.csAt, end: sem.csAt + sem.csMin * 60000 }) + '（' + sem.csMin + '分）' : '日にちと時刻を選んでください';
+    picked.classList.toggle('is-set', !!sem.csAt);
+    var r = sem.res || {};
+    $('#csWho').textContent = r.name ? 'お名前：' + r.name + '　メール：' + r.email + '（説明会のご予約と同じ）' : '';
+    $$('[data-cs="when"] .chip').forEach(function (c) { c.classList.toggle('is-on', c.getAttribute('data-v') === sem.cs.when); });
+    $$('[data-cs="worry"] .chip').forEach(function (c) { c.classList.toggle('is-on', sem.cs.worry.indexOf(c.getAttribute('data-v')) >= 0); });
+  }
+
+  // 例：11月5日（水）19:00〜19:30
+  function consultWhen(c) { return dayLabel(slotDayKey(c.start)) + ' ' + clock(c.start) + '〜' + clock(c.end); }
+
+  function csNote(msg, kind) {
+    var el = $('#csFormNote');
+    el.textContent = msg || '';
+    el.className = 'form-note' + (kind ? ' ' + kind : '');
+  }
+
+  function csSubmit() {
+    if (sem.csSending) return;
+    var area = $('#c-area').value.trim();
+    $$('#c-area,[data-cs="when"],#csTimes').forEach(function (el) { el.classList.remove('is-error'); });
+    var bad = null;
+    if (!area) { $('#c-area').classList.add('is-error'); bad = bad || $('#c-area'); }
+    if (!sem.cs.when) { $('[data-cs="when"]').classList.add('is-error'); bad = bad || $('[data-cs="when"]'); }
+    if (!sem.csAt) { $('#csTimes').classList.add('is-error'); bad = $('#csTimeSec'); }
+    if (bad) {
+      csNote(!sem.csAt ? '時刻を選んでください' : '入っていない項目があります', 'ng');
+      bad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    sem.csSending = true;
+    var btn = $('#csSubmit');
+    btn.disabled = true;
+    csNote('予約しています…');
+    var at = sem.csAt;
+    var talk = canPostToTalk();
+    semApi('consult', { start: at, talk: talk, answers: { area: area, when: sem.cs.when, worry: sem.cs.worry.slice(), note: $('#c-note').value.trim(), tel: $('#c-tel').value.trim() } }).then(function (d) {
+      if (!d.ok) {
+        if (d.error === 'taken') {
+          if (d.consult) sem.slots = d.consult.slots;
+          sem.csAt = 0;
+          renderConsult();
+          csNote('その時間は、ちょうど埋まってしまいました。別の時間を選んでください。', 'ng');
+          $('#csTimeSec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else csNote(d.error === 'closed' ? 'すでにご加盟の手続き中です。トークでご連絡ください。' : '予約できませんでした。もう一度お試しください。', 'ng');
+        return;
+      }
+      sem.res = d.reservation;
+      sem.consulting = false;
+      csNote('');
+      track('consult_book', { lead_h: Math.round((at - semNow()) / 3600000) });
+      renderSeminar();
+      window.scrollTo(0, 0);
+      toast('個別相談を予約しました');
+      if (talk) {
+        postToTalk(CONSULT_PREFIX + '\n日時：' + consultWhen(d.reservation.consult) + '\nお相手：' + hostName().replace('　', ' ')).then(function (ok) {
+          if (!ok) semApi('cconfirm').catch(function () {});
+        });
+      }
+    }).catch(function () {
+      csNote('予約できませんでした。電波の良い場所で、もう一度お試しください。', 'ng');
+    }).then(function () { sem.csSending = false; btn.disabled = false; });
+  }
+
+  function renderCTicket() {
+    var c = sem.res.consult, p = jstParts(c.start);
+    $('#ctDate').textContent = p.y + '年' + (p.m + 1) + '月' + p.d + '日（' + '日月火水木金土'.charAt(p.w) + '）';
+    $('#ctTime').textContent = clock(c.start);
+    $('#ctEnd').textContent = clock(c.end);
+    $('#ctJoin').hidden = !c.url;
+    $('#ctNote').textContent = c.url
+      ? '開始の少し前に、上のボタンから入室してください。前日と10分前にも、LINEとメールでお知らせします。'
+      : '入室用のURLは、当日までに担当者からトークでお送りします。前日と10分前にもお知らせします。';
+    updateCCountdown();
+  }
+
+  function updateCCountdown() {
+    var c = sem.res && sem.res.consult;
+    if (!c) return;
+    var left = Math.max(0, c.start - semNow());
+    var s = Math.ceil(left / 1000), days = Math.floor(s / 86400);
+    $('#ctD').textContent = days;
+    $('#ctH').textContent = pad2(Math.floor(s % 86400 / 3600));
+    $('#ctM').textContent = pad2(Math.floor(s % 3600 / 60));
+    $('#ctS').textContent = pad2(s % 60);
+    $('#ctBox').classList.toggle('no-days', days === 0);
+    var soon = left <= 10 * 60000;
+    $('#ctTicket').classList.toggle('is-soon', soon);
+    $('#ctLabel').textContent = left <= 0 ? 'ただいま個別相談の時間です' : soon ? 'まもなく始まります。入室してお待ちください' : '開始まで';
+  }
+
+  function consultGcal() {
+    var c = sem.res.consult;
+    var f = function (ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('BUYMO 個別相談（' + hostName().replace('　', ' ') + '）') +
+      '&dates=' + f(c.start) + '/' + f(c.end) +
+      '&details=' + encodeURIComponent((c.url ? 'Google Meet：' + c.url + '\n' : '') + '予約内容：' + liffUrl('?view=seminar&c=1'));
+  }
+
+  function consultCancel() {
+    if (!window.confirm('個別相談の予約を取り消しますか？')) return;
+    semApi('consultCancel').then(function (d) {
+      if (!d.ok) { toast('取り消せませんでした'); return; }
+      sem.res = d.reservation;
+      toast('個別相談の予約を取り消しました');
+      renderSeminar();
+    }).catch(function () { toast('取り消せませんでした'); });
   }
 
   function setupSeminar() {
@@ -1274,6 +1509,39 @@
     $('#liveRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; resetPlayer(); renderSeminar(); window.scrollTo(0, 0); });
     $('#semRebook').addEventListener('click', function () { sem.rebook = true; sem.day = ''; sem.time = ''; sem.month = null; renderSeminar(); window.scrollTo(0, 0); });
     $('#semRetry').addEventListener('click', semLoad);
+    // 個別相談
+    $('#csBack').addEventListener('click', function () { sem.consulting = false; csNote(''); renderSeminar(); window.scrollTo(0, 0); });
+    $('#csDays').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-csday]');
+      if (!b) return;
+      sem.csDay = b.getAttribute('data-csday');
+      renderConsult();
+    });
+    $('#csTimes').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-csat]');
+      if (!b) return;
+      sem.csAt = Number(b.getAttribute('data-csat'));
+      $('#csTimes').classList.remove('is-error');
+      if ($('#csFormNote').classList.contains('ng')) csNote('');
+      renderConsult();
+      $('#csForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $$('[data-cs]').forEach(function (box) {
+      box.addEventListener('click', function (e) {
+        var c = e.target.closest('.chip');
+        if (!c) return;
+        var v = c.getAttribute('data-v');
+        if (box.getAttribute('data-cs') === 'when') { sem.cs.when = v; box.classList.remove('is-error'); }
+        else { var i = sem.cs.worry.indexOf(v); if (i < 0) sem.cs.worry.push(v); else sem.cs.worry.splice(i, 1); }
+        renderConsult();
+      });
+    });
+    $('#c-area').addEventListener('input', function () { this.classList.remove('is-error'); });
+    $('#csForm').addEventListener('submit', function (e) { e.preventDefault(); csSubmit(); });
+    $('#ctJoin').addEventListener('click', function () { var c = sem.res && sem.res.consult; if (c && c.url) { track('consult_join', {}); openUrl(c.url, true); } });
+    $('#ctCal').addEventListener('click', function () { openUrl(consultGcal(), true); });
+    $('#ctChange').addEventListener('click', function () { openConsult(); });
+    $('#ctCancel').addEventListener('click', consultCancel);
     $('#playerStart').addEventListener('click', startPlayer);
     document.addEventListener('visibilitychange', function () { if (document.hidden && sem.player) sendProgress(); });
   }
@@ -1392,6 +1660,7 @@
     applyProfile();
     setDefaultReceive();
     var r = readRoute();
+    if (r.c && r.view === 'seminar') sem.wantConsult = true;   // 個別相談の日時を選ぶ画面から開く
     nav(r.view, r.step, true);
     // リッチメニューから ?view=home&sec=faq のように開いたら、その見出しまでスクロール
     var target = r.sec && document.getElementById('sec-' + r.sec);
