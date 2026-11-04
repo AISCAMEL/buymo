@@ -36,7 +36,8 @@
 5. LIFF ID をこのチャットで教えてください。`site/kaitori/config.js` の `LIFF_ID` に入れて公開します
    （公式LINE の**ベーシックID**（`@` から始まる）も教えてもらえると、「トークで相談」でトーク画面を直接開けるようになります）
 
-ミニアプリのURLは `https://miniapp.line.me/{LIFF ID}` になります（以下「ミニアプリURL」）。
+**設定済み**：プロバイダー「BUYMO」の「BUYMOログイン」チャネルの LIFF、LIFF ID `2011748468-9v7ikPEB`、ベーシックID `@964nkhyl`。
+ミニアプリURL（以下「ミニアプリURL」）は `https://liff.line.me/2011748468-9v7ikPEB` です。
 
 ## 2. リッチメニュー（LINE Official Account Manager）
 
