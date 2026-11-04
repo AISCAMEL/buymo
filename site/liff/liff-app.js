@@ -1071,13 +1071,14 @@
     $('#cdLabel').textContent = soon ? 'まもなく開始します' : '開始まで';
   }
 
-  // Google カレンダーに登録（開始時刻から動画の長さぶん）
+  // Google カレンダーに登録。開始時刻から動画の長さぶんだけの予定にして、名前にも開始時刻を入れる
+  // （「○時まで再生できます」は入れない：カレンダーで見たときに、時間の幅が広く見えないように）
   function gcalUrl() {
     var f = function (ms) { return new Date(ms).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
-    var st = resStart();
-    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('BUYMO 副業パートナー 動画説明会') +
+    var st = resStart(), hmS = clock(st);
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('BUYMO 動画説明会（' + hmS + '開始・約' + sem.cfg.minutes + '分）') +
       '&dates=' + f(st) + '/' + f(st + sem.cfg.minutes * 60000) +
-      '&details=' + encodeURIComponent('開始時刻になったら、説明会ページで再生してください（約' + sem.cfg.minutes + '分。' + untilText() + 'まで再生できます）\n説明会ページ：' + liffUrl('?view=seminar'));
+      '&details=' + encodeURIComponent(hmS + ' に始まります（約' + sem.cfg.minutes + '分の録画）。\n開始時刻になったら、この説明会ページを開いて、再生ボタンを押してください。\n説明会ページ：' + liffUrl('?view=seminar'));
   }
 
   function semCancel() {
