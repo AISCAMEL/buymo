@@ -801,6 +801,16 @@ function setup() {
   ['ANTHROPIC_API_KEY', 'LINE_CHANNEL_ACCESS_TOKEN', 'SLACK_WEBHOOK_URL', 'LINEWORKS_WEBHOOK_URL'].forEach(function (k) {
     Logger.log(k + ': ' + (props.getProperty(k) ? '設定済み' : '★未設定'));
   });
+  // 入れ方のまちがいを知らせる（キーの中身は表示しない）
+  var ak = String(props.getProperty('ANTHROPIC_API_KEY') || '');
+  if (ak && !/^sk-ant-[\w-]+$/.test(ak.trim())) Logger.log('★ANTHROPIC_API_KEY の値が正しくありません。「sk-ant-」で始まるキーの文字だけを入れてください（いまは「' + ak.slice(0, 6) + '…」で始まっています）');
+  else if (ak && ak !== ak.trim()) Logger.log('★ANTHROPIC_API_KEY の前後に空白が入っています。消してください');
+  var lt = String(props.getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '');
+  if (lt && lt.length < 100) Logger.log('★LINE_CHANNEL_ACCESS_TOKEN が短すぎます（' + lt.length + '文字）。「Channel secret」ではなく、「チャネルアクセストークン（長期）」の長い文字を入れてください');
+  props.getKeys().forEach(function (k) {
+    if (k !== 'LINE_CHANNEL_ACCESS_TOKEN' && /LINE.*TOKEN|CHANNEL_ACCESS/i.test(k)) Logger.log('★プロパティの名前が「' + k.slice(0, 30) + '…」になっています。名前は LINE_CHANNEL_ACCESS_TOKEN ちょうどにして、トークンは右の「値」の欄に入れてください');
+    if (k !== 'ANTHROPIC_API_KEY' && /ANTHROPIC/i.test(k)) Logger.log('★プロパティの名前が「' + k.slice(0, 30) + '」になっています。名前は ANTHROPIC_API_KEY ちょうどにしてください');
+  });
   Logger.log('通知メールの送り先: ' + (props.getProperty('NOTIFY_EMAIL') || Session.getEffectiveUser().getEmail() + '（このGASの持ち主）'));
   Logger.log('AI：' + (props.getProperty('ANTHROPIC_API_KEY') ? 'Claude API に直接（' + (props.getProperty('CLAUDE_MODEL') || CLAUDE_DEFAULT_MODEL) + '）'
     : props.getProperty('OPENROUTER_API_KEY') ? 'OpenRouter（' + (props.getProperty('AI_MODEL') || DEFAULT_MODEL) + '）' : '★未設定（ANTHROPIC_API_KEY を入れてください）'));
