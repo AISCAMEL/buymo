@@ -199,13 +199,15 @@ function morning_(ms) {
   return dayStart_(jst_(ms, 'yyyy-MM-dd')) + (h >= 22 ? 33 : 9) * HOUR_MS;
 }
 
-// Google カレンダーに登録するリンク（開始時刻から動画の長さぶん）
+// Google カレンダーに登録するリンク。開始時刻から動画の長さぶんだけの予定にして、名前にも開始時刻を入れる
+// （「○時まで再生できます」は入れない：カレンダーで見たときに、時間の幅が広く見えないように）
 function gcalUrl_(res, cfg) {
   var t = times_(res, cfg);
   var f = function (ms) { return Utilities.formatDate(new Date(ms), 'UTC', "yyyyMMdd'T'HHmmss'Z'"); };
-  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('BUYMO 副業パートナー 動画説明会') +
+  var hmS = jst_(t.start, 'H:mm');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('BUYMO 動画説明会（' + hmS + '開始・約' + cfg.minutes + '分）') +
     '&dates=' + f(t.start) + '/' + f(t.start + cfg.minutes * 60000) +
-    '&details=' + encodeURIComponent('開始時刻になったら、説明会ページで再生してください（約' + cfg.minutes + '分。' + untilLabel_(t) + 'まで再生できます）\n説明会ページ：' + SEMINAR_PAGE);
+    '&details=' + encodeURIComponent(hmS + ' に始まります（約' + cfg.minutes + '分の録画）。\n開始時刻になったら、LINE のミニアプリ「オルタナティブライフ」の説明会ページを開いて、再生ボタンを押してください。\n説明会ページ：' + SEMINAR_PAGE);
 }
 
 
