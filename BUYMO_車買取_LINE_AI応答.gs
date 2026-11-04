@@ -9,7 +9,7 @@
      OPENROUTER_API_KEY        : OpenRouter の API キー（必須。BUYMO の本番 GAS と同じキーでよい）
      LINE_CHANNEL_ACCESS_TOKEN : BUYMO 車買取の公式LINE のチャネルアクセストークン（長期）（必須）
      WEBHOOK_TOKEN             : Webhook URL の末尾 ?token= に付ける合言葉（setup() を実行すると自動で作られる）
-     MINIAPP_URL               : 車買取ミニアプリのURL（例 https://miniapp.line.me/xxxxxxxxxx-XXXXXXXX）。空ならサイト版 https://buymo.me/kaitori/
+     MINIAPP_URL               : 車買取ミニアプリのURL。空なら https://liff.line.me/2011748468-9v7ikPEB（BUYMOログインの LIFF）
      SLACK_WEBHOOK_URL         : 引き継ぎ・査定申込・写真の受信を本部に知らせる Slack の Incoming Webhook（任意）
      LINEWORKS_WEBHOOK_URL     : 同じ通知を LINE WORKS のトークルームに送る「Incoming Webhook」アプリの URL（任意）
      NOTIFY_EMAIL              : 引き継ぎを知らせるメールアドレス（任意・空ならこの GAS の持ち主）
@@ -30,7 +30,7 @@
    セットアップ手順：BUYMO_車買取_LINEミニアプリ_セットアップ.md
    ============================================================ */
 
-var APP_URL = String(PropertiesService.getScriptProperties().getProperty('MINIAPP_URL') || 'https://buymo.me/kaitori/').trim();   // 車買取ミニアプリ
+var APP_URL = String(PropertiesService.getScriptProperties().getProperty('MINIAPP_URL') || 'https://liff.line.me/2011748468-9v7ikPEB').trim();   // 車買取ミニアプリ（LINE の中で開く）
 var SITE_URL = 'https://buymo.me/';
 var MEMBER_URL = 'https://buymo.me/member.html';
 var DEFAULT_MODEL = 'anthropic/claude-haiku-4-5';
