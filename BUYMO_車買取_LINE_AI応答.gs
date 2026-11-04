@@ -6,14 +6,16 @@
    「オルタナティブライフ LINE AI応答」と同じ作りで、中身（AIの知識・ボタン）を車買取のお客様向けにしたもの。
 
    ■ スクリプトプロパティ（プロジェクトの設定 → スクリプト プロパティ）
-     OPENROUTER_API_KEY        : OpenRouter の API キー（必須。BUYMO の本番 GAS と同じキーでよい）
+     ANTHROPIC_API_KEY         : Claude API（Anthropic）の API キー（console.anthropic.com で作る）。入れると Claude API に直接つなぐ
+     CLAUDE_MODEL              : Claude API で使うモデル（任意・既定 claude-opus-5-5）
+     OPENROUTER_API_KEY        : OpenRouter の API キー（ANTHROPIC_API_KEY がないときだけ使う）
      LINE_CHANNEL_ACCESS_TOKEN : BUYMO 車買取の公式LINE のチャネルアクセストークン（長期）（必須）
      WEBHOOK_TOKEN             : Webhook URL の末尾 ?token= に付ける合言葉（setup() を実行すると自動で作られる）
      MINIAPP_URL               : 車買取ミニアプリのURL。空なら https://liff.line.me/2011748468-9v7ikPEB（BUYMOログインの LIFF）
      SLACK_WEBHOOK_URL         : 引き継ぎ・査定申込・写真の受信を本部に知らせる Slack の Incoming Webhook（任意）
      LINEWORKS_WEBHOOK_URL     : 同じ通知を LINE WORKS のトークルームに送る「Incoming Webhook」アプリの URL（任意）
      NOTIFY_EMAIL              : 引き継ぎを知らせるメールアドレス（任意・空ならこの GAS の持ち主）
-     AI_MODEL                  : 使うモデル（任意・既定 anthropic/claude-haiku-4-5＝サイトのチャットと同じ）
+     AI_MODEL                  : OpenRouter で使うモデル（任意・既定 anthropic/claude-haiku-4-5）
      LOG_SHEET_ID              : 会話ログのスプレッドシートID（setup() を実行すると自動で作られる）
      APP_SECRET                : 通知メールのリンクに付ける署名の鍵（自動で作られる）
      ADMIN_KEY                 : 本部の画面から会話ログを読むための合言葉（showAdminKey() で作られる）
@@ -33,7 +35,8 @@
 var APP_URL = String(PropertiesService.getScriptProperties().getProperty('MINIAPP_URL') || 'https://liff.line.me/2011748468-9v7ikPEB').trim();   // 車買取ミニアプリ（LINE の中で開く）
 var SITE_URL = 'https://buymo.me/';
 var MEMBER_URL = 'https://buymo.me/member.html';
-var DEFAULT_MODEL = 'anthropic/claude-haiku-4-5';
+var DEFAULT_MODEL = 'anthropic/claude-haiku-4-5';   // OpenRouter のとき
+var CLAUDE_DEFAULT_MODEL = 'claude-opus-5-5';        // Claude API に直接つなぐとき
 var PAUSE_HOURS = 24;          // 本部の画面で「AIを止めて担当者が対応」を押したとき、AI が返信しない時間
 // 引き継ぎ（「担当者と話したい」など）のときに AI を止めるか。false：止めない（本部に知らせるだけで、AI はそのまま返事を続ける）
 var AUTO_PAUSE = false;
@@ -347,8 +350,9 @@ function resumeAllAI() {
    ============================================================ */
 function askAI_(messages) {
   var props = PropertiesService.getScriptProperties();
+  if (props.getProperty('ANTHROPIC_API_KEY')) return askClaude_(messages, props);
   var apiKey = props.getProperty('OPENROUTER_API_KEY');
-  if (!apiKey) { Logger.log('OPENROUTER_API_KEY が未設定'); return null; }
+  if (!apiKey) { Logger.log('ANTHROPIC_API_KEY（または OPENROUTER_API_KEY）が未設定'); return null; }
   var model = props.getProperty('AI_MODEL') || DEFAULT_MODEL;
 
   try {
@@ -358,7 +362,7 @@ function askAI_(messages) {
       headers: {
         'Authorization': 'Bearer ' + apiKey,
         'HTTP-Referer': 'https://buymo.me',
-        'X-Title': 'Alternative Life LINE'
+        'X-Title': 'BUYMO LINE'
       },
       payload: JSON.stringify({
         model: model,
@@ -382,6 +386,61 @@ function askAI_(messages) {
     return text || null;
   } catch (err) {
     Logger.log('askAI_: ' + err.message);
+    reportError_('AIの返事', err);
+    return null;
+  }
+}
+
+// Claude API（Anthropic Messages API）に直接つなぐ
+function askClaude_(messages, props) {
+  var model = String(props.getProperty('CLAUDE_MODEL') || CLAUDE_DEFAULT_MODEL).trim();
+  // 会話は user から始め、同じ役割が続くときはまとめる
+  var msgs = [];
+  messages.forEach(function (m) {
+    var role = m.role === 'assistant' ? 'assistant' : 'user';
+    var text = String(m.content || '').trim();
+    if (!text) return;
+    if (!msgs.length && role === 'assistant') return;
+    var last = msgs[msgs.length - 1];
+    if (last && last.role === role) last.content += '\n' + text;
+    else msgs.push({ role: role, content: text });
+  });
+  if (!msgs.length) return null;
+  try {
+    var res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: {
+        'x-api-key': props.getProperty('ANTHROPIC_API_KEY'),
+        'anthropic-version': '2026-10-21',
+        'anthropic-beta': 'server-side-fallback-2026-07-01'   // 安全のための自動判定で断られたとき、別のモデルで答え直す
+      },
+      payload: JSON.stringify({
+        model: model,
+        max_tokens: 4000,
+        system: systemPrompt_(),
+        output_config: { effort: 'low' },   // トークの短い受け答え：速く・安く
+        fallbacks: 'default',
+        messages: msgs
+      }),
+      muteHttpExceptions: true
+    });
+    var code = res.getResponseCode();
+    if (code !== 200) {
+      Logger.log('Claude API ' + code + ': ' + res.getContentText().slice(0, 500));
+      var why = code === 401 ? 'API キーが正しくありません' : code === 429 ? '使いすぎの制限にかかりました' : code === 529 || code >= 500 ? 'Claude 側が混み合っています' : code === 400 ? 'リクエストの形が正しくありません' : '';
+      reportError_('AIの返事（Claude API）', 'HTTP ' + code + (why ? '（' + why + '）' : ''), res.getContentText().slice(0, 300));
+      return null;
+    }
+    var data = JSON.parse(res.getContentText());
+    if (data.stop_reason === 'refusal') {
+      return 'すみません、その内容にはお答えできません。車の売却や査定のことなら、お気軽にどうぞ。';
+    }
+    var text = (data.content || []).filter(function (b) { return b.type === 'text'; })
+      .map(function (b) { return b.text; }).join('').trim();
+    return text || null;
+  } catch (err) {
+    Logger.log('askClaude_: ' + err.message);
     reportError_('AIの返事', err);
     return null;
   }
@@ -739,11 +798,12 @@ function setup() {
     props.setProperty('WEBHOOK_TOKEN', Utilities.getUuid().replace(/-/g, ''));
   }
   Logger.log('Webhook URL の末尾に付ける文字：?token=' + props.getProperty('WEBHOOK_TOKEN'));
-  ['OPENROUTER_API_KEY', 'LINE_CHANNEL_ACCESS_TOKEN', 'SLACK_WEBHOOK_URL', 'LINEWORKS_WEBHOOK_URL'].forEach(function (k) {
+  ['ANTHROPIC_API_KEY', 'LINE_CHANNEL_ACCESS_TOKEN', 'SLACK_WEBHOOK_URL', 'LINEWORKS_WEBHOOK_URL'].forEach(function (k) {
     Logger.log(k + ': ' + (props.getProperty(k) ? '設定済み' : '★未設定'));
   });
   Logger.log('通知メールの送り先: ' + (props.getProperty('NOTIFY_EMAIL') || Session.getEffectiveUser().getEmail() + '（このGASの持ち主）'));
-  Logger.log('AI_MODEL: ' + (props.getProperty('AI_MODEL') || DEFAULT_MODEL + '（既定）'));
+  Logger.log('AI：' + (props.getProperty('ANTHROPIC_API_KEY') ? 'Claude API に直接（' + (props.getProperty('CLAUDE_MODEL') || CLAUDE_DEFAULT_MODEL) + '）'
+    : props.getProperty('OPENROUTER_API_KEY') ? 'OpenRouter（' + (props.getProperty('AI_MODEL') || DEFAULT_MODEL) + '）' : '★未設定（ANTHROPIC_API_KEY を入れてください）'));
 }
 
 // AI の回答だけを試す（LINE には送らない）
@@ -903,9 +963,9 @@ function healthReport_(withAI) {
   // AI
   if (withAI) {
     var ans = askAI_([{ role: 'user', content: '動作確認です。「OK」とだけ答えてください。' }]);
-    add(ans ? 'ok' : 'ng', 'AI', ans ? 'AI が返事をしています' : 'AI が返事をしません。OpenRouter の残高・API キーを確認してください');
+    add(ans ? 'ok' : 'ng', 'AI', ans ? 'AI が返事をしています' : 'AI が返事をしません。Claude API（または OpenRouter）の残高・API キーを確認してください');
   }
-  if (!props.getProperty('OPENROUTER_API_KEY')) add('ng', 'AI', 'OPENROUTER_API_KEY が未設定です');
+  if (!props.getProperty('ANTHROPIC_API_KEY') && !props.getProperty('OPENROUTER_API_KEY')) add('ng', 'AI', 'ANTHROPIC_API_KEY が未設定です');
 
   // メールの残り送信数
   try {

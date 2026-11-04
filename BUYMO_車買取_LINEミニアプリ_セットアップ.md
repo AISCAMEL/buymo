@@ -60,7 +60,8 @@
 4. プロジェクトの設定 → スクリプト プロパティ
    | プロパティ | 値 |
    |---|---|
-   | `OPENROUTER_API_KEY` | OpenRouter の API キー（本番 GAS と同じでよい） |
+   | `ANTHROPIC_API_KEY` | Claude API の API キー（https://console.anthropic.com →「API Keys」→「Create Key」。`sk-ant-` で始まる）。Claude に直接つなぐ（既定のモデル `claude-opus-5-5`、変えるときは `CLAUDE_MODEL`） |
+   | `OPENROUTER_API_KEY` | （`ANTHROPIC_API_KEY` を入れないときだけ）OpenRouter の API キー |
    | `LINE_CHANNEL_ACCESS_TOKEN` | 手順2のトークン |
    | `MINIAPP_URL` | ミニアプリURL（手順1。未作成なら空でよい → `https://buymo.me/kaitori/` を案内） |
    | `SLACK_WEBHOOK_URL` | 本部の Slack 通知（任意） |
