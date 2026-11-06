@@ -20,7 +20,7 @@
   var LS_HISTORY = 'altlife_history';
   var LS_CHECK = 'altlife_check';
   var LS_DRAFT = 'altlife_draft';
-  var VIEWS = { home: 1, seminar: 1, apply: 1, check: 1, mypage: 1, done: 1 };
+  var VIEWS = { home: 1, seminar: 1, apply: 1, check: 1, mypage: 1, done: 1, onboard: 1 };
   var LAST_STEP = 3;
 
   var state = {
@@ -168,6 +168,7 @@
     });
     if (view === 'apply') { applyCheckContext(); showStep(r.step); }
     if (view === 'mypage') renderMypage();
+    if (view === 'onboard') obLoad();
     if (view === 'seminar') enterSeminar();
     window.scrollTo(0, 0);
     track('liff_view', { view: view, step: view === 'apply' ? r.step : 0 });
@@ -629,6 +630,7 @@
       status.textContent = 'LINEアプリから開くと連携できます';
     }
     $('#btnLogin').hidden = !(state.liffReady && !state.loggedIn);
+    $('#mpOnboard').hidden = !(ob.data || (sem.res && (sem.res.status === '加盟決定' || sem.res.status === '申込')));
     $('#friendCard').hidden = state.friend !== false;
 
     var hist = lsGet(userKey(LS_HISTORY), []);
@@ -1291,8 +1293,158 @@
     $('#semDoneTitle').textContent = t[0];
     $('#semDoneText').textContent = t[1];
     $('#semDoneApply').hidden = mode !== 'cafter';
-    $('#semDoneConsult').hidden = st !== '相談希望';   // 担当者からの連絡を待たずに、自分で日時を選べる
+    $('#semDoneConsult').hidden = st !== '相談希望';
+    $('#semDoneOnboard').hidden = st !== '加盟決定';   // 担当者からの連絡を待たずに、自分で日時を選べる
     $('#semDoneRebook').hidden = st === '加盟決定';    // 行き止まりにしない：説明会はいつでも予約し直せる
+  }
+
+  /* ---------- 開業までの手続き（加盟が決まった方。GAS の 加盟手続き.gs） ---------- */
+  var ob = { data: null, loading: false, doc: '' };
+
+  function obLoad() {
+    if (ob.loading) return;
+    if (!canAuth()) { obMsg('LINEアプリから開くと、手続きの進み具合が見られます。'); return; }
+    ob.loading = true;
+    obMsg(ob.data ? '' : '読み込んでいます…');
+    semApi('obState').then(function (d) {
+      if (!d.ok) throw new Error(d.error);
+      ob.data = d.onboard;
+      obRender();
+    }).catch(function () { obMsg('読み込めませんでした。電波の良い場所で、開き直してください。'); })
+      .then(function () { ob.loading = false; });
+  }
+
+  function obMsg(text) {
+    $('#obMsg').hidden = !text;
+    $('#obMsgText').textContent = text || '';
+    if (text) $('#obBody').hidden = true;
+  }
+
+  var OB_TEXT = [
+    ['仮契約', 'ご加盟に向けて、まずは仮契約です。担当者から内容をご案内します。'],
+    ['本審査（書類の提出）', '下の書類を、写真かPDFで提出してください。届いた書類は、担当者が確認します。'],
+    ['活動エリアの決定', '担当者が、エリアの状況をご案内しながら一緒に決めます。'],
+    ['ご加盟契約（電子契約）', '契約書をご確認のうえ、電子署名をお願いします。'],
+    ['研修（福島・3日間）', '下から、ご都合のよい月の研修の回を選んでください。'],
+    ['開業', '開業おめでとうございます！これからは加盟店ポータルから査定・案件の管理ができます。']
+  ];
+
+  function obRender() {
+    var o = ob.data;
+    if (!o) { obMsg('加盟のお手続きが始まると、ここに進み具合が出ます。ご加盟をご希望の方は、まず代表との個別相談をご予約ください。'); return; }
+    obMsg('');
+    $('#obBody').hidden = false;
+    $('#obSteps').innerHTML = o.stages.map(function (l, i) {
+      var cls = i < o.stage ? 'done' : i === o.stage ? 'now' : '';
+      return '<li class="' + cls + '"><span>' + (i < o.stage ? '✓' : i + 1) + '</span><b>' + esc(l) + '</b></li>';
+    }).join('');
+    var t = OB_TEXT[Math.min(o.stage, OB_TEXT.length - 1)];
+    $('#obTitle').textContent = o.stage >= o.stages.length ? '開業済み' : t[0];
+    var txt = t[1];
+    if (o.stage === 2 && o.area) txt = '活動エリア：' + o.area;
+    if (o.stage === 5 && o.openDate) txt = '開業日：' + o.openDate + '。' + t[1];
+    $('#obText').textContent = txt;
+    var btn = $('#obUrl'), url = o.stage === 5 ? o.portal : o.url;
+    btn.hidden = !url || (o.stage !== 0 && o.stage !== 3 && o.stage !== 5);
+    btn.textContent = o.stage === 3 ? '契約書を確認して署名する' : o.stage === 5 ? '加盟店ポータルを開く' : '仮契約の内容を見る';
+    btn.setAttribute('data-url', url || '');
+    // 本審査の書類（本審査の段階から、出したものはずっと見られる）
+    $('#obDocsSec').hidden = o.stage < 1;
+    $$('#obKind .chip').forEach(function (c) { c.classList.toggle('is-on', c.getAttribute('data-kind') === o.kind); });
+    $('#obKindBox').hidden = o.stage > 1 && !!o.kind;
+    $('#obDocs').innerHTML = !o.kind ? '<li class="ob-doc-empty">上で「個人」か「法人」を選ぶと、必要な書類が出ます。</li>' : o.docs.map(function (d) {
+      var cls = d.status === 'OK' ? 'ok' : d.status === '差し戻し' ? 'ng' : d.status === '提出済み' ? 'sent' : '';
+      return '<li class="' + cls + '"><div><b>' + esc(d.label) + '</b><small>' + (d.status === '未提出' && d.later ? '取得後に提出（まだの方）' : esc(d.status) + (d.at ? '・' + esc(d.at) : '')) +
+        (d.status === '差し戻し' && d.note ? '<br>理由：' + esc(d.note) : '') + '</small></div>' +
+        (d.status === 'OK' ? '<span class="badge">確認済み</span>' : '<button type="button" class="btn btn-sm ' + (d.status === '未提出' || d.status === '差し戻し' ? 'btn-sun' : 'btn-ghost') + '" data-obdoc="' + d.id + '">' + (d.status === '未提出' ? '提出する' : '出し直す') + '</button>') + '</li>';
+    }).join('');
+    // 研修
+    $('#obTrainSec').hidden = o.stage < 4;
+    var bk = $('#obBooked');
+    bk.hidden = !o.training;
+    if (o.training) bk.innerHTML = '<b>ご予約済み：' + esc(o.training.label) + '</b><small>' + esc(o.training.place) + (o.training.note ? '<br>' + esc(o.training.note) : '') + '</small>';
+    $('#obSessions').innerHTML = o.stage !== 4 ? '' : (o.sessions || []).map(function (ss) {
+      var mine = o.training && o.training.month === ss.month;
+      var full = !mine && (ss.skip || ss.left <= 0);
+      return '<button type="button" class="ob-ses' + (mine ? ' is-on' : '') + '" data-obmonth="' + ss.month + '"' + (full ? ' disabled' : '') + '>' +
+        '<b>' + esc(ss.label) + '</b><small>' + (mine ? 'ご予約済み' : ss.skip ? 'この月は開催しません' : ss.left > 0 ? '残り ' + ss.left + ' 席' : '満席') + '</small></button>';
+    }).join('') || '<p class="hint">いま予約できる回がありません。担当者からご案内します。</p>';
+  }
+
+  // 写真は長い辺 2000px・JPEG にして送る（PDF はそのまま）
+  function obReadFile(file) {
+    return new Promise(function (resolve, reject) {
+      if (file.type === 'application/pdf') {
+        if (file.size > 8 * 1024 * 1024) { reject(new Error('size')); return; }
+        var fr = new FileReader();
+        fr.onload = function () { resolve({ mime: 'application/pdf', data: String(fr.result).split(',')[1] }); };
+        fr.onerror = reject;
+        fr.readAsDataURL(file);
+        return;
+      }
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var max = 2000, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
+        var cv = document.createElement('canvas');
+        cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        resolve({ mime: 'image/jpeg', data: cv.toDataURL('image/jpeg', 0.85).split(',')[1] });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('image')); };
+      img.src = url;
+    });
+  }
+
+  function obUpload(file) {
+    var note = $('#obDocNote');
+    note.className = 'form-note';
+    note.textContent = '送っています…（少し時間がかかります）';
+    obReadFile(file).then(function (f) {
+      return semApi('obUpload', { doc: ob.doc, mime: f.mime, data: f.data });
+    }).then(function (d) {
+      if (!d.ok) throw new Error(d.error);
+      ob.data = d.onboard;
+      note.className = 'form-note ok';
+      note.textContent = '提出しました。担当者が確認します。';
+      track('onboard_upload', { doc: ob.doc });
+      obRender();
+    }).catch(function (e) {
+      note.className = 'form-note ng';
+      note.textContent = e && e.message === 'size' ? 'ファイルが大きすぎます（8MBまで）。写真で撮り直してください。' : '送れませんでした。電波の良い場所で、もう一度お試しください。';
+    });
+  }
+
+  function setupOnboard() {
+    $('#obUrl').addEventListener('click', function () { var u = this.getAttribute('data-url'); if (u) openUrl(u, true); });
+    $('#obKind').addEventListener('click', function (e) {
+      var c = e.target.closest('[data-kind]');
+      if (!c || !ob.data) return;
+      semApi('obKind', { kind: c.getAttribute('data-kind') }).then(function (d) { if (d.ok) { ob.data = d.onboard; obRender(); } }).catch(function () { toast('送れませんでした'); });
+    });
+    $('#obDocs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-obdoc]');
+      if (!b) return;
+      ob.doc = b.getAttribute('data-obdoc');
+      $('#obFile').value = '';
+      $('#obFile').click();
+    });
+    $('#obFile').addEventListener('change', function () { if (this.files && this.files[0]) obUpload(this.files[0]); });
+    $('#obSessions').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-obmonth]');
+      if (!b || b.disabled) return;
+      var note = $('#obTrainNote');
+      note.className = 'form-note';
+      note.textContent = '予約しています…';
+      semApi('obTraining', { month: b.getAttribute('data-obmonth') }).then(function (d) {
+        if (!d.ok) { note.className = 'form-note ng'; note.textContent = d.error === 'full' ? 'その回は満席になりました。別の月を選んでください。' : '予約できませんでした。'; if (d.onboard) { ob.data = d.onboard; obRender(); } return; }
+        ob.data = d.onboard;
+        note.className = 'form-note ok';
+        note.textContent = '研修を予約しました。LINEにも確認が届きます。';
+        track('onboard_training', {});
+        obRender();
+      }).catch(function () { note.className = 'form-note ng'; note.textContent = '予約できませんでした。電波の良い場所で、もう一度お試しください。'; });
+    });
   }
 
   /* ---------- 見終わったあとのアンケート（3問・30秒） ---------- */
@@ -1780,6 +1932,7 @@
      ======================================================= */
   setupApplyForm();
   setupSeminar();
+  setupOnboard();
   restoreCheck();
   applyOaName();
 

@@ -599,6 +599,8 @@ function adminApi_(e) {
       resumeAI(u);
       logRow_(u, '本部', '本部の画面からAIの返信を再開しました');
       out = { ok: true };
+    } else if (/^ob/.test(String(req.action)) && typeof onboardAdmin_ === 'function') {
+      out = onboardAdmin_(req);   // 加盟が決まってからの手続き（加盟手続き.gs）
     } else if (req.action === 'consult' && u && typeof consultResult_ === 'function') {
       out = consultResult_(u, String(req.result || ''));   // 個別相談の結果（加盟決定／検討中／見送り／来なかった）
     } else out = { ok: false, error: 'action' };
@@ -663,6 +665,10 @@ function adminPeople_() {
       if (booked && (!p.firstAt || booked < p.firstAt)) p.firstAt = booked;
       if (updated > p.lastAt) p.lastAt = updated;
     });
+  }
+  if (typeof obAllForAdmin_ === 'function') {   // 加盟手続きの進み具合
+    var ob = obAllForAdmin_();
+    Object.keys(ob).forEach(function (u) { person(u).onboard = ob[u]; });
   }
   var props = PropertiesService.getScriptProperties(), now = Date.now();
   props.getKeys().forEach(function (k) {

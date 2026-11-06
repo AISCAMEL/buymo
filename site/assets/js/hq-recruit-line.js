@@ -142,6 +142,8 @@ window.RCLINE = (function () {
   /* ---------- いま対応が必要な人 ---------- */
   function attentionOf(l) {
     var p = l.line, s = p && p.seminar, now = Date.now();
+    var ob = p && p.onboard;
+    if (ob && (ob.docs || []).some(function (d) { return d.status === '提出済み'; })) return { lv: 'orange', label: '📄 書類の確認', why: '本審査の書類が届いています。「OK」か「差し戻し」を押してください' };
     if (s && s.status === '相談予約' && s.consultEnd && s.consultEnd < now) return { lv: 'red', label: '個別相談の結果を入力', why: consultText(s) + ' の相談が終わりました。「加盟決定／検討中／見送り／来なかった」を押してください' };
     if (s && s.status === '相談予約' && s.consultAt && s.consultAt - now < 36 * HOUR) return { lv: 'orange', label: '個別相談 ' + consultText(s), why: firstLine(s.consultInfo, 2) };
     if (s && s.survey && s.survey.indexOf('すぐにでも話を聞きたい') >= 0 && !s.consultAt && s.status !== '見送り') return { lv: 'orange', label: '🔥 アンケート：すぐ話を聞きたい', why: firstLine(s.survey, 3) + '。個別相談の予約をすすめてください' };
@@ -278,8 +280,10 @@ window.RCLINE = (function () {
       '<div class="lf">' + funnel + '</div>' +
       '<div class="la-head"><h2>🔔 いま対応が必要な人 <span>' + att.length + '人</span></h2></div>' +
       '<div class="la-grid">' + cards + '</div>' +
+      '<div id="lhTraining"></div>' +
       (demo ? '' : '<p class="lk-change"><button type="button" id="lkChange">LINE連携の合言葉を変える</button></p>');
     renderHealth();
+    renderTrainings();
     var ch = document.getElementById('lkChange');
     if (ch) ch.addEventListener('click', function () { if (window.confirm('この端末に保存した合言葉を消して、入れ直しますか？')) { keySet(''); location.reload(); } });
     host.querySelectorAll('[data-open]').forEach(function (c) {
@@ -334,6 +338,62 @@ window.RCLINE = (function () {
     }).join('') + '</ol>';
   }
 
+  /* ---------- 開業までの手続き（加盟手続き.gs） ---------- */
+  var OB_STAGES = ['仮契約', '本審査（書類）', 'エリアの決定', 'ご加盟契約（電子契約）', '研修', '開業'];
+  function obHtml(p) {
+    var o = p.onboard, s = p.seminar || {};
+    if (!o) {
+      if (s.status !== '加盟決定' && s.status !== '申込') return '';
+      return '<div class="lc lob"><div class="rc-sub-h">🧭 開業までの手続き</div><p class="lc-res">まだ始まっていません。</p>' +
+        '<button type="button" class="lc-btn on" data-ob="start">手続きを始める（仮契約のご案内を送る）</button></div>';
+    }
+    var docs = (o.docs || []).map(function (d) {
+      return '<li><b>' + esc(d.label) + '</b><span class="lob-st lob-' + (d.status === 'OK' ? 'ok' : d.status === '差し戻し' ? 'ng' : d.status === '提出済み' ? 'sent' : 'none') + '">' + esc(d.status) + '</span>' +
+        (d.links && d.links.length ? ' <a href="' + esc(d.links[d.links.length - 1]) + '" target="_blank" rel="noopener">見る</a>' : '') +
+        (d.status === '提出済み' || d.status === '差し戻し' || d.status === 'OK' ? ' <button type="button" class="lob-mini" data-obdoc="' + d.id + '" data-v="OK">OK</button><button type="button" class="lob-mini" data-obdoc="' + d.id + '" data-v="差し戻し">差し戻し</button>' : '') + '</li>';
+    }).join('');
+    return '<div class="lc lob"><div class="rc-sub-h">🧭 開業までの手続き</div>' +
+      '<p class="lc-when"><b>' + esc(o.stageLabel) + '</b><small>' + (o.kind ? esc(o.kind) + '・' : '') + '更新 ' + esc(String(o.stageAt || '').slice(5, 16)) + '</small></p>' +
+      '<label class="rc-field">段階<select data-obf="stage">' + OB_STAGES.map(function (l, i) { return '<option value="' + i + '"' + (i === o.stage ? ' selected' : '') + '>' + (i + 1) + '. ' + l + '</option>'; }).join('') +
+        '<option value="6"' + (o.stage >= 6 ? ' selected' : '') + '>開業済み</option></select></label>' +
+      '<label class="rc-field">案内のURL（仮契約・電子契約）<input type="url" data-obf="url" value="' + esc(o.url || '') + '" placeholder="https://（電子契約のURLなど）"></label>' +
+      '<label class="rc-field">活動エリア<input type="text" data-obf="area" value="' + esc(o.area || '') + '" placeholder="例：福島県いわき市"></label>' +
+      '<label class="rc-field">開業日<input type="text" data-obf="openDate" value="' + esc(o.openDate || '') + '" placeholder="例：2026-12-01"></label>' +
+      (o.training ? '<p class="lc-res">研修：' + esc(o.trainingLabel) + '</p>' : '') +
+      (docs ? '<ul class="lob-docs">' + docs + '</ul>' : (o.stage >= 1 ? '<p class="lc-res">書類：お客様が「個人／法人」を選ぶと出ます</p>' : '')) +
+      '<div class="lc-btns"><button type="button" class="lc-btn on" data-ob="save">保存して、段階が変わったらご案内を送る</button><button type="button" class="lc-btn" data-ob="resend">いまの段階のご案内をもう一度送る</button></div>' +
+      '<p class="lc-res" data-role="ob-state"></p></div>';
+  }
+
+  // 研修の回と参加者・一斉送信
+  function renderTrainings() {
+    var host = document.getElementById('lhTraining');
+    if (!host) return;
+    if (demo) { host.innerHTML = ''; return; }
+    host.innerHTML = '<p class="rc-hint">研修の回を読み込んでいます…</p>';
+    api('obTrainings').then(function (d) {
+      if (!d.ok) { host.innerHTML = ''; return; }
+      var list = (d.sessions || []).filter(function (x) { return !x.skip; });
+      host.innerHTML = '<div class="la-head"><h2>🎓 研修の回（定員 ' + d.capacity + '名）</h2></div>' + list.map(function (x) {
+        return '<div class="ltr"><p><b>' + esc(x.label) + '</b><span>' + x.people.length + ' / ' + x.capacity + '名</span></p>' +
+          (x.people.length ? '<p class="ltr-ppl">' + x.people.map(function (q) { return esc(q.name); }).join('、') + '</p>' : '<p class="ltr-ppl">まだ予約はありません</p>') +
+          (x.people.length ? '<textarea data-trmsg="' + x.month + '" placeholder="この回の参加者全員にLINEで送る（例：用意していただくもの）"></textarea><button type="button" class="lc-btn on" data-trsend="' + x.month + '">この回の全員にLINEを送る</button>' : '') + '</div>';
+      }).join('');
+      host.querySelectorAll('[data-trsend]').forEach(function (bt) {
+        bt.addEventListener('click', function () {
+          var m = bt.getAttribute('data-trsend'), ta = host.querySelector('[data-trmsg="' + m + '"]'), text = ta.value.trim();
+          if (!text) { window.alert('送る文を入れてください'); return; }
+          if (!window.confirm('この回の参加者全員に、LINEで送りますか？')) return;
+          bt.disabled = true;
+          api('obBroadcast', { month: m, text: text }).then(function (r) {
+            bt.disabled = false;
+            if (r.ok) { ta.value = ''; window.alert(r.sent + ' / ' + r.total + '名に送りました'); } else window.alert('送れませんでした（' + (r.error || '') + '）');
+          }).catch(function () { bt.disabled = false; window.alert('通信できませんでした'); });
+        });
+      });
+    }).catch(function () { host.innerHTML = ''; });
+  }
+
   var RESULT_TEXT = { '加盟決定': '加盟決定', '相談後検討': '検討中', '見送り': '見送り', '相談欠席': '来なかった' };
   var RESULTS = [['join', '🎉 加盟決定'], ['think', '🤔 検討中'], ['decline', '見送り'], ['noshow', '来なかった']];
 
@@ -375,6 +435,7 @@ window.RCLINE = (function () {
         '<label class="rc-field">期限<input type="text" data-role="nextDue" value="' + esc(l.nextDue || '') + '" placeholder="例：11/5"></label>' +
         '<div class="la-actions">' + actions + '</div>' +
         (p ? consultHtml(p.seminar) : '') +
+        (p ? obHtml(p) : '') +
       '</div>' +
     '</div>';
   }
@@ -397,6 +458,45 @@ window.RCLINE = (function () {
         box.querySelector('.ltl-host').innerHTML = '<p class="rc-hint">読み込めませんでした。開き直してください。</p>';
       }).then(function () { p.loading = false; });
     });
+    // 開業までの手続き
+    function obDone(d, msg) {
+      if (!d.ok) { window.alert('できませんでした（' + (d.error || '') + '）'); return; }
+      p.onboard = d.onboard;
+      var holder = box.querySelector('.lob');
+      if (holder) { var tmp = document.createElement('div'); tmp.innerHTML = obHtml(p); holder.parentNode.replaceChild(tmp.firstChild, holder); wireOb(); }
+      var st = box.querySelector('[data-role="ob-state"]');
+      if (st) st.textContent = msg;
+      renderTop(state.leads);
+    }
+    function wireOb() {
+      box.querySelectorAll('[data-ob]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var kind = b.getAttribute('data-ob');
+          if (demo) { window.alert('見本では保存しません'); return; }
+          if (kind === 'start') { if (!window.confirm('開業までの手続きを始めて、仮契約のご案内を送りますか？')) return; api('obStart', { u: p.userId }).then(function (d) { obDone(d, '手続きを始めました'); }); return; }
+          var f = function (k) { var el = box.querySelector('[data-obf="' + k + '"]'); return el ? el.value : undefined; };
+          var body = { u: p.userId, url: f('url'), area: f('area'), openDate: f('openDate') };
+          var stg = f('stage');
+          if (kind === 'save' && Number(stg) !== p.onboard.stage) {
+            if (!window.confirm('段階を「' + (OB_STAGES[stg] || '開業済み') + '」に変えて、お客様にご案内を送りますか？')) return;
+            body.stage = Number(stg);
+          }
+          if (kind === 'resend') { if (!window.confirm('いまの段階のご案内を、もう一度送りますか？')) return; body.resend = true; }
+          b.disabled = true;
+          api('obSet', body).then(function (d) { b.disabled = false; obDone(d, kind === 'resend' ? 'ご案内を送りました' : body.stage !== undefined ? '段階を変えて、ご案内を送りました' : '保存しました'); })
+            .catch(function () { b.disabled = false; window.alert('通信できませんでした'); });
+        });
+      });
+      box.querySelectorAll('[data-obdoc]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (demo) return;
+          var v = b.getAttribute('data-v'), note = '';
+          if (v === '差し戻し') { note = window.prompt('差し戻しの理由（お客様に届きます）', ''); if (note === null) return; }
+          api('obDoc', { u: p.userId, doc: b.getAttribute('data-obdoc'), status: v, note: note }).then(function (d) { obDone(d, v === 'OK' ? '書類をOKにしました' : '差し戻しをお客様に送りました'); });
+        });
+      });
+    }
+    wireOb();
     // 個別相談の結果（加盟決定／検討中／見送り／来なかった）→ お客様に次のご案内が自動で届く
     box.querySelectorAll('[data-cres]').forEach(function (b) {
       b.addEventListener('click', function () {

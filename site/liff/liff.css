@@ -618,3 +618,39 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);bac
 .sv .field .label{align-items:flex-start;text-align:left;line-height:1.5}
 .sv .field .label .num{flex:none}
 #svSubmit{margin-top:6px}
+
+/* ---------- 開業までの手続き ---------- */
+.ob-steps{display:grid;gap:0;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px 14px}
+.ob-steps li{display:flex;align-items:center;gap:12px;padding:10px 0;font-size:14px;color:var(--sub)}
+.ob-steps li + li{border-top:1px dashed var(--border)}
+.ob-steps li span{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-latin);font-weight:700;font-size:13px;background:var(--bg);color:var(--sub);border:1.5px solid var(--border)}
+.ob-steps li b{font-weight:700}
+.ob-steps li.done{color:var(--leaf)}
+.ob-steps li.done span{background:var(--mint-wash);border-color:var(--mint);color:var(--leaf)}
+.ob-steps li.now{color:var(--navy)}
+.ob-steps li.now span{background:var(--sun);border-color:var(--sun);color:var(--navy);box-shadow:0 0 0 4px var(--sun-wash)}
+.ob-steps li.now b{font-weight:900}
+.ob-card{background:var(--card);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow-md)}
+.ob-now{font-size:12px;font-weight:800;color:var(--sun);margin-bottom:4px}
+.ob-card .decide-lead{margin-bottom:12px}
+.ob-docs{display:grid;gap:8px;margin-bottom:8px}
+.ob-docs li{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border-radius:var(--radius-sm);padding:12px 14px;box-shadow:var(--shadow);border-left:4px solid var(--border)}
+.ob-docs li b{display:block;font-size:14px;color:var(--navy)}
+.ob-docs li small{display:block;font-size:12px;color:var(--sub);margin-top:2px;line-height:1.5}
+.ob-docs li.sent{border-left-color:var(--sun)}
+.ob-docs li.ok{border-left-color:var(--leaf)}
+.ob-docs li.ng{border-left-color:var(--red)}
+.ob-docs li.ng small{color:var(--red)}
+.ob-docs .btn{flex:none}
+.ob-doc-empty{font-size:13px;color:var(--sub);justify-content:flex-start !important}
+.ob-booked{margin-bottom:10px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--mint-wash);border:1.5px solid var(--mint)}
+.ob-booked b{display:block;color:var(--leaf);font-size:14.5px}
+.ob-booked small{display:block;font-size:12px;color:var(--navy);margin-top:4px;line-height:1.6}
+.ob-sessions{display:grid;gap:8px}
+.ob-ses{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;border-radius:var(--radius-sm);background:#fff;border:1.5px solid var(--border);text-align:left}
+.ob-ses b{font-size:14.5px;color:var(--navy)}
+.ob-ses small{flex:none;font-size:12px;font-weight:800;color:var(--leaf)}
+.ob-ses.is-on{background:var(--navy);border-color:var(--navy)}
+.ob-ses.is-on b,.ob-ses.is-on small{color:#fff}
+.ob-ses:disabled{opacity:.5}
+.ob-ses:disabled small{color:var(--sub)}

@@ -333,6 +333,9 @@ function seminarHandle_(req) {
   webAppUrl_();
 
   // 個別相談の空いている枠（代表のカレンダーの「相談OK」の時間から、ほかの予定を除いたもの）。読むだけなのでロックしない
+  // 加盟が決まってからの手続き（加盟手続き.gs）
+  if (/^ob/.test(String(req.action)) && typeof onboardHandle_ === 'function') return onboardHandle_(req, user, out);
+
   if (req.action === 'slots') {
     var cc0 = consultCfg_();
     out.consult = { minutes: cc0.minutes, slots: consultSlots_(cc0, now, false), bookingUrl: cc0.bookingUrl };
@@ -637,6 +640,8 @@ function seminarTick() {
   } finally {
     lock.releaseLock();
   }
+  // 加盟手続き：書類の声かけ・研修のお知らせ（加盟手続き.gs）
+  if (typeof onboardTick_ === 'function') { try { onboardTick_(Date.now()); } catch (err) { Logger.log('onboardTick_: ' + err.message); } }
   found.forEach(function (f) {
     try { f(); } catch (err) { Logger.log('consultScan job: ' + err.message); }
   });
@@ -1210,12 +1215,14 @@ function consultMessage_(id, res, cfg) {
   };
 
   if (id === 'cjoin') return {
-    line: card_('ご加盟のご決断、ありがとうございます', '契約内容とエリアのご案内を、担当者から3営業日以内にお送りします。ご不明な点は、このトークでいつでもどうぞ。', [['トークで質問する', '加盟の手続きについて質問があります']], K),
+    line: card_('ご加盟のご決断、ありがとうございます', 'これから開業まで（仮契約 → 本審査 → エリア → ご加盟契約 → 研修 → 開業）を、このLINEで順にご案内します。進み具合は、下のボタンからいつでも見られます。',
+      [['開業までの手続きを見る', APP_URL + '?view=onboard'], ['トークで質問する', '加盟の手続きについて質問があります']], K),
     mail: {
       subject: 'ご加盟のご決断、ありがとうございます',
       body: 'BUYMO 副業パートナーへのご加盟をご決断いただき、ありがとうございます。\n\n' +
-        '契約内容とエリアのご案内を、担当者から3営業日以内にお送りします。\n' +
-        'ご契約は、書面で内容をご確認いただき、ご納得いただけた場合のみです。\n\n' +
+        'これから開業まで（仮契約 → 本審査 → エリアの決定 → ご加盟契約（電子契約）→ 研修 → 開業）を、LINEで順にご案内します。\n' +
+        '進み具合はこちらで見られます：' + APP_URL + '?view=onboard\n' +
+        'ご契約は、契約書で内容をご確認いただき、ご納得いただけた場合のみです。\n\n' +
         'ご不明な点は、公式LINEのトークでいつでも受け付けています。'
     }
   };
@@ -1398,6 +1405,8 @@ function consultResult_(userId, result) {
     lock.releaseLock();
   }
   if (m[1]) { try { deliver_(m[1], copy, cfg, { line: true, mail: true }); } catch (err) { reportError_('個別相談の結果のお知らせ', err); } }
+  // 加盟決定：開業までの手続きを始める（最初のご案内は上の「ご決断ありがとうございます」で送ったので、ここでは送らない）
+  if (result === 'join' && typeof onboardAdmin_ === 'function') { try { onboardAdmin_({ action: 'obStart', u: userId, silent: true }); } catch (err) { reportError_('加盟手続きの開始', err); } }
   logRow_(userId, '本部', '個別相談の結果：' + { join: '加盟決定', think: '検討中', decline: '見送り', noshow: '来なかった' }[result]);
   return { ok: true, status: m[0] };
 }
