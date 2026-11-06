@@ -144,6 +144,7 @@ window.RCLINE = (function () {
     var p = l.line, s = p && p.seminar, now = Date.now();
     if (s && s.status === '相談予約' && s.consultEnd && s.consultEnd < now) return { lv: 'red', label: '個別相談の結果を入力', why: consultText(s) + ' の相談が終わりました。「加盟決定／検討中／見送り／来なかった」を押してください' };
     if (s && s.status === '相談予約' && s.consultAt && s.consultAt - now < 36 * HOUR) return { lv: 'orange', label: '個別相談 ' + consultText(s), why: firstLine(s.consultInfo, 2) };
+    if (s && s.survey && s.survey.indexOf('すぐにでも話を聞きたい') >= 0 && !s.consultAt && s.status !== '見送り') return { lv: 'orange', label: '🔥 アンケート：すぐ話を聞きたい', why: firstLine(s.survey, 3) + '。個別相談の予約をすすめてください' };
     if (s && s.status === '視聴完了' && s.doneAt && now - s.doneAt < DAY) return { lv: 'orange', label: '🔥 最後まで視聴・相談はまだ', why: '見終わったばかりです。代表からのご案内は自動で送ります。チャットでひとこと声をかけるチャンス' };
     if (p && p.paused && s && s.status === '相談希望') return { lv: 'red', label: '個別相談を希望', why: '説明会のあと個別相談を選択。AIの返信を止めています（あと' + p.pauseLeft + '時間）' };
     if (p && p.paused) return { lv: 'red', label: '担当者を希望', why: 'チャットで返信してください。AIの返信を止めています（あと' + p.pauseLeft + '時間）' };
@@ -344,6 +345,7 @@ window.RCLINE = (function () {
       '<div class="rc-sub-h">🗓 代表との個別相談</div>' +
       '<p class="lc-when"><b>' + esc(consultText(s)) + '</b>' + (s.meetUrl ? '<a href="' + esc(s.meetUrl) + '" target="_blank" rel="noopener">Google Meet を開く</a>' : '<span class="lc-nourl">Meet の URL なし（お客様に送ってください）</span>') + '</p>' +
       (s.consultInfo ? '<p class="lc-info">' + esc(s.consultInfo).replace(/\n/g, '<br>') + '</p>' : '') +
+      (s.survey ? '<p class="lc-info"><b>説明会のアンケート</b><br>' + esc(s.survey).replace(/\n/g, '<br>') + '</p>' : '') +
       '<p class="lc-res" data-role="cres-state">' + (res ? '結果：' + esc(res) : '相談が終わったら、結果を押してください。お客様に次のご案内が自動で届きます。') + '</p>' +
       '<div class="lc-btns">' + RESULTS.map(function (r) {
         return '<button type="button" class="lc-btn' + (RESULT_TEXT[s.status] === r[1].replace(/^\S+ /, '') ? ' on' : '') + '" data-cres="' + r[0] + '">' + r[1] + '</button>';

@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Fraunces:ital,wght@1,600&family=Outfit:wght@600;700&display=swap" />
-<link rel="stylesheet" href="liff.css?v=9" />
+<link rel="stylesheet" href="liff.css?v=10" />
 </head>
 <body>
 
@@ -354,6 +354,50 @@
         <p class="player-hint" id="playerHint" role="status" aria-live="polite" hidden></p>
         <p class="hint">音が出ます。途中で止めても、続きから見られます。動画の最後に、加盟のお申し込み・個別相談のご案内があります。</p>
         <p class="live-links"><button type="button" id="liveRebook">いまは見られない方：別の日時に変更する</button></p>
+      </div>
+    </div>
+
+    <!-- 視聴後：まず30秒のアンケート（答えたら、個別相談へ） -->
+    <div id="semSurvey" hidden>
+      <div class="sec">
+        <div class="decide sv">
+          <p class="sec-kicker">Thank you</p>
+          <h2 class="sec-title">最後までご覧いただき、ありがとうございました</h2>
+          <p class="decide-lead">3つの質問に答えるだけ（30秒）です。答えていただいた内容をもとに、あなたに合わせてご案内します。</p>
+          <div class="field">
+            <span class="label"><span class="num">1</span>説明会の内容はいかがでしたか？</span>
+            <div class="chips chips-col" data-sv="feel">
+              <button type="button" class="chip" data-v="とてもよくわかった">とてもよくわかった</button>
+              <button type="button" class="chip" data-v="だいたいわかった">だいたいわかった</button>
+              <button type="button" class="chip" data-v="わからないところがあった">わからないところがあった</button>
+            </div>
+          </div>
+          <div class="field">
+            <span class="label"><span class="num">2</span>BUYMOの副業に、いまどのくらい興味がありますか？</span>
+            <div class="chips chips-col" data-sv="interest">
+              <button type="button" class="chip" data-v="すぐにでも話を聞きたい">すぐにでも話を聞きたい</button>
+              <button type="button" class="chip" data-v="もう少し知りたい">もう少し知りたい</button>
+              <button type="button" class="chip" data-v="今回は見送り">今回は見送り</button>
+            </div>
+          </div>
+          <div class="field">
+            <span class="label"><span class="num">3</span>いちばん気になることは？<span class="opt">いくつでも</span></span>
+            <div class="chips" data-sv="worry" data-multi="1">
+              <button type="button" class="chip" data-v="収入の目安">収入の目安</button>
+              <button type="button" class="chip" data-v="初期費用・資金">初期費用・資金</button>
+              <button type="button" class="chip" data-v="本業との両立">本業との両立</button>
+              <button type="button" class="chip" data-v="仕事の内容">仕事の内容</button>
+              <button type="button" class="chip" data-v="契約・エリア">契約・エリア</button>
+              <button type="button" class="chip" data-v="特にない">特にない</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="sv-note">ひとこと<span class="opt">任意</span></label>
+            <textarea id="sv-note" maxlength="300" placeholder="例：家族に相談してから決めたいです"></textarea>
+          </div>
+          <p class="form-note" id="svNote" role="status" aria-live="polite"></p>
+          <button type="button" class="btn btn-sun btn-block" id="svSubmit"><svg class="ico"><use href="#i-check"/></svg>回答して次へ</button>
+        </div>
       </div>
     </div>
 
@@ -833,6 +877,6 @@
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=6"></script>
 <script src="../assets/js/analytics.js"></script>
-<script src="liff-app.js?v=13"></script>
+<script src="liff-app.js?v=14"></script>
 </body>
 </html>
