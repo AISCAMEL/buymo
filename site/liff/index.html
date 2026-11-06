@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&family=Fraunces:ital,wght@1,600&family=Outfit:wght@600;700&display=swap" />
-<link rel="stylesheet" href="liff.css?v=10" />
+<link rel="stylesheet" href="liff.css?v=11" />
 </head>
 <body>
 
@@ -562,6 +562,7 @@
           <h2 class="sec-title" id="semDoneTitle"></h2>
           <p class="decide-lead" id="semDoneText"></p>
           <div class="decide-btns">
+            <button type="button" class="btn btn-sun btn-block" data-go="onboard" id="semDoneOnboard" hidden><svg class="ico"><use href="#i-route"/></svg>開業までの手続きを見る</button>
             <button type="button" class="btn btn-sun btn-block" data-sem="consult" id="semDoneConsult" hidden><svg class="ico"><use href="#i-calendar"/></svg>代表と話す日時を自分で選ぶ</button>
             <button type="button" class="btn btn-sun btn-block" data-sem="apply" id="semDoneApply" hidden><svg class="ico"><use href="#i-store"/></svg>加盟を申し込む</button>
             <button type="button" class="btn btn-line btn-block" data-action="talk"><svg class="ico"><use href="#i-chat"/></svg>トークを開く</button>
@@ -811,6 +812,57 @@
     </div>
   </section>
 
+  <!-- ===================== 開業までの手続き（加盟が決まった方） ===================== -->
+  <section class="view" data-view="onboard" aria-label="開業までの手続き" hidden>
+    <div class="page-head">
+      <p class="sec-kicker">Road to opening</p>
+      <h1 class="page-title">開業までの手続き</h1>
+      <p class="page-lead">仮契約から開業まで、いまどこまで進んでいるかと、次にやることがわかります。わからないことは、トークでいつでも聞けます。</p>
+    </div>
+    <div class="sec" id="obMsg"><p class="cs-loading" id="obMsgText">読み込んでいます…</p></div>
+    <div id="obBody" hidden>
+      <div class="sec">
+        <ol class="ob-steps" id="obSteps"></ol>
+      </div>
+      <div class="sec">
+        <div class="ob-card" id="obCard">
+          <p class="ob-now">いまの段階</p>
+          <h2 class="sec-title" id="obTitle"></h2>
+          <p class="decide-lead" id="obText"></p>
+          <button type="button" class="btn btn-sun btn-block" id="obUrl" hidden></button>
+        </div>
+      </div>
+      <!-- 本審査：書類の提出 -->
+      <div class="sec" id="obDocsSec" hidden>
+        <h2 class="sub-title">本審査の書類</h2>
+        <div class="field" id="obKindBox">
+          <span class="label">ご加盟の形</span>
+          <div class="chips chips-grid" id="obKind">
+            <button type="button" class="chip" data-kind="個人">個人で加盟</button>
+            <button type="button" class="chip" data-kind="法人">法人で加盟</button>
+          </div>
+        </div>
+        <ul class="ob-docs" id="obDocs"></ul>
+        <input type="file" id="obFile" accept="image/*,application/pdf" hidden />
+        <p class="form-note" id="obDocNote" role="status" aria-live="polite"></p>
+        <p class="hint">写真（スマホで撮ったもの）か PDF で提出できます。古物商許可証は、まだの方は取得後で大丈夫です（取得は本部がサポートします）。</p>
+      </div>
+      <!-- 研修：回の予約 -->
+      <div class="sec" id="obTrainSec" hidden>
+        <h2 class="sub-title">研修の日程（福島の本社・3日間）</h2>
+        <div class="ob-booked" id="obBooked" hidden></div>
+        <div class="ob-sessions" id="obSessions"></div>
+        <p class="form-note" id="obTrainNote" role="status" aria-live="polite"></p>
+        <p class="hint">研修は毎月、月末の金曜〜日曜に行います。用意していただくものは、近くなったらLINEでお知らせします。</p>
+      </div>
+      <div class="sec">
+        <ul class="menu">
+          <li><button type="button" data-action="talk"><svg class="ico"><use href="#i-chat"/></svg>手続きについてトークで質問する<svg class="ico end"><use href="#i-right"/></svg></button></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== マイページ ===================== -->
   <section class="view" data-view="mypage" aria-label="マイページ" hidden>
     <div class="page-head">
@@ -853,6 +905,7 @@
 
     <div class="sec">
       <ul class="menu">
+        <li id="mpOnboard" hidden><button type="button" data-go="onboard"><svg class="ico"><use href="#i-route"/></svg>開業までの手続き<svg class="ico end"><use href="#i-right"/></svg></button></li>
         <li><button type="button" data-ext="PARTNER_URL"><svg class="ico"><use href="#i-book"/></svg>パートナー募集の詳細<svg class="ico end"><use href="#i-external"/></svg></button></li>
         <li><button type="button" data-action="talk"><svg class="ico"><use href="#i-chat"/></svg>トークで質問する<svg class="ico end"><use href="#i-right"/></svg></button></li>
         <li><button type="button" data-action="share"><svg class="ico"><use href="#i-share"/></svg>友だちに紹介する<svg class="ico end"><use href="#i-right"/></svg></button></li>
@@ -877,6 +930,6 @@
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=6"></script>
 <script src="../assets/js/analytics.js"></script>
-<script src="liff-app.js?v=14"></script>
+<script src="liff-app.js?v=15"></script>
 </body>
 </html>
