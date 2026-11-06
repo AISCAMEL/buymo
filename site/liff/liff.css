@@ -612,3 +612,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);bac
 .ct-join{margin:16px 0 0}
 .ticket.is-soon .ct-join{animation:soon-btn 1.2s ease-in-out infinite}
 @keyframes soon-btn{50%{box-shadow:0 0 0 6px rgba(255,176,77,.35)}}
+
+/* ---------- 見終わったあとのアンケート ---------- */
+.sv .field{text-align:left}
+.sv .field .label{align-items:flex-start;text-align:left;line-height:1.5}
+.sv .field .label .num{flex:none}
+#svSubmit{margin-top:6px}

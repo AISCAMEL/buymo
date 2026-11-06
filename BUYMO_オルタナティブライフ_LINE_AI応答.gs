@@ -657,7 +657,8 @@ function adminPeople_() {
       var ct = typeof consultTimes_ === 'function' ? consultTimes_(res) : null;
       p.seminar = { day: res.day, time: res.time || '', start: tt ? tt.start : 0, end: tt ? tt.end : 0,
         status: res.status, pct: res.pct, name: res.name, email: res.email, doneAt: toMs_(res.doneAt || ''),
-        consultAt: ct ? ct.start : 0, consultEnd: ct ? ct.end : 0, consultInfo: res.consultInfo || '', meetUrl: res.meetUrl || '' };
+        consultAt: ct ? ct.start : 0, consultEnd: ct ? ct.end : 0, consultInfo: res.consultInfo || '', meetUrl: res.meetUrl || '',
+        survey: res.survey && typeof surveyText_ === 'function' ? surveyText_(res.survey) : '' };
       var booked = toMs_(res.reservedAt), updated = toMs_(r[9]);
       if (booked && (!p.firstAt || booked < p.firstAt)) p.firstAt = booked;
       if (updated > p.lastAt) p.lastAt = updated;
@@ -694,6 +695,7 @@ function adminTimeline_(u) {
       if (doneAt) list.push({ at: doneAt, kind: 'seminar_watch', text: '説明会を最後まで視聴（' + res.pct + '%）' });
       else if (res.pct > 0) list.push({ at: updated, kind: 'seminar_watch', text: '説明会を視聴（' + res.pct + '%）' });
       var ct = typeof consultTimes_ === 'function' ? consultTimes_(res) : null;
+      if (res.survey && typeof surveyText_ === 'function') list.push({ at: toMs_(res.survey.at || '') || updated, kind: 'decide', text: '説明会のアンケート\n' + surveyText_(res.survey) });
       if (ct) list.push({ at: Math.min(ct.start, updated), kind: 'consult', text: '代表との個別相談：' + consultLabel_(res, consultCfg_()) + (res.consultInfo ? '\n' + res.consultInfo : '') });
       var DEC = { '申込': '「加盟を申し込む」を選択', '相談希望': '「個別相談で詳しく聞く」を選択（日程はチャットで調整）', '検討中': '「もう少し考える」を選択', 'キャンセル': '説明会の予約を取り消し',
         '加盟決定': '個別相談のあと：加盟決定', '相談後検討': '個別相談のあと：検討中', '相談欠席': '個別相談：来られなかった', '見送り': '見送り' };

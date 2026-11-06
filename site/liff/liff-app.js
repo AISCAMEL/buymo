@@ -141,7 +141,7 @@
     }
     var v = sp.get('view') || 'home';
     if (!VIEWS[v] || v === 'done') v = 'home';
-    return { view: v, step: parseInt(sp.get('step'), 10) || 1, sec: sp.get('sec') || '', c: sp.get('c') === '1' };
+    return { view: v, step: parseInt(sp.get('step'), 10) || 1, sec: sp.get('sec') || '', c: sp.get('c') === '1', q: sp.get('q') === '1' };
   }
 
   function urlFor(r) {
@@ -670,7 +670,8 @@
     canJoin: false,  // 見終わった方だけ、資料請求フォームに「加盟を申し込みたい」を出す
     // 代表との個別相談（見終わったあと、代表のカレンダーの空いている日時を選んで予約。Google Meet）
     host: null, consulting: false, wantConsult: false, slots: null, slotsLoading: false, csMin: 30,
-    csDay: '', csAt: 0, cs: { when: '', worry: [] }, csSending: false
+    csDay: '', csAt: 0, cs: { when: '', worry: [] }, csSending: false,
+    sv: { feel: '', interest: '', worry: [] }, svSending: false, wantSurvey: false   // 見終わったあとのアンケート
   };
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
@@ -765,6 +766,7 @@
     else if (action === 'decide' && r) r.status = { apply: '申込', consult: '相談希望', later: '検討中' }[x.decision] || r.status;
     else if (action === 'consult' && r) { r.status = '相談予約'; r.consult = { start: x.start, end: x.start + 30 * 60000, url: 'https://meet.google.com/', info: '' }; }
     else if (action === 'consultCancel' && r) { r.status = '視聴完了'; r.consult = null; }
+    else if (action === 'survey' && r) { r.survey = x.survey; if (x.survey.interest === '今回は見送り') r.status = '見送り'; }
     else if (action === 'cscan' && r && sem.bookOpened) { r.status = '相談予約'; var c0 = Date.parse(todayKey() + 'T19:00:00+09:00') + DAY_MS; r.consult = { start: c0, end: c0 + 30 * 60000, url: 'https://meet.google.com/', info: '', via: 'google' }; }
     lsSet('altlife_sem_dry', r);
     var out = { ok: true, now: Date.now(), config: { openMin: 480, closeMin: 1440, slotMin: 30, windowMin: 60, leadMin: 5, minutes: 7, days: 14, ready: false }, reservation: r,
@@ -788,6 +790,7 @@
       if (d.ok) sem.res = d.reservation || null;
       // LINE のお知らせの「個別相談の日時を選ぶ」（?view=seminar&c=1）から開いたときは、予約画面から
       if (sem.wantConsult) { sem.wantConsult = false; if (canConsult()) openConsult(true); }
+      if (sem.wantSurvey) { sem.wantSurvey = false; sem.consulting = false; }   // LINE の「アンケートに答える」から
       restoreWatch();
       semMessage('');
       renderSeminar();
@@ -800,7 +803,7 @@
     $('#semMsg').hidden = !text;
     $('#semMsgText').textContent = text;
     $('#semRetry').hidden = !retry;
-    if (text) $$('#semBook,#semTicket,#semLive,#semDecide,#semConsult,#semCTicket,#semDone,#semMissed').forEach(function (el) { el.hidden = true; });
+    if (text) $$('#semBook,#semTicket,#semLive,#semSurvey,#semDecide,#semConsult,#semCTicket,#semDone,#semMissed').forEach(function (el) { el.hidden = true; });
   }
 
   /* ---------- 表示の切り替え ---------- */
@@ -820,7 +823,7 @@
     var r = sem.res;
     if (!r || sem.rebook) return 'book';
     if (sem.consulting) return 'consult';
-    if (r.status === '申込' || r.status === '相談希望' || r.status === '加盟決定') return 'done';
+    if (r.status === '申込' || r.status === '相談希望' || r.status === '加盟決定' || r.status === '見送り') return 'done';
     if (r.status === '相談予約' && r.consult) return semNow() < r.consult.end + 30 * 60000 ? 'cticket' : 'cafter';
     if (r.status === '相談後検討' || r.status === '相談欠席') return 'decide';
     var now = semNow();
@@ -855,7 +858,11 @@
     $('#semBook').hidden = mode !== 'book';
     $('#semTicket').hidden = mode !== 'ticket';
     $('#semLive').hidden = mode !== 'watch';
-    $('#semDecide').hidden = !(mode === 'decide' || (mode === 'watch' && finished()));
+    // 見終わったら、まずアンケート（答えるまでは個別相談の案内を出さない）
+    var after = mode === 'decide' || (mode === 'watch' && finished());
+    var needSurvey = after && !!sem.res && !sem.res.survey && !sem.res.consult && sem.res.status !== '相談後検討' && sem.res.status !== '相談欠席';
+    $('#semSurvey').hidden = !needSurvey;
+    $('#semDecide').hidden = !after || needSurvey;
     $('#semConsult').hidden = mode !== 'consult';
     $('#semCTicket').hidden = mode !== 'cticket';
     $('#semDone').hidden = !(mode === 'done' || mode === 'cafter');
@@ -1278,6 +1285,7 @@
     var st = sem.res.status;
     var t = mode === 'cafter' ? ['ご相談ありがとうございました', 'お時間をいただき、ありがとうございました。気になることは、トークに送るとAIがすぐにお答えします。加盟を決めたら、ここからお申し込みいただけます。']
       : st === '加盟決定' ? ['ご加盟のご決断、ありがとうございます', '契約内容とエリアのご案内を、担当者から3営業日以内にお送りします。ご契約は、書面で内容をご確認いただき、ご納得いただけた場合のみです。']
+      : st === '見送り' ? ['ご回答ありがとうございました', 'ご覧いただき、ありがとうございました。またいつでも、このトークで質問したり、説明会を見直したりできます。お気軽にどうぞ。']
       : st === '相談希望' ? ['個別相談のご希望を受け付けました', '担当者が、LINEのトークで日程をご連絡します（営業時間外は翌営業日になることがあります）。待たずに、代表の予約ページからご都合のよい日時を選んでいただくこともできます。']
       : ['加盟のお申し込みを受け付けました', '担当者から3営業日以内に、契約内容とエリアのご案内をします。ご契約は、内容にご納得いただけた場合のみです。'];
     $('#semDoneTitle').textContent = t[0];
@@ -1285,6 +1293,49 @@
     $('#semDoneApply').hidden = mode !== 'cafter';
     $('#semDoneConsult').hidden = st !== '相談希望';   // 担当者からの連絡を待たずに、自分で日時を選べる
     $('#semDoneRebook').hidden = st === '加盟決定';    // 行き止まりにしない：説明会はいつでも予約し直せる
+  }
+
+  /* ---------- 見終わったあとのアンケート（3問・30秒） ---------- */
+  function renderSurvey() {
+    $$('[data-sv]').forEach(function (box) {
+      var k = box.getAttribute('data-sv');
+      $$('.chip', box).forEach(function (c) {
+        var v = c.getAttribute('data-v');
+        c.classList.toggle('is-on', k === 'worry' ? sem.sv.worry.indexOf(v) >= 0 : sem.sv[k] === v);
+      });
+    });
+  }
+
+  function svSubmit() {
+    if (sem.svSending) return;
+    var note = $('#svNote');
+    $$('[data-sv]').forEach(function (b) { b.classList.remove('is-error'); });
+    if (!sem.sv.feel || !sem.sv.interest) {
+      if (!sem.sv.feel) $('[data-sv="feel"]').classList.add('is-error');
+      if (!sem.sv.interest) $('[data-sv="interest"]').classList.add('is-error');
+      note.className = 'form-note ng';
+      note.textContent = '1と2を選んでください';
+      return;
+    }
+    sem.svSending = true;
+    $('#svSubmit').disabled = true;
+    note.className = 'form-note';
+    note.textContent = '送っています…';
+    var survey = { feel: sem.sv.feel, interest: sem.sv.interest, worry: sem.sv.worry.slice(), note: $('#sv-note').value.trim() };
+    semApi('survey', { survey: survey }).then(function (d) {
+      if (!d.ok) throw new Error(d.error);
+      sem.res = d.reservation;
+      note.textContent = '';
+      track('seminar_survey', { interest: survey.interest });
+      // 「すぐにでも話を聞きたい」→ そのまま代表との個別相談の予約へ
+      if (survey.interest === 'すぐにでも話を聞きたい' && canConsult()) { openConsult(); return; }
+      renderSeminar();
+      window.scrollTo(0, 0);
+      if (survey.interest === 'もう少し知りたい') $('#decideNote').hidden = false;
+    }).catch(function () {
+      note.className = 'form-note ng';
+      note.textContent = '送れませんでした。電波の良い場所で、もう一度押してください。';
+    }).then(function () { sem.svSending = false; $('#svSubmit').disabled = false; });
   }
 
   /* ---------- 代表との個別相談（Google Meet） ---------- */
@@ -1594,6 +1645,17 @@
     $('#ctCal').addEventListener('click', function () { openUrl(consultGcal(), true); });
     $('#ctChange').addEventListener('click', function () { openConsult(); });
     $('#ctCancel').addEventListener('click', consultCancel);
+    $$('[data-sv]').forEach(function (box) {
+      box.addEventListener('click', function (e) {
+        var c = e.target.closest('.chip');
+        if (!c) return;
+        var k = box.getAttribute('data-sv'), v = c.getAttribute('data-v');
+        if (k === 'worry') { var i = sem.sv.worry.indexOf(v); if (i < 0) sem.sv.worry.push(v); else sem.sv.worry.splice(i, 1); }
+        else { sem.sv[k] = v; box.classList.remove('is-error'); }
+        renderSurvey();
+      });
+    });
+    $('#svSubmit').addEventListener('click', svSubmit);
     $('#csOpenBook').addEventListener('click', function () {
       if (!sem.bookingUrl) return;
       sem.bookOpened = true;
@@ -1726,6 +1788,7 @@
     setDefaultReceive();
     var r = readRoute();
     if (r.c && r.view === 'seminar') sem.wantConsult = true;   // 個別相談の日時を選ぶ画面から開く
+    if (r.q && r.view === 'seminar') sem.wantSurvey = true;    // アンケートから開く
     nav(r.view, r.step, true);
     // リッチメニューから ?view=home&sec=faq のように開いたら、その見出しまでスクロール
     var target = r.sec && document.getElementById('sec-' + r.sec);

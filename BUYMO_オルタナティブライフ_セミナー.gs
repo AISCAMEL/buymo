@@ -46,7 +46,7 @@
 var MINIAPP_CHANNEL_ID = '2012192113';       // LINEミニアプリ「オルタナティブライフ」のチャネルID（LIFF ID の前半）
 var SEMINAR_SHEET = '説明会予約';
 var SEMINAR_COLS = ['予約日時', 'userId', 'LINE表示名', 'お名前', 'メール', '視聴日時', '状態', '視聴(%)', '配信済み', '更新日時', 'メール停止',
-  '視聴完了日時', '個別相談日時', '相談の回答', 'MeetのURL', 'カレンダーの予定ID'];
+  '視聴完了日時', '個別相談日時', '相談の回答', 'MeetのURL', 'カレンダーの予定ID', 'アンケート'];
 var LEAD_MIN = 5;                            // 開始の5分前まで予約できる
 var WATCHED_PCT = 50;                        // これ以上見た方は「視聴した」として、そのあとの案内を分ける
 var DONE_PCT = 90;                           // これ以上見た方（または最後まで再生した方）は「視聴完了」
@@ -77,6 +77,8 @@ var CONSULT_STEPS = [
   { id: 'c1', due: function (t) { return t.day - 4 * HOUR_MS; },                                          // 前日 20:00（予約がその2時間前より後なら送らない）
     skip: function (t, due, res) { return res.status !== '相談予約'; } },
   { id: 'c0', due: function (t) { return t.start - 10 * 60000; },                                         // 10分前（Meet の入室ボタンつき）
+    skip: function (t, due, res) { return res.status !== '相談予約'; } },
+  { id: 'cty', due: function (t) { return t.end + 30 * 60000; },                                         // 相談が終わって30分：代表からのお礼（自動）
     skip: function (t, due, res) { return res.status !== '相談予約'; } },
   { id: 'cf3', due: function (t, res) { return res.status === '相談後検討' ? t.day + (3 * 24 + 19) * HOUR_MS : Infinity; } }  // 「検討中」の3日後 19:00
 ];
@@ -228,7 +230,7 @@ function seminarSheet_() {
     sh.getRange('A:B').setNumberFormat('@');
     sh.getRange('F:F').setNumberFormat('@');
     sh.getRange('I:J').setNumberFormat('@');
-    sh.getRange('L:P').setNumberFormat('@');
+    sh.getRange('L:Q').setNumberFormat('@');
   } else {
     if (sh.getRange(1, 6).getValue() === '視聴日') sh.getRange(1, 6).setValue('視聴日時');   // 日にちだけの予約だったころのシート
     // 個別相談の列がまだないシートには、見出しを足す
@@ -236,6 +238,12 @@ function seminarSheet_() {
       sh.getRange(1, 12, 1, 5).setValues([SEMINAR_COLS.slice(11)])
         .setFontWeight('bold').setBackground('#0F2A4D').setFontColor('#ffffff');
       sh.getRange('L:P').setNumberFormat('@');
+    }
+    // アンケートの列がまだないシートには、見出しを足す
+    if (sh.getRange(1, 17).getValue() !== SEMINAR_COLS[16]) {
+      sh.getRange(1, 17, 1, 1).setValues([[SEMINAR_COLS[16]]])
+        .setFontWeight('bold').setBackground('#0F2A4D').setFontColor('#ffffff');
+      sh.getRange('Q:Q').setNumberFormat('@');
     }
   }
   return sh;
@@ -255,7 +263,7 @@ function toRes_(r, i) {
     day: at.slice(0, 10), time: tm ? hm2_(Number(tm[1]) * 60 + Number(tm[2])) : '',
     status: String(r[6] || '予約'), pct: Number(r[7]) || 0, sent: String(r[8] || ''), mailStop: !!r[10],
     doneAt: cellText_(r[11]), consultAt: cellText_(r[12]).slice(0, 16), consultInfo: String(r[13] || ''),
-    meetUrl: String(r[14] || ''), eventId: String(r[15] || '')
+    meetUrl: String(r[14] || ''), eventId: String(r[15] || ''), survey: parseSurvey_(r[16])
   };
 }
 
@@ -274,7 +282,7 @@ function findRes_(sh, userId) {
 function saveRes_(sh, res) {
   var row = [res.reservedAt, res.userId, res.lineName, res.name, res.email, res.time ? res.day + ' ' + res.time : res.day, res.status, res.pct,
     res.sent, jst_(Date.now(), 'yyyy-MM-dd HH:mm:ss'), res.mailStop ? '停止' : '',
-    res.doneAt || '', res.consultAt || '', res.consultInfo || '', res.meetUrl || '', res.eventId || ''];
+    res.doneAt || '', res.consultAt || '', res.consultInfo || '', res.meetUrl || '', res.eventId || '', res.survey ? JSON.stringify(res.survey) : ''];
   if (res.row) sh.getRange(res.row, 1, 1, row.length).setValues([row]);
   else { sh.appendRow(row); res.row = sh.getLastRow(); }
 }
@@ -452,6 +460,21 @@ function seminarHandle_(req) {
       // Google の予約ページで予約して、ミニアプリに戻ってきたとき：この方の予約をすぐ探す
       consultScan_(sh, cfg, now, user.userId).forEach(function (j) { after.push(j); });
       res = findRes_(sh, user.userId);
+    } else if (act === 'survey') {
+      // 説明会を見終わったあとのアンケート
+      if (!res || res.status === 'キャンセル') return fail_(out, 'nores');
+      var sv = surveyClean_(req.survey || {});
+      if (!sv.feel || !sv.interest) return fail_(out, 'survey');
+      var first = !res.survey;
+      res.survey = sv;
+      // 「今回は見送り」：説明会のあとの追いかけのご案内を止める（個別相談を予約している方はそのまま）
+      if (sv.interest === SURVEY_Q.interest[2] && !CONSULT_LIVE[res.status]) res.status = '見送り';
+      saveRes_(sh, res);
+      var c8 = JSON.parse(JSON.stringify(res));
+      if (first) after.push(function () {
+        logRow_(c8.userId, 'お客様', 'アンケート：' + surveyText_(c8.survey).replace(/\n/g, '／'));
+        notifyStaff_('📝 説明会のアンケート（' + (c8.name || c8.lineName) + ' さん）', surveyText_(c8.survey) + '\n\nお名前：' + c8.name + '\nLINE：' + c8.lineName);
+      });
     } else if (act === 'cconfirm') {
       // トークへの投稿ができなかったときだけ、個別相談の予約の確認を LINE で送る
       if (res && res.status === '相談予約' && res.sent.split(',').indexOf('cbookline') < 0) {
@@ -499,7 +522,8 @@ function publicRes_(res, cfg, now) {
   var ct = consultTimes_(res);
   return { day: res.day, time: res.time || '', start: t ? t.start : 0, end: t ? t.end : 0,
     name: res.name, email: res.email, status: res.status, pct: res.pct, videoId: open ? cfg.videoId : '',
-    consult: ct ? { start: ct.start, end: ct.end, url: res.meetUrl || '', info: res.consultInfo || '', via: viaGoogle_(res) ? 'google' : 'app' } : null };
+    consult: ct ? { start: ct.start, end: ct.end, url: res.meetUrl || '', info: res.consultInfo || '', via: viaGoogle_(res) ? 'google' : 'app' } : null,
+    survey: res.survey || null };
 }
 
 // 本人確認：前回渡した署名つき sk → LIFF の ID トークン → アクセストークン の順に試す
@@ -817,7 +841,21 @@ function stepMessage_(id, res, cfg) {
   };
 
   // 見終わって15分：代表からのご案内（その場で個別相談を予約した方には送らない）
-  if (id === 'w15') return open ? invite('説明会を最後までご覧いただき、ありがとうございました。') : null;
+  if (id === 'w15') {
+    if (!open) return null;
+    if (!res.survey) return {   // アンケートにまだ答えていない：アンケートのお願い（答えたあとに個別相談へ）
+      line: hostCard_('説明会のご感想を聞かせてください', '最後までご覧いただき、ありがとうございました。\n3つの質問に答えるだけ（30秒）です。答えていただいた内容をもとに、あなたに合わせたご案内をします。',
+        [['アンケートに答える（30秒）', SURVEY_PAGE], pick]),
+      mail: {
+        subject: '【' + hostName + 'より】説明会のご感想を聞かせてください（30秒）',
+        body: hostName + 'です。説明会を最後までご覧いただき、ありがとうございました。\n\n' +
+          '3つの質問に答えるだけ（30秒）のアンケートにご協力ください。答えていただいた内容をもとに、あなたに合わせたご案内をします。\n' +
+          'アンケート：' + SURVEY_PAGE + '\n\n' +
+          'すぐに話を聞きたい方は、個別相談（無料・' + consultCfg_().minutes + '分・Google Meet）をご予約ください：\n' + CONSULT_PAGE
+      }
+    };
+    return invite('説明会を最後までご覧いただき、ありがとうございました。');
+  }
 
   if (id === 'end') {
     if (res.doneAt) return null;   // 最後まで見た方には、見終わって15分のご案内を送っている
@@ -1084,6 +1122,7 @@ function doneNote_(res, cfg) {
 function consultNote_(res, cc) {
   return '日時：' + consultLabel_(res, cc) + '\nお名前：' + res.name + '\nメール：' + res.email + '\nLINE：' + res.lineName + '\n\n' +
     '■ 事前の回答\n' + res.consultInfo + '\n\n' +
+    (res.survey ? '■ 説明会のアンケート\n' + surveyText_(res.survey) + '\n\n' : '') +
     'Google Meet：' + (res.meetUrl || '（自動で作れませんでした。お客様に入室の URL を送ってください）') + '\n' +
     (cc.calId ? 'カレンダー（' + cc.calId + '）' : '代表の Google カレンダー') + 'に予定を入れました。前日と10分前に、お客様へ自動でお知らせします。\n' +
     '相談が終わったら、本部の画面で「加盟決定／検討中／見送り／来なかった」を押してください。';
@@ -1137,7 +1176,8 @@ function consultMessage_(id, res, cfg) {
     }
   };
 
-  if (id === 'cthanks') return {
+  if (id === 'cty' && res.status !== '相談予約') return null;
+  if (id === 'cthanks' || id === 'cty') return {
     line: hostCard_('本日はありがとうございました', 'お時間をいただき、ありがとうございました。ゆっくりご検討ください。\n気になることは、このトークに送るとAIがすぐにお答えします。もう一度話したいときは、いつでも予約できます。',
       [['もう一度相談する', CONSULT_PAGE], ['トークで質問する', '個別相談のあとで質問があります']]),
     mail: {
@@ -1202,6 +1242,38 @@ function consultTalk_(replyToken, userId, text) {
   lineFetch_('/v2/bot/message/reply', 'post', { replyToken: replyToken, messages: [msg] });
   logRow_(userId, 'お客様', text);
   logRow_(userId, '定型', note);
+}
+
+/* ---------- 説明会を見終わったあとのアンケート（3問） ---------- */
+var SURVEY_Q = {
+  feel: ['とてもよくわかった', 'だいたいわかった', 'わからないところがあった'],
+  interest: ['すぐにでも話を聞きたい', 'もう少し知りたい', '今回は見送り'],
+  worry: ['収入の目安', '初期費用・資金', '本業との両立', '仕事の内容', '契約・エリア', '特にない']
+};
+var SURVEY_PAGE = SEMINAR_PAGE + '&q=1';   // ミニアプリのアンケート
+
+function surveyClean_(a) {
+  var pick = function (v, list) { return list.indexOf(String(v)) >= 0 ? String(v) : ''; };
+  return {
+    feel: pick(a.feel, SURVEY_Q.feel),
+    interest: pick(a.interest, SURVEY_Q.interest),
+    worry: (Array.isArray(a.worry) ? a.worry : []).map(String).filter(function (w) { return SURVEY_Q.worry.indexOf(w) >= 0; }),
+    note: String(a.note || '').trim().slice(0, 300),
+    at: jst_(Date.now(), 'yyyy-MM-dd HH:mm:ss')
+  };
+}
+
+function parseSurvey_(v) {
+  if (!v) return null;
+  try { var o = JSON.parse(String(v)); return o && o.interest ? o : null; } catch (e) { return null; }
+}
+
+function surveyText_(sv) {
+  if (!sv) return '';
+  var lines = ['説明会の内容：' + sv.feel, '興味：' + sv.interest];
+  if (sv.worry && sv.worry.length) lines.push('気になること：' + sv.worry.join('・'));
+  if (sv.note) lines.push('ひとこと：' + sv.note);
+  return lines.join('\n');
 }
 
 /* ---------- Google の予約ページ（予約スケジュール）で入った個別相談 ----------
@@ -1317,6 +1389,8 @@ function consultResult_(userId, result) {
     if (!res) return { ok: false, error: 'nores' };
     res.status = m[0];
     res.sent = (res.sent ? res.sent.split(',') : []).filter(function (x) { return x !== 'cf3' && x !== m[1]; }).join(',');
+    // 「検討中」：相談の30分後に自動でお礼を送っていれば、もう一度は送らない
+    if (m[1] === 'cthanks' && res.sent.split(',').indexOf('cty') >= 0) { m = [m[0], '']; }
     if (m[1]) addSent_(res, m[1]);
     saveRes_(sh, res);
     copy = JSON.parse(JSON.stringify(res));
