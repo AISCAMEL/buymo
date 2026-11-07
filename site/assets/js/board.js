@@ -115,13 +115,16 @@
           (c.genre ? '<span class="kb-tag">' + HQ.esc(c.genre) + '</span>' : '') + '</div>' +
           '<div class="kb-name">' + HQ.esc(c.name || '') + '</div>' +
           '<div class="kb-meta">' + (c.date ? '<span class="kb-date">📅' + HQ.esc(c.date) + '</span>' : '') + '</div>' +
-          '<div class="kb-assign-row"><select class="kb-assign-sel" data-id="' + HQ.esc(c.id) + '">' + storeOpts + '</select></div>';
+          '<div class="kb-assign-row"><select class="kb-assign-sel" data-id="' + HQ.esc(c.id) + '">' + storeOpts + '</select></div>' +
+          '<button type="button" class="kb-open" data-open="' + HQ.esc(c.id) + '">詳しく見る ›</button>';
         var sel = card.querySelector('.kb-assign-sel');
         sel.addEventListener('change', function () { if (sel.value) assignCase(c.id, sel.value); });
         sel.addEventListener('click', function (e) { e.stopPropagation(); });
         card.addEventListener('dragstart', function (e) { e.dataTransfer.setData('text/plain', c.id); card.classList.add('dragging'); });
         card.addEventListener('dragend', function () { card.classList.remove('dragging'); });
-        card.addEventListener('click', function (e) { if (!card.classList.contains('dragging') && !e.target.closest('.kb-assign-sel')) openPanel(c.id); });
+        card.addEventListener('pointerdown', function () { card.classList.remove('dragging'); });
+        card.querySelector('.kb-open').addEventListener('click', function (e) { e.stopPropagation(); openPanel(c.id); });
+        card.addEventListener('click', function (e) { if (!card.classList.contains('dragging') && !e.target.closest('.kb-assign-sel') && !e.target.closest('.kb-open')) openPanel(c.id); });
         ubody.appendChild(card);
       });
       ucol.appendChild(ubody);
@@ -158,10 +161,13 @@
           photoThumb +
           '<div class="kb-name">' + HQ.esc(c.name || '') + '</div>' +
           '<div class="kb-meta">' + (c.date ? '<span class="kb-date">📅' + HQ.esc(c.date) + '</span>' : '') + HQ.esc(c.assignee || '担当未定') + (c.amount ? '・' + HQ.yen(c.amount) : '') + '</div>' +
-          (c.memo ? '<div class="kb-memo">' + HQ.esc(c.memo) + '</div>' : '');
+          (c.memo ? '<div class="kb-memo">' + HQ.esc(c.memo) + '</div>' : '') +
+          '<button type="button" class="kb-open" data-open="' + HQ.esc(c.id) + '">詳しく見る ›</button>';
         card.addEventListener('dragstart', function (e) { e.dataTransfer.setData('text/plain', c.id); card.classList.add('dragging'); });
         card.addEventListener('dragend', function () { card.classList.remove('dragging'); });
-        card.addEventListener('click', function (e) { if (!card.classList.contains('dragging')) openPanel(c.id); });
+        card.addEventListener('pointerdown', function () { card.classList.remove('dragging'); });
+        card.querySelector('.kb-open').addEventListener('click', function (e) { e.stopPropagation(); openPanel(c.id); });
+        card.addEventListener('click', function (e) { if (!card.classList.contains('dragging') && !e.target.closest('.kb-open')) openPanel(c.id); });
         body.appendChild(card);
       });
       col.appendChild(body);
@@ -734,10 +740,18 @@
     }).join('') : '<li class="cp-empty">まだ記録はありません。</li>';
   }
   function openPanel(id) {
-    ensurePanel();
-    var c = findCase(id); if (!c) return;
-    panelId = id; fillPanel(c);
-    panel.classList.add('open');
+    try {
+      ensurePanel();
+      var c = findCase(id);
+      if (!c) { window.alert('案件 ' + id + ' が見つかりません。ページを読み込み直してください。'); return; }
+      panelId = id; fillPanel(c);
+      panel.classList.add('open');
+    } catch (err) {
+      // 開けなかった理由を出す（スクリーンショットで原因がわかるように）
+      window.alert('案件 ' + id + ' を開けませんでした。\n' + (err && err.message ? err.message : err));
+      if (panel) panel.classList.add('open');
+      return;
+    }
     // 共有オークション/清算データを取得して反映（別端末の入力を同期）
     if (HQ.loadAuction) HQ.loadAuction(id, function (a) {
       if (!a || !panelId || panelId !== id) return;
