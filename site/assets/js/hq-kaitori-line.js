@@ -70,7 +70,7 @@
       if (c.pickup && c.pickup > now && c.pickup - now < 36 * HOUR && c.stage !== '完了' && c.stage !== '失注')
         out.push({ lv: 'amber', label: '🚚 引取りが近い', why: md(c.pickup) + '（' + wd(c.pickup) + '）' + hm(c.pickup) + ' に引取り（' + c.id + '）' });
     });
-    if (p.handoffAt && now - p.handoffAt < 3 * DAY) out.push({ lv: 'red', label: '🙋 担当者と話したい', why: '「' + (p.handoffText || '') + '」' });
+    if (p.handoffAt && now - p.handoffAt < 3 * DAY && !/^【(査定額へのお返事|次のお車の相談)】/.test(p.handoffText || '')) out.push({ lv: 'red', label: '🙋 担当者と話したい', why: '「' + (p.handoffText || '') + '」' });
     if (p.applyAt && !(p.cases || []).length && now - p.applyAt > HOUR && staff < p.applyAt) out.push({ lv: 'amber', label: '🔗 案件と結びつける', why: 'ミニアプリから申し込みましたが、まだ案件と結びついていません。案件IDを入れてください' });
     if (p.photoAt && now - p.photoAt < DAY && staff < p.photoAt) out.push({ lv: 'blue', label: '📷 写真が届いた', why: mainCase(p) ? '案件 ' + mainCase(p).id + ' のメモに入れました' : 'トークで写真を確認して、案件に追加してください' });
     return out;
@@ -85,7 +85,7 @@
     var q = state.q.trim().toLowerCase();
     var shown = list.filter(function (p) {
       if (q && (nameOf(p) + ' ' + p.lineName + ' ' + (p.cases || []).map(function (c) { return c.id; }).join(' ')).toLowerCase().indexOf(q) < 0) return false;
-      if (state.filter === 'todo') return attention(p).length > 0;
+      if (state.filter === 'todo') return attention(p).length > 0 || !!state.open[p.userId];   // 開いているカードは、対応したあとも閉じるまで出しておく
       if (state.filter === 'case') return (p.cases || []).length > 0;
       if (state.filter === 'nocase') return !(p.cases || []).length && !p.blocked;
       if (state.filter === 'name') return p.realName && !p.nameDone;

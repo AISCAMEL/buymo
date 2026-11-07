@@ -18,11 +18,14 @@ window.AUTH = (function () {
   function role() { var s = get(); return s ? s.role : null; }
   function token() { var s = get(); return s ? s.token : ''; }
 
-  function home(r) { return r === 'partner' ? 'hq.html?role=partner' : (r === 'member' ? 'member.html' : 'hq-dashboard.html'); }
+  function home(r) { return r === 'partner' ? 'hq.html?role=partner' : (r === 'member' ? 'member.html' : 'hq-today.html'); }
 
   /* 本部/加盟店の許可メール（ここに追加するだけでログインできます）
      ※ メールアドレス方式・パスワード不要。小文字で記載。 */
   var STAFF_HQ = ['info@aisjaltd.com', 'kaitori@buymo.me', 'test@buymo.me'];
+  /* 本部スタッフ（本部の画面に入れるが、お金の画面＝請求書・支払い管理は見られない）。小文字で記載。
+     例：var STAFF_HQ_STAFF = ['staff1@buymo.me', 'staff2@buymo.me']; */
+  var STAFF_HQ_STAFF = [];
   /* 加盟店：メール → 担当店名。
      本部が案件をこの「店名」に割り当てると、その店のアカウントだけに案件が表示されます。
      店名は本部の「加盟店管理」の店名と一致させること（既定：いわき店/郡山店/仙台店）。 */
@@ -34,7 +37,7 @@ window.AUTH = (function () {
 
   function staffRoleOf(email) {
     email = String(email || '').trim().toLowerCase();
-    if (STAFF_HQ.indexOf(email) >= 0) return 'hq';
+    if (STAFF_HQ.indexOf(email) >= 0 || STAFF_HQ_STAFF.indexOf(email) >= 0) return 'hq';
     if (Object.prototype.hasOwnProperty.call(STAFF_PARTNER, email)) return 'partner';
     return null;
   }
@@ -52,8 +55,9 @@ window.AUTH = (function () {
     (document.body || document.documentElement).appendChild(s);
     setTimeout(function () { if (!done) { s.onerror(); } }, 12000);
   }
+  function levelOf(email) { return STAFF_HQ_STAFF.indexOf(String(email || '').trim().toLowerCase()) >= 0 ? 'staff' : 'admin'; }
   function setSession(eff, email, store) {
-    set({ token: 'staff-' + Math.random().toString(36).slice(2), role: eff, name: email, email: email, store: store || '', exp: now() + TTL });
+    set({ token: 'staff-' + Math.random().toString(36).slice(2), role: eff, level: eff === 'hq' ? levelOf(email) : '', name: email, email: email, store: store || '', exp: now() + TTL });
     try { localStorage.setItem('buymo_role', eff); localStorage.setItem('buymo_who', store || ''); } catch (e) {}
   }
 
@@ -95,6 +99,7 @@ window.AUTH = (function () {
   function allowed(s, req) {
     if (!s) return false;
     if (!req || req === 'any') return true;
+    if (req === 'hqadmin') return s.role === 'hq' && s.level !== 'staff';   // お金の画面：本部の管理者だけ
     if (s.role === 'hq') return true;              // 本部は全権限
     if (req === 'staff') return s.role === 'partner' || s.role === 'hq';
     return s.role === req;
@@ -113,5 +118,7 @@ window.AUTH = (function () {
     if (a) { e.preventDefault(); logout(); location.replace('portal-login.html'); }
   });
 
-  return { login: login, logout: logout, guard: guard, role: role, token: token, get: get, home: home };
+  // 本部の管理者か（スタッフは false）。お金の画面・数字の表示を出し分けるのに使う
+  function isAdmin() { var s = get(); return !!s && s.role === 'hq' && s.level !== 'staff'; }
+  return { login: login, logout: logout, guard: guard, role: role, token: token, get: get, home: home, isAdmin: isAdmin };
 })();

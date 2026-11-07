@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>今日やること｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
+<link rel="stylesheet" href="assets/css/buymo.css?v=39" />
+<link rel="stylesheet" href="assets/css/board.css?v=15" />
+<style>
+.td-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 12px;}
+.td-summary{font-size:15px;}
+.td-ai{border:0;background:#0A6B3C;color:#fff;border-radius:10px;padding:10px 16px;font-weight:800;font-size:14px;cursor:pointer;}
+.td-counts{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;}
+.td-count{background:#fff;border-radius:10px;padding:10px 12px;text-decoration:none;color:#33415c;box-shadow:var(--shadow,0 1px 4px rgba(0,0,0,.06));display:flex;flex-direction:column;gap:2px;font-size:12px;}
+.td-count b{font-size:22px;color:#0F2A4D;}
+.td-item{display:flex;gap:12px;align-items:center;background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;text-decoration:none;color:inherit;border-left:5px solid #ccc;box-shadow:var(--shadow,0 1px 4px rgba(0,0,0,.06));}
+.td-red{border-left-color:#D92D20;}.td-amber{border-left-color:#F79009;}.td-blue{border-left-color:#2E90FA;}
+.td-ic{font-size:22px;}
+.td-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.td-main b{font-size:15px;}.td-who{font-size:13px;color:#33415c;}.td-main small{font-size:12px;color:#6b7a90;}
+.td-lv{font-size:11px;font-weight:800;color:#6b7a90;}.td-red .td-lv{color:#B42318;}.td-amber .td-lv{color:#B54708;}.td-blue .td-lv{color:#175CD3;}
+.td-btn{font-size:12.5px;font-weight:700;color:#0A6B3C;white-space:nowrap;}
+.td-note{font-size:12.5px;color:#6b7a90;}
+@media(max-width:820px){.td-counts{grid-template-columns:repeat(3,1fr);}.td-btn{display:none;}}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js?v=2"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <h1>今日やること</h1>
+    <div class="td-top"><div class="td-summary" id="tdSummary">読み込み中…</div><button type="button" class="td-ai" id="tdAi">🤖 AI に今日の段取りを聞く</button></div>
+    <div class="td-counts" id="tdCounts"></div>
+    <div id="tdList"></div>
+    <div id="tdLine"></div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js?v=18"></script>
+<script src="assets/js/hq-today.js?v=1"></script>
+</body>
+</html>

@@ -526,23 +526,28 @@ window.HQ = (function () {
         ['guide', '使い方', 'partner-guide.html', '❓']
       ]]
     ] : [
-      ['業務', [
-        ['dashboard', 'ダッシュボード', 'hq-dashboard.html', '🏠'],
+      ['今日', [
+        ['today', '今日やること', 'hq-today.html', '🏠'],
+        ['dashboard', '数字のまとめ', 'hq-dashboard.html', '📊']
+      ]],
+      ['お客様・案件', [
         ['board', '案件ボード', 'hq.html?role=hq', '🗂️'],
-        ['leads', 'リード', 'hq-leads.html', '📋'],
+        ['leads', '案件の一覧', 'hq-leads.html', '📋'],
         ['kaitoriline', '車買取LINE', 'hq-kaitori-line.html', '💚'],
-        ['auctions', 'オークション', 'hq-auctions.html', '🔨'],
-        ['billing', '請求書', 'hq-billing.html', '🧾'],
-        ['documents', '書類発行', 'hq-documents.html', '📄'],
         ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬']
+      ]],
+      ['書類・お金', [
+        ['documents', '書類発行', 'hq-documents.html', '📄'],
+        ['auctions', 'オークション', 'hq-auctions.html', '🔨'],
+        ['billing', '請求書', 'hq-billing.html', '🧾', 'admin'],
+        ['payments', '支払い管理', 'hq-payments.html', '💴', 'admin']
       ]],
       ['加盟店', [
         ['stores', '加盟店', 'hq-stores.html', '🏪'],
         ['activity', '加盟店の動き', 'hq-partner-activity.html', '📈'],
-        ['payments', '支払い管理', 'hq-payments.html', '💴'],
         ['recruit', '加盟店募集', 'hq-recruit.html', '🤝']
       ]],
-      ['発信・育成', [
+      ['発信', [
         ['notices', 'お知らせ', 'hq-notices.html', '📢'],
         ['column', 'コラム', 'hq-column.html', '✍️'],
         ['academy', 'アカデミー管理', 'hq-academy.html', '🎓'],
@@ -550,11 +555,14 @@ window.HQ = (function () {
         ['promo', '販促ツール', 'partner-promo.html', '📣'],
         ['community', 'コミュニティ', 'partner-community.html', '👥']
       ]],
-      ['その他', [
-        ['report', '営業レポート', 'report.html', '📊'],
-        ['guide', '使い方', 'partner-guide.html', '❓']
+      ['使い方', [
+        ['manual', '本部の使い方', 'hq-manual.html', '🧭'],
+        ['report', '営業レポート', 'report.html', '📊']
       ]]
     ];
+    // お金の画面（'admin' の印）は、本部スタッフには出さない
+    var admin = !(window.AUTH && AUTH.isAdmin) || AUTH.isAdmin() || r === 'partner';
+    groups = groups.map(function (g) { return [g[0], g[1].filter(function (it) { return admin || it[4] !== 'admin'; })]; }).filter(function (g) { return g[1].length; });
     var flat = [];
     var html = '<div class="side-search"><input type="search" id="navSearch" placeholder="🔍 案件ID・顧客名・加盟店名" autocomplete="off"><div class="side-results" id="navResults" hidden></div></div>';
     groups.forEach(function (grp) {
@@ -566,6 +574,7 @@ window.HQ = (function () {
       html += '</div>';
     });
     el.innerHTML = html;
+    if (r !== 'partner') { pageIntro(active); mountAI(active); }
     wireNavSearch(r);
     mountGlobalSearch(r, flat);
     // 加盟店がコンテンツページを開いたら閲覧履歴を記録（本部の進捗把握用）
@@ -574,6 +583,73 @@ window.HQ = (function () {
       logView(cur ? cur[1] : (document.title || active), 'page');
     }
   }
+  /* ---------- 本部の各画面の「この画面でやること」と「次はここ」 ----------
+     本部の使い方（hq-manual.html）もこの内容から作る。順番＝仕事の流れ */
+  var PAGE_GUIDE = [
+    { key: 'today', title: '今日やること', href: 'hq-today.html', group: '今日',
+      do: ['朝いちばんに開く。上から順に片づける', '赤＝今日中、黄＝早めに、青＝確認だけ', '押すと、その案件・その方の画面に移る'],
+      next: ['案件ボード', 'hq.html?role=hq'] },
+    { key: 'board', title: '案件ボード', href: 'hq.html?role=hq', group: 'お客様・案件',
+      do: ['新しい申込は「新規受付」に入る。まず「未割当」で担当（加盟店）を決める', 'カードを左右に動かすとステージが変わる（車買取LINEのお客様には自動でお知らせ）', 'カードをタップすると、写真・メモ・書類・売却の管理がすべて見られる'],
+      next: ['車買取LINE', 'hq-kaitori-line.html'] },
+    { key: 'leads', title: '案件の一覧', href: 'hq-leads.html', group: 'お客様・案件',
+      do: ['案件を表で探す・絞り込む（ステージ・担当・日付）', '滞留（5日以上動いていない）を見つけて手を打つ', 'CSV で書き出せる'],
+      next: ['案件ボード', 'hq.html?role=hq'] },
+    { key: 'kaitoriline', title: '車買取LINE', href: 'hq-kaitori-line.html', group: 'お客様・案件',
+      do: ['「対応が必要」の人から順に、LINE のチャットで返信する', '査定額へのお返事（売りたい・相談したい）と、引取りの日時をここで管理', 'サイトや電話の案件は、案件IDを入れて LINE と結びつける'],
+      next: ['書類発行', 'hq-documents.html'] },
+    { key: 'chatassist', title: '接客アシスト', href: 'hq-chat-assist.html', group: 'お客様・案件',
+      do: ['お客様に送る前の文を貼って、AI で添削する', '言い回し・敬語・抜けを直してから送る'],
+      next: ['車買取LINE', 'hq-kaitori-line.html'] },
+    { key: 'documents', title: '書類発行', href: 'hq-documents.html', group: '書類・お金',
+      do: ['案件を選ぶと、お名前・車の情報が書類に入る', '車検証・印鑑証明の写真を AI が読み取って転記できる（📷 AI で読み取る）', '中身を確かめて印刷・PDF にする'],
+      next: ['オークション', 'hq-auctions.html'] },
+    { key: 'auctions', title: 'オークション', href: 'hq-auctions.html', group: '書類・お金',
+      do: ['どの車を、いつ、どの会場へ出すかを記録', '落札・流れの結果を入れる'],
+      next: ['今日やること', 'hq-today.html'] },
+    { key: 'billing', title: '請求書', href: 'hq-billing.html', group: '書類・お金', admin: true,
+      do: ['加盟店への請求を月ごとに作る（自動計算のあと調整できる）'], next: ['支払い管理', 'hq-payments.html'] },
+    { key: 'payments', title: '支払い管理', href: 'hq-payments.html', group: '書類・お金', admin: true,
+      do: ['加盟店ごとの入金・積立・残高を管理する'], next: ['今日やること', 'hq-today.html'] },
+    { key: 'stores', title: '加盟店', href: 'hq-stores.html', group: '加盟店',
+      do: ['加盟店の一覧と実績を見る', '新しい加盟店を追加し、ログインのご案内を送る'], next: ['加盟店の動き', 'hq-partner-activity.html'] },
+    { key: 'activity', title: '加盟店の動き', href: 'hq-partner-activity.html', group: '加盟店',
+      do: ['加盟店がどの資料・研修を見ているかを確認', '止まっている加盟店に声をかける'], next: ['加盟店募集', 'hq-recruit.html'] },
+    { key: 'recruit', title: '加盟店募集', href: 'hq-recruit.html', group: '加盟店',
+      do: ['加盟を考えている方（オルタナティブライフ LINE）の流れを見る', '個別相談の結果・開業までの手続きをここで進める'], next: ['お知らせ', 'hq-notices.html'] },
+    { key: 'notices', title: 'お知らせ', href: 'hq-notices.html', group: '発信',
+      do: ['加盟店の画面の上に出すお知らせを書く'], next: ['今日やること', 'hq-today.html'] }
+  ];
+  // 本部の AI（右下の「🤖 AI」）を読み込む
+  function mountAI(key) {
+    if (window.HQAI) { HQAI.mount(key); return; }
+    if (document.getElementById('hqAiJs')) return;
+    var x = document.createElement('script'); x.id = 'hqAiJs'; x.src = 'assets/js/hq-ai.js?v=1';
+    x.onload = function () { if (window.HQAI) HQAI.mount(key); };
+    document.body.appendChild(x);
+  }
+  function pageIntro(key) {
+    var g = null;
+    for (var i = 0; i < PAGE_GUIDE.length; i++) if (PAGE_GUIDE[i].key === key) g = PAGE_GUIDE[i];
+    if (!g) return;
+    var h1 = document.querySelector('main h1, .portal-main h1');
+    if (!h1 || document.getElementById('pageIntro')) return;
+    var closed = false; try { closed = localStorage.getItem('buymo_intro_' + key) === '0'; } catch (e) {}
+    var box = document.createElement('details');
+    box.id = 'pageIntro'; box.className = 'page-intro'; if (!closed) box.open = true;
+    box.innerHTML = '<summary>📌 この画面でやること</summary><ol>' + g.do.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>' +
+      (g.next ? '<p class="page-intro-next">次はここ → <a href="' + g.next[1] + '">' + esc(g.next[0]) + '</a>　｜　<a href="hq-manual.html">本部の使い方</a></p>' : '');
+    box.addEventListener('toggle', function () { try { localStorage.setItem('buymo_intro_' + key, box.open ? '1' : '0'); } catch (e) {} });
+    h1.parentNode.insertBefore(box, h1.nextSibling);
+    if (!document.getElementById('pageIntroCss')) {
+      var st = document.createElement('style'); st.id = 'pageIntroCss';
+      st.textContent = '.page-intro{background:#F2FAF5;border:1px solid #CFE8D9;border-radius:10px;padding:8px 14px;margin:8px 0 14px;font-size:13px;}' +
+        '.page-intro summary{cursor:pointer;font-weight:700;color:#0A6B3C;}.page-intro ol{margin:6px 0 4px 1.2em;padding:0;line-height:1.7;}' +
+        '.page-intro-next{margin:4px 0 0;color:#556;}.page-intro-next a{color:#0A6B3C;font-weight:700;}';
+      document.head.appendChild(st);
+    }
+  }
+
   // サイド検索：案件ID・顧客名・加盟店名で横断 → 該当ページへジャンプ
   function wireNavSearch(role) {
     var inp = document.getElementById('navSearch'), box = document.getElementById('navResults');
@@ -731,7 +807,7 @@ window.HQ = (function () {
   }
 
   return {
-    ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES, CALENDAR: CALENDAR,
+    PAGE_GUIDE: PAGE_GUIDE, ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES, CALENDAR: CALENDAR,
     mountCalendar: mountCalendar, calendarEmbedUrl: calendarEmbedUrl,
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     loadPayments: loadPayments, savePayment: savePayment,

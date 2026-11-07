@@ -711,6 +711,7 @@ function adminApi_(e) {
     else if (req.action === 'timeline') out = { ok: true, timeline: adminTimeline_(u) };
     else if ((req.action === 'setName' || req.action === 'nameDone') && typeof nameAdmin_ === 'function') out = nameAdmin_(req);
     else if (/^(caseLink|caseUnlink|pickup|kdone|stats)$/.test(String(req.action)) && typeof caseAdmin_ === 'function') out = caseAdmin_(req);
+    else if (/^ai(Read|Assist)$/.test(String(req.action)) && typeof aiAdmin_ === 'function') out = aiAdmin_(req);   // 本部の AI（AI業務.gs）
     else if (req.action === 'health') {
       var last = null;
       try { last = JSON.parse(PropertiesService.getScriptProperties().getProperty('HEALTH_LAST') || 'null'); } catch (e2) { /* noop */ }
