@@ -122,13 +122,48 @@
         '<button type="button" class="cb-fb-b" data-fb="0" data-h="' + histRec.id + '">👎 いいえ</button></div>';
       addMsg('bot', bubble);
     } else {
-      histRec.a = '(該当なし)';
-      addMsg('bot', '<div class="cb-a">ぴったりの回答が見つかりませんでした。<br>この質問を <b>ノウハウ</b> に登録すると、次回から回答できるようになります。</div>' +
-        '<div class="cb-fb"><button type="button" class="cb-addknow" data-q="' + esc(q) + '">＋ この質問をノウハウに登録</button>' +
-        '<button type="button" class="cb-toimprove" data-q="' + esc(q) + '">💡 改善要望として送る</button></div>');
+      // ノウハウにぴったりの答えがない → 本部の AI に聞く（ノウハウを渡して、それをもとに答えてもらう）
+      var wait = addMsg('bot', '<div class="cb-a">🤖 AI が考えています…</div>');
+      askAI(q, hits).then(function (ans) {
+        if (wait && wait.parentNode) wait.parentNode.removeChild(wait);
+        if (ans) {
+          histRec.a = ans; histRec.ai = true;
+          addMsg('bot', '<span class="cb-cat cb-cat-x">AI</span><div class="cb-a">' + esc(ans).replace(/\n/g, '<br>') + '</div>' +
+            '<p class="cb-ai-note">※ 本部のノウハウと一般的な知識をもとにした AI の答えです。料金・決まりごとは本部に確認してください。</p>' +
+            '<div class="cb-fb"><span>この回答は役に立ちましたか？</span>' +
+            '<button type="button" class="cb-fb-b" data-fb="1" data-h="' + histRec.id + '">👍 はい</button>' +
+            '<button type="button" class="cb-fb-b" data-fb="0" data-h="' + histRec.id + '">👎 いいえ</button>' +
+            '<button type="button" class="cb-addknow" data-q="' + esc(q) + '">＋ ノウハウに登録</button></div>');
+        } else {
+          histRec.a = '(該当なし)';
+          addMsg('bot', '<div class="cb-a">ぴったりの回答が見つかりませんでした。<br>この質問を <b>ノウハウ</b> に登録すると、次回から回答できるようになります。</div>' +
+            '<div class="cb-fb"><button type="button" class="cb-addknow" data-q="' + esc(q) + '">＋ この質問をノウハウに登録</button>' +
+            '<button type="button" class="cb-toimprove" data-q="' + esc(q) + '">💡 改善要望として送る</button></div>');
+        }
+        saveHist(histRec);
+      });
+      return;
     }
+    saveHist(histRec);
+  }
+  function saveHist(histRec) {
     var hist = lget(K_HIST); hist.unshift(histRec); lset(K_HIST, hist); gasBackup('history', 'add', histRec);
     renderStats();
+  }
+  // 本部の AI（BUYMO 車買取 LINE AI応答の GAS・api=partnerai）。答えがなければ null
+  var AI_URL = 'https://script.google.com/macros/s/AKfycbxvgXV0kse1pFJVq1oonuOt3LBIrKPOC8VrZKAjduIjGx7UR4JcWg64Gh03r4jdYfVqxw/exec?api=partnerai';
+  var aiTalk = [];
+  function askAI(q, hits) {
+    var near = search(q, 12).map(function (o) { return o.e; });
+    var know = near.concat(SEED.filter(function (e) { return near.indexOf(e) < 0; })).slice(0, 30).map(function (e) { return { q: e.q, a: e.a }; });
+    var body = JSON.stringify({ q: q, knowledge: know, history: aiTalk.slice(-6), who: who() });
+    return fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok || !d.answer) return null;
+        aiTalk.push({ role: 'user', content: q }, { role: 'assistant', content: d.answer });
+        return d.answer;
+      }).catch(function () { return null; });
   }
   function catCls(c) { var i = CATS.indexOf(c); return i < 0 ? 'x' : i; }
 

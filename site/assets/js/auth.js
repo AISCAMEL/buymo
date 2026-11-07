@@ -18,7 +18,7 @@ window.AUTH = (function () {
   function role() { var s = get(); return s ? s.role : null; }
   function token() { var s = get(); return s ? s.token : ''; }
 
-  function home(r) { return r === 'partner' ? 'hq.html?role=partner' : (r === 'member' ? 'member.html' : 'hq-today.html'); }
+  function home(r) { return r === 'partner' ? 'partner-flow.html' : (r === 'member' ? 'member.html' : 'hq-today.html'); }
 
   /* 本部/加盟店の許可メール（ここに追加するだけでログインできます）
      ※ メールアドレス方式・パスワード不要。小文字で記載。 */

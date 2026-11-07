@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>仕事の流れ｜BUYMO 加盟店</title>
+<meta name="description" content="BUYMO 加盟店向け システム操作マニュアル。ログイン・案件ボードの見方・査定額の入力・売却申請・アカデミー・チャットの使い方をまとめた画面操作ガイド。加盟店限定。" />
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" type="image/svg+xml" href="assets/img/buymo-favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
+<link rel="stylesheet" href="assets/css/buymo.css?v=39" />
+<link rel="stylesheet" href="assets/css/board.css?v=15" />
+<link rel="stylesheet" href="assets/css/academy.css" />
+<link rel="stylesheet" href="assets/css/partner-doc.css" />
+<style>
+.pf-steps{display:flex;flex-direction:column;gap:14px;margin-top:10px;}
+.pf-step{background:#fff;border-radius:14px;box-shadow:var(--shadow,0 1px 4px rgba(0,0,0,.06));padding:16px 18px;display:grid;grid-template-columns:52px 1fr;gap:12px;}
+.pf-no{width:44px;height:44px;border-radius:50%;background:#0A6B3C;color:#fff;font-weight:900;font-size:20px;display:flex;align-items:center;justify-content:center;}
+.pf-step h2{margin:0 0 4px;font-size:18px;color:#0F2A4D;}
+.pf-step .pf-when{font-size:12.5px;color:#6b7a90;margin:0 0 8px;}
+.pf-step ol{margin:0 0 8px 1.2em;padding:0;line-height:1.8;font-size:14px;}
+.pf-tip{background:#FFF8E1;border-radius:8px;padding:8px 10px;font-size:13px;margin:6px 0;}
+.pf-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.pf-links a{border:1px solid #CFE3D8;background:#F2FAF5;color:#0A6B3C;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;text-decoration:none;}
+.pf-nav{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px;}
+.pf-nav a{background:#fff;border:1px solid #e3e7ee;border-radius:999px;padding:5px 12px;font-size:13px;text-decoration:none;color:#33415c;}
+.pf-help{background:#0F2A4D;color:#fff;border-radius:14px;padding:16px 18px;margin-top:16px;}
+.pf-help a{color:#9EE6BE;font-weight:700;}
+@media(max-width:640px){.pf-step{grid-template-columns:1fr;}.pf-no{width:36px;height:36px;font-size:16px;}}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js?v=2"></script><script>AUTH.guard("staff");</script>
+
+<div class="apr-conf">🔒 加盟店限定｜無断複製・転載・第三者提供を禁じます。</div>
+
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">加盟店</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <h1>仕事の流れ</h1>
+    <p class="portal-sub">1台の買取は、この6ステップで進みます。いまのステップを開いて、上から順にやってください。わからないときは、いつでも「AIに相談」へ。</p>
+    <nav class="pf-nav"><a href="#s1">1. 案件を受ける</a><a href="#s2">2. 査定</a><a href="#s3">3. 契約・書類</a><a href="#s4">4. 引取り</a><a href="#s5">5. 出品・売却</a><a href="#s6">6. 清算・入金</a></nav>
+    <div class="pf-steps">
+      <section class="pf-step" id="s1"><div class="pf-no">1</div><div><h2>案件を受ける</h2><p class="pf-when">本部から案件が割り当てられたら（案件ボードに出ます）</p><ol><li>案件ボードで、自分の店に入った案件を開く（写真・車の情報・お客様のメモを確認）</li><li>24時間以内にお客様へ連絡（電話または LINE）。名乗って、査定の日時を決める</li><li>話し方に迷ったら「スクリプト」の「初回のご連絡」をそのまま使う</li></ol><p class="pf-tip">💡 連絡が遅いほど、他社に流れます。まず「受け取りました」だけでも早めに。</p><div class="pf-links"><a href="hq.html?role=partner">案件ボード</a><a href="partner-scripts.html">スクリプト</a><a href="hq-chat-assist.html">接客アシスト</a></div></div></section>
+      <section class="pf-step" id="s2"><div class="pf-no">2</div><div><h2>査定</h2><p class="pf-when">お客様と日時を決めたら</p><ol><li>写真と実車で、修復歴・装備・傷・走行距離を確認（チェックリストを見ながら）</li><li>相場を調べて査定額を出す。迷ったら本部の価格判定に相談</li><li>査定額を伝えるときは、根拠（装備・人気・相場）をひとこと添える</li></ol><p class="pf-tip">💡 根拠を添えると、成約率と満足度が上がります。減点した理由も正直に。</p><div class="pf-links"><a href="partner-checklist.html#flow">チェックリスト</a><a href="partner-chatbot.html">AIに相談</a><a href="partner-scripts.html">スクリプト</a></div></div></section>
+      <section class="pf-step" id="s3"><div class="pf-no">3</div><div><h2>契約・書類</h2><p class="pf-when">お客様が「売る」と決めたら</p><ol><li>「書類発行」で売買契約書を作り、内容を一緒に確認して署名・押印をもらう</li><li>必要書類をそろえる（普通車と軽自動車で違う。ローンが残っていたら所有権解除）</li><li>案件ボードのステージを「契約」にする</li></ol><p class="pf-tip">💡 車検証の所有者がディーラーやローン会社なら、所有権解除の書類が先に必要です。</p><div class="pf-links"><a href="hq-documents.html">書類発行</a><a href="partner-checklist.html#normal">必要書類（普通車）</a><a href="partner-checklist.html#kei">軽自動車</a><a href="partner-checklist.html#loan">ローン残債</a></div></div></section>
+      <section class="pf-step" id="s4"><div class="pf-no">4</div><div><h2>引取り</h2><p class="pf-when">契約と書類がそろったら</p><ol><li>お客様と引取りの日時を決める（自分で行くか、陸送を頼む）</li><li>当日：車の状態・付属品・書類の原本を確認して受け取る</li><li>受け取った書類と車の写真を本部に共有する</li></ol><p class="pf-tip">💡 陸送の手配先・オークション会場の情報は「現場サポート」にあります。</p><div class="pf-links"><a href="partner-info.html">現場サポート</a><a href="partner-checklist.html#special">チェックリスト</a></div></div></section>
+      <section class="pf-step" id="s5"><div class="pf-no">5</div><div><h2>出品・売却</h2><p class="pf-when">車を引き取ったら</p><ol><li>オークションに出すか、直販（BUYMO 買取）にするかを決める</li><li>案件ボードの案件を開き、「売却の管理」で方法・金額を入れて売却申請する</li><li>オークションの結果（落札・流れ）を入れる</li></ol><p class="pf-tip">💡 売却申請を忘れると、清算が進みません。案件ボードの「🚨売却未申請」に注意。</p><div class="pf-links"><a href="hq.html?role=partner">案件ボード</a><a href="partner-chatbot.html">AIに相談</a></div></div></section>
+      <section class="pf-step" id="s6"><div class="pf-no">6</div><div><h2>清算・入金</h2><p class="pf-when">売れたら</p><ol><li>本部が清算書を作り、手数料などを差し引いて入金します</li><li>「売上・請求」で、入金予定と明細を確認する</li><li>案件ボードのステージを「完了」にする</li></ol><p class="pf-tip">💡 手数料：オークションは出品代行 ¥10,000＋成約手数料（粗利×5%）、直販は一律 ¥30,000（税抜）。</p><div class="pf-links"><a href="partner-sales.html">売上・請求</a><a href="hq.html?role=partner">案件ボード</a></div></div></section>
+    </div>
+    <div class="pf-help"><b>困ったときは</b><br>・まず <a href="partner-chatbot.html">AIに相談</a>（本部のノウハウをもとに、すぐ答えます）<br>・現場のトラブル・連絡先は <a href="partner-info.html">現場サポート</a><br>・システムの操作は <a href="partner-guide.html">使い方</a></div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js?v=19"></script>
+<script>HQ.nav('flow');</script>
+</body>
+</html>

@@ -183,3 +183,56 @@ function testAIWork() {
   var r = aiAssist_({ messages: [{ role: 'user', content: '案件ボードの使い方を3行で教えて' }], context: { page: 'test', cases: [] } });
   Logger.log(JSON.stringify(r));
 }
+
+/* ---------- 加盟店の AI 相談（加盟店の画面 partner-chatbot から・合言葉なし） ----------
+   本部のノウハウ（画面から送られる Q&A）と、買取の一般的な知識で答える。
+   使いすぎを防ぐため、1分に20回・1日に400回まで */
+var PARTNER_AI_SYSTEM = [
+  'あなたは BUYMO（車買取のフランチャイズ）本部の AI で、加盟店（車買取の現場の人）からの相談に答える。日本語で、やさしく、短く（目安200〜400字）。',
+  '答えは「本部のノウハウ」に書いてあることを最優先にする。ノウハウにない料金・契約条件・本部の決まりごとは作らない（「本部に確認してください」と書く）。',
+  '書類・名義変更・所有権解除・査定のコツなど、車買取の一般的な知識は答えてよいが、法律や手続きは「念のため運輸支局・本部に確認」と添える。',
+  '答えの最後に、関係する画面があれば1つだけ案内する：書類発行（hq-documents.html）／チェックリスト（partner-checklist.html）／スクリプト（partner-scripts.html）／現場サポート（partner-info.html）／仕事の流れ（partner-flow.html）。',
+  'マークダウンの記号（** や #）は使わない。箇条書きは「・」。'
+].join('\n');
+
+function partnerAiApi_(e) {
+  var out;
+  try {
+    var req = JSON.parse((e.postData && e.postData.contents) || '{}');
+    var q = String(req.q || '').trim().slice(0, 1000);
+    if (!q) out = { ok: false, error: 'empty' };
+    else if (!PropertiesService.getScriptProperties().getProperty('ANTHROPIC_API_KEY')) out = { ok: false, error: 'nokey' };
+    else if (!partnerAiQuota_()) out = { ok: false, error: 'busy' };
+    else {
+      var know = (Array.isArray(req.knowledge) ? req.knowledge : []).slice(0, 40).map(function (k) {
+        return 'Q. ' + String(k.q || '').slice(0, 200) + '\nA. ' + String(k.a || '').slice(0, 800);
+      }).join('\n\n');
+      var hist = (Array.isArray(req.history) ? req.history : []).slice(-6).map(function (m) {
+        return { role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content || '').slice(0, 1500) };
+      }).filter(function (m) { return m.content; });
+      while (hist.length && hist[0].role !== 'user') hist.shift();
+      if (hist.length && hist[hist.length - 1].role === 'user') hist.pop();
+      hist.push({ role: 'user', content: q });
+      var text = aiCall_(PARTNER_AI_SYSTEM + '\n\n# 本部のノウハウ\n' + (know || '（なし）'), hist, { effort: 'low', maxTokens: 1500 });
+      out = text ? { ok: true, answer: text.slice(0, 3000) } : { ok: false, error: 'ai' };
+    }
+  } catch (err) {
+    Logger.log('partnerAiApi_: ' + err.message);
+    out = { ok: false, error: 'server' };
+  }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+function partnerAiQuota_() {
+  var cache = CacheService.getScriptCache();
+  var mk = 'pai_m_' + Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMddHHmm');
+  var m = Number(cache.get(mk) || 0);
+  if (m >= 20) return false;
+  cache.put(mk, String(m + 1), 120);
+  var props = PropertiesService.getScriptProperties();
+  var dk = 'PAI_DAY_' + Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd');
+  var d = Number(props.getProperty(dk) || 0);
+  if (d >= 400) return false;
+  props.setProperty(dk, String(d + 1));
+  if (d === 0) props.getKeys().forEach(function (k) { if (k.indexOf('PAI_DAY_') === 0 && k !== dk) props.deleteProperty(k); });
+  return true;
+}
