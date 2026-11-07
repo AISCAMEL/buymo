@@ -12,6 +12,8 @@
        （古物商許可証は、まだなら取得後に提出）。写真・PDF はこの Google アカウントのドライブに保存
      ・研修：毎月 月末の金曜〜日曜（3日間）。定員まで予約でき、2週間前・前日にお知らせ。
        持ち物などは、本部の画面からその回の参加者全員に LINE でまとめて送れる
+     ・開業後のフォロー：開業から3日・1週間・2週間・1か月・2か月・3か月に自動で声かけ。
+       「いかがですか？」にボタンで答えてもらい、「少し困っています」「担当者と話したい」は本部にすぐ通知
    記録はスプレッドシート「オルタナティブライフ LINE会話ログ」の「加盟手続き」シート。
 
    ■ スクリプトプロパティ（すべて任意）
@@ -24,7 +26,11 @@
    ============================================================ */
 
 var OB_SHEET = '加盟手続き';
-var OB_COLS = ['開始日時', 'userId', 'LINE表示名', 'お名前', 'メール', '区分', '段階', '段階の更新日時', '案内のURL', '書類', 'エリア', '研修の回', '開業日', '配信済み', 'メモ'];
+var OB_COLS = ['開始日時', 'userId', 'LINE表示名', 'お名前', 'メール', '区分', '段階', '段階の更新日時', '案内のURL', '書類', 'エリア', '研修の回', '開業日', '配信済み', 'メモ', '開業後の様子'];
+var FOLLOW_PREFIX = '【開業後の様子】';   // 開業後のフォローのボタンが送る文の先頭
+var FOLLOW_ANSWERS = ['順調です', '少し困っています', '担当者と話したい'];
+// 開業から何日後に声をかけるか（開業日の 10:00。開業日がなければ「開業」にした日から）
+var FOLLOW_STEPS = [['f3', 3], ['f7', 7], ['f14', 14], ['f30', 30], ['f60', 60], ['f90', 90]];
 var OB_PAGE = APP_URL + '?view=onboard';
 var OB_STAGES = [
   { key: 'kari', label: '仮契約' },
@@ -61,7 +67,10 @@ function obSheet_() {
     sh.appendRow(OB_COLS);
     sh.getRange(1, 1, 1, OB_COLS.length).setFontWeight('bold').setBackground('#0F2A4D').setFontColor('#ffffff');
     sh.setFrozenRows(1);
-    sh.getRange('A:O').setNumberFormat('@');
+    sh.getRange('A:P').setNumberFormat('@');
+  } else if (sh.getRange(1, 16).getValue() !== OB_COLS[15]) {
+    sh.getRange(1, 16, 1, 1).setValues([[OB_COLS[15]]]).setFontWeight('bold').setBackground('#0F2A4D').setFontColor('#ffffff');
+    sh.getRange('P:P').setNumberFormat('@');
   }
   return sh;
 }
@@ -72,12 +81,13 @@ function obRows_(sh) {
 }
 
 function obToRow_(r, i) {
-  var docs = {};
+  var docs = {}, follow = [];
   try { docs = JSON.parse(String(r[9] || '{}')) || {}; } catch (e) { docs = {}; }
+  try { follow = JSON.parse(String(r[15] || '[]')) || []; } catch (e) { follow = []; }
   return {
     row: i + 2, startedAt: cellText_(r[0]), userId: String(r[1]), lineName: String(r[2] || ''), name: String(r[3] || ''), email: String(r[4] || ''),
     kind: String(r[5] || ''), stage: Math.max(0, Math.min(OB_STAGES.length, Number(r[6]) || 0)), stageAt: cellText_(r[7]), url: String(r[8] || ''),
-    docs: docs, area: String(r[10] || ''), training: String(r[11] || ''), openDate: cellText_(r[12]).slice(0, 10), sent: String(r[13] || ''), memo: String(r[14] || '')
+    docs: docs, area: String(r[10] || ''), training: String(r[11] || ''), openDate: cellText_(r[12]).slice(0, 10), sent: String(r[13] || ''), memo: String(r[14] || ''), follow: follow
   };
 }
 
@@ -89,7 +99,7 @@ function obFind_(sh, userId) {
 
 function obSave_(sh, o) {
   var row = [o.startedAt, o.userId, o.lineName, o.name, o.email, o.kind, String(o.stage), o.stageAt, o.url, JSON.stringify(o.docs || {}),
-    o.area, o.training, o.openDate, o.sent, o.memo];
+    o.area, o.training, o.openDate, o.sent, o.memo, JSON.stringify((o.follow || []).slice(-10))];
   if (o.row) sh.getRange(o.row, 1, 1, row.length).setValues([row]);
   else { sh.appendRow(row); o.row = sh.getLastRow(); }
 }
@@ -320,7 +330,7 @@ function obNew_(u) {
   try { res = findRes_(seminarSheet_(), u); } catch (e) { /* noop */ }
   return { row: 0, startedAt: jst_(Date.now(), 'yyyy-MM-dd HH:mm:ss'), userId: u, lineName: (res && res.lineName) || displayName_(u),
     name: (res && res.name) || '', email: (res && res.email) || '', kind: '', stage: 0, stageAt: jst_(Date.now(), 'yyyy-MM-dd HH:mm:ss'),
-    url: '', docs: {}, area: '', training: '', openDate: '', sent: '', memo: '' };
+    url: '', docs: {}, area: '', training: '', openDate: '', sent: '', memo: '', follow: [] };
 }
 
 function obStageJob_(o) {
@@ -336,7 +346,8 @@ function obAdminView_(o) {
   if (!o) return null;
   return { stage: o.stage, stageLabel: obStageLabel_(o), stageAt: o.stageAt, kind: o.kind, url: o.url, area: o.area,
     training: o.training, trainingLabel: obTrainingLabel_(o.training), openDate: o.openDate, memo: o.memo,
-    docs: obDocList_(o).map(function (d) { var s = o.docs[d.id] || {}; d.links = s.files || []; return d; }) };
+    docs: obDocList_(o).map(function (d) { var s = o.docs[d.id] || {}; d.links = s.files || []; return d; }),
+    follow: (o.follow || []).slice(-3) };
 }
 
 // 本部の一覧（コード.gs の adminPeople_ から）
@@ -393,6 +404,21 @@ function obMessage_(id, o) {
     line: card_(id === 't1' ? '明日から研修です' : '研修まで2週間になりました', '日程：' + tLabel + '\n' + placeText + (id === 't1' ? '\nお気をつけてお越しください。' : '\n宿泊・交通の手配がまだでしたら、お早めにどうぞ。'), [page], K),
     mail: { subject: '【BUYMO】' + (id === 't1' ? '明日から研修です' : '研修まで2週間になりました'), body: '日程：' + tLabel + '\n' + placeText }
   };
+  if (/^f\d+$/.test(id)) {
+    var days = Number(id.slice(1));
+    var when = days >= 30 ? Math.round(days / 30) + 'か月' : days === 7 ? '1週間' : days === 14 ? '2週間' : days + '日';
+    var ask = [['順調です', FOLLOW_PREFIX + '順調です'], ['少し困っています', FOLLOW_PREFIX + '少し困っています'], ['担当者と話したい', FOLLOW_PREFIX + '担当者と話したい']];
+    var body = days === 3
+      ? '最初の1台に向けて、まずはここから。\n・加盟店ポータルにログインできるか\n・査定依頼の情報の受け取り方\n・研修の動画の見直し（いつでも何度でも見られます）\nわからないことは、このトークでいつでも聞けます。'
+      : days === 14
+        ? '査定や商談で迷ったときは、ひとりで決めずに相談してください。価格は本部の価格判定に通せます。いま、どんなところで迷っていますか？'
+        : days === 30
+          ? '最初の1か月、おつかれさまでした。よろしければ、代表と30分の振り返り（Google Meet）もできます。いまの様子を、下のボタンで教えてください。'
+          : 'いまの様子を、下のボタンで教えてください。気になることは、このトークにそのまま送っても大丈夫です。';
+    var btns = days === 3 ? [['加盟店ポータルを開く', 'https://buymo.me/portal-login.html'], ['トークで質問する', '開業後の質問があります']]
+      : days === 30 && typeof consultCfg_ === 'function' && consultCfg_().bookingUrl ? ask.slice(0, 2).concat([['代表と振り返る（30分）', consultCfg_().bookingUrl]]) : ask;
+    return { line: card_('開業から' + when + '、いかがですか？', body, btns, '開業後のフォロー') };
+  }
   if (id === 'd3' || id === 'd7') {
     var miss = obDocList_(o).filter(function (d) { return d.status === '未提出' && !d.later; });
     if (!miss.length) return null;
@@ -417,6 +443,32 @@ function obDeliver_(id, o) {
   if (via.length) logRow_(o.userId, '自動配信', (m.line ? m.line.altText : m.mail.subject) + '（' + via.join('・') + '）');
 }
 
+/* ---------- 開業後のフォローの答え（コード.gs から：【開業後の様子】…） ---------- */
+function obCheckinReply_(replyToken, userId, text) {
+  var ans = text.slice(FOLLOW_PREFIX.length).trim();
+  if (FOLLOW_ANSWERS.indexOf(ans) < 0) ans = ans.slice(0, 40);
+  var o = null;
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sh = obSheet_();
+    o = obFind_(sh, userId);
+    if (o) { o.follow = (o.follow || []).concat([{ at: jst_(Date.now(), 'yyyy-MM-dd HH:mm'), a: ans }]); obSave_(sh, o); }
+  } finally {
+    lock.releaseLock();
+  }
+  var who = o ? (o.name || o.lineName) : displayName_(userId);
+  var msg = ans === '順調です'
+    ? 'よかったです！この調子でいきましょう。気になることが出てきたら、いつでもこのトークに送ってください。'
+    : ans === '担当者と話したい'
+      ? '担当者にお知らせしました。担当者から、このトークでご連絡します（営業時間外は翌営業日になることがあります）。そのあいだも、AIがお答えします。'
+      : 'お知らせいただき、ありがとうございます。どんなことでお困りか、このトークにそのまま送ってください。AIがすぐにお答えし、担当者にもお知らせしました。';
+  lineFetch_('/v2/bot/message/reply', 'post', { replyToken: replyToken, messages: [textMessage_(msg)] });
+  logRow_(userId, 'お客様', text);
+  logRow_(userId, ans === '順調です' ? '定型' : '引き継ぎ', msg);
+  if (ans !== '順調です') notifyStaff_('🧭 開業後のフォロー：' + ans + '（' + who + ' さん）', '開業後の声かけへの答え：' + ans + '\nLINE のチャットで、様子を聞いてみてください。');
+}
+
 /* ---------- 5分おき（セミナー.gs の seminarTick から）：書類の声かけ・研修のお知らせ ---------- */
 function onboardTick_(now) {
   var sh;
@@ -437,6 +489,13 @@ function onboardTick_(now) {
       var st = obTrainingStart_(o.training);
       [['t14', st - 14 * 86400000 + 10 * HOUR_MS], ['t1', st - 86400000 + 18 * HOUR_MS]].forEach(function (x) {
         if (sent.indexOf(x[0]) < 0 && now >= x[1]) { add.push(x[0]); if (now - x[1] < 6 * HOUR_MS) jobs.push([x[0], o]); }
+      });
+    }
+    if (o.stage >= 5) {   // 開業後のフォロー
+      var base = o.openDate && dayStart_(o.openDate) ? dayStart_(o.openDate) + 10 * HOUR_MS : stAt;
+      if (base) FOLLOW_STEPS.forEach(function (x) {
+        var due = base + x[1] * 86400000;
+        if (sent.indexOf(x[0]) < 0 && add.indexOf(x[0]) < 0 && now >= due) { add.push(x[0]); if (now - due < 24 * HOUR_MS) jobs.push([x[0], o]); }
       });
     }
     if (add.length) { o.sent = sent.concat(add).join(','); obSave_(sh, o); }
