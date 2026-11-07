@@ -9,7 +9,7 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
 <link rel="stylesheet" href="assets/css/buymo.css?v=39" />
 <link rel="stylesheet" href="assets/css/board.css?v=15" />
-<style>.kb-open{display:block;width:100%;margin-top:8px;padding:8px 10px;border:1px solid #0A6B3C;border-radius:8px;background:#fff;color:#0A6B3C;font-weight:700;font-size:13px;cursor:pointer;touch-action:manipulation;}.kb-open:active{background:#E6F4EC;}.cp-vehicle-photo-img{display:inline-flex;flex-direction:column;align-items:center;gap:2px;margin:4px 6px 4px 0;text-decoration:none;}.cp-vehicle-photo-img img{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e3e7ee;background:#f3f5f8;}</style>
+<style>.kb-card{position:relative;cursor:pointer;}.kb-open{position:absolute;right:8px;bottom:8px;margin:0;padding:3px 9px;border:1px solid #cfe3d8;border-radius:999px;background:#fff;color:#0A6B3C;font-weight:700;font-size:11.5px;cursor:pointer;touch-action:manipulation;}.kb-open:active{background:#E6F4EC;}.kb-card .kb-thumb{position:absolute;top:8px;right:8px;width:52px;height:40px;margin:0;border-radius:6px;overflow:hidden;}.kb-card .kb-thumb img{width:100%;height:100%;object-fit:cover;display:block;}.kb-card .kb-thumb-more{font-size:10px;padding:0 3px;}.kb-card:has(.kb-thumb) .kb-card-top,.kb-card:has(.kb-thumb) .kb-name{padding-right:58px;}.kb-col-unassigned .kb-assign-row{margin-right:58px;}.kb-memo-s{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-right:46px;}.kb-card:not(:has(.kb-memo-s)) .kb-meta{padding-right:46px;}.cp-vehicle-photo-img{display:inline-flex;flex-direction:column;align-items:center;gap:2px;margin:4px 6px 4px 0;text-decoration:none;}.cp-vehicle-photo-img img{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e3e7ee;background:#f3f5f8;}</style>
 </head>
 <body>
 <script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
@@ -57,7 +57,7 @@
 <script src="assets/js/hq-common.js?v=17"></script>
 <script>HQ.nav('board');</script>
 <script src="assets/js/notices.js"></script>
-<script src="assets/js/board.js?v=13" defer></script>
+<script src="assets/js/board.js?v=14" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
 </html>
