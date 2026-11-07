@@ -112,6 +112,17 @@ function systemPrompt_() {
 }
 
 
+// AI への指示に足す、いま返事をしているお客様のお名前（お名前.gs がなければ何も足さない）
+var PROMPT_USER_ = '';
+function namePart_() {
+  return PROMPT_USER_ && typeof namePrompt_ === 'function' ? namePrompt_(PROMPT_USER_) : '';
+}
+
+// 通知に出す名前：本名がわかれば「田中 太郎 様（LINE：たなか）」、なければ LINE の表示名
+function custName_(userId) {
+  return typeof whoLabel_ === 'function' ? whoLabel_(userId) : displayName_(userId);
+}
+
 /* ============================================================
    Webhook の入り口
    ============================================================ */
@@ -191,12 +202,14 @@ function handleEvent_(ev) {
 
   // ミニアプリからの申込投稿：お礼と今後の流れ
   if (text.indexOf(APPLY_PREFIX) === 0) {
-    var thanks = 'お申し込みありがとうございます！\n担当者が内容を確認し、3営業日以内に資料をお送りします。\n\n' +
+    var applyName = typeof nameFromPost_ === 'function' ? nameFromPost_(text) : '';
+    if (applyName) setRealName_(userId, applyName, '申込');   // 申込のお名前を LINE と結びつける（お名前.gs）
+    var thanks = (applyName ? callName_(applyName) + '、' : '') + 'お申し込みありがとうございます！\n担当者が内容を確認し、3営業日以内に資料をお送りします。\n\n' +
       'それまでの間も、気になることがあればこのトークで何でも聞いてください。AIがすぐにお答えします。';
     reply_(ev.replyToken, thanks, DEFAULT_QUICK);
     logRow_(userId, 'お客様', text);
     logRow_(userId, '定型', thanks);
-    notifySlack_(':page_facing_up: *LINEミニアプリから資料請求*（' + displayName_(userId) + '）\n```' + text + '```');
+    notifySlack_(':page_facing_up: *LINEミニアプリから資料請求*（' + custName_(userId) + '）\n```' + text + '```');
     return;
   }
 
@@ -214,6 +227,7 @@ function handleEvent_(ev) {
   // ミニアプリで説明会を予約したときの投稿：予約内容の確認を返信（返信は無料。セミナー.gs）
   // 個別相談の予約（【個別相談の予約】）も同じ：予約内容の確認を返信
   if ((text.indexOf(SEMINAR_PREFIX) === 0 || (typeof CONSULT_PREFIX !== 'undefined' && text.indexOf(CONSULT_PREFIX) === 0)) && typeof seminarTalkReply_ === 'function') {
+    if (typeof nameFromPost_ === 'function' && nameFromPost_(text)) setRealName_(userId, nameFromPost_(text), '申込');
     seminarTalkReply_(ev.replyToken, userId, text);
     return;
   }
@@ -256,6 +270,7 @@ function handleEvent_(ev) {
   startLoading_(userId);
   var history = getHistory_(userId);
   history.push({ role: 'user', content: text });
+  PROMPT_USER_ = userId;   // AI への指示に、この方のお名前を足す（お名前.gs）
   var answer = askAI_(history);
 
   if (answer === null) {
@@ -266,6 +281,7 @@ function handleEvent_(ev) {
     return;
   }
 
+  if (typeof takeName_ === 'function') answer = takeName_(answer, userId);   // 名乗ったお名前を覚える（お名前.gs）
   var needHuman = answer.indexOf(HANDOFF_MARK) >= 0;
   answer = plainText_(answer.split(HANDOFF_MARK).join(''));
   if (needHuman) {
@@ -310,26 +326,26 @@ function handoff_(replyToken, userId, text, aiAnswer) {
 
 // 担当者に知らせる（トークでの引き継ぎ・説明会後の個別相談の両方で使う）。AUTO_PAUSE のときだけ AI も止める
 function pauseAndNotify_(userId, title, detail) {
-  var name = displayName_(userId);
+  var name = displayName_(userId), who = custName_(userId);
   if (!AUTO_PAUSE) {
-    notifyStaff_(title + '（' + name + ' さん）', [
+    notifyStaff_(title + '（' + who + '）', [
       detail,
       '',
       '■ 対応のしかた',
       '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
-      '2. ' + name + ' さんのトークを開いて返信する',
+      '2. ' + name + ' さん（LINE の表示名）のトークを開いて返信する',
       '※ AI はそのまま返事を続けています。担当者だけでじっくり話したいときは、本部の「加盟店募集」画面で、その方の「■ AIを止めて担当者が対応」を押してください'
     ].join('\n'));
     return;
   }
   PropertiesService.getScriptProperties()
     .setProperty('pause_' + userId, String(Date.now() + PAUSE_HOURS * 3600 * 1000));
-  notifyStaff_(title + '（' + name + ' さん）', [
+  notifyStaff_(title + '（' + who + '）', [
     detail,
     '',
     '■ 対応のしかた',
     '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
-    '2. ' + name + ' さんのトークを開いて返信する',
+    '2. ' + name + ' さん（LINE の表示名）のトークを開いて返信する',
     '3. 対応が終わったら、下のリンクを押すとAIの自動返信がすぐ再開します（押さなくても' + PAUSE_HOURS + '時間後に自動で再開）',
     'AIを再開する：' + webAppUrl_() + '?a=resume&u=' + encodeURIComponent(userId) + '&s=' + sign_('resume:' + userId)
   ].join('\n'));
@@ -379,7 +395,7 @@ function askAI_(messages) {
       payload: JSON.stringify({
         model: model,
         max_tokens: 1000,
-        messages: [{ role: 'system', content: systemPrompt_() }].concat(messages)
+        messages: [{ role: 'system', content: systemPrompt_() + namePart_() }].concat(messages)
       }),
       muteHttpExceptions: true
     });
@@ -592,6 +608,7 @@ function adminApi_(e) {
     if (!key || req.key !== key) out = { ok: false, error: 'key' };
     else if (req.action === 'people') out = { ok: true, now: Date.now(), people: adminPeople_() };
     else if (req.action === 'timeline') out = { ok: true, timeline: adminTimeline_(u) };
+    else if ((req.action === 'setName' || req.action === 'nameDone') && typeof nameAdmin_ === 'function') out = nameAdmin_(req);
     else if (req.action === 'health') {
       var last = null;
       try { last = JSON.parse(PropertiesService.getScriptProperties().getProperty('HEALTH_LAST') || 'null'); } catch (e2) { /* noop */ }
@@ -685,6 +702,11 @@ function adminPeople_() {
     p.paused = true;
     p.pauseLeft = Math.ceil((until - now) / 3600000);
   });
+  // お客様の本名（お名前.gs）
+  if (typeof namesMap_ === 'function') {
+    var names = namesMap_();
+    Object.keys(names).forEach(function (u) { if (!map[u]) return; map[u].realName = names[u].name; map[u].nameSource = names[u].source; map[u].nameDone = names[u].done; });
+  }
   return Object.keys(map).map(function (u) { return map[u]; });
 }
 

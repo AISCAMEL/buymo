@@ -49,12 +49,12 @@ window.RCLINE = (function () {
     function ev(h, kind, text, who) { return { at: now - h * HOUR, kind: kind, text: text || '', who: who || '' }; }
     function at30(ms) { return Math.round(ms / (HOUR / 2)) * (HOUR / 2); }   // 見本の個別相談は 30分きざみ
     var people = [
-      { userId: 'U001', lineName: 'けんた', firstAt: now - 6 * DAY, lastAt: now - 2 * HOUR, paused: true, pauseLeft: 22,
+      { userId: 'U001', lineName: 'けんた', realName: '山本 健太', nameSource: '会話', nameDone: true, firstAt: now - 6 * DAY, lastAt: now - 2 * HOUR, paused: true, pauseLeft: 22,
         seminar: { day: md(now - DAY), status: '相談希望', pct: 100 },
         timeline: [ev(144, 'friend'), ev(143, 'user', '会社員でもできますか？'), ev(143, 'ai', 'はい、会社員の方も始められます。平日は夜30分ほど、動くのは主に土日です…'),
           ev(140, 'seminar_book', '説明会を予約（' + md(now - DAY) + '）'), ev(26, 'seminar_watch', '説明会を最後まで視聴（100%）'),
           ev(2, 'consult', '説明会のあと「個別相談で詳しく聞く」を選択'), ev(2, 'staff', '本部にメールで通知・AIの返信を停止')] },
-      { userId: 'U002', lineName: 'みほ', firstAt: now - 4 * DAY, lastAt: now - 0.5 * HOUR, paused: false,
+      { userId: 'U002', lineName: 'みほ', realName: '佐藤 美穂', nameSource: '申込', nameDone: false, firstAt: now - 4 * DAY, lastAt: now - 0.5 * HOUR, paused: false,
         seminar: { day: md(now - 0.4 * DAY), status: '申込', pct: 100 },
         timeline: [ev(96, 'friend'), ev(95, 'user', '初期費用はいくらぐらい？'), ev(95, 'ai', '加盟金50万円と保証金10.5万円（税別）です。毎月の固定費は4万円で…'),
           ev(30, 'seminar_book', '説明会を予約（' + md(now - 0.4 * DAY) + '）'), ev(9, 'seminar_watch', '説明会を最後まで視聴（100%）'), ev(0.5, 'apply', '加盟を申し込み（東京都・会社員）')] },
@@ -119,7 +119,7 @@ window.RCLINE = (function () {
       if (used[p.userId]) return;
       var s = p.seminar || {};
       var stage = s.status === '加盟決定' ? '加盟' : CONSULTING[s.status] ? '商談' : p.seminar ? 'セミナー予約' : '新規';
-      leads.push({ id: 'line_' + p.userId, manual: true, lineUserId: p.userId, name: s.name || (p.lineName || 'LINEの方') + '（LINE）', storeName: '',
+      leads.push({ id: 'line_' + p.userId, manual: true, lineUserId: p.userId, name: p.realName || s.name || (p.lineName || 'LINEの方') + '（LINE）', storeName: '',
         email: s.email || '', tel: '', pref: '', date: new Date(p.firstAt || Date.now()).toLocaleDateString('ja-JP'), stage: stage,
         steps: {}, memo: '', seminarDate: '', care: {}, line: p });
     });
@@ -322,6 +322,7 @@ window.RCLINE = (function () {
     if (!p) return '';
     var s = p.seminar;
     return '<span class="lb-row"><span class="lb lb-line">LINE：' + esc(p.lineName) + '・' + ago(p.lastAt) + '</span>' +
+      (p.realName && !p.nameDone ? '<span class="lb lb-name">管理画面の名前を直す</span>' : '') +
       (p.paused ? '<span class="lb lb-pause">AI停止中</span>' : '') +
       (s ? '<span class="lb lb-sem">説明会 ' + esc(dayText(s.day, s.time)) + '・' + (s.pct ? s.pct + '%' : esc(s.status)) + '</span>' : '') +
       (s && s.consultAt ? '<span class="lb lb-consult">個別相談 ' + esc(consultText(s)) + (RESULT_TEXT[s.status] ? '・' + RESULT_TEXT[s.status] : '') + '</span>' : '') + '</span>';
@@ -422,6 +423,19 @@ window.RCLINE = (function () {
   }
   function aiBtnText(p) { return p.paused ? '▶ AIの返信を再開する' : '■ AIを止めて担当者が対応'; }
 
+  /* ---------- お客様の本名（お名前.gs） ---------- */
+  var NAME_SRC = { '本部': '本部が入力', '申込': '申込のお名前', '会話': 'トークで名乗ったお名前' };
+  function nameHtml(p) {
+    var todo = p.realName && !p.nameDone;
+    return '<div class="lnm" data-role="name-box"><div class="rc-sub-h">🪪 お客様のお名前（本名）</div>' +
+      (p.realName ? '<p class="lc-res">' + esc(p.realName) + ' 様<small>（' + esc(NAME_SRC[p.nameSource] || p.nameSource || '') + '）・LINE：' + esc(p.lineName) + '</small></p>'
+        : '<p class="rc-hint">まだわかりません。申込やトークで名乗ると、自動で入ります。</p>') +
+      '<div class="lnm-row"><input type="text" data-role="name-in" value="' + esc(p.realName || '') + '" placeholder="例：田中 太郎"><button type="button" class="la-btn la-btn-o" data-role="name-save">保存</button></div>' +
+      (todo ? '<p class="lnm-todo">LINE の管理画面（チャット）の名前を「' + esc(p.realName) + '」に手で直してください ' +
+        '<button type="button" class="la-btn la-btn-o" data-role="name-done">直した</button></p>' : '') +
+      '<p class="rc-hint" data-role="name-state"></p></div>';
+  }
+
   function bodyHtml(l) {
     var p = l.line;
     var tl = !p ? '<p class="rc-hint">LINEのやり取りはまだありません。</p>'
@@ -437,6 +451,7 @@ window.RCLINE = (function () {
         '<label class="rc-field">内容<input type="text" data-role="next" value="' + esc(l.next || '') + '" placeholder="例：電話で個別相談の日程を決める"></label>' +
         '<label class="rc-field">期限<input type="text" data-role="nextDue" value="' + esc(l.nextDue || '') + '" placeholder="例：11/5"></label>' +
         '<div class="la-actions">' + actions + '</div>' +
+        (p ? nameHtml(p) : '') +
         (p ? consultHtml(p.seminar) : '') +
         (p ? obHtml(p) : '') +
       '</div>' +
@@ -500,6 +515,41 @@ window.RCLINE = (function () {
       });
     }
     wireOb();
+    // お客様の本名
+    function wireName() {
+      var nb = box.querySelector('[data-role="name-box"]');
+      if (!nb) return;
+      function redraw(msg) {
+        var tmp = document.createElement('div'); tmp.innerHTML = nameHtml(p);
+        nb.parentNode.replaceChild(tmp.firstChild, nb); wireName();
+        var st = box.querySelector('[data-role="name-state"]'); if (st) st.textContent = msg;
+        renderTop(state.leads);
+      }
+      var sv = nb.querySelector('[data-role="name-save"]');
+      sv.addEventListener('click', function () {
+        var v = nb.querySelector('[data-role="name-in"]').value.trim();
+        if (!v) { window.alert('お名前を入れてください'); return; }
+        if (demo) { p.realName = v; p.nameSource = '本部'; p.nameDone = false; redraw('（見本）保存しました'); return; }
+        sv.disabled = true;
+        api('setName', { u: p.userId, name: v }).then(function (d) {
+          sv.disabled = false;
+          if (!d.ok) { window.alert('保存できませんでした（' + (d.error === 'name' ? 'お名前に数字や記号は使えません' : d.error || '') + '）'); return; }
+          if (d.name !== p.realName) p.nameDone = false;
+          p.realName = d.name; p.nameSource = '本部';
+          l.name = d.name;
+          redraw('保存しました。このあと AI は「' + d.name.split(' ')[0] + '様」とお呼びします');
+        }).catch(function () { sv.disabled = false; window.alert('通信できませんでした'); });
+      });
+      var dn = nb.querySelector('[data-role="name-done"]');
+      if (dn) dn.addEventListener('click', function () {
+        if (demo) { p.nameDone = true; redraw('（見本）直した にしました'); return; }
+        dn.disabled = true;
+        api('nameDone', { u: p.userId, done: true }).then(function (d) {
+          if (d.ok) { p.nameDone = true; redraw('「直した」にしました'); } else { dn.disabled = false; window.alert('できませんでした（' + (d.error || '') + '）'); }
+        }).catch(function () { dn.disabled = false; window.alert('通信できませんでした'); });
+      });
+    }
+    wireName();
     // 個別相談の結果（加盟決定／検討中／見送り／来なかった）→ お客様に次のご案内が自動で届く
     box.querySelectorAll('[data-cres]').forEach(function (b) {
       b.addEventListener('click', function () {
