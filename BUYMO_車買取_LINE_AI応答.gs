@@ -104,6 +104,17 @@ function systemPrompt_() {
 }
 
 
+// AI への指示に足す、いま返事をしているお客様のお名前（お名前.gs がなければ何も足さない）
+var PROMPT_USER_ = '';
+function namePart_() {
+  return PROMPT_USER_ && typeof namePrompt_ === 'function' ? namePrompt_(PROMPT_USER_) : '';
+}
+
+// 通知に出す名前：本名がわかれば「田中 太郎 様（LINE：たなか）」、なければ LINE の表示名
+function custName_(userId) {
+  return typeof whoLabel_ === 'function' ? whoLabel_(userId) : displayName_(userId);
+}
+
 /* ============================================================
    Webhook の入り口
    ============================================================ */
@@ -176,7 +187,7 @@ function handleEvent_(ev) {
   if (msg.type !== 'text') {
     var photo = msg.type === 'image';
     logRow_(userId, 'お客様', photo ? '（写真）' : '（' + msg.type + '）');
-    if (photo) notifySlack_(':camera: *LINEに写真が届きました*（' + displayName_(userId) + '）\nトークで写真を確認して、案件に追加してください。', { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
+    if (photo) notifySlack_(':camera: *LINEに写真が届きました*（' + custName_(userId) + '）\nトークで写真を確認して、案件に追加してください。', { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
     if (isPaused_(userId)) return;
     // 写真を何枚も続けて送られたときに返信が並ばないよう、10分に1回だけ返す
     var cache = CacheService.getScriptCache(), ck = 'photo_' + userId;
@@ -194,12 +205,15 @@ function handleEvent_(ev) {
 
   // ミニアプリからの申込投稿：お礼と今後の流れ
   if (text.indexOf(APPLY_PREFIX) === 0) {
-    var thanks = '査定のお申し込みありがとうございます！\n担当者が内容を確認して、査定額をメールでお届けします（最短翌日）。\n\n' +
+    var thanksName = typeof nameFromPost_ === 'function' ? callName_(nameFromPost_(text)) : '';
+    var thanks = (thanksName ? thanksName + '、' : '') + '査定のお申し込みありがとうございます！\n担当者が内容を確認して、査定額をメールでお届けします（最短翌日）。\n\n' +
       '写真を追加したいときは、このトークにそのまま送ってください。気になることも何でもどうぞ。AIがすぐにお答えします。';
     reply_(ev.replyToken, thanks, DEFAULT_QUICK);
     logRow_(userId, 'お客様', text);
     logRow_(userId, '定型', thanks);
-    notifySlack_(':car: *LINEミニアプリから査定の申込*（' + displayName_(userId) + '）\n```' + text + '```', { label: '案件ボードを開く', url: 'https://buymo.me/hq-leads.html' });
+    var applyName = typeof nameFromPost_ === 'function' ? nameFromPost_(text) : '';
+    if (applyName) setRealName_(userId, applyName, '申込');   // 申込のお名前を LINE と結びつける（お名前.gs）
+    notifySlack_(':car: *LINEミニアプリから査定の申込*（' + custName_(userId) + '）\n```' + text + '```', { label: '案件ボードを開く', url: 'https://buymo.me/hq-leads.html' });
     return;
   }
 
@@ -246,6 +260,7 @@ function handleEvent_(ev) {
   startLoading_(userId);
   var history = getHistory_(userId);
   history.push({ role: 'user', content: text });
+  PROMPT_USER_ = userId;   // AI への指示に、この方のお名前を足す（お名前.gs）
   var answer = askAI_(history);
 
   if (answer === null) {
@@ -256,6 +271,7 @@ function handleEvent_(ev) {
     return;
   }
 
+  if (typeof takeName_ === 'function') answer = takeName_(answer, userId);   // 名乗ったお名前を覚える（お名前.gs）
   var needHuman = answer.indexOf(HANDOFF_MARK) >= 0;
   answer = plainText_(answer.split(HANDOFF_MARK).join(''));
   if (needHuman) {
@@ -299,24 +315,24 @@ function handoff_(replyToken, userId, text, aiAnswer) {
 // 担当者に知らせる。AUTO_PAUSE のときだけ AI も止める
 function pauseAndNotify_(userId, title, detail) {
   if (!AUTO_PAUSE) {
-    notifyStaff_(title + '（' + displayName_(userId) + ' さん）', [
+    notifyStaff_(title + '（' + custName_(userId) + '）', [
       detail,
       '',
       '■ 対応のしかた',
       '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
-      '2. ' + displayName_(userId) + ' さんのトークを開いて返信する',
+      '2. ' + displayName_(userId) + ' さん（LINE の表示名）のトークを開いて返信する',
       '※ AI はそのまま返事を続けています。担当者だけで話したいときは、本部の画面で「AIを止めて担当者が対応」を押してください'
     ].join('\n'));
     return;
   }
   PropertiesService.getScriptProperties()
     .setProperty('pause_' + userId, String(Date.now() + PAUSE_HOURS * 3600 * 1000));
-  notifyStaff_(title + '（' + displayName_(userId) + ' さん）', [
+  notifyStaff_(title + '（' + custName_(userId) + '）', [
     detail,
     '',
     '■ 対応のしかた',
     '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
-    '2. ' + displayName_(userId) + ' さんのトークを開いて返信する',
+    '2. ' + displayName_(userId) + ' さん（LINE の表示名）のトークを開いて返信する',
     '3. 対応が終わったら、下のリンクを押すとAIの自動返信がすぐ再開します（押さなくても' + PAUSE_HOURS + '時間後に自動で再開）',
     'AIを再開する：' + webAppUrl_() + '?a=resume&u=' + encodeURIComponent(userId) + '&s=' + sign_('resume:' + userId)
   ].join('\n'));
@@ -367,7 +383,7 @@ function askAI_(messages) {
       payload: JSON.stringify({
         model: model,
         max_tokens: 1000,
-        messages: [{ role: 'system', content: systemPrompt_() }].concat(messages)
+        messages: [{ role: 'system', content: systemPrompt_() + namePart_() }].concat(messages)
       }),
       muteHttpExceptions: true
     });
@@ -418,7 +434,7 @@ function askClaude_(messages, props) {
       payload: JSON.stringify({
         model: model,
         max_tokens: 4000,
-        system: systemPrompt_(),
+        system: systemPrompt_() + namePart_(),
         output_config: { effort: 'low' },   // トークの短い受け答え：速く・安く
         fallbacks: 'default',
         messages: msgs
@@ -659,6 +675,7 @@ function adminApi_(e) {
     if (!key || req.key !== key) out = { ok: false, error: 'key' };
     else if (req.action === 'people') out = { ok: true, now: Date.now(), people: adminPeople_() };
     else if (req.action === 'timeline') out = { ok: true, timeline: adminTimeline_(u) };
+    else if ((req.action === 'setName' || req.action === 'nameDone') && typeof nameAdmin_ === 'function') out = nameAdmin_(req);
     else if (req.action === 'health') {
       var last = null;
       try { last = JSON.parse(PropertiesService.getScriptProperties().getProperty('HEALTH_LAST') || 'null'); } catch (e2) { /* noop */ }
@@ -741,6 +758,11 @@ function adminPeople_() {
     p.paused = true;
     p.pauseLeft = Math.ceil((until - now) / 3600000);
   });
+  // お客様の本名（お名前.gs）
+  if (typeof namesMap_ === 'function') {
+    var names = namesMap_();
+    Object.keys(names).forEach(function (u) { if (!map[u]) return; map[u].realName = names[u].name; map[u].nameSource = names[u].source; map[u].nameDone = names[u].done; });
+  }
   return Object.keys(map).map(function (u) { return map[u]; });
 }
 

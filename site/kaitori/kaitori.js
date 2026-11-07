@@ -610,7 +610,7 @@
       lsSet(userKey(LS_HISTORY), hist.slice(0, 20));
       lsSet(LS_DRAFT, { name: payload.name, tel: payload.phone, email: payload.email, pref: val('pref') });
       track('generate_lead', { genre: payload.genre, source: 'liff' });
-      return postToTalk('【無料査定の申込】\n' + car + '\n写真：' + count + '枚\n査定をお願いします。');
+      return postToTalk('【無料査定の申込】\n' + (payload.name ? 'お名前：' + payload.name + '\n' : '') + car + '\n写真：' + count + '枚\n査定をお願いします。');
     }).then(function (posted) {
       $('#doneLead').textContent = posted
         ? 'ありがとうございます。申し込み内容をトークにも送りました。担当者が確認して、査定額をメールでお届けします。'

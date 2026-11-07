@@ -488,7 +488,7 @@
     var payload = buildPayload();
     var want = state.chips.want;
     var receive = state.chips.receive;
-    var talk = '【パートナー資料の請求】\nBUYMOの副業パートナーについて、' +
+    var talk = '【パートナー資料の請求】\n' + (payload.name ? 'お名前：' + payload.name + '\n' : '') + 'BUYMOの副業パートナーについて、' +
       (want === '資料がほしい' ? '資料を希望します。' : '資料と「' + want + '」を希望します。') +
       (slotText() ? '\n都合のよい時間：' + slotText() : '') +
       '\n活動したいエリア：' + payload.prefecture;
