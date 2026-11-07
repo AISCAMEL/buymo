@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>本部ログイン｜BUYMO</title>
+<meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
+<link rel="stylesheet" href="assets/css/buymo.css?v=39" />
+<style>
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(800px 300px at 80% -10%,#FFD9C2,transparent 60%),linear-gradient(180deg,#fff,#FFF1E6);}
+  .login-card{background:#fff;border-radius:20px;box-shadow:var(--shadow-hover);padding:38px 32px;max-width:430px;width:92%;}
+  .login-card .logo{justify-content:center;font-size:28px;margin-bottom:8px;}
+  .login-card h1{font-size:20px;font-weight:900;margin-bottom:18px;text-align:center;}
+  .lf{margin-bottom:14px;}
+  .lf label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .lf input{width:100%;height:48px;border:1px solid #ddd;border-radius:10px;padding:0 14px;font-size:16px;font-family:inherit;}
+  .lf input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(20,184,166,.15);}
+  .l-err{color:#e53935;font-size:13px;min-height:18px;text-align:center;}
+  .l-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+  .l-btn{height:50px;border:none;border-radius:10px;font-weight:900;font-size:15px;cursor:pointer;color:#fff;}
+  .l-btn.hq{background:linear-gradient(135deg,#FF8552,#F2591F);}
+  .l-btn.partner{background:var(--navy);}
+  .l-divider{display:flex;align-items:center;gap:10px;color:#aaa;font-size:12px;margin:20px 0 14px;}
+  .l-divider::before,.l-divider::after{content:"";flex:1;height:1px;background:#eee;}
+  .l-member{display:block;text-align:center;background:var(--cream);border:1px solid #f0e2cf;border-radius:10px;padding:12px;font-weight:700;color:#333;}
+  .l-member:hover{color:var(--orange);}
+  .login-note{margin-top:18px;font-size:12px;color:#999;text-align:center;}
+
+  .l-btn.one{width:100%;}
+  .l-badge{display:block;width:max-content;margin:0 auto 10px;font-size:12px;font-weight:800;padding:4px 12px;border-radius:999px;}
+  .l-badge.hq{background:#FFE7DB;color:#C2410C;}.l-badge.partner{background:#E3ECF5;color:#0F2A4D;}
+  .l-other{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:16px;font-size:13px;}
+  .l-other a{color:#556;text-decoration:underline;}
+  .l-choose{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+  .l-door{display:flex;align-items:center;gap:14px;border:1px solid #eee;border-radius:14px;padding:16px;text-decoration:none;color:#222;background:#fff;transition:box-shadow .15s,border-color .15s;}
+  .l-door:hover{border-color:var(--orange);box-shadow:var(--shadow);}
+  .l-door .ic{font-size:28px;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .l-door b{display:block;font-size:16px;}.l-door small{color:#888;font-size:12px;}
+  .l-door .ar{margin-left:auto;color:#bbb;font-size:20px;}
+  .d-hq .ic{background:#FFE7DB;}.d-partner .ic{background:#E3ECF5;}.d-member .ic{background:#FFF4E0;}
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <a href="/" class="logo">BUYMO</a>
+    <img class="page-mascot" src="assets/img/buymo/m/19_お辞儀ポーズ.webp" alt="" aria-hidden="true" style="float:none;display:block;margin:0 auto 12px;">
+    <span class="l-badge hq">本部</span>
+    <h1>本部ログイン</h1>
+    <div class="lf"><label for="liEmail">メールアドレス</label><input type="email" id="liEmail" placeholder="you@buymo.me" autocomplete="username" /></div>
+    <p class="l-err" id="liErr"></p>
+    <button class="l-btn hq one" id="liGo" type="button">本部でログイン</button>
+    <p class="login-note">本部に登録されたメールアドレスでログインします。</p>
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer;font-size:12px;color:#999;text-align:center;list-style:none;">詳細設定（アクセスキー）</summary>
+      <div style="margin-top:10px;">
+        <label for="liApiKey" style="font-size:12px;color:#666;">アクセスキー<span style="color:#999;">（本部から配布された場合のみ入力）</span></label>
+        <input id="liApiKey" type="text" placeholder="未設定のままでOK" autocomplete="off"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;" />
+        <button id="liApiSave" type="button" class="l-btn" style="margin-top:8px;width:100%;background:var(--gray);color:var(--navy);">この端末に保存</button>
+        <p id="liApiNote" style="font-size:11px;color:#999;margin-top:6px;">※ 本部が機密データ保護（API_SECRET）を有効にした場合のみ必要です。この端末にのみ保存されます。</p>
+      </div>
+    </details>
+    <div class="l-other"><a href="partner-login.html">加盟店の方はこちら</a><a href="member.html">お客様（マイページ）はこちら</a></div>
+  </div>
+</div>
+<script src="assets/js/auth.js?v=3"></script>
+<script>
+  var err = document.getElementById('liErr');
+  function go() {
+    var s = AUTH.get(); var next = new URLSearchParams(location.search).get('next');
+    if (next && !/^[\w.-]+\.html([?#].*)?$/.test(next)) next = '';   // このサイトの画面だけに戻る
+    location.replace(next || AUTH.home(s ? s.role : 'hq'));
+  }
+  function login() {
+    err.textContent = '';
+    var pw = document.getElementById('liPass'); 
+    AUTH.login(document.getElementById('liEmail').value, pw ? pw.value : '', 'hq', function (ok, msg) {
+      if (ok) go(); else err.textContent = msg || 'ログインに失敗しました';
+    });
+  }
+  document.getElementById('liGo').addEventListener('click', login);
+  document.querySelectorAll('.lf input').forEach(function (i) { i.addEventListener('keydown', function (e) { if (e.key === 'Enter') login(); }); });
+  // アクセスキー（機密データ保護が有効な場合のみ・端末に保存）
+  (function () {
+    var inp = document.getElementById('liApiKey');
+    var btn = document.getElementById('liApiSave');
+    var note = document.getElementById('liApiNote');
+    if (!inp || !btn) return;
+    try { inp.value = localStorage.getItem('buymo_api_key') || ''; } catch (e) {}
+    btn.addEventListener('click', function () {
+      try { localStorage.setItem('buymo_api_key', inp.value.trim()); note.textContent = '✓ この端末に保存しました。'; note.style.color = 'var(--green)'; }
+      catch (e) { note.textContent = '保存できませんでした（ブラウザ設定をご確認ください）。'; note.style.color = 'var(--red)'; }
+    });
+  })();
+</script>
+<script src="assets/js/analytics.js?v=2" defer></script>
+</body>
+</html>
