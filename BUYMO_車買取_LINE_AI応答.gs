@@ -139,6 +139,8 @@ function doPost(e) {
   if (e && e.parameter && e.parameter.api === 'seminar' && typeof seminarApi_ === 'function') return seminarApi_(e);
   // 本部の「加盟店募集」画面からの呼び出し（ADMIN_KEY で確認）
   if (e && e.parameter && e.parameter.api === 'admin') return adminApi_(e);
+  // 加盟店の AI 相談（AI業務.gs）
+  if (e && e.parameter && e.parameter.api === 'partnerai' && typeof partnerAiApi_ === 'function') return partnerAiApi_(e);
 
   var props = PropertiesService.getScriptProperties();
   // GAS はリクエストヘッダー（署名）を読めないため、URL の token で LINE 以外からの呼び出しを弾く

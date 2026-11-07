@@ -506,6 +506,7 @@ window.HQ = (function () {
     // グループ [ラベル, [ [key,表示名,href,アイコン], ... ] ]
     var groups = (r === 'partner') ? [
       ['業務', [
+        ['flow', '仕事の流れ', 'partner-flow.html', '🧭'],
         ['board', '案件ボード', 'hq.html?role=partner', '🗂️'],
         ['leadmarket', '案件マーケット', 'partner-leads.html', '🛒'],
         ['sales', '売上・請求', 'partner-sales.html', '💴'],
@@ -519,7 +520,7 @@ window.HQ = (function () {
         ['academy', 'アカデミー', 'partner-academy.html', '🎓'],
         ['scripts', 'スクリプト', 'partner-scripts.html', '📝'],
         ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬'],
-        ['chatbot', 'AIチャットボット', 'partner-chatbot.html', '🤖'],
+        ['chatbot', 'AIに相談', 'partner-chatbot.html', '🤖'],
         ['community', 'コミュニティ', 'partner-community.html', '👥']
       ]],
       ['その他', [
@@ -575,6 +576,7 @@ window.HQ = (function () {
     });
     el.innerHTML = html;
     if (r !== 'partner') { pageIntro(active); mountAI(active); }
+    else pageIntro(active, PARTNER_GUIDE);
     wireNavSearch(r);
     mountGlobalSearch(r, flat);
     // 加盟店がコンテンツページを開いたら閲覧履歴を記録（本部の進捗把握用）
@@ -628,9 +630,20 @@ window.HQ = (function () {
     x.onload = function () { if (window.HQAI) HQAI.mount(key); };
     document.body.appendChild(x);
   }
-  function pageIntro(key) {
+  // 加盟店の画面の「この画面でやること」（仕事の流れ partner-flow.html のどのステップで使うか）
+  var PARTNER_GUIDE = [
+    { key: 'board', do: ['自分の店に割り当てられた案件が並ぶ（タップで詳しく）', 'カードを動かしてステージを進める（契約・完了など）', '車を売ったら、案件を開いて「売却の管理」から申請する'], next: ['仕事の流れ', 'partner-flow.html'] },
+    { key: 'documents', do: ['案件を選ぶと、お名前・車の情報が書類に入る', '売買契約書・委任状などを A4 で印刷・PDF にする'], next: ['必要書類のチェック', 'partner-checklist.html'] },
+    { key: 'scripts', do: ['場面ごとの話し方。ボタンでコピーしてそのまま使える', '初回の連絡・査定額の伝え方・断られたとき などがある'], next: ['仕事の流れ', 'partner-flow.html'] },
+    { key: 'chatbot', do: ['わからないことを、ふつうの言葉で聞く', '本部のノウハウにない質問は、AI が一般的な知識で答える（料金や決まりごとは本部に確認）', '役に立った答えは「ノウハウに登録」で次から早く出る'], next: ['仕事の流れ', 'partner-flow.html'] },
+    { key: 'sales', do: ['売れた車の清算・入金予定と明細を確認する'], next: ['仕事の流れ', 'partner-flow.html'] },
+    { key: 'info', do: ['オークション会場・陸送の手配先と、困ったときの連絡先'], next: ['仕事の流れ', 'partner-flow.html'] },
+    { key: 'checklist', do: ['買取の流れと、普通車・軽自動車・ローン残債などの必要書類', 'お客様と一緒にチェックしながら、書類の抜けを防ぐ'], next: ['書類発行', 'hq-documents.html'] }
+  ];
+  function pageIntro(key, list) {
     var g = null;
-    for (var i = 0; i < PAGE_GUIDE.length; i++) if (PAGE_GUIDE[i].key === key) g = PAGE_GUIDE[i];
+    list = list || PAGE_GUIDE;
+    for (var i = 0; i < list.length; i++) if (list[i].key === key) g = list[i];
     if (!g) return;
     var h1 = document.querySelector('main h1, .portal-main h1');
     if (!h1 || document.getElementById('pageIntro')) return;
@@ -807,7 +820,7 @@ window.HQ = (function () {
   }
 
   return {
-    PAGE_GUIDE: PAGE_GUIDE, ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES, CALENDAR: CALENDAR,
+    PAGE_GUIDE: PAGE_GUIDE, intro: function (key) { var r = (window.AUTH && AUTH.role) ? AUTH.role() : null; pageIntro(key, r === 'partner' ? PARTNER_GUIDE : PAGE_GUIDE); }, ENDPOINT: ENDPOINT, STAGES: STAGES, WON: WON, FEES: FEES, CALENDAR: CALENDAR,
     mountCalendar: mountCalendar, calendarEmbedUrl: calendarEmbedUrl,
     loadCases: loadCases, loadSales: loadSales, getCasesLS: getCasesLS, saveCases: saveCases, upsertCase: upsertCase, deleteCase: deleteCase,
     loadPayments: loadPayments, savePayment: savePayment,
