@@ -341,7 +341,7 @@ function kquoteReply_(replyToken, userId, text) {
   logRow_(userId, 'お客様', text);
   logRow_(userId, ans === '今回は見送る' ? '定型' : '引き継ぎ', msg);
   notifyStaff_((ans === '売りたい' ? '🔥 ' : '') + '査定額へのお返事：' + ans + '（' + who + '）',
-    (c ? '案件：' + c.id + (c.amount ? '（査定額 ' + kyen_(c.amount) + '）' : '') + '\n' : '') +
+    (c ? '案件：' + c.id + (c.amount ? '（査定額 ' + kyen_(c.amount) + '）' : '') + '\n案件ボードで開く：https://buymo.me/hq.html?role=hq&case=' + encodeURIComponent(c.id) + '\n' : '') +
     (ans === '今回は見送る' ? '案件ボードのステージを「失注」などにしてください。' : 'LINE のチャットで、この方に連絡してください。'));
 }
 function knextCarReply_(replyToken, userId, text) {

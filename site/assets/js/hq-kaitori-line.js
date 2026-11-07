@@ -142,9 +142,10 @@
   function bodyHtml(p) {
     var cs = p.cases || [];
     var caseHtml = cs.map(function (c) {
-      return '<div class="kl-case"><div class="kl-case-h"><b>' + esc(c.id) + '</b> ' + esc(c.stage) + (c.amount ? '・査定額 ' + yen(c.amount) : '') +
+      return '<div class="kl-case"><div class="kl-case-h"><a class="kl-caselink" href="hq.html?role=hq&case=' + encodeURIComponent(c.id) + '" title="案件ボードでこの案件を開く">' + esc(c.id) + ' ↗</a> ' + esc(c.stage) + (c.amount ? '・査定額 ' + yen(c.amount) : '') +
         '<small>（' + (c.link === '本部' ? '本部が結びつけ' : 'ミニアプリの申込') + '）</small>' +
         '<button type="button" class="kl-x" data-unlink="' + esc(c.id) + '" title="結びつけを外す">外す</button></div>' +
+        '<a class="kl-btn kl-btn-o kl-open" href="hq.html?role=hq&case=' + encodeURIComponent(c.id) + '">🗂️ 案件ボードでこの案件を開く</a>' +
         (c.answer ? '<p class="kl-hint">査定額へのお返事：<b>' + esc(c.answer) + '</b>（' + md(c.answerAt) + ' ' + hm(c.answerAt) + '）</p>' : '') +
         (c.stage === '完了' || c.stage === '失注' ? '' :
           '<label class="kl-field">引取りの日時<span class="kl-row"><input type="datetime-local" data-pick="' + esc(c.id) + '" value="' + (c.pickup ? localInput(c.pickup) : '') + '">' +
