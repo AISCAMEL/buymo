@@ -64,14 +64,20 @@
     window.HQAI_EXTRA = '今日やることの一覧（画面に出ているもの）：\n' + list.map(function (x) { return '・[' + LV[x.lv][1] + '] ' + x.title + '：' + x.who + '（' + x.why + '）'; }).join('\n');
   }
 
+  // 前回の一覧をこの端末に覚えておき、開いたらすぐ出す（新しいデータが届いたら入れ替える）
+  var PCACHE = 'buymo_kline_cache';
+  function cacheGet() { try { var c = JSON.parse(localStorage.getItem(PCACHE) || 'null'); return c && Date.now() - c.at < 7 * 86400000 ? c : null; } catch (e) { return null; } }
+  function cacheSet(d) { try { localStorage.setItem(PCACHE, JSON.stringify({ at: Date.now(), chat: d.chat || '', people: d.people || [] })); } catch (e) { /* 容量オーバーのときは覚えない */ } }
   function loadLine() {
     var key = ''; try { key = localStorage.getItem('buymo_kaitori_line_key') || ''; } catch (e) {}
     if (!key || !window.HQAI) { state.lineErr = '合言葉が未設定です（「車買取LINE」の画面で一度入れると、ここにも出ます）'; render(); return; }
+    var cached = cacheGet();
+    if (cached && state.people === null) { state.people = cached.people; render(); }
     HQAI.call('people', {}).then(function (d) {
-      if (d && d.ok) { state.people = d.people || []; window.HQAI_LINE = items().filter(function (x) { return /LINE|お返事|担当者|引取り/.test(x.title); }).slice(0, 30); }
-      else state.lineErr = d && d.error === 'key' ? '合言葉が違います（「車買取LINE」の画面で入れ直してください）' : '読み込めませんでした';
+      if (d && d.ok) { cacheSet(d); state.people = d.people || []; window.HQAI_LINE = items().filter(function (x) { return /LINE|お返事|担当者|引取り/.test(x.title); }).slice(0, 30); }
+      else if (state.people === null) state.lineErr = d && d.error === 'key' ? '合言葉が違います（「車買取LINE」の画面で入れ直してください）' : '読み込めませんでした';
       render();
-    }).catch(function () { state.lineErr = '通信できませんでした'; render(); });
+    }).catch(function () { if (state.people === null) state.lineErr = '通信できませんでした'; render(); });
   }
 
   document.getElementById('tdAi').addEventListener('click', function () {
@@ -79,5 +85,7 @@
   });
   HQ.loadCases(function (list) { state.cases = list || []; render(); });
   // hq-ai.js は hq-common が読み込む。読み込みを待ってから LINE の情報を取る
+  // 前回の LINE の情報は、AI の読み込みを待たずにすぐ出す
+  (function () { var c = cacheGet(); if (c) { state.people = c.people; render(); } })();
   (function wait(n) { if (window.HQAI || n > 40) loadLine(); else setTimeout(function () { wait(n + 1); }, 100); })(0);
 })();

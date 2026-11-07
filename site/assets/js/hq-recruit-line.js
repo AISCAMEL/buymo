@@ -599,15 +599,24 @@ window.RCLINE = (function () {
   }
 
   // hq-recruit.js から呼ぶ：リードに LINE の人を合わせる（見本のときはサンプルのデータ）
+  // 前回の一覧をこの端末に覚えておき、開いたらすぐ出す（新しいデータが届いたら入れ替える）
+  var PCACHE = 'buymo_rline_cache';
+  function cacheGet() { try { var c = JSON.parse(localStorage.getItem(PCACHE) || 'null'); return c && Date.now() - c.at < 7 * 86400000 ? c : null; } catch (e) { return null; } }
+  function cacheSet(d) { try { localStorage.setItem(PCACHE, JSON.stringify({ at: Date.now(), chat: d.chat || '', people: d.people || [] })); } catch (e) { /* 容量オーバーのときは覚えない */ } }
   function load(leads, cb) {
     if (demo) { var d = demoData(); cb(merge(d.leads, d.people)); return; }
     if (!keyGet()) { state.connected = false; cb(leads); return; }
+    var base = leads.slice();
+    var cached = cacheGet();
+    if (cached) { state.connected = true; if (cached.chat) CHAT_URL = cached.chat; cb(merge(base.slice(), cached.people)); }
     api('people').then(function (d) {
-      if (!d.ok) { state.connected = false; state.error = d.error || 'error'; cb(leads); return; }
+      if (!d.ok) { state.connected = false; state.error = d.error || 'error'; if (!cached) cb(leads); return; }
       state.connected = true;
       if (d.chat) CHAT_URL = d.chat;
-      cb(merge(leads, d.people || []));
+      cacheSet(d);
+      cb(merge(base.slice(), d.people || []));
     }).catch(function (e) {
+      if (cached) return;   // 前回の一覧を出したまま
       state.connected = false;
       state.error = '通信エラー';
       cb(leads);
