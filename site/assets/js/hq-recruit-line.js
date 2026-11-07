@@ -9,7 +9,9 @@ window.RCLINE = (function () {
   var demo = /[?&]demo=1\b/.test(location.search);
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var HOUR = 3600000, DAY = 24 * HOUR;
-  var CHAT_URL = 'https://chat.line.biz/';
+  var CHAT_URL = 'https://chat.line.biz/';   // GAS から、このアカウントの URL をもらって置きかえる
+  // その方のトーク（GAS が教えてくれたアカウントの URL があれば、そのアカウントのトークを直接開く）
+  function chatLink(p) { return /chat\.line\.biz\/U[0-9a-f]+$/.test(CHAT_URL) ? CHAT_URL + '/chat/' + p.userId : CHAT_URL; }
   var LINE_API = 'https://script.google.com/macros/s/AKfycbzo97X1a5vzmsZITgeFdvpP97S8xgklpl3KxvJjixPoFSBPuNVN-RvDOXICVEIrel9w/exec';
   var KEY_LS = 'buymo_line_admin_key';
   var state = { connected: false, error: '', leads: [] };
@@ -441,7 +443,7 @@ window.RCLINE = (function () {
     var tl = !p ? '<p class="rc-hint">LINEのやり取りはまだありません。</p>'
       : p.timeline ? tlHtml(p.timeline) : '<p class="rc-hint">読み込み中…</p>';
     var actions = p ? (
-      '<a class="la-btn" href="' + CHAT_URL + '" target="_blank" rel="noopener">LINEのチャットを開く</a>' +
+      '<a class="la-btn" href="' + esc(chatLink(p)) + '" target="_blank" rel="noopener">LINEのチャットを開く</a>' +
       '<p class="la-ai-state' + (p.paused ? ' off' : '') + '" data-role="aistate">' + aiStateText(p) + '</p>' +
       '<button type="button" class="la-btn ' + (p.paused ? '' : 'la-btn-o') + '" data-role="ai">' + aiBtnText(p) + '</button>') : '';
     return '<div class="lt-grid">' +
@@ -603,6 +605,7 @@ window.RCLINE = (function () {
     api('people').then(function (d) {
       if (!d.ok) { state.connected = false; state.error = d.error || 'error'; cb(leads); return; }
       state.connected = true;
+      if (d.chat) CHAT_URL = d.chat;
       cb(merge(leads, d.people || []));
     }).catch(function (e) {
       state.connected = false;
