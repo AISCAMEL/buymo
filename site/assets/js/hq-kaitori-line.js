@@ -239,6 +239,10 @@
     $('#klStats').innerHTML = lines && lines.length ? lines.filter(String).map(function (l, i) { return i === 0 ? '<b>' + esc(l.replace(/^■ /, '')) + '</b>' : '<span>' + esc(l) + '</span>'; }).join('') : '';
   }
 
+  // 前回の一覧をこの端末に覚えておき、開いたらすぐ出す（新しいデータが届いたら入れ替える）
+  var PCACHE = 'buymo_kline_cache';
+  function cacheGet() { try { var c = JSON.parse(localStorage.getItem(PCACHE) || 'null'); return c && Date.now() - c.at < 7 * 86400000 ? c : null; } catch (e) { return null; } }
+  function cacheSet(d) { try { localStorage.setItem(PCACHE, JSON.stringify({ at: Date.now(), chat: d.chat || '', people: d.people || [] })); } catch (e) { /* 容量オーバーのときは覚えない */ } }
   function load() {
     if (demo) {
       state.people = demoData();
@@ -248,17 +252,28 @@
       return;
     }
     if (!keyGet()) { $('#klKey').hidden = false; $('#klMain').hidden = true; return; }
-    $('#klList').innerHTML = '<p class="kl-empty">読み込み中…</p>';
+    var cached = cacheGet();
+    if (cached && !state.people.length) {
+      if (cached.chat) CHAT_URL = cached.chat;
+      state.people = cached.people.filter(function (p) { return p.userId; });
+      render();
+    } else if (!state.people.length) $('#klList').innerHTML = '<p class="kl-empty">読み込み中…</p>';
+    $('#klReload').textContent = '↻ 更新中…';
     api('people').then(function (d) {
+      $('#klReload').textContent = '↻ 読み込み直す';
       if (!d.ok) {
         if (d.error === 'key') { keySet(''); $('#klKey').hidden = false; $('#klMain').hidden = true; $('#klKeyMsg').textContent = '合言葉が違います。入れ直してください。'; return; }
         $('#klList').innerHTML = '<p class="kl-empty">読み込めませんでした（' + esc(d.error) + '）</p>'; return;
       }
       if (d.chat) CHAT_URL = d.chat;
+      cacheSet(d);
+      // 開いているカードの「これまでの流れ」は読み直したものを残す
+      var tl = {}; state.people.forEach(function (p) { if (p.timeline) tl[p.userId] = p.timeline; });
       state.people = (d.people || []).filter(function (p) { return p.userId; });
+      state.people.forEach(function (p) { if (tl[p.userId] && state.open[p.userId]) p.timeline = tl[p.userId]; });
       render();
       api('stats').then(function (s) { if (s.ok) renderStats(s.lines); }).catch(function () {});
-    }).catch(function () { $('#klList').innerHTML = '<p class="kl-empty">通信できませんでした。少しおいて開き直してください。</p>'; });
+    }).catch(function () { $('#klReload').textContent = '↻ 読み込み直す'; if (!state.people.length) $('#klList').innerHTML = '<p class="kl-empty">通信できませんでした。少しおいて開き直してください。</p>'; });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
