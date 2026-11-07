@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>本部の使い方｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
+<link rel="stylesheet" href="assets/css/buymo.css?v=39" />
+<link rel="stylesheet" href="assets/css/board.css?v=15" />
+<style>
+.mn-sec{background:#fff;border-radius:12px;padding:16px 18px;margin-bottom:14px;box-shadow:var(--shadow,0 1px 4px rgba(0,0,0,.06));}
+.mn-sec h2{font-size:17px;margin:0 0 10px;color:#0F2A4D;}
+.mn-flow{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;counter-reset:f;}
+.mn-flow li{list-style:none;background:#F2FAF5;border:1px solid #CFE8D9;border-radius:10px;padding:10px;font-size:13px;counter-increment:f;}
+.mn-flow li::before{content:counter(f);display:inline-block;width:22px;height:22px;border-radius:50%;background:#0A6B3C;color:#fff;text-align:center;line-height:22px;font-weight:800;margin-right:6px;font-size:12px;}
+.mn-flow b{display:block;margin:4px 0 2px;}
+.mn-day{margin:0;padding-left:1.2em;line-height:1.9;font-size:14px;}
+.mn-grp{font-size:13px;font-weight:800;color:#6b7a90;margin:14px 0 6px;}
+.mn-page{border:1px solid #e3e7ee;border-radius:10px;padding:10px 14px;margin-bottom:8px;}
+.mn-page a{font-weight:800;color:#0A6B3C;font-size:15px;}
+.mn-page ol{margin:6px 0 0 1.2em;padding:0;font-size:13px;line-height:1.7;}
+.mn-page .mn-admin{font-size:11px;background:#FFF1DB;color:#8a4b00;border-radius:999px;padding:2px 8px;margin-left:6px;}
+.mn-ai li{margin-bottom:4px;}
+@media(max-width:820px){.mn-flow{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js?v=2"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <h1>本部の使い方</h1>
+    <p class="portal-sub">本部のスタッフが、どこで何をするかを、仕事の順番にまとめています。迷ったらここに戻ってください。</p>
+
+    <section class="mn-sec">
+      <h2>🚗 1台の流れ（お客様の申込から入金まで）</h2>
+      <ol class="mn-flow">
+        <li><b>申込が届く</b>サイト・LINE から「新規受付」に入る（車買取LINE のお客様は自動で結びつく）</li>
+        <li><b>担当を決める</b>案件ボードの「未割当」で加盟店を選ぶ</li>
+        <li><b>査定</b>写真を見て査定額を出し、ステージを「査定中」→「商談中」へ。お客様の LINE に自動でお知らせ</li>
+        <li><b>契約・書類</b>「契約」にして、書類発行で売買契約書などを作る（車検証は AI が読み取れる）</li>
+        <li><b>引取り</b>車買取LINE で引取りの日時を入れる（お客様に前日もお知らせ）</li>
+        <li><b>入金・完了</b>「入金待ち」→「完了」。お礼と口コミのお願いは自動で届く</li>
+      </ol>
+    </section>
+
+    <section class="mn-sec">
+      <h2>🕘 1日の流れ</h2>
+      <ol class="mn-day">
+        <li><b>朝</b>：「<a href="hq-today.html">今日やること</a>」を開き、赤（今日中に）から片づける。「🤖 AI に今日の段取りを聞く」で順番も相談できる</li>
+        <li><b>新しい申込</b>：案件ボードの「未割当」で担当を決める</li>
+        <li><b>お客様への返事</b>：「<a href="hq-kaitori-line.html">車買取LINE</a>」の「対応が必要」から、LINE のチャットで返信する</li>
+        <li><b>書類</b>：「<a href="hq-documents.html">書類発行</a>」で案件を選び、車検証などを AI で読み取って印刷する</li>
+        <li><b>夕方</b>：もう一度「今日やること」を見て、残りがないか確かめる</li>
+      </ol>
+    </section>
+
+    <section class="mn-sec mn-ai">
+      <h2>🤖 AI の使い方（どの画面でも右下の「🤖 AI」）</h2>
+      <ul>
+        <li>「CS-7004 を査定中にして」「担当が決まっていない案件は？」のように、ふつうの言葉で話しかける</li>
+        <li>AI が出した操作の候補は、<b>［実行］を押したときだけ</b>行われる（勝手に変わらない）</li>
+        <li>お客様に送る文は「下書き」として出る。中身を確かめて、コピーして送る</li>
+        <li>書類発行の「📷 AI で読み取る」で、車検証・印鑑証明・免許証の写真から項目を読み取って転記できる</li>
+        <li>はじめて使うときだけ合言葉を聞かれます（「車買取LINE」の画面と同じもの）</li>
+      </ul>
+    </section>
+
+    <section class="mn-sec">
+      <h2>🧭 画面ごとにやること</h2>
+      <div id="mnPages"></div>
+      <p class="kl-hint" style="font-size:12px;color:#6b7a90;">各画面の上にも「📌 この画面でやること」が出ます（閉じておくこともできます）。</p>
+    </section>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js?v=18"></script>
+<script>
+  HQ.nav('manual');
+  (function () {
+    var admin = !(window.AUTH && AUTH.isAdmin) || AUTH.isAdmin();
+    var groups = [];
+    HQ.PAGE_GUIDE.forEach(function (g) { if (g.admin && !admin) return; if (groups.indexOf(g.group) < 0) groups.push(g.group); });
+    document.getElementById('mnPages').innerHTML = groups.map(function (gr) {
+      return '<div class="mn-grp">' + HQ.esc(gr) + '</div>' + HQ.PAGE_GUIDE.filter(function (g) { return g.group === gr && (admin || !g.admin); }).map(function (g) {
+        return '<div class="mn-page"><a href="' + g.href + '">' + HQ.esc(g.title) + ' ›</a>' + (g.admin ? '<span class="mn-admin">管理者だけ</span>' : '') +
+          '<ol>' + g.do.map(function (x) { return '<li>' + HQ.esc(x) + '</li>'; }).join('') + '</ol></div>';
+      }).join('');
+    }).join('');
+  })();
+</script>
+</body>
+</html>

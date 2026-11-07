@@ -40,7 +40,7 @@
 </style>
 </head>
 <body>
-<script src="assets/js/auth.js"></script><script>AUTH.guard("staff");</script>
+<script src="assets/js/auth.js?v=2"></script><script>AUTH.guard("staff");</script>
 <header class="portal-header">
   <div class="container">
     <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
@@ -72,6 +72,16 @@
       <span class="fi-note">※入力内容は各書類に自動反映されます</span>
       <button type="button" id="docSaveDraft" class="doc-btn outline" style="margin-left:auto;">💾 下書き保存</button>
     </div>
+
+    <!-- AI で書類を読み取る（本部のみ・AI業務.gs） -->
+    <section class="dai" id="docAi" hidden>
+      <div class="dai-head"><b>📷 書類を AI で読み取って転記</b><span>車検証・印鑑証明・免許証の写真や PDF を選ぶと、AI が項目を読み取ります。確かめてから書類に入れます。</span></div>
+      <div class="dai-row">
+        <select id="docAiKind"><option value="auto">種類：自動で判断</option><option value="shaken">車検証</option><option value="inkan">印鑑登録証明書</option><option value="license">運転免許証</option><option value="other">そのほか</option></select>
+        <label class="doc-btn dai-pick">📷 写真・PDF を選ぶ<input type="file" id="docAiFile" accept="image/*,application/pdf" hidden></label>
+      </div>
+      <div id="docAiOut"></div>
+    </section>
 
     <!-- 発行書類 -->
     <div class="doc-grid">
@@ -407,9 +417,20 @@
 .dh-empty{font-size:13px;color:#99a;padding:12px 2px;}
 .tk-prevwrap{flex-direction:row!important;align-items:center;gap:12px;}
 #tkImgPreview{max-width:170px;max-height:120px;border:1px solid #dde3ee;border-radius:8px;object-fit:cover;box-shadow:0 1px 4px rgba(10,27,61,.12);}
+.dai{background:#F2FAF5;border:1px solid #CFE8D9;border-radius:12px;padding:14px 16px;margin:0 0 18px;}
+.dai-head{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;}.dai-head span{font-size:12.5px;color:#556;}
+.dai-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}.dai-row select{padding:8px;border-radius:8px;border:1px solid #d6dbe3;}
+.dai-pick{cursor:pointer;}
+.dai-busy{color:#0A6B3C;font-weight:700;margin:10px 0 0;}.dai-err{color:#B42318;font-weight:700;margin:10px 0 0;}
+.dai-res{background:#fff;border-radius:10px;padding:12px;margin-top:10px;}
+.dai-warn{background:#FFF4E0;color:#7a4500;border-radius:8px;padding:8px 8px 8px 24px;font-size:13px;margin:8px 0;}
+.dai-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;}.dai-tbl th{text-align:left;font-weight:600;color:#556;padding:4px 6px;white-space:nowrap;width:30%;}
+.dai-tbl td{padding:3px 4px;}.dai-tbl td:first-child{width:24px;}.dai-tbl input[type=text]{width:100%;padding:6px 8px;border:1px solid #d6dbe3;border-radius:6px;font-size:13px;}
+.dai-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}.dai-note,.dai-hint{font-size:12px;color:#6b7a90;margin:6px 0 0;}
 </style>
-<script src="assets/js/hq-common.js?v=17"></script>
+<script src="assets/js/hq-common.js?v=18"></script>
 <script src="assets/js/hq-documents.js?v=11" defer></script>
+<script src="assets/js/hq-doc-ai.js?v=1" defer></script>
 <script src="assets/js/pdf-fill.js?v=6" defer></script>
 <script src="assets/js/analytics.js?v=2" defer></script>
 </body>
