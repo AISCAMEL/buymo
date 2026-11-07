@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>車買取LINE｜BUYMO 本部</title>
+<meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
+<link rel="stylesheet" href="assets/css/buymo.css?v=39" />
+<link rel="stylesheet" href="assets/css/board.css?v=15" />
+<style>
+.kl-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0;}
+.kl-top input[type=search]{flex:1;min-width:180px;padding:9px 12px;border:1px solid #d6dbe3;border-radius:8px;font-size:14px;}
+.kl-stats{display:flex;flex-direction:column;gap:2px;background:#F2FAF5;border:1px solid #CFE8D9;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:12px;}
+.kl-stats:empty{display:none;}
+.kl-stats b{color:#0A6B3C;}
+.kl-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.kl-f{border:1px solid #d6dbe3;background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;}
+.kl-f.on{background:#0A6B3C;border-color:#0A6B3C;color:#fff;}
+.kl-f b{margin-left:2px;}
+.kl-card{background:#fff;border-radius:12px;box-shadow:var(--shadow,0 1px 4px rgba(0,0,0,.08));margin-bottom:10px;overflow:hidden;}
+.kl-head{display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr;gap:12px;align-items:center;width:100%;padding:12px 16px;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit;}
+.kl-who strong{display:block;font-size:15px;}
+.kl-who small{color:#6b7a90;font-size:12px;}
+.kl-last{min-width:0;font-size:13px;color:#444;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.kl-badges{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;}
+.kb{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:#EEF2F7;color:#33415c;white-space:nowrap;}
+.kb-case{background:#E6F4EC;color:#0A6B3C;}
+.kb-hot{background:#FDE7E4;color:#B42318;}
+.kb-pick{background:#E8F0FE;color:#1d4ed8;}
+.kb-name{background:#FFF1DB;color:#8a4b00;}
+.kb-grey{background:#f1f1f1;color:#666;}
+.kl-att{padding:0 16px 10px;}
+.kl-a{margin:4px 0 0;font-size:13px;padding:6px 10px;border-radius:8px;}
+.kl-red{background:#FDECEA;color:#8f1d12;}
+.kl-amber{background:#FFF4E0;color:#7a4500;}
+.kl-blue{background:#EAF1FE;color:#1e3a8a;}
+.kl-body{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:12px 16px 16px;border-top:1px solid #eef0f4;}
+.kl-body>*{min-width:0;}
+.kl-card{min-width:0;}
+.kl-h{font-size:13px;font-weight:700;color:#33415c;margin-bottom:6px;}
+.kl-tl{list-style:none;margin:0;padding:0;max-height:440px;overflow:auto;}
+.kl-tl li{display:flex;gap:8px;padding:6px 0;border-bottom:1px dashed #eef0f4;font-size:13px;}
+.kl-tl small{color:#8a96a8;}
+.kl-tl li>div{min-width:0;flex:1;}
+.kl-tl p{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;}
+.kt-user p{background:#F2F5F9;border-radius:8px;padding:6px 8px;}
+.kt-ai p{background:#F2FAF5;border-radius:8px;padding:6px 8px;}
+.kl-actions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+.kl-btn{display:inline-block;border:1px solid #0A6B3C;background:#0A6B3C;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;}
+.kl-btn-o{background:#fff;color:#0A6B3C;}
+.kl-box{border:1px solid #e3e7ee;border-radius:10px;padding:10px 12px;margin-top:10px;background:#FAFBFD;}
+.kl-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.kl-row input{flex:1 1 160px;min-width:0;padding:8px 10px;border:1px solid #d6dbe3;border-radius:8px;font-size:14px;}
+.kl-field{display:block;font-size:12px;color:#556;margin-top:8px;}
+.kl-hint{font-size:12px;color:#6b7a90;margin:4px 0 0;}
+.kl-todo{overflow-wrap:anywhere;font-size:12px;color:#8a4b00;font-weight:700;margin:6px 0 0;}
+.kl-todo .kl-btn{padding:3px 10px;margin-left:4px;}
+.kl-case{border-bottom:1px dashed #e3e7ee;padding-bottom:8px;margin-bottom:6px;}
+.kl-case-h{font-size:13px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.kl-case-h small{color:#6b7a90;}
+.kl-x{margin-left:auto;border:0;background:none;color:#B42318;font-size:12px;cursor:pointer;}
+.kl-empty{background:#fff;border-radius:12px;padding:24px;text-align:center;color:#6b7a90;}
+.kl-key{background:#fff;border-radius:12px;padding:18px;max-width:520px;}
+.kl-key input{width:100%;padding:10px;border:1px solid #d6dbe3;border-radius:8px;margin:8px 0;font-size:15px;}
+.kl-demo{background:#FFF8E1;border:1px solid #F3D9B8;border-radius:10px;padding:8px 12px;font-size:13px;margin-bottom:10px;}
+@media(max-width:820px){.kl-head{grid-template-columns:1fr;}.kl-badges{justify-content:flex-start;}.kl-body{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<script src="assets/js/auth.js"></script><script>AUTH.guard("hq");</script>
+<header class="portal-header">
+  <div class="container">
+    <a href="portal-login.html" class="logo"><span class="logo-mark" aria-hidden="true"><img src="assets/img/buymo/logo-mark.png?v=2" alt="" style="height:26px;width:26px;object-fit:contain;vertical-align:-7px;" /></span> BUYMO</a>
+    <span class="portal-title">本部</span>
+    <nav class="portal-nav" id="hqNav"></nav>
+    <a href="portal-login.html" class="portal-logout">ログアウト</a>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="container">
+    <h1>車買取LINE（公式LINE @964nkhyl）</h1>
+    <p class="portal-sub">LINE のお客様ごとに、会話・本名・案件・査定額へのお返事・引取り日をまとめて見られます。案件ボードでステージを進めると、お客様の LINE に自動でお知らせが届きます。</p>
+
+    <div class="kl-key" id="klKey" hidden>
+      <b>合言葉を入れてください</b>
+      <p class="kl-hint">「BUYMO 車買取 LINE AI応答」の GAS で、関数 showAdminKey を実行するとログに出ます。この端末に保存します。</p>
+      <input type="password" id="klKeyIn" autocomplete="off" placeholder="合言葉（ADMIN_KEY）">
+      <button type="button" class="kl-btn" id="klKeySave">保存して開く</button>
+      <p class="kl-hint" id="klKeyMsg"></p>
+    </div>
+
+    <div id="klMain">
+      <p class="kl-demo" id="klDemo" hidden>見本のデータです（保存はしません）</p>
+      <div class="kl-stats" id="klStats"></div>
+      <div class="kl-top">
+        <input type="search" id="klSearch" placeholder="🔍 お名前・LINE名・案件ID">
+        <button type="button" class="kl-btn kl-btn-o" id="klReload">↻ 読み込み直す</button>
+        <button type="button" class="kl-btn kl-btn-o" id="klKeyReset">合言葉を入れ直す</button>
+      </div>
+      <div class="kl-filters" id="klFilters"></div>
+      <div id="klList"></div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/hq-common.js?v=17"></script>
+<script>HQ.nav('kaitoriline');</script>
+<script src="assets/js/hq-kaitori-line.js?v=1"></script>
+</body>
+</html>
