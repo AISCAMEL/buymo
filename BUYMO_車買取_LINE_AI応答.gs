@@ -214,7 +214,7 @@ function handleEvent_(ev) {
     var quiet = photo && cache.get(ck);
     if (photo && !quiet) {
       cache.put(ck, '1', 600);
-      notifySlack_(':camera: *LINEに写真が届きました*（' + custName_(userId) + '）\n' + (photoCase ? '案件 ' + photoCase.id + ' のメモに写真のリンクを足します。' : 'トークで写真を確認して、案件に追加してください。'), { label: photoCase ? '案件ボードを開く' : 'LINEのチャットを開く', url: photoCase ? 'https://buymo.me/hq-leads.html' : chatUrl_(userId) });
+      notifySlack_(':camera: *LINEに写真が届きました*（' + custName_(userId) + '）\n' + (photoCase ? '案件 ' + photoCase.id + ' のメモに写真のリンクを足します。' : 'トークで写真を確認して、案件に追加してください。'), { label: photoCase ? '案件ボードを開く' : 'LINEのチャットを開く', url: photoCase ? 'https://buymo.me/hq.html?role=hq&case=' + encodeURIComponent(photoCase.id) : chatUrl_(userId) });
     }
     if (!quiet && !isPaused_(userId)) {
       var thanksPhoto = !photo
