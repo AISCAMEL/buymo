@@ -116,7 +116,7 @@
           '<div class="kb-name">' + HQ.esc(c.name || '') + '</div>' +
           '<div class="kb-meta">' + (c.date ? '<span class="kb-date">📅' + HQ.esc(c.date) + '</span>' : '') + '</div>' +
           '<div class="kb-assign-row"><select class="kb-assign-sel" data-id="' + HQ.esc(c.id) + '">' + storeOpts + '</select></div>' +
-          '<button type="button" class="kb-open" data-open="' + HQ.esc(c.id) + '">詳しく見る ›</button>';
+          '<button type="button" class="kb-open" data-open="' + HQ.esc(c.id) + '">開く ›</button>';
         var sel = card.querySelector('.kb-assign-sel');
         sel.addEventListener('change', function () { if (sel.value) assignCase(c.id, sel.value); });
         sel.addEventListener('click', function (e) { e.stopPropagation(); });
@@ -162,8 +162,8 @@
           photoThumb +
           '<div class="kb-name">' + HQ.esc(c.name || '') + '</div>' +
           '<div class="kb-meta">' + (c.date ? '<span class="kb-date">📅' + HQ.esc(c.date) + '</span>' : '') + HQ.esc(c.assignee || '担当未定') + (c.amount ? '・' + HQ.yen(c.amount) : '') + '</div>' +
-          (c.memo ? '<div class="kb-memo">' + HQ.esc(c.memo) + '</div>' : '') +
-          '<button type="button" class="kb-open" data-open="' + HQ.esc(c.id) + '">詳しく見る ›</button>';
+          (c.memo && memoSummary(c.memo) ? '<div class="kb-memo kb-memo-s">' + HQ.esc(memoSummary(c.memo)) + '</div>' : '') +
+          '<button type="button" class="kb-open" data-open="' + HQ.esc(c.id) + '">開く ›</button>';
         card.addEventListener('dragstart', function (e) { e.dataTransfer.setData('text/plain', c.id); card.classList.add('dragging'); });
         card.addEventListener('dragend', function () { card.classList.remove('dragging'); });
         card.addEventListener('pointerdown', function () { card.classList.remove('dragging'); });
@@ -861,6 +861,14 @@
   function photoSrc(u, size) {
     var m = String(u || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
     return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (size || 400) : String(u || '');
+  }
+  // カードに出すメモの要点（LINE ミニアプリの申込なら「車両」の行、それ以外は1行目）
+  function memoSummary(m) {
+    var t = String(m || '').replace(/\r/g, '');
+    var car = t.match(/車両[：:]\s*([^\n]+)/);
+    var line = car ? car[1] : (t.split('\n').filter(function (x) { return x.trim() && !/^[【—-]/.test(x.trim()); })[0] || t.split('\n')[0] || '');
+    line = line.trim();
+    return line.length > 60 ? line.slice(0, 60) + '…' : line;
   }
   function isPhotoUrl(u) { return /^https?:\/\//.test(String(u || '')); }
   // スプレッドシートから来た値は、数字（電話番号など）のこともあるので文字にそろえる
