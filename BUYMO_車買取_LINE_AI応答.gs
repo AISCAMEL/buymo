@@ -100,7 +100,8 @@ function systemPrompt_() {
   if (typeof seminarConfig_ === 'function') {
     try { var c = seminarConfig_(); times = slotsLabel_(c); win = windowText_(c); } catch (e) { /* 既定の文のまま */ }
   }
-  return SYSTEM_PROMPT.replace('{SEMINAR_TIMES}', times).replace('{SEMINAR_WINDOW}', win);
+  return SYSTEM_PROMPT.replace('{SEMINAR_TIMES}', times).replace('{SEMINAR_WINDOW}', win) +
+    (typeof ESTIMATE_PROMPT !== 'undefined' ? ESTIMATE_PROMPT : '');   // AI の概算（案件連動.gs）
 }
 
 
@@ -178,6 +179,9 @@ function handleEvent_(ev) {
   // 友だち追加・ブロックを記録する（本部の画面の「これまでの流れ」に出る）
   if ((ev.type === 'follow' || ev.type === 'unfollow') && ev.source && ev.source.type === 'user') {
     logRow_(ev.source.userId, ev.type === 'follow' ? '友だち追加' : 'ブロック', '');
+    // 申し込んでいない友だちへの声かけ（案件連動.gs）
+    if (ev.type === 'follow' && typeof kfriendAdd_ === 'function') kfriendAdd_(ev.source.userId);
+    if (ev.type === 'unfollow' && typeof kfriendStop_ === 'function') kfriendStop_(ev.source.userId, 'ブロック');
     return;
   }
   if (ev.type !== 'message' || !ev.source || ev.source.type !== 'user') return;   // 1:1 トークのみ
@@ -187,17 +191,26 @@ function handleEvent_(ev) {
   if (msg.type !== 'text') {
     var photo = msg.type === 'image';
     logRow_(userId, 'お客様', photo ? '（写真）' : '（' + msg.type + '）');
-    if (photo) notifySlack_(':camera: *LINEに写真が届きました*（' + custName_(userId) + '）\nトークで写真を確認して、案件に追加してください。', { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
-    if (isPaused_(userId)) return;
-    // 写真を何枚も続けて送られたときに返信が並ばないよう、10分に1回だけ返す
+    // 案件と結びついたお客様の写真は、ドライブに保存して案件のメモにリンクを足す（案件連動.gs）
+    var photoCase = photo && typeof kcaseOfUser_ === 'function' ? kcaseOfUser_(userId) : null;
+    if (photoCase && CLOSED_STAGES[photoCase.stage]) photoCase = null;
     var cache = CacheService.getScriptCache(), ck = 'photo_' + userId;
-    if (photo && cache.get(ck)) return;
-    if (photo) cache.put(ck, '1', 600);
-    var thanksPhoto = photo
-      ? '写真ありがとうございます！担当者が確認します。\n査定のお申し込みがまだでしたら、下の「写真で無料査定」から車の情報も送っていただくと、査定額をメールでお届けできます（約3分）。'
-      : 'メッセージありがとうございます！ご質問は文字で送っていただければ、AIがすぐにお答えします。';
-    reply_(ev.replyToken, thanksPhoto, DEFAULT_QUICK);
-    logRow_(userId, '定型', thanksPhoto);
+    // 写真を何枚も続けて送られたときに返信や通知が並ばないよう、10分に1回だけ返す
+    var quiet = photo && cache.get(ck);
+    if (photo && !quiet) {
+      cache.put(ck, '1', 600);
+      notifySlack_(':camera: *LINEに写真が届きました*（' + custName_(userId) + '）\n' + (photoCase ? '案件 ' + photoCase.id + ' のメモに写真のリンクを足します。' : 'トークで写真を確認して、案件に追加してください。'), { label: photoCase ? '案件ボードを開く' : 'LINEのチャットを開く', url: photoCase ? 'https://buymo.me/hq-leads.html' : 'https://chat.line.biz/' });
+    }
+    if (!quiet && !isPaused_(userId)) {
+      var thanksPhoto = !photo
+        ? 'メッセージありがとうございます！ご質問は文字で送っていただければ、AIがすぐにお答えします。'
+        : photoCase
+          ? '写真ありがとうございます！お申し込みの査定（' + photoCase.id + '）に追加して、担当者が確認します。'
+          : '写真ありがとうございます！担当者が確認します。\n査定のお申し込みがまだでしたら、下の「写真で無料査定」から車の情報も送っていただくと、査定額をメールでお届けできます（約3分）。';
+      reply_(ev.replyToken, thanksPhoto, DEFAULT_QUICK);
+      logRow_(userId, '定型', thanksPhoto);
+    }
+    if (photoCase) kcasePhoto_(userId, msg.id);
     return;
   }
 
@@ -211,6 +224,7 @@ function handleEvent_(ev) {
     reply_(ev.replyToken, thanks, DEFAULT_QUICK);
     logRow_(userId, 'お客様', text);
     logRow_(userId, '定型', thanks);
+    if (typeof kfriendStop_ === 'function') kfriendStop_(userId, '申込あり');   // 友だちへの声かけを止める（案件連動.gs）
     var applyName = typeof nameFromPost_ === 'function' ? nameFromPost_(text) : '';
     if (applyName) setRealName_(userId, applyName, '申込');   // 申込のお名前を LINE と結びつける（お名前.gs）
     notifySlack_(':car: *LINEミニアプリから査定の申込*（' + custName_(userId) + '）\n```' + text + '```', { label: '案件ボードを開く', url: 'https://buymo.me/hq-leads.html' });
@@ -233,6 +247,10 @@ function handleEvent_(ev) {
     seminarTalkReply_(ev.replyToken, userId, text);
     return;
   }
+
+  // 査定額へのお返事・次のお車の相談のボタン（案件連動.gs）
+  if (typeof QUOTE_PREFIX !== 'undefined' && text.indexOf(QUOTE_PREFIX) === 0) { kquoteReply_(ev.replyToken, userId, text); return; }
+  if (typeof NEXTCAR_TEXT !== 'undefined' && text === NEXTCAR_TEXT) { knextCarReply_(ev.replyToken, userId, text); return; }
 
   // 引き継ぎ中のお客様が「AIに戻る」を押した
   if (text === RESUME_TEXT) {
@@ -272,6 +290,7 @@ function handleEvent_(ev) {
   }
 
   if (typeof takeName_ === 'function') answer = takeName_(answer, userId);   // 名乗ったお名前を覚える（お名前.gs）
+  if (typeof kestimateFill_ === 'function') answer = kestimateFill_(answer);   // 概算の目安を付け足す（案件連動.gs）
   var needHuman = answer.indexOf(HANDOFF_MARK) >= 0;
   answer = plainText_(answer.split(HANDOFF_MARK).join(''));
   if (needHuman) {
@@ -676,6 +695,7 @@ function adminApi_(e) {
     else if (req.action === 'people') out = { ok: true, now: Date.now(), people: adminPeople_() };
     else if (req.action === 'timeline') out = { ok: true, timeline: adminTimeline_(u) };
     else if ((req.action === 'setName' || req.action === 'nameDone') && typeof nameAdmin_ === 'function') out = nameAdmin_(req);
+    else if (/^(caseLink|caseUnlink|pickup|kdone|stats)$/.test(String(req.action)) && typeof caseAdmin_ === 'function') out = caseAdmin_(req);
     else if (req.action === 'health') {
       var last = null;
       try { last = JSON.parse(PropertiesService.getScriptProperties().getProperty('HEALTH_LAST') || 'null'); } catch (e2) { /* noop */ }
@@ -733,6 +753,10 @@ function adminPeople_() {
     // 担当者を希望した時刻（AI を止めないので、本部の画面ではこれで知る）。本部が操作したら済み
     if (who === '引き継ぎ') { p.handoffAt = t; p.handoffText = p.lastText; }
     if (who === '本部' && t >= (p.handoffAt || 0)) p.handoffAt = 0;
+    // 本部の画面の「いま対応が必要な人」用
+    if (who === 'お客様' && String(r[4]) === '（写真）') p.photoAt = t;
+    if (who === 'お客様' && String(r[4]).indexOf(APPLY_PREFIX) === 0) p.applyAt = t;
+    if (who === '本部') p.staffAt = t;
   });
   if (typeof seminarSheet_ === 'function') {
     var hasTimes = typeof times_ === 'function', semCfg = seminarConfig_();
@@ -758,6 +782,11 @@ function adminPeople_() {
     p.paused = true;
     p.pauseLeft = Math.ceil((until - now) / 3600000);
   });
+  // その方の案件（案件連動.gs）
+  if (typeof casePeopleInfo_ === 'function') {
+    var ci = casePeopleInfo_();
+    Object.keys(map).forEach(function (u) { if (ci.cases[u]) map[u].cases = ci.cases[u]; if (ci.friends[u]) map[u].nudge = ci.friends[u]; });
+  }
   // お客様の本名（お名前.gs）
   if (typeof namesMap_ === 'function') {
     var names = namesMap_();
@@ -1007,6 +1036,9 @@ function healthReport_(withAI) {
 
   // 説明会（セミナー.gs があるときだけ）
   var sem = null;
+  // 案件ボードとの連動（案件連動.gs）
+  if (typeof caseHealth_ === 'function') { try { var ch = caseHealth_(); add(ch.level, ch.label, ch.text); } catch (e) { add('warn', '案件ボードとの連動', e.message); } }
+
   if (typeof seminarSheet_ === 'function') {
     try {
       var cfg = seminarConfig_();
@@ -1066,6 +1098,7 @@ function dailyCheck() {
   lines.push('', '■ 直近24時間', 'お客様のメッセージ ' + s.msgs + '／AIの返事 ' + s.ai + '／担当者への引き継ぎ ' + s.handoff + '／友だち追加 ' + s.follow + '／ブロック ' + s.block);
   if (r.seminar) lines.push('説明会の予約 ' + r.seminar.booked24 + '件／今日の回 ' + r.seminar.today + '件／これからの予約 ' + r.seminar.upcoming + '件／自動で送ったお知らせ ' + s.step + '件');
   if (r.paused) lines.push('いま AI を止めている人：' + r.paused + '人');
+  if (typeof caseDailyLines_ === 'function') { try { lines = lines.concat(caseDailyLines_()); } catch (e) { /* noop */ } }   // 昨日の数字（案件連動.gs）
   var title = (bad.length ? '要確認 ' + bad.length + '件' : '異常なし') + '（毎朝の点検）';
   notifyStaff_(title, lines.join('\n'));
   Logger.log(title + '\n' + lines.join('\n'));

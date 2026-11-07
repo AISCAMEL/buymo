@@ -530,6 +530,7 @@ window.HQ = (function () {
         ['dashboard', 'ダッシュボード', 'hq-dashboard.html', '🏠'],
         ['board', '案件ボード', 'hq.html?role=hq', '🗂️'],
         ['leads', 'リード', 'hq-leads.html', '📋'],
+        ['kaitoriline', '車買取LINE', 'hq-kaitori-line.html', '💚'],
         ['auctions', 'オークション', 'hq-auctions.html', '🔨'],
         ['billing', '請求書', 'hq-billing.html', '🧾'],
         ['documents', '書類発行', 'hq-documents.html', '📄'],

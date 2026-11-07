@@ -1219,5 +1219,8 @@
     if (r.genre) setGenre(r.genre);
     if (r.ask) ai.pendingAsk = r.ask;
     nav(r.view, r.step, true);
+    // 売却後のお礼の「ご家族・お友だちに教える」（?share=1）：シェアの画面をすぐ開く
+    var qs = location.search; try { qs += decodeURIComponent(location.search); } catch (e) {}
+    if (/[?&]share=1\b/.test(qs)) setTimeout(share, 400);
   });
 })();
