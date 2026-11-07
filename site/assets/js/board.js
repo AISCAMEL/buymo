@@ -152,8 +152,9 @@
         var carBadge = (c.car && (c.car.maker || c.car.model || c.car.year)) ? '<span class="kb-car">📋車両情報</span>' : '';
         var photoBadge = (c.carPhotos && c.carPhotos.length) ? '<span class="kb-photo">📷' + c.carPhotos.length + '枚</span>' : '';
         // 車両写真のサムネイル（1枚目）をカードに表示。読み込めなければ非表示。
-        var photoThumb = (c.carPhotos && c.carPhotos.length)
-          ? '<div class="kb-thumb"><img src="' + HQ.esc(c.carPhotos[0]) + '" alt="車両写真" loading="lazy" onerror="var t=this.closest(&quot;.kb-thumb&quot;);if(t)t.style.display=&quot;none&quot;;">' +
+        var firstPhoto = (c.carPhotos || []).filter(isPhotoUrl)[0];
+        var photoThumb = firstPhoto
+          ? '<div class="kb-thumb"><img src="' + HQ.esc(photoSrc(firstPhoto, 400)) + '" alt="車両写真" loading="lazy" onerror="var t=this.closest(&quot;.kb-thumb&quot;);if(t)t.style.display=&quot;none&quot;;">' +
             (c.carPhotos.length > 1 ? '<span class="kb-thumb-more">+' + (c.carPhotos.length - 1) + '</span>' : '') + '</div>'
           : '';
         card.innerHTML = '<div class="kb-card-top"><span class="kb-id">' + c.id + '</span>' +
@@ -727,7 +728,10 @@
     var ph = document.getElementById('cpVehiclePhotos');
     if (ph) ph.innerHTML = photos.length
       ? '<div class="cp-vehicle-photos-head">📷 写真 ' + photos.length + '枚</div>' + photos.map(function (u, i) {
-          return '<a href="' + HQ.esc(u) + '" target="_blank" rel="noopener" class="cp-vehicle-photo">写真' + (i + 1) + '</a>';
+          if (!isPhotoUrl(u)) return '<span class="cp-vehicle-photo">写真' + (i + 1) + '（' + HQ.esc(u) + '）</span>';
+          return '<a href="' + HQ.esc(u) + '" target="_blank" rel="noopener" class="cp-vehicle-photo cp-vehicle-photo-img">' +
+            '<img src="' + HQ.esc(photoSrc(u, 600)) + '" alt="写真' + (i + 1) + '" loading="lazy" onerror="this.remove();">' +
+            '<span>写真' + (i + 1) + '</span></a>';
         }).join('')
       : '';
     area.style.display = '';
@@ -853,6 +857,12 @@
     });
   }
 
+  // ドライブの写真のリンク（…/file/d/ID/view など）→ 画像として表示できる縮小画像の URL。ドライブ以外はそのまま
+  function photoSrc(u, size) {
+    var m = String(u || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{10,})/);
+    return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (size || 400) : String(u || '');
+  }
+  function isPhotoUrl(u) { return /^https?:\/\//.test(String(u || '')); }
   // スプレッドシートから来た値は、数字（電話番号など）のこともあるので文字にそろえる
   function normCase(c) {
     ['id', 'name', 'email', 'genre', 'assignee', 'stage', 'memo', 'source', 'date'].forEach(function (k) { if (c[k] != null && typeof c[k] !== 'string') c[k] = String(c[k]); });
