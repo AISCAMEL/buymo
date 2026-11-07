@@ -116,6 +116,21 @@ function custName_(userId) {
   return typeof whoLabel_ === 'function' ? whoLabel_(userId) : displayName_(userId);
 }
 
+// LINE のチャット画面（このアカウントの、その方のトーク）の URL。
+// chat.line.biz だけだと、最後に開いていた別のアカウントが出てしまうため、アカウント（ボットの userId）を付ける
+function chatUrl_(userId) {
+  var props = PropertiesService.getScriptProperties();
+  var bot = props.getProperty('BOT_USER_ID');
+  if (!bot) {
+    try {
+      var res = lineFetch_('/v2/bot/info', 'get');
+      if (res.getResponseCode() === 200) { bot = JSON.parse(res.getContentText()).userId || ''; if (bot) props.setProperty('BOT_USER_ID', bot); }
+    } catch (e) { /* noop */ }
+  }
+  if (!bot) return 'https://chat.line.biz/';
+  return 'https://chat.line.biz/' + bot + (userId ? '/chat/' + userId : '');
+}
+
 /* ============================================================
    Webhook の入り口
    ============================================================ */
@@ -199,7 +214,7 @@ function handleEvent_(ev) {
     var quiet = photo && cache.get(ck);
     if (photo && !quiet) {
       cache.put(ck, '1', 600);
-      notifySlack_(':camera: *LINEに写真が届きました*（' + custName_(userId) + '）\n' + (photoCase ? '案件 ' + photoCase.id + ' のメモに写真のリンクを足します。' : 'トークで写真を確認して、案件に追加してください。'), { label: photoCase ? '案件ボードを開く' : 'LINEのチャットを開く', url: photoCase ? 'https://buymo.me/hq-leads.html' : 'https://chat.line.biz/' });
+      notifySlack_(':camera: *LINEに写真が届きました*（' + custName_(userId) + '）\n' + (photoCase ? '案件 ' + photoCase.id + ' のメモに写真のリンクを足します。' : 'トークで写真を確認して、案件に追加してください。'), { label: photoCase ? '案件ボードを開く' : 'LINEのチャットを開く', url: photoCase ? 'https://buymo.me/hq-leads.html' : chatUrl_(userId) });
     }
     if (!quiet && !isPaused_(userId)) {
       var thanksPhoto = !photo
@@ -338,7 +353,7 @@ function pauseAndNotify_(userId, title, detail) {
       detail,
       '',
       '■ 対応のしかた',
-      '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
+      '1. LINE Official Account Manager の「チャット」を開く：' + chatUrl_(userId),
       '2. ' + displayName_(userId) + ' さん（LINE の表示名）のトークを開いて返信する',
       '※ AI はそのまま返事を続けています。担当者だけで話したいときは、本部の画面で「AIを止めて担当者が対応」を押してください'
     ].join('\n'));
@@ -350,7 +365,7 @@ function pauseAndNotify_(userId, title, detail) {
     detail,
     '',
     '■ 対応のしかた',
-    '1. LINE Official Account Manager の「チャット」を開く：https://chat.line.biz/',
+    '1. LINE Official Account Manager の「チャット」を開く：' + chatUrl_(userId),
     '2. ' + displayName_(userId) + ' さん（LINE の表示名）のトークを開いて返信する',
     '3. 対応が終わったら、下のリンクを押すとAIの自動返信がすぐ再開します（押さなくても' + PAUSE_HOURS + '時間後に自動で再開）',
     'AIを再開する：' + webAppUrl_() + '?a=resume&u=' + encodeURIComponent(userId) + '&s=' + sign_('resume:' + userId)
@@ -612,7 +627,7 @@ function logRow_(userId, who, text) {
 
 // 本部に知らせる：Slack（設定があれば）＋メール
 function notifyStaff_(title, body) {
-  notifySlack_('*' + title + '*\n' + body, { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
+  notifySlack_('*' + title + '*\n' + body, { label: 'LINEのチャットを開く', url: chatUrl_() });
   try {
     var to = PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL') || Session.getEffectiveUser().getEmail();
     if (to) MailApp.sendEmail({ to: to, subject: '【BUYMO 車買取 LINE】' + title, body: body + '\n\n— BUYMO 車買取 LINE（自動送信）', name: 'BUYMO 車買取 LINE' });
@@ -675,7 +690,7 @@ function notifyWorks_(text, button) {
 // 本部への通知（Slack・LINE WORKS）を試しに送る（エディタから実行）
 function testNotify() {
   var p = PropertiesService.getScriptProperties();
-  notifySlack_('🔔 *通知のテスト*\nこの通知が届いていれば、本部への通知は設定できています。', { label: 'LINEのチャットを開く', url: 'https://chat.line.biz/' });
+  notifySlack_('🔔 *通知のテスト*\nこの通知が届いていれば、本部への通知は設定できています。', { label: 'LINEのチャットを開く', url: chatUrl_() });
   Logger.log('Slack: ' + (p.getProperty('SLACK_WEBHOOK_URL') ? '送りました' : '未設定') + '／LINE WORKS: ' + (p.getProperty('LINEWORKS_WEBHOOK_URL') ? '送りました' : '★未設定（LINEWORKS_WEBHOOK_URL）'));
 }
 
@@ -692,7 +707,7 @@ function adminApi_(e) {
     var key = PropertiesService.getScriptProperties().getProperty('ADMIN_KEY');
     var u = String(req.u || '');
     if (!key || req.key !== key) out = { ok: false, error: 'key' };
-    else if (req.action === 'people') out = { ok: true, now: Date.now(), people: adminPeople_() };
+    else if (req.action === 'people') out = { ok: true, now: Date.now(), chat: chatUrl_(), people: adminPeople_() };
     else if (req.action === 'timeline') out = { ok: true, timeline: adminTimeline_(u) };
     else if ((req.action === 'setName' || req.action === 'nameDone') && typeof nameAdmin_ === 'function') out = nameAdmin_(req);
     else if (/^(caseLink|caseUnlink|pickup|kdone|stats)$/.test(String(req.action)) && typeof caseAdmin_ === 'function') out = caseAdmin_(req);

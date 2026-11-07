@@ -6,7 +6,9 @@
   'use strict';
   var GAS = 'https://script.google.com/macros/s/AKfycbxvgXV0kse1pFJVq1oonuOt3LBIrKPOC8VrZKAjduIjGx7UR4JcWg64Gh03r4jdYfVqxw/exec';
   var KEY_LS = 'buymo_kaitori_line_key';
-  var CHAT_URL = 'https://chat.line.biz/';
+  var CHAT_URL = 'https://chat.line.biz/';   // GAS から、このアカウントの URL をもらって置きかえる
+  // その方のトーク（GAS が教えてくれたアカウントの URL があれば、そのアカウントのトークを直接開く）
+  function chatLink(p) { return /chat\.line\.biz\/U[0-9a-f]+$/.test(CHAT_URL) ? CHAT_URL + '/chat/' + p.userId : CHAT_URL; }
   var HOUR = 3600000, DAY = 24 * HOUR;
   var demo = /[?&]demo=1\b/.test(location.search);
   var state = { people: [], filter: 'todo', open: {}, q: '' };
@@ -153,7 +155,7 @@
     return '<div class="kl-body">' +
       '<div class="kl-col"><div class="kl-h">📜 これまでの流れ（新しい順）</div><div data-role="tl">' + tlHtml(p.timeline) + '</div></div>' +
       '<div class="kl-col">' +
-        '<div class="kl-actions"><a class="kl-btn" href="' + CHAT_URL + '" target="_blank" rel="noopener">LINEのチャットを開く</a>' +
+        '<div class="kl-actions"><a class="kl-btn" href="' + esc(chatLink(p)) + '" target="_blank" rel="noopener">LINEのチャットを開く</a>' +
           '<button type="button" class="kl-btn kl-btn-o" data-role="done">✓ 対応しました</button>' +
           '<button type="button" class="kl-btn kl-btn-o" data-role="ai">' + (p.paused ? '▶ AIの返信を再開する' : '■ AIを止めて担当者が対応') + '</button></div>' +
         '<p class="kl-hint" data-role="msg"></p>' +
@@ -251,6 +253,7 @@
         if (d.error === 'key') { keySet(''); $('#klKey').hidden = false; $('#klMain').hidden = true; $('#klKeyMsg').textContent = '合言葉が違います。入れ直してください。'; return; }
         $('#klList').innerHTML = '<p class="kl-empty">読み込めませんでした（' + esc(d.error) + '）</p>'; return;
       }
+      if (d.chat) CHAT_URL = d.chat;
       state.people = (d.people || []).filter(function (p) { return p.userId; });
       render();
       api('stats').then(function (s) { if (s.ok) renderStats(s.lines); }).catch(function () {});
