@@ -663,10 +663,10 @@
   }
   /* 同一顧客の判定キー（電話→氏名+メール） */
   function custKey(c) {
-    var t = (c.tel || '').replace(/[^0-9]/g, '');
+    var t = String(c.tel == null ? '' : c.tel).replace(/[^0-9]/g, '');
     if (t.length >= 6) return 't:' + t;
-    var n = (c.name || '').trim();
-    return n ? 'n:' + n + '|' + (c.email || '').trim() : '';
+    var n = String(c.name == null ? '' : c.name).trim();
+    return n ? 'n:' + n + '|' + String(c.email == null ? '' : c.email).trim() : '';
   }
   function renderCustomer(c) {
     var area = document.getElementById('cpCustArea'); if (!area) return;
@@ -853,8 +853,15 @@
     });
   }
 
+  // スプレッドシートから来た値は、数字（電話番号など）のこともあるので文字にそろえる
+  function normCase(c) {
+    ['id', 'name', 'email', 'genre', 'assignee', 'stage', 'memo', 'source', 'date'].forEach(function (k) { if (c[k] != null && typeof c[k] !== 'string') c[k] = String(c[k]); });
+    if (typeof c.tel === 'number') c.tel = (/^[1-9]\d{8,9}$/.test(String(c.tel)) ? '0' : '') + String(c.tel);   // 先頭の0が消えた電話番号を戻す
+    else if (c.tel != null && typeof c.tel !== 'string') c.tel = String(c.tel);
+    return c;
+  }
   HQ.loadCases(function (list) {
-    cases = list; render();
+    cases = (list || []).map(normCase); render();
     // サイド検索から ?case=<id> で来たら該当案件を開く
     try {
       var want = new URLSearchParams(location.search).get('case');
