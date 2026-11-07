@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ログイン｜BUYMO（会員／加盟店／本部）</title>
+<title>ログイン｜BUYMO（本部／加盟店／マイページ）</title>
 <meta name="robots" content="noindex,nofollow" /><link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
@@ -28,6 +28,19 @@
   .l-member{display:block;text-align:center;background:var(--cream);border:1px solid #f0e2cf;border-radius:10px;padding:12px;font-weight:700;color:#333;}
   .l-member:hover{color:var(--orange);}
   .login-note{margin-top:18px;font-size:12px;color:#999;text-align:center;}
+
+  .l-btn.one{width:100%;}
+  .l-badge{display:block;width:max-content;margin:0 auto 10px;font-size:12px;font-weight:800;padding:4px 12px;border-radius:999px;}
+  .l-badge.hq{background:#FFE7DB;color:#C2410C;}.l-badge.partner{background:#E3ECF5;color:#0F2A4D;}
+  .l-other{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:16px;font-size:13px;}
+  .l-other a{color:#556;text-decoration:underline;}
+  .l-choose{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+  .l-door{display:flex;align-items:center;gap:14px;border:1px solid #eee;border-radius:14px;padding:16px;text-decoration:none;color:#222;background:#fff;transition:box-shadow .15s,border-color .15s;}
+  .l-door:hover{border-color:var(--orange);box-shadow:var(--shadow);}
+  .l-door .ic{font-size:28px;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .l-door b{display:block;font-size:16px;}.l-door small{color:#888;font-size:12px;}
+  .l-door .ar{margin-left:auto;color:#bbb;font-size:20px;}
+  .d-hq .ic{background:#FFE7DB;}.d-partner .ic{background:#E3ECF5;}.d-member .ic{background:#FFF4E0;}
 </style>
 </head>
 <body>
@@ -35,62 +48,19 @@
   <div class="login-card">
     <a href="/" class="logo">BUYMO</a>
     <img class="page-mascot" src="assets/img/buymo/m/19_お辞儀ポーズ.webp" alt="" aria-hidden="true" style="float:none;display:block;margin:0 auto 12px;">
-    <h1>業務ログイン</h1>
-    <div class="lf"><label for="liEmail">メールアドレス</label><input type="email" id="liEmail" placeholder="you@example.com" autocomplete="username" /></div>
-    <div class="lf"><label for="liPass">パスワード</label><input type="password" id="liPass" placeholder="加盟店の方は本部発行のパスワード" autocomplete="current-password" /></div>
-    <p class="l-hint" style="font-size:12px;color:#888;margin:-4px 0 8px;">加盟店の方はメールアドレスと本部発行のパスワードを入力してください。</p>
-    <p class="l-err" id="liErr"></p>
-    <div class="l-btns">
-      <button class="l-btn hq" data-role="hq" type="button">本部でログイン</button>
-      <button class="l-btn partner" data-role="partner" type="button">加盟店でログイン</button>
+    <h1>ログイン</h1>
+    <div class="l-choose">
+      <a class="l-door d-hq" href="hq-login.html{Q}"><span class="ic">🏢</span><span><b>本部</b><small>本部のスタッフの方</small></span><span class="ar">›</span></a>
+      <a class="l-door d-partner" href="partner-login.html{Q}"><span class="ic">🏪</span><span><b>加盟店</b><small>加盟店（BUYMO 各店）の方</small></span><span class="ar">›</span></a>
+      <a class="l-door d-member" href="member.html"><span class="ic">👤</span><span><b>お客様マイページ</b><small>査定・売却の状況の確認</small></span><span class="ar">›</span></a>
     </div>
-
-    <div class="l-divider">お客様はこちら</div>
-    <a class="l-member" href="member.html">👤 会員マイページ（査定状況の確認）</a>
-
-    <p class="login-note">本部・加盟店は<strong>登録済みのメールアドレスと本部発行のパスワード</strong>でログインします。ログインできるアカウントは本部で管理します。</p>
-
-    <details style="margin-top:14px;">
-      <summary style="cursor:pointer;font-size:12px;color:#999;text-align:center;list-style:none;">詳細設定（アクセスキー）</summary>
-      <div style="margin-top:10px;">
-        <label for="liApiKey" style="font-size:12px;color:#666;">アクセスキー<span style="color:#999;">（本部から配布された場合のみ入力）</span></label>
-        <input id="liApiKey" type="text" placeholder="未設定のままでOK" autocomplete="off"
-          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;" />
-        <button id="liApiSave" type="button" class="l-btn" style="margin-top:8px;width:100%;background:var(--gray);color:var(--navy);">この端末に保存</button>
-        <p id="liApiNote" style="font-size:11px;color:#999;margin-top:6px;">※ 本部が機密データ保護（API_SECRET）を有効にした場合のみ必要です。この端末にのみ保存されます。</p>
-      </div>
-    </details>
   </div>
 </div>
-<script src="assets/js/auth.js?v=2"></script>
 <script>
-  var err = document.getElementById('liErr');
-  function go() {
-    var s = AUTH.get(); var next = new URLSearchParams(location.search).get('next');
-    location.replace(next || AUTH.home(s ? s.role : 'hq'));
-  }
-  // 既ログインなら素通し
-  if (AUTH.get()) { /* stay; user can re-login */ }
-  document.querySelectorAll('.l-btn[data-role]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      err.textContent = '';
-      AUTH.login(document.getElementById('liEmail').value, document.getElementById('liPass').value, b.getAttribute('data-role'), function (ok, msg) {
-        if (ok) go(); else err.textContent = msg || 'ログインに失敗しました';
-      });
-    });
-  });
-
-  // アクセスキー（機密データ保護が有効な場合のみ・端末に保存）
+  // ?next= を、選んだ入口へ引き継ぐ
   (function () {
-    var inp = document.getElementById('liApiKey');
-    var btn = document.getElementById('liApiSave');
-    var note = document.getElementById('liApiNote');
-    if (!inp || !btn) return;
-    try { inp.value = localStorage.getItem('buymo_api_key') || ''; } catch (e) {}
-    btn.addEventListener('click', function () {
-      try { localStorage.setItem('buymo_api_key', inp.value.trim()); note.textContent = '✓ この端末に保存しました。'; note.style.color = 'var(--green)'; }
-      catch (e) { note.textContent = '保存できませんでした（ブラウザ設定をご確認ください）。'; note.style.color = 'var(--red)'; }
-    });
+    var q = location.search || '';
+    document.querySelectorAll('.l-door').forEach(function (a) { a.setAttribute('href', a.getAttribute('href').replace('{Q}', a.classList.contains('d-member') ? '' : q)); });
   })();
 </script>
 <script src="assets/js/analytics.js?v=2" defer></script>

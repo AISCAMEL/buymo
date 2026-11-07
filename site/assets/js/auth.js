@@ -104,18 +104,23 @@ window.AUTH = (function () {
     if (req === 'staff') return s.role === 'partner' || s.role === 'hq';
     return s.role === req;
   }
+  // 入口（ログイン画面）は、本部・加盟店・お客様で分けている
+  function loginPage(req) { return req === 'hq' || req === 'hqadmin' ? 'hq-login.html' : req === 'partner' ? 'partner-login.html' : 'portal-login.html'; }
   function guard(req) {
     var s = get();
     if (allowed(s, req)) return true;
     if (s) { location.replace(home(s.role)); }     // ログイン済だが権限不足→自分のホームへ
-    else { location.replace('portal-login.html'); } // 未ログイン→ログインへ
+    else {                                         // 未ログイン→その画面の入口へ（ログインしたら元の画面に戻る）
+      var here = location.pathname.split('/').pop() + location.search;
+      location.replace(loginPage(req) + (here ? '?next=' + encodeURIComponent(here) : ''));
+    }
     return false;
   }
 
   // ログアウトリンクの共通処理
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('.portal-logout,[data-logout]');
-    if (a) { e.preventDefault(); logout(); location.replace('portal-login.html'); }
+    if (a) { e.preventDefault(); var r = role(); logout(); location.replace(r === 'hq' ? 'hq-login.html' : r === 'partner' ? 'partner-login.html' : 'portal-login.html'); }
   });
 
   // 本部の管理者か（スタッフは false）。お金の画面・数字の表示を出し分けるのに使う
