@@ -143,6 +143,8 @@ window.RCLINE = (function () {
   function attentionOf(l) {
     var p = l.line, s = p && p.seminar, now = Date.now();
     var ob = p && p.onboard;
+    var lastF = ob && ob.follow && ob.follow.length ? ob.follow[ob.follow.length - 1] : null;
+    if (lastF && lastF.a !== '順調です' && now - Date.parse(String(lastF.at).replace(' ', 'T') + ':00+09:00') < 3 * DAY) return { lv: 'red', label: '🧭 開業後のフォロー', why: '「' + lastF.a + '」と答えています。チャットで様子を聞いてください' };
     if (ob && (ob.docs || []).some(function (d) { return d.status === '提出済み'; })) return { lv: 'orange', label: '📄 書類の確認', why: '本審査の書類が届いています。「OK」か「差し戻し」を押してください' };
     if (s && s.status === '相談予約' && s.consultEnd && s.consultEnd < now) return { lv: 'red', label: '個別相談の結果を入力', why: consultText(s) + ' の相談が終わりました。「加盟決定／検討中／見送り／来なかった」を押してください' };
     if (s && s.status === '相談予約' && s.consultAt && s.consultAt - now < 36 * HOUR) return { lv: 'orange', label: '個別相談 ' + consultText(s), why: firstLine(s.consultInfo, 2) };
@@ -360,6 +362,7 @@ window.RCLINE = (function () {
       '<label class="rc-field">活動エリア<input type="text" data-obf="area" value="' + esc(o.area || '') + '" placeholder="例：福島県いわき市"></label>' +
       '<label class="rc-field">開業日<input type="text" data-obf="openDate" value="' + esc(o.openDate || '') + '" placeholder="例：2026-12-01"></label>' +
       (o.training ? '<p class="lc-res">研修：' + esc(o.trainingLabel) + '</p>' : '') +
+      (o.follow && o.follow.length ? '<p class="lc-res">開業後の様子：' + o.follow.map(function (f) { return esc(String(f.at).slice(5)) + ' ' + esc(f.a); }).join(' ／ ') + '</p>' : '') +
       (docs ? '<ul class="lob-docs">' + docs + '</ul>' : (o.stage >= 1 ? '<p class="lc-res">書類：お客様が「個人／法人」を選ぶと出ます</p>' : '')) +
       '<div class="lc-btns"><button type="button" class="lc-btn on" data-ob="save">保存して、段階が変わったらご案内を送る</button><button type="button" class="lc-btn" data-ob="resend">いまの段階のご案内をもう一度送る</button></div>' +
       '<p class="lc-res" data-role="ob-state"></p></div>';

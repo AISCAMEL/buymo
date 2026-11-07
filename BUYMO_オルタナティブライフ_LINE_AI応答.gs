@@ -218,6 +218,12 @@ function handleEvent_(ev) {
     return;
   }
 
+  // 開業後のフォローのボタン（【開業後の様子】順調です など。加盟手続き.gs）
+  if (typeof FOLLOW_PREFIX !== 'undefined' && text.indexOf(FOLLOW_PREFIX) === 0 && typeof obCheckinReply_ === 'function') {
+    obCheckinReply_(ev.replyToken, userId, text);
+    return;
+  }
+
   // 引き継ぎ中のお客様が「AIに戻る」を押した
   if (text === RESUME_TEXT) {
     resumeAI(userId);
