@@ -1,0 +1,167 @@
+/* ============================================================
+   BUYMO 業務アプリの見た目（本部・加盟店の画面に共通）
+   すっきり業務アプリ風：白を基調に、余白を広く、文字を大きく。色は BUYMO の緑を少しだけ。
+   iPad で押しやすいよう、ボタン・入力欄は 44px 以上。
+   既存の buymo.css / board.css の上に重ねて読み込む（このファイルを外せば元の見た目に戻る）
+   ============================================================ */
+:root{
+  --app-bg:#F6F7F9;
+  --app-surface:#FFFFFF;
+  --app-line:#E5E7EB;
+  --app-line-strong:#D1D5DB;
+  --app-text:#111827;
+  --app-sub:#6B7280;
+  --app-faint:#9CA3AF;
+  --app-accent:#0F766E;
+  --app-accent-dark:#0B5A54;
+  --app-accent-wash:#E6F4F1;
+  --app-red:#D92D20; --app-red-wash:#FEF3F2;
+  --app-amber:#B54708; --app-amber-wash:#FFFAEB;
+  --app-blue:#175CD3; --app-blue-wash:#EFF8FF;
+  --app-radius:12px;
+  --app-radius-sm:8px;
+  --app-shadow:0 1px 2px rgba(16,24,40,.05);
+  --app-shadow-pop:0 12px 32px rgba(16,24,40,.12);
+}
+
+/* ---------- 土台 ---------- */
+body.has-sidenav, .portal-main{background:var(--app-bg);color:var(--app-text);}
+body.has-sidenav{font-size:15px;-webkit-font-smoothing:antialiased;}
+.portal-main{padding:28px 0 72px;}
+.portal-main .container{max-width:1240px;}
+.portal-main h1{font-size:26px;font-weight:800;letter-spacing:.01em;color:var(--app-text);margin:0 0 6px;}
+.portal-main h2{color:var(--app-text);}
+.portal-sub{color:var(--app-sub);font-size:14.5px;line-height:1.7;margin-bottom:20px;}
+.page-mascot{opacity:.95;}
+.notice-bar{background:var(--app-surface)!important;border:1px solid var(--app-line)!important;border-left:3px solid #F79009!important;border-radius:var(--app-radius)!important;box-shadow:var(--app-shadow);}
+.notice-bar.warn{border-left-color:var(--app-red)!important;}
+.apr-conf{background:var(--app-text)!important;font-size:12px!important;}
+
+/* ---------- ヘッダー・メニュー（スマホ／iPad 縦：上に横並び） ---------- */
+.portal-header{background:var(--app-surface);color:var(--app-text);border-bottom:1px solid var(--app-line);box-shadow:none;}
+.portal-header .logo{color:var(--app-text);font-weight:900;}
+.portal-title{color:var(--app-sub);}
+.portal-nav a{color:#374151;font-weight:600;background:transparent;}
+.portal-nav a:hover{background:#F3F4F6;color:var(--app-text);}
+.portal-nav a[aria-current]{background:var(--app-accent-wash);color:var(--app-accent);}
+.portal-logout{color:var(--app-sub)!important;font-size:13px;}
+.portal-header .gs-btn{background:#F3F4F6!important;border-color:var(--app-line)!important;color:var(--app-sub)!important;}
+
+/* ---------- 左のメニュー（PC・iPad 横） ---------- */
+@media (min-width:992px){
+  .has-sidenav .portal-header{width:232px;background:var(--app-surface);border-right:1px solid var(--app-line);border-bottom:0;box-shadow:none;}
+  .has-sidenav .portal-header::-webkit-scrollbar-thumb{background:#E5E7EB;}
+  .has-sidenav .portal-header .container{padding:18px 14px;}
+  .has-sidenav .portal-header .logo{font-size:21px;margin:0 6px 2px;}
+  .has-sidenav .portal-title{color:var(--app-faint);font-size:11px;border-bottom:1px solid var(--app-line);padding-bottom:12px;margin-bottom:8px;}
+  .has-sidenav .nav-group{margin-bottom:10px;}
+  .has-sidenav .nav-group-h{color:var(--app-faint);font-size:11px;font-weight:700;letter-spacing:.08em;padding:10px 10px 4px;}
+  .has-sidenav .portal-nav a{color:#374151;font-size:14px;font-weight:600;padding:10px 10px;border-radius:var(--app-radius-sm);position:relative;}
+  .has-sidenav .portal-nav a:hover{background:#F3F4F6;color:var(--app-text);}
+  .has-sidenav .portal-nav a[aria-current]{background:var(--app-accent-wash);color:var(--app-accent);}
+  .has-sidenav .portal-nav a[aria-current]::before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--app-accent);}
+  .has-sidenav .nav-ic{filter:saturate(.9);}
+  .has-sidenav .side-search input{background:#F3F4F6;border:1px solid transparent;color:var(--app-text);height:40px;font-size:13.5px;border-radius:10px;}
+  .has-sidenav .side-search input::placeholder{color:var(--app-faint);}
+  .has-sidenav .side-search input:focus{outline:none;border-color:var(--app-accent);background:#fff;box-shadow:0 0 0 3px rgba(15,118,110,.12);}
+  .has-sidenav .portal-logout{border-top:1px solid var(--app-line);color:var(--app-sub)!important;}
+  .has-sidenav .portal-main{margin-left:232px;}
+  .has-sidenav .portal-header .gs-btn{background:#F3F4F6!important;color:var(--app-sub)!important;}
+}
+
+/* ---------- カード（白・細い線・小さな影） ---------- */
+.kpi,.add-bar,.kl-card,.td-item,.td-count,.mn-sec,.pf-step,.rc-lead,.lc,.store-card,.na-card,.panel,.doc-card,.fill-bar,.kl-key,.kl-empty,.mn-page,.lnm,.kl-box,.dai-res{
+  background:var(--app-surface)!important;border:1px solid var(--app-line)!important;box-shadow:var(--app-shadow)!important;border-radius:var(--app-radius)!important;
+}
+.kpi{padding:18px 20px;}
+.kpi .kpi-label{color:var(--app-sub);font-weight:600;font-size:13px;}
+.kpi .kpi-num{color:var(--app-text);font-weight:800;}
+.kl-card:hover,.td-item:hover,.doc-card:hover{border-color:var(--app-line-strong)!important;}
+
+/* 今日やること：左の色の線だけで急ぎ度を出す */
+.td-item{border-left-width:4px!important;}
+.td-red{border-left-color:var(--app-red)!important;}
+.td-amber{border-left-color:#F79009!important;}
+.td-blue{border-left-color:#2E90FA!important;}
+.td-count b{color:var(--app-text)!important;}
+.td-ai{border-radius:10px!important;min-height:44px;}
+
+/* ---------- ボタン ---------- */
+.btn-primary,.doc-btn:not(.outline),.kl-btn:not(.kl-btn-o),.la-btn:not(.la-btn-o),.td-ai,.cp-save,#cpSave,.dai-pick{
+  background:var(--app-accent)!important;border-color:var(--app-accent)!important;color:#fff!important;
+}
+.btn-primary:hover,.doc-btn:not(.outline):hover,.kl-btn:not(.kl-btn-o):hover,.la-btn:not(.la-btn-o):hover,.td-ai:hover{background:var(--app-accent-dark)!important;}
+.doc-btn.outline,.kl-btn-o,.la-btn-o{background:#fff!important;color:var(--app-accent)!important;border:1px solid var(--app-line-strong)!important;}
+.doc-btn.outline:hover,.kl-btn-o:hover,.la-btn-o:hover{border-color:var(--app-accent)!important;background:var(--app-accent-wash)!important;}
+.btn,.doc-btn,.kl-btn,.la-btn,.kb-open{border-radius:10px!important;font-weight:700;}
+.doc-btn,.kl-btn,.la-btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:4px;}
+.kb-col .kb-count{background:#fff!important;color:var(--app-sub)!important;border:1px solid var(--app-line);}
+
+/* ---------- 入力欄 ---------- */
+.portal-main input[type=text],.portal-main input[type=email],.portal-main input[type=tel],.portal-main input[type=number],.portal-main input[type=date],.portal-main input[type=datetime-local],.portal-main input[type=search],.portal-main select,.portal-main textarea{
+  border:1px solid var(--app-line-strong);border-radius:10px;background:#fff;color:var(--app-text);font-family:inherit;
+}
+.portal-main input:not([type=checkbox]):not([type=radio]):not([type=file]),.portal-main select{min-height:42px;}
+.portal-main input:focus,.portal-main select:focus,.portal-main textarea:focus{outline:none;border-color:var(--app-accent)!important;box-shadow:0 0 0 3px rgba(15,118,110,.12);}
+
+/* ---------- 表 ---------- */
+.portal-main table{border-collapse:separate;border-spacing:0;}
+.portal-main table th{background:#F9FAFB;color:var(--app-sub);font-weight:600;font-size:12.5px;border-bottom:1px solid var(--app-line);}
+.portal-main table td{border-bottom:1px solid #F0F1F3;}
+.portal-main table tr:hover td{background:#FAFBFC;}
+
+/* ---------- 案件ボード（カンバン） ---------- */
+.kanban{gap:16px;}
+.kb-col{background:#EEF0F3;border-radius:var(--app-radius);border:1px solid #E6E8EC;}
+.kb-col-head{color:var(--app-text);font-weight:700;font-size:14px;border-bottom:1px solid #E1E4E8;padding:12px 14px;}
+.kb-count{background:#fff;color:var(--app-sub);border:1px solid var(--app-line);font-weight:700;}
+.kb-col-unassigned{background:#FFF8EB;border-color:#F8E3BD;}
+.kb-col-unassigned .kb-col-head{color:var(--app-amber);border-bottom-color:#F3DDB2;}
+.kb-card{border:1px solid var(--app-line);border-left:3px solid var(--app-accent);box-shadow:var(--app-shadow);border-radius:10px;}
+.kb-card:hover{box-shadow:0 4px 12px rgba(16,24,40,.08);}
+.kb-card.stale{border-left-color:var(--app-red);}
+.kb-card .kb-name{font-size:15.5px;font-weight:700;color:var(--app-text);}
+.kb-card .kb-id{color:var(--app-faint);font-weight:600;}
+.kb-card .kb-tag{background:var(--app-accent-wash);color:var(--app-accent);font-weight:700;}
+.kb-card .kb-memo{background:#F9FAFB;color:#4B5563;}
+.kb-open{border:1px solid var(--app-line-strong)!important;color:var(--app-accent)!important;}
+.case-panel .cp-inner,.case-panel > div{border-radius:16px 0 0 16px;}
+
+/* ---------- 案内・バッジ ---------- */
+.page-intro{background:var(--app-surface)!important;border:1px solid var(--app-line)!important;border-left:3px solid var(--app-accent)!important;border-radius:var(--app-radius)!important;}
+.page-intro summary{color:var(--app-text)!important;}
+.page-intro-next a{color:var(--app-accent)!important;}
+.kb,.lb{border-radius:999px;}
+
+/* ---------- ログイン ---------- */
+.login-wrap{background:var(--app-bg)!important;}
+.login-card{border:1px solid var(--app-line);box-shadow:var(--app-shadow-pop)!important;border-radius:20px!important;}
+.login-card .logo{color:var(--app-accent)!important;}
+.l-btn.hq{background:var(--app-accent)!important;}
+.l-btn.partner{background:var(--app-text)!important;}
+.l-door{border-color:var(--app-line)!important;}
+.l-door:hover{border-color:var(--app-accent)!important;box-shadow:var(--app-shadow-pop)!important;}
+.lf input{border-color:var(--app-line-strong)!important;}
+.lf input:focus{border-color:var(--app-accent)!important;box-shadow:0 0 0 3px rgba(15,118,110,.12)!important;}
+
+/* ---------- スマホ ---------- */
+@media (max-width:767px){
+  .portal-main{padding:18px 0 80px;}
+  .portal-main h1{font-size:22px;}
+  .portal-header .container{gap:6px 10px;padding-top:10px;padding-bottom:8px;}
+  .portal-nav a{font-size:13.5px;padding:8px 12px;}
+  .side-search{display:none!important;}
+  /* 1行目：ロゴ・検索・ログアウト／2行目：メニュー */
+  .portal-header .container{display:flex;flex-wrap:wrap;align-items:center;}
+  .portal-header .logo{order:1;}
+  .portal-title{display:none;}
+  .portal-header .gs-btn{order:3;margin:0 0 0 auto!important;width:auto!important;flex:0 0 auto;padding:6px 10px!important;}
+  .portal-header .gs-btn .gs-btn-t{display:none;}
+  .portal-role{order:3;margin-left:auto;font-size:11.5px;color:var(--app-sub);background:#F3F4F6;border-radius:999px;padding:3px 9px;}
+  .portal-role ~ .gs-btn,.portal-role + .portal-logout{margin-left:6px!important;}
+  .portal-logout{order:4;margin-left:6px!important;white-space:nowrap;}
+  .portal-nav{order:5;width:100%;}
+  /* お知らせの帯を小さく */
+  .notice-bar{font-size:13px;padding:8px 10px;}
+
+}

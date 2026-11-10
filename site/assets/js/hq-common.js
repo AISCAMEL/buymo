@@ -653,7 +653,10 @@ window.HQ = (function () {
     box.innerHTML = '<summary>📌 この画面でやること</summary><ol>' + g.do.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>' +
       (g.next ? '<p class="page-intro-next">次はここ → <a href="' + g.next[1] + '">' + esc(g.next[0]) + '</a>　｜　<a href="hq-manual.html">本部の使い方</a></p>' : '');
     box.addEventListener('toggle', function () { try { localStorage.setItem('buymo_intro_' + key, box.open ? '1' : '0'); } catch (e) {} });
-    h1.parentNode.insertBefore(box, h1.nextSibling);
+    // 見出しが横並びの枠（イラストと並ぶ等）の中にあるときは、その枠の下に入れる
+    var anchor = h1;
+    try { var pd = getComputedStyle(h1.parentNode).display; if (/flex|grid/.test(pd) && !h1.parentNode.classList.contains('container')) anchor = h1.parentNode; } catch (e) {}
+    anchor.parentNode.insertBefore(box, anchor.nextSibling);
     if (!document.getElementById('pageIntroCss')) {
       var st = document.createElement('style'); st.id = 'pageIntroCss';
       st.textContent = '.page-intro{background:#F2FAF5;border:1px solid #CFE8D9;border-radius:10px;padding:8px 14px;margin:8px 0 14px;font-size:13px;}' +
