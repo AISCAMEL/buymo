@@ -5,6 +5,9 @@
    既存の buymo.css / board.css の上に重ねて読み込む（このファイルを外せば元の見た目に戻る）
    ============================================================ */
 :root{
+  /* 書体：パソコン・iPad・スマホにもともと入っている書体（読み込み不要で速い） */
+  --f-sys:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo",system-ui,"Segoe UI",Roboto,sans-serif;
+  --f-body:var(--f-sys);
   --app-bg:#F6F7F9;
   --app-surface:#FFFFFF;
   --app-line:#E5E7EB;
@@ -25,6 +28,8 @@
 }
 
 /* ---------- 土台 ---------- */
+body.has-sidenav,body.has-sidenav button,body.has-sidenav input,body.has-sidenav select,body.has-sidenav textarea,.login-wrap,.login-wrap button,.login-wrap input{font-family:var(--f-sys)!important;}
+.portal-main .kpi-num,.td-count b,.kb-count{font-variant-numeric:tabular-nums;}
 body.has-sidenav, .portal-main{background:var(--app-bg);color:var(--app-text);}
 body.has-sidenav{font-size:15px;-webkit-font-smoothing:antialiased;}
 .portal-main{padding:28px 0 72px;}
