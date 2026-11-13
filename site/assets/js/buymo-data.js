@@ -20,7 +20,7 @@
 var BUYMO_VOICES = [
   {
     _demo: true,
-    avatar: 'assets/img/buymo/real-voice-2.jpg',
+    avatar: 'assets/img/opt/buymo__real-voice-2.webp',
     name: '佐藤さん',
     meta: '40代／東京都',
     stars: 5,
@@ -28,7 +28,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/real-voice-1.jpg',
+    avatar: 'assets/img/opt/buymo__real-voice-1.webp',
     name: '山田さん',
     meta: '30代／大阪府',
     stars: 5,
@@ -36,7 +36,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-3.jpg',
+    avatar: 'assets/img/opt/buymo__voice-3.webp',
     name: '田中さん',
     meta: '50代／福島県',
     stars: 5,
@@ -44,7 +44,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-4.jpg',
+    avatar: 'assets/img/opt/buymo__voice-4.webp',
     name: '鈴木さん',
     meta: '20代／宮城県',
     stars: 5,
@@ -52,7 +52,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/real-voice-3.jpg',
+    avatar: 'assets/img/opt/buymo__real-voice-3.webp',
     name: '伊藤さん',
     meta: '60代／神奈川県',
     stars: 5,
@@ -60,7 +60,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-6.jpg',
+    avatar: 'assets/img/opt/buymo__voice-6.webp',
     name: '渡辺さん',
     meta: '40代／愛知県',
     stars: 5,
@@ -68,7 +68,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-7.jpg',
+    avatar: 'assets/img/opt/buymo__voice-7.webp',
     name: '小林さん',
     meta: '30代／埼玉県',
     stars: 5,
@@ -76,7 +76,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-8.jpg',
+    avatar: 'assets/img/opt/buymo__voice-8.webp',
     name: '加藤さん',
     meta: '50代／広島県',
     stars: 5,
@@ -84,7 +84,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-9.jpg',
+    avatar: 'assets/img/opt/buymo__voice-9.webp',
     name: '松本さん',
     meta: '30代／千葉県',
     stars: 4,
@@ -92,7 +92,7 @@ var BUYMO_VOICES = [
   },
   {
     _demo: true,
-    avatar: 'assets/img/buymo/voice-10.jpg',
+    avatar: 'assets/img/opt/buymo__voice-10.webp',
     name: '木村さん',
     meta: '40代／福岡県',
     stars: 5,
@@ -101,20 +101,20 @@ var BUYMO_VOICES = [
 ];
 
 var BUYMO_RESULTS = [
-  { _demo: true, icon: 'assets/img/buymo/all_09_alphard.jpg',           vs: 32, name: 'トヨタ アルファード',     year: '2020年式', price: 3480000, area: '大阪府'  },
-  { _demo: true, icon: 'assets/img/buymo/all_10_landcruiser.jpg',       vs: 45, name: 'トヨタ ランドクルーザー', year: '2019年式', price: 5120000, area: '東京都'  },
-  { _demo: true, icon: 'assets/img/buymo/all_22_harrier.jpg',           vs: 19, name: 'トヨタ ハリアー',         year: '2020年式', price: 2850000, area: '神奈川県' },
-  { _demo: true, icon: 'assets/img/buymo/all_19_hiace_2ab8436c.jpg',    vs: 23, name: 'トヨタ ハイエース',       year: '2019年式', price: 2360000, area: '福岡県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_24_lexus.jpg',             vs: 38, name: 'レクサス LS',            year: '2019年式', price: 3800000, area: '愛知県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_27_slk_619f51ee.jpg',      vs: 27, name: 'メルセデス・ベンツ SLK', year: '2018年式', price: 2700000, area: '兵庫県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_07_jimny.jpg',             vs: 12, name: 'スズキ ジムニー',         year: '2020年式', price: 2250000, area: '北海道'  },
-  { _demo: true, icon: 'assets/img/buymo/all_01_prius.jpg',             vs: 15, name: 'トヨタ プリウス',         year: '2019年式', price: 1680000, area: '埼玉県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_16_swift_ead86f83.jpg',    vs: 8,  name: 'スズキ スイフト',         year: '2019年式', price: 1180000, area: '京都府'  },
-  { _demo: true, icon: 'assets/img/buymo/all_39_car15.jpg',             vs: 11, name: 'ホンダ N-BOX',           year: '2021年式', price: 1280000, area: '静岡県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_38_car14.jpg',             vs: 21, name: 'トヨタ ハイラックス',     year: '2020年式', price: 3150000, area: '宮城県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_20_lexus_suv_83696e3a.jpg', vs: 29, name: 'レクサス NX',            year: '2020年式', price: 3280000, area: '千葉県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_08_odyssey.jpg',           vs: 16, name: 'ホンダ オデッセイ',       year: '2019年式', price: 1920000, area: '広島県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_15_crown_6b2e7bff.jpg',    vs: 18, name: 'トヨタ クラウン',         year: '2018年式', price: 2180000, area: '福島県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_06_volvo.jpg',             vs: 24, name: 'ボルボ V60',            year: '2019年式', price: 1980000, area: '栃木県'  },
-  { _demo: true, icon: 'assets/img/buymo/all_05_mira.jpg',              vs: 7,  name: 'ダイハツ ミラ',          year: '2020年式', price:  720000, area: '岡山県'  }
+  { _demo: true, icon: 'assets/img/opt/buymo__all_09_alphard.webp',           vs: 32, name: 'トヨタ アルファード',     year: '2020年式', price: 3480000, area: '大阪府'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_10_landcruiser.webp',       vs: 45, name: 'トヨタ ランドクルーザー', year: '2019年式', price: 5120000, area: '東京都'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_22_harrier.webp',           vs: 19, name: 'トヨタ ハリアー',         year: '2020年式', price: 2850000, area: '神奈川県' },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_19_hiace_2ab8436c.webp',    vs: 23, name: 'トヨタ ハイエース',       year: '2019年式', price: 2360000, area: '福岡県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_24_lexus.webp',             vs: 38, name: 'レクサス LS',            year: '2019年式', price: 3800000, area: '愛知県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_27_slk_619f51ee.webp',      vs: 27, name: 'メルセデス・ベンツ SLK', year: '2018年式', price: 2700000, area: '兵庫県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_07_jimny.webp',             vs: 12, name: 'スズキ ジムニー',         year: '2020年式', price: 2250000, area: '北海道'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_01_prius.webp',             vs: 15, name: 'トヨタ プリウス',         year: '2019年式', price: 1680000, area: '埼玉県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_16_swift_ead86f83.webp',    vs: 8,  name: 'スズキ スイフト',         year: '2019年式', price: 1180000, area: '京都府'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_39_car15.webp',             vs: 11, name: 'ホンダ N-BOX',           year: '2021年式', price: 1280000, area: '静岡県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_38_car14.webp',             vs: 21, name: 'トヨタ ハイラックス',     year: '2020年式', price: 3150000, area: '宮城県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_20_lexus_suv_83696e3a.webp', vs: 29, name: 'レクサス NX',            year: '2020年式', price: 3280000, area: '千葉県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_08_odyssey.webp',           vs: 16, name: 'ホンダ オデッセイ',       year: '2019年式', price: 1920000, area: '広島県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_15_crown_6b2e7bff.webp',    vs: 18, name: 'トヨタ クラウン',         year: '2018年式', price: 2180000, area: '福島県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_06_volvo.webp',             vs: 24, name: 'ボルボ V60',            year: '2019年式', price: 1980000, area: '栃木県'  },
+  { _demo: true, icon: 'assets/img/opt/buymo__all_05_mira.webp',              vs: 7,  name: 'ダイハツ ミラ',          year: '2020年式', price:  720000, area: '岡山県'  }
 ];

@@ -21,15 +21,16 @@
 <meta property="og:site_name" content="BUYMO｜車買取" />
 <meta property="og:title" content="BUYMO｜自宅から写真を送るだけ。車買取に新しいスタイル。" />
 <meta property="og:description" content="オンラインで売却。手間なし、かんたん。しつこい電話なし・書類は郵送・全国対応。" />
-<meta property="og:image" content="assets/img/buymo-ogp.png" />
+<meta property="og:image" content="assets/img/opt/buymo-ogp.webp" />
 <meta property="og:url" content="https://buymo.me/" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="canonical" href="https://buymo.me/" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" /></noscript>
+
 <link rel="stylesheet" href="assets/css/buymo.css?v=40" />
+<link rel="stylesheet" href="assets/css/home.css?v=5" />
 
 <!-- 構造化データ（ローカルビジネス） -->
 <script type="application/ld+json">
@@ -151,18 +152,15 @@
 
     <nav class="gnav" id="gnav" aria-label="メインナビゲーション">
       <ul>
-        <li><a href="#top">ホーム</a></li>
         <li><a href="#features">サービス内容</a></li>
         <li><a href="#genres">買取ジャンル</a></li>
         <li><a href="area/">エリア一覧</a></li><li><a href="store/">加盟店一覧</a></li><li><a href="column/">コラム</a></li>
         <li><a href="#faq">よくある質問</a></li>
-        <li><a href="#form">お問い合わせ</a></li>
       </ul>
     </nav>
 
-    <a href="https://lin.ee/yNz0Tl7" class="header-tel" target="_blank" rel="noopener" aria-label="電話する（LINEが開きます）">
-      <span class="tel-ico" aria-hidden="true">📞</span>電話する
-    </a>
+    <a href="https://lin.ee/yNz0Tl7" class="header-line" target="_blank" rel="noopener" aria-label="LINEで相談（LINEが開きます）"><svg class="ic ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/></svg>LINEで相談</a>
+    <a href="#form" class="header-cta">無料査定</a>
 
     <button class="hamburger" id="hamburger" aria-label="メニューを開く" aria-expanded="false" aria-controls="gnav">
       <span></span><span></span><span></span>
@@ -172,11 +170,11 @@
 
 <main>
 
-  <!-- ============ ヒーロー（シミュレーター先行） ============ -->
   <section class="hero3" aria-labelledby="hero-title">
+    <div class="hero3-photo" aria-hidden="true"></div>
     <div class="container hero3-grid">
       <div class="hero3-copy reveal">
-        <span class="hero3-eyebrow">🔢 まずは今の相場をチェック</span>
+        <span class="hero3-eyebrow"><svg class="ic ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>まずは今の相場をチェック</span>
         <h1 id="hero-title">まずは30秒で、<br><span class="hl">今の買取額</span>を知る。</h1>
         <p class="hero3-sub">車種・年式・走行・状態を選ぶだけ。おおよその買取額がその場で分かります。<br>もちろん無料・しつこい電話なし・全国47都道府県対応。</p>
         <ul class="hero3-chips">
@@ -184,74 +182,25 @@
         </ul>
         <div class="hero3-cta">
           <a href="#form" class="btn btn-primary btn-lg">写真で無料査定<span aria-hidden="true"> →</span></a>
-          <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn btn-outline-w btn-lg">📞 電話で相談</a>
+          <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="btn btn-line btn-lg"><svg class="ic ic-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/></svg>LINEで相談</a>
         </div>
       </div>
       <div class="hero3-sim reveal">
-        <p class="hero3-sim-cap">🔢 30秒 かんたん査定シミュレーション<span>選ぶだけで概算がすぐ分かります</span></p>
+        <p class="hero3-sim-cap">30秒 かんたん査定シミュレーション<span>選ぶだけで概算がすぐ分かります</span></p>
         <div id="buymoSim"></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 数字バンド ============ -->
   <section class="stats-band" aria-label="数字で見るBUYMO">
     <div class="container stats-grid">
-      <div class="stat-b"><span class="num">0<small>円</small></span><p>査定料</p></div>
-      <div class="stat-b"><span class="num">0<small>円</small></span><p>手数料</p></div>
-      <div class="stat-b"><span class="num">写真<small>だけ</small></span><p>査定方法</p></div>
-      <div class="stat-b"><span class="num">47<small>都道府県</small></span><p>全国対応</p></div>
+      <div class="stat-b"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5 12 12l3.5-4.5M12 12v5M9 13h6M9 15.5h6"/></svg><span class="num">0<small>円</small></span><p>査定料・手数料</p></div>
+      <div class="stat-b"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span class="num">写真<small>だけ</small></span><p>来店・訪問なし</p></div>
+      <div class="stat-b"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="num">3<small>営業日</small></span><p>以内にお振込み</p></div>
+      <div class="stat-b"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span class="num">47<small>都道府県</small></span><p>全国対応</p></div>
     </div>
   </section>
 
-  <!-- ============ 動画で見るBUYMO ============ -->
-  <section class="top-video" aria-labelledby="tv-title">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">MOVIE</span></div>
-      <h2 id="tv-title" class="section-title">動画で見るBUYMO</h2>
-      <p class="section-note" style="text-align:center">30秒でわかる、かんたん写真査定。</p>
-      <div class="tv-frame">
-        <video controls preload="metadata" playsinline>
-          <source src="assets/video/buymo-top.mp4#t=0.1" type="video/mp4">
-          お使いのブラウザは動画の再生に対応していません。
-        </video>
-      </div>
-    </div>
-  </section>
-  <style>
-  .top-video{padding:56px 0;background:var(--green-bg,#F1FBF9);}
-  .top-video .section-note{margin-bottom:14px;}
-  .tv-frame{max-width:880px;margin:8px auto 0;border-radius:18px;overflow:hidden;box-shadow:0 16px 40px rgba(10,61,56,.18);background:#000;line-height:0;}
-  .tv-frame video{display:block;width:100%;height:auto;}
-  </style>
-
-  <!-- ============ キャンペーンバナー（3つの約束） ============ -->
-  <section class="campaign" aria-labelledby="campaign-title">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">CAMPAIGN</span></div>
-      <h2 id="campaign-title" class="section-title">BUYMOの3つの約束</h2>
-      <div class="banners">
-        <a href="https://lin.ee/yNz0Tl7" target="_blank" rel="noopener" class="cban line">
-          <img class="cban-img" src="assets/img/buymo/banner-line.jpg" alt="" loading="lazy" onerror="this.remove()" />
-          <span class="cban-t">LINEで相談</span>
-          <span class="cban-s">友だち追加で、かんたん査定・ご相談。写真もそのまま送れます。</span>
-        </a>
-        <a href="#form" class="cban speed">
-          <span class="cban-badge">手数料0円</span>
-          <img class="cban-img" src="assets/img/buymo/banner-speed.jpg" alt="" loading="lazy" onerror="this.remove()" />
-          <span class="cban-t">スピード入金</span>
-          <span class="cban-s">書類・車両を確認後、3営業日以内に確実にお振込みします。</span>
-        </a>
-        <a href="area/" class="cban nation">
-          <img class="cban-img" src="assets/img/buymo/banner-nationwide.jpg" alt="" loading="lazy" onerror="this.remove()" />
-          <span class="cban-t">全国出張査定</span>
-          <span class="cban-s">北海道から沖縄まで、全国47都道府県に対応しています。</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ ヒーロー実写ビジュアル ============ -->
   <section class="hpb" aria-labelledby="hpb-title">
     <div class="container hpb-grid">
       <div class="hpb-text reveal">
@@ -266,12 +215,102 @@
         <a href="#form" class="btn btn-primary btn-lg">写真で無料査定<span aria-hidden="true"> →</span></a>
       </div>
       <div class="hpb-img reveal">
-        <img src="assets/img/buymo/real-hero.jpg" alt="自宅の駐車場でスマホを使って愛車を撮影する様子" loading="lazy" onerror="this.closest('.hpb').style.display='none'">
+        <img src="assets/img/opt/buymo__real-flow-photo.webp" alt="自宅の駐車場でスマホを使って愛車を撮影する様子" loading="lazy" onerror="this.closest('.hpb').style.display='none'">
       </div>
     </div>
   </section>
 
-  <!-- ============ 今月の買取実績ティッカー ============ -->
+  <section class="features" id="features" aria-labelledby="features-title">
+    <div class="container">
+      <div class="eyebrow-wrap"><span class="eyebrow">POINT</span></div>
+      <h2 id="features-title" class="section-title">BUYMOが選ばれる4つの理由</h2>
+      <div class="grid grid-4 feature-grid">
+        <article class="card feature-card reveal">
+          <span class="badge-num">1</span>
+          <div class="card-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
+          <h3>写真だけで査定</h3>
+          <p>スマホで撮った写真を送るだけ。スタッフが来宅する必要はありません。</p>
+        </article>
+        <article class="card feature-card reveal">
+          <span class="badge-num">2</span>
+          <div class="card-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/><path d="M3 3l18 18"/></svg></div>
+          <h3>しつこい電話なし</h3>
+          <p>査定結果はメールでご連絡。お断りの際もしつこいお電話は一切しません。</p>
+        </article>
+        <article class="card feature-card reveal">
+          <span class="badge-num">3</span>
+          <div class="card-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+          <h3>全国47都道府県対応</h3>
+          <p>北海道から沖縄まで、全国どこにお住まいでも対応いたします。</p>
+        </article>
+        <article class="card feature-card reveal">
+          <span class="badge-num">4</span>
+          <div class="card-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5 12 12l3.5-4.5M12 12v5M9 13h6M9 15.5h6"/></svg></div>
+          <h3>手数料はいただきません</h3>
+          <p>査定料・手続き代行費・その他すべての手数料が完全無料です。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="flow-explain" aria-labelledby="flow-title-3">
+    <div class="container">
+      <div class="eyebrow-wrap"><span class="eyebrow">HOW IT WORKS</span></div>
+      <h2 id="flow-title-3" class="section-title">BUYMOの査定は<span class="hl">3ステップ</span>で完結</h2>
+      <p class="flow-lead">お電話は<strong>売却ご決断後の最終確認時のみ・こちらからおかけ</strong>いたします。</p>
+
+      <ol class="flow-steps-3">
+        <li class="flow-step-3">
+          <div class="fs-num">1</div>
+          <div class="fs-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg></div>
+          <h3>30秒でかんたん入力・送信</h3>
+          <p class="fs-time">所要 <strong>約30秒</strong></p>
+          <p class="fs-desc">お名前・メール・お車の情報だけ。写真はまだ不要です。まずはお気軽にお申込みください。</p>
+        </li>
+        <li class="flow-step-3">
+          <div class="fs-num">2</div>
+          <div class="fs-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+          <h3>メールの案内で写真を撮影・返信</h3>
+          <p class="fs-time">所要 <strong>約5〜10分</strong></p>
+          <p class="fs-desc">送信直後にご案内メールをお届け。ガイドに沿って撮影 → 返信で送るだけ。撮り方は図解つきなので迷いません。</p>
+        </li>
+        <li class="flow-step-3">
+          <div class="fs-num">3</div>
+          <div class="fs-ico"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 7.5 12 12l3.5-4.5M12 12v5M9 13h6M9 15.5h6"/></svg></div>
+          <h3>査定額を受け取る</h3>
+          <p class="fs-time">最短 <strong>24時間以内</strong></p>
+          <p class="fs-desc">AIと専任査定士が価格を提示。売却をご決断される場合のみ、こちらから最終確認のお電話を1回だけ。</p>
+        </li>
+      </ol>
+
+      <div class="promise-box">
+        <div class="promise-icon" aria-hidden="true">🤝</div>
+        <div class="promise-text">
+          <h3>BUYMOの3つのお約束</h3>
+          <ul>
+            <li><strong>営業電話は一切しません。</strong>お電話は最終ご確認時のみ、こちらからおかけします。</li>
+            <li><strong>個人情報は必要最小限のみ。</strong>お名前・ご住所は査定額ご確認後に伺います。</li>
+            <li><strong>ご相談・査定・キャンセル、すべて無料。</strong>費用は一切かかりません。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="top-video" aria-labelledby="tv-title">
+    <div class="container">
+      <div class="eyebrow-wrap"><span class="eyebrow">MOVIE</span></div>
+      <h2 id="tv-title" class="section-title">動画で見るBUYMO</h2>
+      <p class="section-note" style="text-align:center">30秒でわかる、かんたん写真査定。</p>
+      <div class="tv-frame">
+        <video controls preload="none" playsinline poster="assets/img/opt/video-poster.webp">
+          <source src="assets/video/buymo-top.mp4#t=0.1" type="video/mp4">
+          お使いのブラウザは動画の再生に対応していません。
+        </video>
+      </div>
+    </div>
+  </section>
+
   <section class="buy-ticker-section" aria-labelledby="buy-ticker-heading">
     <div class="container">
       <div class="buy-ticker" id="buyTicker" aria-live="polite">
@@ -287,127 +326,26 @@
     </div>
   </section>
 
-  <!-- ============ 4大特長 ============ -->
-  <section class="features" id="features" aria-labelledby="features-title">
+  <section class="results" aria-labelledby="results-title">
     <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">POINT</span></div>
-      <h2 id="features-title" class="section-title">BUYMOの4大特長</h2>
-      <div class="grid grid-4 feature-grid">
-        <article class="card feature-card reveal">
-          <span class="badge-num">1</span>
-          <div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-photo.png?v=1" alt="" loading="lazy" width="40" height="40" /></div>
-          <h3>写真だけで査定</h3>
-          <p>スマホで撮った写真を送るだけ。スタッフが来宅する必要はありません。</p>
-        </article>
-        <article class="card feature-card reveal">
-          <span class="badge-num">2</span>
-          <div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-mobile.png?v=1" alt="" loading="lazy" width="40" height="40" /></div>
-          <h3>しつこい電話なし</h3>
-          <p>査定結果はメールでご連絡。お断りの際もしつこいお電話は一切しません。</p>
-        </article>
-        <article class="card feature-card reveal">
-          <span class="badge-num">3</span>
-          <div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-japan.png?v=1" alt="" loading="lazy" width="40" height="40" /></div>
-          <h3>全国47都道府県対応</h3>
-          <p>北海道から沖縄まで、全国どこにお住まいでも対応いたします。</p>
-        </article>
-        <article class="card feature-card reveal">
-          <span class="badge-num">4</span>
-          <div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-shield.png?v=1" alt="" loading="lazy" width="40" height="40" /></div>
-          <h3>手数料はいただきません</h3>
-          <p>査定料・手続き代行費・その他すべての手数料が完全無料です。</p>
-        </article>
-      </div>
-      <div class="section-mascot sm-love" aria-hidden="true">🐪</div>
+      <h2 id="results-title" class="section-title">買取実績</h2>
+      <p class="section-note" id="resultsNote">※ 掲載の金額・実績は一例です。「他社より+◯◯万円」は他社査定額との差額の一例で、すべての車が対象になるものではありません。</p>
+      <div class="grid grid-4 result-grid" id="resultGrid"></div>
     </div>
   </section>
 
-  <!-- ============ お取引の流れ ============ -->
-  <section class="flow" aria-labelledby="flow-title">
-    <div class="container flow-inner">
-      <div class="eyebrow-wrap"><span class="eyebrow">FLOW</span></div>
-      <h2 id="flow-title" class="section-title">お取引の流れ</h2>
-      <img src="assets/img/buymo/band-flow.png" alt="" loading="lazy" style="display:block;width:100%;max-width:760px;height:auto;margin:0 auto 10px;" onerror="this.style.display='none'">
-      <div class="flow-cols">
-        <div class="flow-main">
-          <ol class="flow-steps">
-            <li class="reveal"><span class="flow-num">1</span><span class="flow-ico" aria-hidden="true">📸</span><span class="flow-label">写真を送る</span></li>
-            <li class="flow-arrow" aria-hidden="true">→</li>
-            <li class="reveal"><span class="flow-num">2</span><span class="flow-ico" aria-hidden="true">📧</span><span class="flow-label">査定額をメール受取</span></li>
-            <li class="flow-arrow" aria-hidden="true">→</li>
-            <li class="reveal"><span class="flow-num">3</span><span class="flow-ico" aria-hidden="true">✍️</span><span class="flow-label">ご契約・書類郵送</span></li>
-            <li class="flow-arrow" aria-hidden="true">→</li>
-            <li class="reveal"><span class="flow-num">4</span><span class="flow-ico" aria-hidden="true">🚗</span><span class="flow-label">業者が引き取り・現車確認</span></li>
-            <li class="flow-arrow" aria-hidden="true">→</li>
-            <li class="reveal"><span class="flow-num">5</span><span class="flow-ico" aria-hidden="true">💴</span><span class="flow-label">入金</span></li>
-          </ol>
-        </div>
-        <div class="flow-map reveal" aria-hidden="true">
-          <div class="flow-map-num">47<small>都道府県</small></div>
-          <p>全国エリア対応</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 買取対象車 ============ -->
-  <section class="targets" aria-labelledby="targets-title">
+  <section class="voices" aria-labelledby="voices-title">
     <div class="container">
-      <h2 id="targets-title" class="section-title">買取対象の車種</h2>
-      <p class="section-note" style="text-align:center">人気車種から状態不問（事故車・不動車・廃車）まで、あらゆる車が買取対象です。各ジャンルの専門ページで高価買取。</p>
-      <div class="grid grid-5 target-grid">
-        <a class="card target-card reveal" href="genre/kei/"><div class="target-img"><img src="assets/img/genre-hero/kei.jpg" alt="軽自動車" loading="lazy" /></div><h3>軽自動車</h3><p>人気の軽を高価買取。</p></a>
-        <a class="card target-card reveal" href="genre/suv/"><div class="target-img"><img src="assets/img/genre-hero/suv.jpg" alt="SUV" loading="lazy" /></div><h3>SUV</h3><p>需要の高いSUVを好条件で。</p></a>
-        <a class="card target-card reveal" href="genre/minivan/"><div class="target-img"><img src="assets/img/genre-hero/minivan.jpg" alt="ミニバン" loading="lazy" /></div><h3>ミニバン</h3><p>ファミリー車も高評価。</p></a>
-        <a class="card target-card reveal" href="genre/sedan/"><div class="target-img"><img src="assets/img/genre-hero/sedan.jpg" alt="セダン" loading="lazy" /></div><h3>セダン</h3><p>定番セダンも安定買取。</p></a>
-        <a class="card target-card reveal" href="genre/hiace/"><div class="target-img"><img src="assets/img/genre-hero/hiace.jpg" alt="ハイエース" loading="lazy" /></div><h3>ハイエース</h3><p>商用・キャンパーで高値。</p></a>
-        <a class="card target-card reveal" href="genre/truck/"><div class="target-img"><img src="assets/img/genre-hero/truck.jpg" alt="トラック・商用車" loading="lazy" /></div><h3>トラック・商用車</h3><p>法人まとめ売却もOK。</p></a>
-        <a class="card target-card reveal" href="genre/import/"><div class="target-img"><img src="assets/img/genre-hero/import.jpg" alt="輸入車" loading="lazy" /></div><h3>輸入車</h3><p>外車も専門ルートで。</p></a>
-        <a class="card target-card reveal" href="genre/luxury/"><div class="target-img"><img src="assets/img/genre-hero/luxury.jpg" alt="高級車" loading="lazy" /></div><h3>高級車</h3><p>ブランド価値を評価。</p></a>
-        <a class="card target-card reveal" href="genre/jiko/"><div class="target-img"><img src="assets/img/genre-hero/jiko.jpg" alt="事故車" loading="lazy" /></div><h3>事故車</h3><p>修復歴・損傷車もOK。</p></a>
-        <a class="card target-card reveal" href="genre/haisha/"><div class="target-img"><img src="assets/img/genre-hero/haisha.jpg" alt="廃車" loading="lazy" /></div><h3>廃車</h3><p>動かない車もお値段を。</p></a>
+      <div class="eyebrow-wrap"><span class="eyebrow">VOICE</span></div>
+      <h2 id="voices-title" class="section-title">お客様の声</h2>
+      <p class="section-note" id="voicesNote">※ 掲載の内容は一例です。</p>
+      <div class="carousel" id="voiceCarousel">
+        <div class="carousel-track" id="voiceTrack"></div>
       </div>
-      <p class="center" style="margin-top:22px"><a href="genre/" class="btn btn-primary">買取ジャンル一覧を見る（全29ジャンル）</a></p>
+      <div class="carousel-dots" id="voiceDots" role="tablist" aria-label="お客様の声の切り替え"></div>
     </div>
   </section>
 
-  <!-- ============ 買取最低保証バナー ============ -->
-  <section class="guarantee" aria-label="買取最低保証">
-    <div class="container grid grid-2">
-      <div class="guarantee-banner reveal">
-        <span class="g-mascot" aria-hidden="true">🐪</span>
-        <p class="g-text">査定料・手数料<br>すべて</p>
-        <p class="g-price"><strong>0</strong>円！</p>
-        <span class="g-cars" aria-hidden="true">💴</span>
-      </div>
-      <div class="guarantee-banner reveal">
-        <span class="g-mascot" aria-hidden="true">🐪</span>
-        <p class="g-text">しつこい<br>お電話</p>
-        <p class="g-price"><strong>0</strong>回！</p>
-        <span class="g-cars" aria-hidden="true">📵</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 選ばれる理由 ============ -->
-  <section class="reasons" aria-labelledby="reasons-title">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">REASON</span></div>
-      <h2 id="reasons-title" class="section-title">BUYMOが選ばれる理由</h2>
-      <img src="assets/img/buymo/real-trust.jpg" alt="スタッフがお客様に車のカギを手渡す様子" loading="lazy" style="display:block;width:100%;max-width:760px;height:auto;margin:0 auto 22px;border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.10);" onerror="this.style.display='none'">
-      <div class="grid grid-3 reason-grid">
-        <article class="card reason-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-japan.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>全国対応</h3><p>全国どこでも対応可能。お近くのスタッフが伺います。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-pay.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>丁寧・確実に入金</h3><p>書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-highprice.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>高価買取</h3><p>独自ルートで無駄を省き、相場より高い査定を実現。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-shield.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>手数料無料</h3><p>査定料・手続き代行料など各種手数料は一切無料。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-photo.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>写真査定でネット完結</h3><p>スマホで写真を送るだけ。来店・訪問なしで査定完了。</p></article>
-        <article class="card reason-card reveal"><div class="card-ico ico2" aria-hidden="true"><img src="assets/img/buymo/ic-shaken.png?v=1" alt="" loading="lazy" width="40" height="40" /></div><h3>丁寧確認・確実入金</h3><p>書類・車両を丁寧に確認のうえ、3営業日以内に確実にお振込みします。</p></article>
-      </div>
-      <div class="section-mascot sm-price" aria-hidden="true">🐪</div>
-    </div>
-  </section>
-
-  <!-- ============ 他社比較 ============ -->
   <section class="compare" aria-labelledby="compare-title">
     <div class="container">
       <div class="eyebrow-wrap"><span class="eyebrow">COMPARE</span></div>
@@ -430,121 +368,30 @@
       </table>
       </div>
       <p class="compare-note">※ 他社・ディーラーとの一般的な比較イメージです。店舗・条件により異なります。</p>
-      <div class="section-mascot sm-cash" aria-hidden="true">🐪</div>
     </div>
   </section>
 
-  <!-- ============ ジャンル別買取 ============ -->
-  <section class="genres-section" id="genres" aria-labelledby="genres-title">
+  <section class="targets" id="genres" aria-labelledby="targets-title">
     <div class="container">
-      <h2 id="genres-title" class="section-title">ジャンル別の買取</h2>
-      <p class="genres-lead">どんな状態・種類の車でもおまかせください。ジャンルごとの専門ページをご用意しています。</p>
-      <div id="genre-cards"></div>
-      <p class="center"><a href="genre/" class="btn btn-primary">買取ジャンル一覧を見る</a></p>
-      <p class="center" style="margin-top:12px;font-weight:700"><a href="houjin.html">🏢 法人のお客様（社用車・まとめ売却・複数台）はこちら ›</a></p>
-    </div>
-  </section>
-
-  <!-- ============ お客様の声 ============ -->
-  <section class="voices" aria-labelledby="voices-title">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">VOICE</span></div>
-      <h2 id="voices-title" class="section-title">お客様の声</h2>
-      <p class="section-note" id="voicesNote">※ 掲載の内容は一例です。</p>
-      <div class="carousel" id="voiceCarousel">
-        <div class="carousel-track" id="voiceTrack"></div>
+      <h2 id="targets-title" class="section-title">買取対象の車種</h2>
+      <p class="section-note" style="text-align:center">人気車種から状態不問（事故車・不動車・廃車）まで、あらゆる車が買取対象です。各ジャンルの専門ページで高価買取。</p>
+      <div class="grid grid-5 target-grid">
+        <a class="card target-card reveal" href="genre/kei/"><div class="target-img"><img src="assets/img/opt/genre-hero__kei.webp" alt="軽自動車" loading="lazy" /></div><h3>軽自動車</h3><p>人気の軽を高価買取。</p></a>
+        <a class="card target-card reveal" href="genre/suv/"><div class="target-img"><img src="assets/img/opt/genre-hero__suv.webp" alt="SUV" loading="lazy" /></div><h3>SUV</h3><p>需要の高いSUVを好条件で。</p></a>
+        <a class="card target-card reveal" href="genre/minivan/"><div class="target-img"><img src="assets/img/opt/genre-hero__minivan.webp" alt="ミニバン" loading="lazy" /></div><h3>ミニバン</h3><p>ファミリー車も高評価。</p></a>
+        <a class="card target-card reveal" href="genre/sedan/"><div class="target-img"><img src="assets/img/opt/genre-hero__sedan.webp" alt="セダン" loading="lazy" /></div><h3>セダン</h3><p>定番セダンも安定買取。</p></a>
+        <a class="card target-card reveal" href="genre/hiace/"><div class="target-img"><img src="assets/img/opt/genre-hero__hiace.webp" alt="ハイエース" loading="lazy" /></div><h3>ハイエース</h3><p>商用・キャンパーで高値。</p></a>
+        <a class="card target-card reveal" href="genre/truck/"><div class="target-img"><img src="assets/img/opt/genre-hero__truck.webp" alt="トラック・商用車" loading="lazy" /></div><h3>トラック・商用車</h3><p>法人まとめ売却もOK。</p></a>
+        <a class="card target-card reveal" href="genre/import/"><div class="target-img"><img src="assets/img/opt/genre-hero__import.webp" alt="輸入車" loading="lazy" /></div><h3>輸入車</h3><p>外車も専門ルートで。</p></a>
+        <a class="card target-card reveal" href="genre/luxury/"><div class="target-img"><img src="assets/img/opt/genre-hero__luxury.webp" alt="高級車" loading="lazy" /></div><h3>高級車</h3><p>ブランド価値を評価。</p></a>
+        <a class="card target-card reveal" href="genre/jiko/"><div class="target-img"><img src="assets/img/opt/genre-hero__jiko.webp" alt="事故車" loading="lazy" /></div><h3>事故車</h3><p>修復歴・損傷車もOK。</p></a>
+        <a class="card target-card reveal" href="genre/haisha/"><div class="target-img"><img src="assets/img/opt/genre-hero__haisha.webp" alt="廃車" loading="lazy" /></div><h3>廃車</h3><p>動かない車もお値段を。</p></a>
       </div>
-      <div class="carousel-dots" id="voiceDots" role="tablist" aria-label="お客様の声の切り替え"></div>
+      <p class="center" style="margin-top:22px"><a href="genre/" class="btn btn-primary">買取ジャンル一覧を見る（全29ジャンル）</a></p>
     </div>
+    <p class="houjin-link"><a href="houjin.html">法人のお客様（社用車・まとめ売却・複数台）はこちら ›</a></p>
   </section>
 
-  <!-- ============ 買取実績 ============ -->
-  <section class="results" aria-labelledby="results-title">
-    <div class="container">
-      <h2 id="results-title" class="section-title">買取実績</h2>
-      <p class="section-note" id="resultsNote">※ 掲載の金額・実績は一例です。「他社より+◯◯万円」は他社査定額との差額の一例で、すべての車が対象になるものではありません。</p>
-      <div class="grid grid-4 result-grid" id="resultGrid"></div>
-    </div>
-  </section>
-
-  <!-- ============ お役立ちコラム ============ -->
-  <section class="columns-top" aria-labelledby="columns-title">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">COLUMN</span></div>
-      <h2 id="columns-title" class="section-title">車買取のお役立ちコラム</h2>
-      <p class="section-note">売る前に知っておきたい相場・手続き・タイミングを、わかりやすく解説しています。</p>
-      <div class="grid grid-3 coltop-grid">
-        <a class="coltop-card reveal" href="column/soba.html"><span class="coltop-img"><img src="assets/img/buymo/cover-soba.jpg" alt="" loading="lazy" /></span><span class="coltop-cat">相場</span><h3>車買取相場の調べ方｜年式・走行距離でいくら変わるかを解説</h3></a>
-        <a class="coltop-card reveal" href="column/jiko.html"><span class="coltop-img"><img src="assets/img/buymo/cover-jiko.jpg" alt="" loading="lazy" /></span><span class="coltop-cat">事故車</span><h3>事故車・不動車の買取相場と、廃車にせず売る方法</h3></a>
-        <a class="coltop-card reveal" href="column/shorui.html"><span class="coltop-img"><img src="assets/img/buymo/cover-shorui.jpg" alt="" loading="lazy" /></span><span class="coltop-cat">手続き</span><h3>車売却の必要書類チェックリスト｜名義変更まで完全ガイド</h3></a>
-        <a class="coltop-card reveal" href="column/timing.html"><span class="coltop-img"><img src="assets/img/buymo/cover-timing.jpg" alt="" loading="lazy" /></span><span class="coltop-cat">タイミング</span><h3>車を高く売るタイミングとは？損しない売却時期を月別に解説</h3></a>
-        <a class="coltop-card reveal" href="column/net.html"><span class="coltop-img"><img src="assets/img/buymo/cover-net.jpg" alt="" loading="lazy" /></span><span class="coltop-cat">ネット完結</span><h3>ネット完結の車買取は安全？流れ・メリット・注意点</h3></a>
-        <a class="coltop-card reveal" href="column/keitora.html"><span class="coltop-img"><img src="assets/img/buymo/cover-keitora.jpg" alt="" loading="lazy" /></span><span class="coltop-cat">軽自動車</span><h3>軽トラの買取相場はいくら？年式・走行距離別の目安</h3></a>
-      </div>
-      <p class="center"><a href="column/" class="btn btn-primary">コラム一覧を見る ›</a></p>
-    </div>
-  </section>
-
-  <!-- ============ ご利用の流れ（詳細） ============ -->
-  <section class="timeline flow-detail" aria-labelledby="timeline-title">
-    <div class="container">
-      <div class="flow-hero">
-        <img src="assets/img/buymo/flow-hero.jpg?v=2" alt="BUYMOの査定・買取フロー全体像" loading="lazy" decoding="async" />
-      </div>
-      <h2 id="timeline-title" class="section-title">ご利用の流れ（詳細）</h2>
-      <p class="flow-detail-lead">お申込みから入金までを写真つきで解説。所要は最短5〜10分、翌日には査定額が届きます。</p>
-
-      <ol class="timeline-list timeline-photo">
-        <li class="reveal">
-          <div class="tl-photo"><img src="assets/img/buymo/real-flow-photo.jpg" alt="スマホで愛車を撮影して送信" loading="lazy" decoding="async" /></div>
-          <div class="tl-body">
-            <div class="tl-meta"><span class="tl-day">Step 1</span><span class="tl-ico" aria-hidden="true"><img src="assets/img/buymo/flow-step1.png" alt="" loading="lazy" /></span></div>
-            <h3>お申し込み・写真送付</h3>
-            <p>フォームからお申し込みいただき、愛車の写真をお送りください。外観・内装・走行距離など、撮影ガイドに沿って進めるだけ。</p>
-          </div>
-        </li>
-        <li class="reveal">
-          <div class="tl-photo"><img src="assets/img/buymo/flow-step2-photo.jpg" alt="査定額をメールで受け取る" loading="lazy" decoding="async" /></div>
-          <div class="tl-body">
-            <div class="tl-meta"><span class="tl-day">Step 2</span><span class="tl-ico" aria-hidden="true"><img src="assets/img/buymo/flow-step2.png" alt="" loading="lazy" /></span></div>
-            <h3>査定額のご提示（メール）</h3>
-            <p>写真をもとに査定額を算出。最短24時間以内にメールでご連絡いたします。しつこいお電話は一切しません。</p>
-          </div>
-        </li>
-        <li class="reveal">
-          <div class="tl-photo"><img src="assets/img/buymo/flow-step3-photo.jpg" alt="契約書に署名・押印" loading="lazy" decoding="async" /></div>
-          <div class="tl-body">
-            <div class="tl-meta"><span class="tl-day">Step 3</span><span class="tl-ico" aria-hidden="true"><img src="assets/img/buymo/flow-step3.png" alt="" loading="lazy" /></span></div>
-            <h3>ご契約・書類郵送</h3>
-            <p>査定額にご納得いただけたら売買契約を締結。必要書類（車検証・自賠責保険証・印鑑証明など）をご郵送ください。</p>
-            <div class="tl-side-note">
-              <img src="assets/img/buymo/flow-documents.png" alt="必要書類イメージ" loading="lazy" decoding="async" />
-              <span>車検証・自賠責・印鑑証明があればスムーズです<br><a href="documents/" style="color:var(--green);font-weight:700;text-decoration:underline;">売却に必要な書類の一覧を見る →</a></span>
-            </div>
-          </div>
-        </li>
-        <li class="reveal">
-          <div class="tl-photo"><img src="assets/img/buymo/real-flow-pickup.jpg" alt="業者が車両を引き取り・現車確認" loading="lazy" decoding="async" /></div>
-          <div class="tl-body">
-            <div class="tl-meta"><span class="tl-day">Step 4</span><span class="tl-ico" aria-hidden="true"><img src="assets/img/buymo/flow-step4.png" alt="" loading="lazy" /></span></div>
-            <h3>業者が引き取り・現車確認</h3>
-            <p>業者がご自宅まで車両を引き取りに伺います。現車確認・最終確認を行い、査定額の最終決定へ。</p>
-          </div>
-        </li>
-        <li class="reveal">
-          <div class="tl-photo"><img src="assets/img/buymo/real-flow-pay.jpg" alt="ご指定口座へ入金" loading="lazy" decoding="async" /></div>
-          <div class="tl-body">
-            <div class="tl-meta"><span class="tl-day">Step 5</span><span class="tl-ico" aria-hidden="true"><img src="assets/img/buymo/flow-step5.png" alt="" loading="lazy" /></span></div>
-            <h3>入金完了</h3>
-            <p>現車確認・最終確認後、ご指定の口座へ<strong>3営業日以内</strong>にお振込みします。お取引完了です。</p>
-          </div>
-        </li>
-      </ol>
-      <div class="section-mascot sm-pickup" aria-hidden="true">🐪</div>
-    </div>
-  </section>
-
-  <!-- ============ FAQ ============ -->
   <section class="faq" id="faq" aria-labelledby="faq-title">
     <div class="container faq-inner">
       <div class="faq-main">
@@ -584,56 +431,9 @@
           </div>
         </div>
       </div>
-      <div class="faq-mascot" aria-hidden="true">🐪👉</div>
     </div>
   </section>
 
-  <!-- ============ 査定フロー説明（3ステップ） ============ -->
-  <section class="flow-explain" aria-labelledby="flow-title-3">
-    <div class="container">
-      <div class="eyebrow-wrap"><span class="eyebrow">HOW IT WORKS</span></div>
-      <h2 id="flow-title-3" class="section-title">BUYMOの査定は<span class="hl">3ステップ</span>で完結</h2>
-      <p class="flow-lead">お電話は<strong>売却ご決断後の最終確認時のみ・こちらからおかけ</strong>いたします。</p>
-
-      <ol class="flow-steps-3">
-        <li class="flow-step-3">
-          <div class="fs-num">1</div>
-          <div class="fs-ico" aria-hidden="true">✍️</div>
-          <h3>30秒でかんたん入力・送信</h3>
-          <p class="fs-time">所要 <strong>約30秒</strong></p>
-          <p class="fs-desc">お名前・メール・お車の情報だけ。写真はまだ不要です。まずはお気軽にお申込みください。</p>
-        </li>
-        <li class="flow-step-3">
-          <div class="fs-num">2</div>
-          <div class="fs-ico" aria-hidden="true">📩</div>
-          <h3>メールの案内で写真を撮影・返信</h3>
-          <p class="fs-time">所要 <strong>約5〜10分</strong></p>
-          <p class="fs-desc">送信直後にご案内メールをお届け。ガイドに沿って撮影 → 返信で送るだけ。撮り方は図解つきなので迷いません。</p>
-        </li>
-        <li class="flow-step-3">
-          <div class="fs-num">3</div>
-          <div class="fs-ico" aria-hidden="true">💰</div>
-          <h3>査定額を受け取る</h3>
-          <p class="fs-time">最短 <strong>24時間以内</strong></p>
-          <p class="fs-desc">AIと専任査定士が価格を提示。売却をご決断される場合のみ、こちらから最終確認のお電話を1回だけ。</p>
-        </li>
-      </ol>
-
-      <div class="promise-box">
-        <div class="promise-icon" aria-hidden="true">🤝</div>
-        <div class="promise-text">
-          <h3>BUYMOの3つのお約束</h3>
-          <ul>
-            <li><strong>営業電話は一切しません。</strong>お電話は最終ご確認時のみ、こちらからおかけします。</li>
-            <li><strong>個人情報は必要最小限のみ。</strong>お名前・ご住所は査定額ご確認後に伺います。</li>
-            <li><strong>ご相談・査定・キャンセル、すべて無料。</strong>費用は一切かかりません。</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 無料査定申込フォーム（メイン導線） ============ -->
   <section class="lead-form-section" id="form" aria-labelledby="form-title">
     <div class="container">
 
@@ -719,24 +519,23 @@
     </div>
   </section>
 
-
-  <!-- 離脱防止モーダル -->
-  <div class="exit-modal" id="exitModal" hidden aria-hidden="true" role="dialog" aria-labelledby="exitModalTitle">
-    <div class="exit-modal-backdrop" data-close></div>
-    <div class="exit-modal-inner">
-      <button class="exit-modal-close" data-close aria-label="閉じる">×</button>
-      <div class="exit-modal-badge">⚡ 最後にお知らせ</div>
-      <h2 id="exitModalTitle">お帰りになる前に、<br><span class="hl">メール1つ</span>だけ試してみませんか？</h2>
-      <p class="exit-modal-lead">10秒で完了。個人情報は不要、電話もかけません。<br>あとは写真を返信するだけで、24時間以内に査定額をお届けします。</p>
-      <div class="exit-modal-actions">
-        <a href="#form" class="btn btn-primary btn-lg" data-close>今すぐ査定依頼</a>
-        <a href="#chat" class="btn btn-outline" data-close>AIチャットで質問</a>
+  <section class="columns-top" aria-labelledby="columns-title">
+    <div class="container">
+      <div class="eyebrow-wrap"><span class="eyebrow">COLUMN</span></div>
+      <h2 id="columns-title" class="section-title">車買取のお役立ちコラム</h2>
+      <p class="section-note">売る前に知っておきたい相場・手続き・タイミングを、わかりやすく解説しています。</p>
+      <div class="grid grid-3 coltop-grid">
+        <a class="coltop-card reveal" href="column/soba.html"><span class="coltop-img"><img src="assets/img/opt/buymo__cover-soba.webp" alt="" loading="lazy" /></span><span class="coltop-cat">相場</span><h3>車買取相場の調べ方｜年式・走行距離でいくら変わるかを解説</h3></a>
+        <a class="coltop-card reveal" href="column/jiko.html"><span class="coltop-img"><img src="assets/img/opt/buymo__cover-jiko.webp" alt="" loading="lazy" /></span><span class="coltop-cat">事故車</span><h3>事故車・不動車の買取相場と、廃車にせず売る方法</h3></a>
+        <a class="coltop-card reveal" href="column/shorui.html"><span class="coltop-img"><img src="assets/img/opt/buymo__cover-shorui.webp" alt="" loading="lazy" /></span><span class="coltop-cat">手続き</span><h3>車売却の必要書類チェックリスト｜名義変更まで完全ガイド</h3></a>
+        <a class="coltop-card reveal" href="column/timing.html"><span class="coltop-img"><img src="assets/img/opt/buymo__cover-timing.webp" alt="" loading="lazy" /></span><span class="coltop-cat">タイミング</span><h3>車を高く売るタイミングとは？損しない売却時期を月別に解説</h3></a>
+        <a class="coltop-card reveal" href="column/net.html"><span class="coltop-img"><img src="assets/img/opt/buymo__cover-net.webp" alt="" loading="lazy" /></span><span class="coltop-cat">ネット完結</span><h3>ネット完結の車買取は安全？流れ・メリット・注意点</h3></a>
+        <a class="coltop-card reveal" href="column/keitora.html"><span class="coltop-img"><img src="assets/img/opt/buymo__cover-keitora.webp" alt="" loading="lazy" /></span><span class="coltop-cat">軽自動車</span><h3>軽トラの買取相場はいくら？年式・走行距離別の目安</h3></a>
       </div>
-      <p class="exit-modal-tiny">※ このメッセージは1回だけ表示されます</p>
+      <p class="center"><a href="column/" class="btn btn-primary">コラム一覧を見る ›</a></p>
     </div>
-  </div>
+  </section>
 
-  <!-- ============ サービスエリア ============ -->
   <section class="area" aria-labelledby="area-title">
     <div class="container">
       <h2 id="area-title" class="section-title">サービスエリア</h2>
@@ -775,13 +574,12 @@
     </div>
   </section>
 
-  <!-- ============ 加盟店・店舗案内 ============ -->
   <section class="store-band" aria-labelledby="store-band-title">
     <div class="container">
       <div class="eyebrow-wrap"><span class="eyebrow">STORE</span></div>
       <h2 id="store-band-title" class="section-title">お近くのBUYMO加盟店</h2>
       <p class="section-note" style="text-align:center">地域に根ざした加盟店が、あなたの愛車を丁寧に査定します。お近くの店舗を加盟店一覧からご覧いただけます。</p>
-      <img src="assets/img/buymo/real-center.jpg" alt="BUYMO買取センターで接客する様子" loading="lazy" style="display:block;width:100%;max-width:820px;height:auto;margin:6px auto 22px;border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.10);" onerror="this.style.display='none'">
+      <img src="assets/img/opt/buymo__real-center.webp" alt="BUYMO買取センターで接客する様子" loading="lazy" style="display:block;width:100%;max-width:820px;height:auto;margin:6px auto 22px;border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.10);" onerror="this.style.display='none'">
       <div class="store-band-grid">
         <a class="store-band-card" href="store/">
           <span class="sbc-pref">福島県いわき市</span>
@@ -790,7 +588,7 @@
           <span class="sbc-cta">店舗を見る →</span>
         </a>
         <a class="store-band-more" href="store/">
-          <span class="sbm-ico" aria-hidden="true"><img src="assets/img/buymo/ic-japan.png?v=1" alt="" width="40" height="40" loading="lazy"></span>
+          <span class="sbm-ico" aria-hidden="true"><img src="assets/img/opt/buymo__ic-japan.webp" alt="" width="40" height="40" loading="lazy"></span>
           <span class="sbm-t">加盟店一覧を見る</span>
           <span class="sbm-d">全国で加盟店を拡大中。あなたの街のBUYMOを探せます。</span>
         </a>
@@ -799,12 +597,11 @@
     </div>
   </section>
 
-  <!-- ============ 会社情報 ============ -->
   <section class="company" id="company" aria-labelledby="company-title">
     <div class="container company-inner">
       <h2 id="company-title" class="section-title">会社情報</h2>
       <div class="grid grid-2 company-grid">
-        <div class="company-photo reveal"><img src="assets/img/buymo/real-operator.jpg" alt="お客様対応スタッフ（オペレーター）" loading="lazy" onerror="this.onerror=null;this.src='assets/img/buymo/operator.jpg';" /></div>
+        <div class="company-photo reveal"><img src="assets/img/opt/buymo__real-operator.webp" alt="お客様対応スタッフ（オペレーター）" loading="lazy" onerror="this.onerror=null;this.src='assets/img/opt/buymo__operator.webp';" /></div>
         <dl class="company-dl reveal">
           <dt>サービス名</dt><dd>BUYMO（バイモ）</dd>
           <dt>買取センター</dt><dd>〒971-8138 福島県いわき市若葉台1丁目31-11</dd>
@@ -813,22 +610,20 @@
           <dt>定休日</dt><dd>365日稼働　24時間受付</dd>
           <dt>事業内容</dt><dd>自動車買取・販売業／フランチャイズ事業</dd>
           <dt>代表者</dt><dd>吉田 一平</dd>
-          <dt>古物商許可</dt><dd><img src="assets/img/buymo/badge-kobutsu.png?v=1" alt="" style="height:22px;vertical-align:-6px;margin-right:6px;" />福島県公安委員会許可 第25121A010859号</dd>
+          <dt>古物商許可</dt><dd><img src="assets/img/opt/buymo__badge-kobutsu.webp" alt="" style="height:22px;vertical-align:-6px;margin-right:6px;" />福島県公安委員会許可 第25121A010859号</dd>
           <dt>運営会社</dt><dd>合同会社アイズ（〒979-0204 福島県いわき市四倉町細谷字大町1番）</dd>
         </dl>
       </div>
       <div class="trust-badges" aria-label="安心・許認可">
-        <figure><img src="assets/img/buymo/badge-kobutsu.png?v=1" alt="古物商許可" loading="lazy"><figcaption>古物商許可</figcaption></figure>
-        <figure><img src="assets/img/buymo/badge-ssl.png?v=1" alt="SSL暗号化通信" loading="lazy"><figcaption>SSL暗号化</figcaption></figure>
-        <figure><img src="assets/img/buymo/badge-privacy.png?v=1" alt="個人情報保護" loading="lazy"><figcaption>個人情報保護</figcaption></figure>
-        <figure><img src="assets/img/buymo/badge-free.png?v=1" alt="手数料無料" loading="lazy"><figcaption>手数料0円</figcaption></figure>
-        <figure><img src="assets/img/buymo/badge-support24.png?v=1" alt="24時間受付" loading="lazy"><figcaption>24時間受付</figcaption></figure>
+        <figure><img src="assets/img/opt/buymo__badge-kobutsu.webp" alt="古物商許可" loading="lazy"><figcaption>古物商許可</figcaption></figure>
+        <figure><img src="assets/img/opt/buymo__badge-ssl.webp" alt="SSL暗号化通信" loading="lazy"><figcaption>SSL暗号化</figcaption></figure>
+        <figure><img src="assets/img/opt/buymo__badge-privacy.webp" alt="個人情報保護" loading="lazy"><figcaption>個人情報保護</figcaption></figure>
+        <figure><img src="assets/img/opt/buymo__badge-free.webp" alt="手数料無料" loading="lazy"><figcaption>手数料0円</figcaption></figure>
+        <figure><img src="assets/img/opt/buymo__badge-support24.webp" alt="24時間受付" loading="lazy"><figcaption>24時間受付</figcaption></figure>
       </div>
-      <div class="company-mascot" aria-hidden="true">🐪</div>
     </div>
   </section>
 
-  <!-- ============ 会員専用ページ誘導 ============ -->
   <section class="member-cta" aria-labelledby="member-title">
     <div class="container member-cta-inner">
       <div class="member-cta-copy">
@@ -842,7 +637,7 @@
         </ul>
       </div>
       <div class="member-cta-actions">
-        <img class="cta-mascot" src="assets/img/buymo/mascot-guide.png" alt="BUYMOマスコット" loading="lazy" />
+        <img class="cta-mascot" src="assets/img/opt/buymo__mascot-guide.webp" alt="BUYMOマスコット" loading="lazy" />
         <a href="#form" class="btn btn-primary btn-lg">まずは無料査定へ</a>
         <a href="member.html" class="member-login">査定の状況を確認する ›</a>
       </div>
@@ -855,7 +650,7 @@
 <div class="sticky-cta" id="stickyCta" aria-hidden="true">
   <p>写真を送るだけ・査定無料！</p>
   <a href="#form" class="btn">無料査定はこちら</a>
-  <a href="#chat" class="s-tel"><img src="/assets/img/buymo/chatbot-avatar.png" alt="" />チャットで査定</a>
+  <a href="#chat" class="s-tel"><img src="/assets/img/opt/buymo__chatbot-avatar.webp" alt="" />チャットで査定</a>
 </div>
 
 <!-- ============ フッター ============ -->
@@ -892,10 +687,10 @@
     <div class="footer-col">
       <h3>SNS</h3>
       <ul class="sns-list">
-        <li><a href="#" class="sns-icon" aria-label="Facebook"><img src="assets/img/buymo/sns-facebook.png" alt="Facebook" /></a></li>
-        <li><a href="#" class="sns-icon" aria-label="X"><img src="assets/img/buymo/sns-x.png" alt="X" /></a></li>
-        <li><a href="#" class="sns-icon" aria-label="Instagram"><img src="assets/img/buymo/sns-instagram.png" alt="Instagram" /></a></li>
-        <li><a href="#" class="sns-icon" aria-label="LINE"><img src="assets/img/buymo/sns-line.png" alt="LINE" /></a></li>
+        <li><a href="#" class="sns-icon" aria-label="Facebook"><img src="assets/img/opt/buymo__sns-facebook.webp" alt="Facebook" /></a></li>
+        <li><a href="#" class="sns-icon" aria-label="X"><img src="assets/img/opt/buymo__sns-x.webp" alt="X" /></a></li>
+        <li><a href="#" class="sns-icon" aria-label="Instagram"><img src="assets/img/opt/buymo__sns-instagram.webp" alt="Instagram" /></a></li>
+        <li><a href="#" class="sns-icon" aria-label="LINE"><img src="assets/img/opt/buymo__sns-line.webp" alt="LINE" /></a></li>
       </ul>
       <p class="footer-hours">査定・お問い合わせ：メール・AIチャット 24時間受付</p>
     </div>
@@ -906,7 +701,7 @@
 </footer>
 
 <!-- トップに戻る -->
-<button class="to-top" id="toTop" aria-label="トップに戻る" hidden><img src="assets/img/buymo/ui-totop.png" alt="" /></button>
+<button class="to-top" id="toTop" aria-label="トップに戻る" hidden><img src="assets/img/opt/buymo__ui-totop.webp" alt="" /></button>
 
 <script src="assets/js/analytics.js?v=2" defer></script>
 <script src="assets/js/genres.js" defer></script>
@@ -918,6 +713,6 @@
 <link rel="stylesheet" href="assets/css/academy.css?v=22" />
 <script>window.BUYMO_BOT_MODE='user';</script>
 <script src="assets/js/chatbot.js?v=26" defer></script>
-<script src="/assets/js/popup.js" defer></script>
+<script src="/assets/js/popup.js?v=2" defer></script>
 </body>
 </html>
