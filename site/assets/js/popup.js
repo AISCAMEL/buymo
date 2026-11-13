@@ -25,7 +25,7 @@
       body: '写真を送るだけでOK。しつこい電話なし・手数料0円で、<b>今の愛車の買取額</b>をチェックできます。',
       img: '/assets/img/buymo/mascot-guide.png',
       primary: { t: '写真で無料査定 →', href: '/buymo-contact.html', cls: 'pu-gold' },
-      secondary: { t: '📞 LINEで相談', href: LINE_URL, cls: 'pu-line', blank: true },
+      secondary: { t: '💬 LINEで相談', href: LINE_URL, cls: 'pu-line', blank: true },
       note: '概算だけでもOK。まずはお気軽に。'
     },
     partner: {
@@ -130,12 +130,16 @@
   function onScroll() {
     var st = window.scrollY || document.documentElement.scrollTop || 0;
     var h = document.documentElement.scrollHeight - window.innerHeight;
-    if (h > 200 && (st / h) >= 0.55) show();
+    if (h > 200 && (st / h) >= 0.85) show();   // ほぼ最後まで読んだとき
   }
 
+  // 最初の画面を邪魔しないよう、すぐには出さない：
+  //  ・パソコン：マウスが画面の上に出た（閉じようとした）とき
+  //  ・どの端末も：ページの 85% まで読んだとき、または 60 秒たったとき
   function init() {
-    timer = setTimeout(show, 18000);
+    timer = setTimeout(show, 60000);
     window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('mouseout', function (e) { if (!e.relatedTarget && e.clientY <= 0) show(); });
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
