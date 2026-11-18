@@ -639,7 +639,37 @@
       items.map(function (x) {
         var ic = x[0] === 'warn' ? '!' : (x[0] === 'ok' ? '✓' : '→');
         return '<div class="cpf-item ' + x[0] + '"><span class="cpf-ic">' + ic + '</span>' + HQ.esc(x[1]) + '</div>';
-      }).join('');
+      }).join('') +
+      // AI生成は本部のみ（ADMIN_KEY が要るため）。加盟店はルールベースのフォローまで。
+      (role !== 'partner'
+        ? '<div class="cpf-aiwrap"><button type="button" class="cpf-ai" id="cpfAiBtn">AIで返信文・次の一手を作成</button><div class="cpf-aiout" id="cpfAiOut"></div></div>'
+        : '');
+    var btn = document.getElementById('cpfAiBtn');
+    if (btn) btn.onclick = function () { aiFollowReply(c, items); };
+  }
+  // フォロー文脈をGASのAI(aiAssist)に渡し、返信文の下書き＋次の一手を生成（GAS変更不要）
+  function aiFollowReply(c, items) {
+    var out = document.getElementById('cpfAiOut'); if (!out) return;
+    if (!window.HQAI) { out.innerHTML = '<div class="cpf-aierr">AIを利用できません（本部AIが読み込まれていません）。</div>'; return; }
+    if (!HQAI.ensureKey()) return; // 合言葉(ADMIN_KEY)の入力を促す
+    var warnTxt = (items || []).filter(function (x) { return x[0] === 'warn'; }).map(function (x) { return x[1]; }).join(' / ') || 'なし';
+    var msg = '次の中古車買取の案件について、担当者が使えるように日本語で作成してください。\n' +
+      '出力は必ず次の2見出しで、簡潔に：\n【次の一手】担当者がすぐやる事を1〜2行。\n【返信文の下書き】お客様へLINEで送る丁寧で短いメッセージ（名前は「' + (c.name || 'お客様') + '様」）。\n\n' +
+      '■案件情報\nID: ' + c.id + '\nお名前: ' + (c.name || '不明') + '\nステージ: ' + c.stage + '\nジャンル: ' + (c.genre || '未設定') +
+      '\n買取金額: ' + (c.amount ? ('¥' + Number(c.amount).toLocaleString()) : '未入力') + '\n経過日数: ' + daysSinceSafe(c.date) + '日\nメモ: ' + (c.memo || 'なし') +
+      '\n未対応・抜け: ' + warnTxt;
+    out.innerHTML = '<div class="cpf-aiload">AIが作成しています…</div>';
+    HQAI.call('aiAssist', { messages: [{ role: 'user', content: msg }], context: { focus: c.id } }).then(function (d) {
+      if (!d || !d.ok) { out.innerHTML = '<div class="cpf-aierr">' + HQ.esc(HQAI.errText ? HQAI.errText(d) : 'AIが返事できませんでした。') + '</div>'; return; }
+      var text = d.reply || '（返事がありませんでした）';
+      out.innerHTML = '<textarea class="cpf-aitext" rows="8"></textarea>' +
+        '<div class="cpf-aibtns"><button type="button" class="cpf-aicopy" id="cpfAiCopy">本文をコピー</button>' +
+        '<button type="button" class="cpf-airegen" id="cpfAiRegen">作り直す</button></div>';
+      var ta = out.querySelector('.cpf-aitext'); if (ta) ta.value = text;
+      var cp = document.getElementById('cpfAiCopy');
+      if (cp) cp.onclick = function () { try { navigator.clipboard.writeText(ta.value); cp.textContent = 'コピーしました'; setTimeout(function () { cp.textContent = '本文をコピー'; }, 1500); } catch (e) {} };
+      var rg = document.getElementById('cpfAiRegen'); if (rg) rg.onclick = function () { aiFollowReply(c, items); };
+    }).catch(function () { out.innerHTML = '<div class="cpf-aierr">通信に失敗しました。少しおいてお試しください。</div>'; });
   }
   function fillPanel(c) {
     document.getElementById('cpId').textContent = c.id + (c.genre ? '（' + c.genre + '）' : '');
