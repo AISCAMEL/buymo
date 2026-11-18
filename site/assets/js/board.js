@@ -750,10 +750,12 @@
       if (!c) { window.alert('案件 ' + id + ' が見つかりません。ページを読み込み直してください。'); return; }
       panelId = id; fillPanel(c);
       panel.classList.add('open');
+      document.body.classList.add('case-open');
     } catch (err) {
       // 開けなかった理由を出す（スクリーンショットで原因がわかるように）
       window.alert('案件 ' + id + ' を開けませんでした。\n' + (err && err.message ? err.message : err));
       if (panel) panel.classList.add('open');
+      document.body.classList.add('case-open');
       return;
     }
     // 共有オークション/清算データを取得して反映（別端末の入力を同期）
@@ -768,7 +770,7 @@
       if (changed) fillPanel(cur);
     });
   }
-  function closePanel() { if (panel) panel.classList.remove('open'); panelId = null; }
+  function closePanel() { if (panel) panel.classList.remove('open'); document.body.classList.remove('case-open'); panelId = null; }
   function deleteCurrentCase() {
     var c = findCase(panelId); if (!c) return;
     if (!window.confirm('案件「' + (c.id) + '　' + (c.name || '') + '」を削除します。\nこの操作は取り消せません。よろしいですか？')) return;

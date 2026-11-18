@@ -273,6 +273,13 @@
   transform:translateX(100%);transition:transform .28s ease;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px;}
 /* 開いたら transform を解除（iOS Safari で transform 付きスクロール内の入力欄がタップできなくなる不具合の回避） */
 .case-panel.open .cp-body{transform:none;}
+/* ワイド画面：詳細ドロワーを開いてもボードを暗転・ロックせず、全幅のまま操作できるようにする
+   （ドロワーは右側に浮かせ、幅も少し抑える。スマホ/タブレット縦は従来どおり暗転オーバーレイ） */
+@media (min-width:1024px){
+  body.case-open .case-panel{pointer-events:none;}
+  body.case-open .case-panel .cp-overlay{opacity:0;pointer-events:none;}
+  body.case-open .case-panel .cp-body{pointer-events:auto;width:400px;box-shadow:-10px 0 30px rgba(0,0,0,.14);}
+}
 .cp-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
 .cp-id{font-weight:900;font-size:18px;color:var(--navy);}
 .cp-close{margin-left:auto;border:none;background:#eef1f6;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer;color:#555;}
