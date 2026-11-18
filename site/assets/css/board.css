@@ -281,6 +281,16 @@
   body.case-open .case-panel .cp-body{pointer-events:auto;width:400px;box-shadow:-10px 0 30px rgba(0,0,0,.14);}
 }
 .cp-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+/* フォロー（次にやること・抜け検知）カード */
+.cp-follow{border:1px solid #cdeee8;background:#f2fbf9;border-radius:12px;padding:12px 14px;margin-bottom:16px;}
+.cpf-head{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;color:#0B5A54;margin-bottom:8px;}
+.cpf-badge{font-size:11px;font-weight:800;color:#B54708;background:#FFFAEB;border:1px solid #FEDF89;border-radius:999px;padding:1px 8px;}
+.cpf-item{display:flex;align-items:flex-start;gap:8px;font-size:13.5px;line-height:1.5;color:#334155;padding:3px 0;}
+.cpf-ic{flex:0 0 auto;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;margin-top:1px;}
+.cpf-item.todo .cpf-ic{background:#0F766E;}
+.cpf-item.warn .cpf-ic{background:#D92D20;}
+.cpf-item.ok .cpf-ic{background:#4E9A6B;}
+.cpf-item.warn{color:#B42318;font-weight:700;}
 .cp-id{font-weight:900;font-size:18px;color:var(--navy);}
 .cp-close{margin-left:auto;border:none;background:#eef1f6;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer;color:#555;}
 .cp-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;}

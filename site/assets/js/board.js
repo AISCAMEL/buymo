@@ -421,6 +421,7 @@
       '<div class="cp-overlay" data-close></div>' +
       '<aside class="cp-body" role="dialog" aria-label="案件詳細">' +
         '<div class="cp-head"><span id="cpId" class="cp-id"></span><button class="cp-close" data-close aria-label="閉じる">×</button></div>' +
+        '<div class="cp-follow" id="cpFollow"></div>' +
         '<div class="cp-fields">' +
           '<label>お名前<input id="cpName"></label>' +
           '<label>連絡先<input id="cpTel"></label>' +
@@ -604,6 +605,42 @@
     var o = withEmpty ? '<option value="">— 未割当 —</option>' : '';
     return o + arr.map(function (v) { return '<option' + (v === sel ? ' selected' : '') + '>' + HQ.esc(v) + '</option>'; }).join('');
   }
+  function daysSinceSafe(d) { try { return daysSince(d); } catch (e) { return 0; } }
+  // 案件の状態から「次にやること・抜け・放置」を漏れなく洗い出す（フォローAIの土台）
+  function buildFollow(c) {
+    var items = [], missing = [], stage = c.stage, A = 'todo', W = 'warn', K = 'ok';
+    if (!c.name) missing.push('お名前');
+    if (!c.tel && !c.email) missing.push('連絡先');
+    if (!c.genre) missing.push('ジャンル');
+    if (!c.assignee && stage !== '失注' && stage !== '完了') items.push([W, '担当（加盟店）が未割当です。割り当ててください。']);
+    if (stage === '新規受付') items.push([A, '内容を確認し、担当を割り当てて「査定中」へ進める。']);
+    else if (stage === '査定中') items.push([A, c.amount ? '査定額を提示し、返答を待つ（→商談中）。' : '査定額（買取金額）を入力して、お客様に提示する。']);
+    else if (stage === '商談中') items.push([A, '条件をすり合わせ、合意したら「契約」へ。必要書類を案内する。']);
+    else if (stage === '後追い') items.push([A, '再連絡して反応を確認する（売却意向・不明点の解消）。']);
+    else if (stage === '契約') items.push([A, c.dropoffDate ? '引取り準備（陸送・書類）を進め、「入金待ち」へ。' : '引取り／入庫の日程を確定して記録する。']);
+    else if (stage === '入金待ち') items.push([A, '入金・振込を確認し、「完了」へ。']);
+    if (['商談中', '契約', '入金待ち'].indexOf(stage) >= 0 && !c.amount) items.push([W, '買取金額が未入力です。']);
+    if (c.claimStatus && c.claimStatus !== 'なし' && c.claimStatus !== '解決済み') items.push([W, 'クレーム対応中（' + c.claimStatus + '）。優先で対応する。']);
+    var dd = daysSinceSafe(c.date);
+    if (['新規受付', '査定中', '商談中', '後追い'].indexOf(stage) >= 0 && dd >= STALE_DAYS) items.push([W, dd + '日動きがありません。後追いしましょう。']);
+    if (missing.length) items.unshift([W, '未入力：' + missing.join('、')]);
+    if (!items.length) items.push([K, '抜けはありません。次の工程へ進めましょう。']);
+    return items;
+  }
+  function renderFollow(c) {
+    var el = document.getElementById('cpFollow'); if (!el) return;
+    if (c.stage === '完了' || c.stage === '失注') {
+      el.innerHTML = '<div class="cpf-head">フォロー</div><div class="cpf-item ok"><span class="cpf-ic">✓</span>この案件は「' + HQ.esc(c.stage) + '」です。対応は完了しています。</div>';
+      return;
+    }
+    var items = buildFollow(c);
+    var warns = items.filter(function (x) { return x[0] === 'warn'; }).length;
+    el.innerHTML = '<div class="cpf-head">フォロー（次にやること）' + (warns ? '<span class="cpf-badge">要確認 ' + warns + '</span>' : '') + '</div>' +
+      items.map(function (x) {
+        var ic = x[0] === 'warn' ? '!' : (x[0] === 'ok' ? '✓' : '→');
+        return '<div class="cpf-item ' + x[0] + '"><span class="cpf-ic">' + ic + '</span>' + HQ.esc(x[1]) + '</div>';
+      }).join('');
+  }
   function fillPanel(c) {
     document.getElementById('cpId').textContent = c.id + (c.genre ? '（' + c.genre + '）' : '');
     document.getElementById('cpName').value = c.name || '';
@@ -615,6 +652,7 @@
     document.getElementById('cpAmount').value = c.amount || '';
     document.getElementById('cpMemo').value = c.memo || '';
     document.getElementById('cpClaim').value = c.claimStatus || 'なし';
+    renderFollow(c);
     renderTimeline(c);
     renderFollowups(c);
     renderVehicle(c);
