@@ -136,7 +136,7 @@
 
     <div class="cm-filter">
       <button class="active" data-tag="">すべて</button>
-      <button data-tag="本部">📢 本部</button>
+      <button data-tag="本部">本部</button>
       <button data-tag="査定">査定</button>
       <button data-tag="営業">営業</button>
       <button data-tag="手続き">手続き</button>
@@ -181,13 +181,13 @@
       var tagCls='cm-tag cm-tag-'+(p.tag||'その他');
       return '<article class="cm-card'+(isHq?' cm-hq':'')+'">'+
         '<div class="cm-card-head">'+
-          '<span class="cm-who">'+(isHq?'📢 ':'🏪 ')+esc(p.who)+'</span>'+
+          '<span class="cm-who">'+(isHq?'':'')+esc(p.who)+'</span>'+
           (p.tag?'<span class="'+tagCls+'">'+esc(p.tag)+'</span>':'')+
           '<span class="cm-time">'+esc(p.time)+'</span>'+
         '</div>'+
         '<h3>'+esc(p.t)+'</h3>'+
         '<p>'+esc(p.b).replace(/\n/g,'<br>')+'</p>'+
-        '<button class="cm-like" data-i="'+globalIdx+'">👍 役に立った <b>'+(p.likes||0)+'</b></button>'+
+        '<button class="cm-like" data-i="'+globalIdx+'">役に立った <b>'+(p.likes||0)+'</b></button>'+
         '</article>';
     }).join('');
   }

@@ -115,17 +115,17 @@
     </div>
 
     <!-- クイックリンク -->
-    <div class="p-section-title">🔗 クイックリンク</div>
+    <div class="p-section-title">クイックリンク</div>
     <div class="p-quick">
-      <a href="partner-academy.html"><span class="p-quick-ico">🎓</span>アカデミー</a>
-      <a href="partner-scripts.html"><span class="p-quick-ico">📖</span>トークスクリプト</a>
-      <a href="partner-community.html"><span class="p-quick-ico">💬</span>コミュニティ</a>
-      <a href="hq.html?role=partner"><span class="p-quick-ico">🗂️</span>案件ボード</a>
+      <a href="partner-academy.html"><span class="p-quick-ico"></span>アカデミー</a>
+      <a href="partner-scripts.html"><span class="p-quick-ico"></span>トークスクリプト</a>
+      <a href="partner-community.html"><span class="p-quick-ico"></span>コミュニティ</a>
+      <a href="hq.html?role=partner"><span class="p-quick-ico"></span>案件ボード</a>
     </div>
 
     <!-- 共有カレンダー -->
     <section class="rep-card" style="margin-top:22px">
-      <h2>📅 共有カレンダー（本部・加盟店）</h2>
+      <h2>共有カレンダー（本部・加盟店）</h2>
       <p class="portal-sub" style="margin:-4px 0 14px;">本部からの予定（研修・オークション日程・キャンペーン等）を共有できます。</p>
       <div id="sharedCal"></div>
     </section>
@@ -159,7 +159,7 @@
       if (!notices.length) { el.innerHTML = '<p class="p-empty">現在お知らせはありません。</p>'; return; }
       el.innerHTML = notices.map(function (n) {
         return '<div class="p-notice-item">' +
-          '<span class="p-notice-lv">' + (n.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' +
+          '<span class="p-notice-lv">' + (n.lv === 'warn' ? '' : 'ℹ') + '</span>' +
           '<div class="p-notice-body"><div class="p-notice-t">' + HQ.esc(n.t) + '</div>' +
           '<div class="p-notice-d">' + HQ.esc(n.date || '') + '</div></div>' +
           '</div>';

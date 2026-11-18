@@ -53,20 +53,20 @@
     <h2 class="ac-h2">研修コース</h2>
     <div class="ac-grid" id="academyGrid"></div>
 
-    <h2 class="ac-h2">📚 PDF資料・解説</h2>
+    <h2 class="ac-h2">PDF資料・解説</h2>
     <p class="portal-sub" style="margin-top:-6px;">本部が登録した資料（PDF）と解説です。クリックでPDFを開けます。</p>
     <div class="mat-grid" id="materialGrid"><p class="mat-empty">読み込み中…</p></div>
 
     <h2 class="ac-h2">資料・サポート</h2>
     <div class="ac-links">
-      <a href="appraisal.html">📗 車の査定マニュアル</a>
-      <a href="manual.html">📘 出品実務マニュアル</a>
-      <a href="partner-checklist.html">📋 買取の流れ・必要書類</a>
-      <a href="partner-documents.html">📄 書類発行</a>
-      <a href="partner-promo.html">📣 販促ツール</a>
-      <a href="partner-scripts.html">💬 トークスクリプト集</a>
-      <a href="partner-community.html">👥 加盟店コミュニティ</a>
-      <a href="embed/simulator-buy-embed.html" target="_blank">🧮 査定シミュレーター</a>
+      <a href="appraisal.html">車の査定マニュアル</a>
+      <a href="manual.html">出品実務マニュアル</a>
+      <a href="partner-checklist.html">買取の流れ・必要書類</a>
+      <a href="partner-documents.html">書類発行</a>
+      <a href="partner-promo.html">販促ツール</a>
+      <a href="partner-scripts.html">トークスクリプト集</a>
+      <a href="partner-community.html">加盟店コミュニティ</a>
+      <a href="embed/simulator-buy-embed.html" target="_blank">査定シミュレーター</a>
     </div>
   </div>
 </main>
@@ -81,7 +81,7 @@
     if (!list || !list.length) { grid.innerHTML = '<p class="mat-empty">まだ資料は登録されていません。</p>'; return; }
     grid.innerHTML = list.map(function (m) {
       var url = HQ.esc(m.url || '');
-      var btn = url ? '<a class="mat-open" href="' + url + '" target="_blank" rel="noopener">📄 PDFを開く</a>' : '';
+      var btn = url ? '<a class="mat-open" href="' + url + '" target="_blank" rel="noopener">PDFを開く</a>' : '';
       return '<div class="mat-card">' +
         '<div class="mat-card-head"><span class="mat-cat">' + HQ.esc(m.cat || '資料') + '</span><span class="mat-date">' + HQ.esc(m.date || '') + '</span></div>' +
         '<div class="mat-title">' + HQ.esc(m.t || '') + '</div>' +

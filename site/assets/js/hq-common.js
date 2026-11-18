@@ -15,7 +15,7 @@ window.HQ = (function () {
   var CKEY = 'buymo_cases', SKEY = 'buymo_stores';
 
   /* ============================================================
-     ★料金設定（将来ここを書き換えるだけで全画面に反映）★
+     料金設定（将来ここを書き換えるだけで全画面に反映）
      ・franchiseMonthly … 加盟店の月額（積立）標準額
      ・auctionSystemFee … オークション システム利用料（出品代行）
      ・directHqFee ……… 直販の本部手数料（一律・税抜）
@@ -30,7 +30,7 @@ window.HQ = (function () {
   };
 
   /* ============================================================
-     ★共有カレンダー（本部・加盟店で同じGoogleカレンダーを表示）★
+     共有カレンダー（本部・加盟店で同じGoogleカレンダーを表示）
      設定方法：
        1) Googleカレンダーを1つ作成（例：「BUYMO 本部・加盟店 共有」）
        2) 設定 → 「予定のアクセス権限」で共有範囲を決める
@@ -73,7 +73,7 @@ window.HQ = (function () {
     } else {
       host.innerHTML =
         '<div class="cal-setup">' +
-          '<p class="cal-setup-t">📅 共有カレンダー（本部・加盟店）を表示するには初期設定が必要です</p>' +
+          '<p class="cal-setup-t">共有カレンダー（本部・加盟店）を表示するには初期設定が必要です</p>' +
           '<ol class="cal-setup-steps">' +
             '<li>Googleカレンダーで共有用カレンダーを1つ作成（例：「BUYMO 本部・加盟店 共有」）</li>' +
             '<li>カレンダー設定 →「予定のアクセス権限」で共有範囲を設定<br>' +
@@ -506,66 +506,66 @@ window.HQ = (function () {
     // グループ [ラベル, [ [key,表示名,href,アイコン], ... ] ]
     var groups = (r === 'partner') ? [
       ['業務', [
-        ['flow', '仕事の流れ', 'partner-flow.html', '🧭'],
-        ['board', '案件ボード', 'hq.html?role=partner', '🗂️'],
-        ['leadmarket', '案件マーケット', 'partner-leads.html', '🛒'],
-        ['sales', '売上・請求', 'partner-sales.html', '💴'],
-        ['documents', '書類発行', 'hq-documents.html', '📄'],
-        ['mystore', 'マイ店舗ページ', 'partner-mystore.html', '🏪']
+        ['flow', '仕事の流れ', 'partner-flow.html', ''],
+        ['board', '案件ボード', 'hq.html?role=partner', ''],
+        ['leadmarket', '案件マーケット', 'partner-leads.html', ''],
+        ['sales', '売上・請求', 'partner-sales.html', ''],
+        ['documents', '書類発行', 'hq-documents.html', ''],
+        ['mystore', 'マイ店舗ページ', 'partner-mystore.html', '']
       ]],
       ['学ぶ・支援', [
-        ['info', '現場サポート', 'partner-info.html', '🛟'],
-        ['downloads', 'ダウンロード', 'partner-downloads.html', '⬇️'],
-        ['promo', '販促ツール', 'partner-promo.html', '📣'],
-        ['academy', 'アカデミー', 'partner-academy.html', '🎓'],
-        ['scripts', 'スクリプト', 'partner-scripts.html', '📝'],
-        ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬'],
-        ['chatbot', 'AIに相談', 'partner-chatbot.html', '🤖'],
-        ['community', 'コミュニティ', 'partner-community.html', '👥']
+        ['info', '現場サポート', 'partner-info.html', ''],
+        ['downloads', 'ダウンロード', 'partner-downloads.html', ''],
+        ['promo', '販促ツール', 'partner-promo.html', ''],
+        ['academy', 'アカデミー', 'partner-academy.html', ''],
+        ['scripts', 'スクリプト', 'partner-scripts.html', ''],
+        ['chatassist', '接客アシスト', 'hq-chat-assist.html', ''],
+        ['chatbot', 'AIに相談', 'partner-chatbot.html', ''],
+        ['community', 'コミュニティ', 'partner-community.html', '']
       ]],
       ['その他', [
-        ['guide', '使い方', 'partner-guide.html', '❓']
+        ['guide', '使い方', 'partner-guide.html', '']
       ]]
     ] : [
       ['今日', [
-        ['today', '今日やること', 'hq-today.html', '🏠'],
-        ['dashboard', '数字のまとめ', 'hq-dashboard.html', '📊']
+        ['today', '今日やること', 'hq-today.html', ''],
+        ['dashboard', '数字のまとめ', 'hq-dashboard.html', '']
       ]],
       ['お客様・案件', [
-        ['board', '案件ボード', 'hq.html?role=hq', '🗂️'],
-        ['leads', '案件の一覧', 'hq-leads.html', '📋'],
-        ['kaitoriline', '車買取LINE', 'hq-kaitori-line.html', '💚'],
-        ['chatassist', '接客アシスト', 'hq-chat-assist.html', '💬']
+        ['board', '案件ボード', 'hq.html?role=hq', ''],
+        ['leads', '案件の一覧', 'hq-leads.html', ''],
+        ['kaitoriline', '車買取LINE', 'hq-kaitori-line.html', ''],
+        ['chatassist', '接客アシスト', 'hq-chat-assist.html', '']
       ]],
       ['書類・お金', [
-        ['documents', '書類発行', 'hq-documents.html', '📄'],
-        ['auctions', 'オークション', 'hq-auctions.html', '🔨'],
-        ['billing', '請求書', 'hq-billing.html', '🧾', 'admin'],
-        ['payments', '支払い管理', 'hq-payments.html', '💴', 'admin']
+        ['documents', '書類発行', 'hq-documents.html', ''],
+        ['auctions', 'オークション', 'hq-auctions.html', ''],
+        ['billing', '請求書', 'hq-billing.html', '', 'admin'],
+        ['payments', '支払い管理', 'hq-payments.html', '', 'admin']
       ]],
       ['加盟店', [
-        ['stores', '加盟店', 'hq-stores.html', '🏪'],
-        ['activity', '加盟店の動き', 'hq-partner-activity.html', '📈'],
-        ['recruit', '加盟店募集', 'hq-recruit.html', '🤝']
+        ['stores', '加盟店', 'hq-stores.html', ''],
+        ['activity', '加盟店の動き', 'hq-partner-activity.html', ''],
+        ['recruit', '加盟店募集', 'hq-recruit.html', '']
       ]],
       ['発信', [
-        ['notices', 'お知らせ', 'hq-notices.html', '📢'],
-        ['column', 'コラム', 'hq-column.html', '✍️'],
-        ['academy', 'アカデミー管理', 'hq-academy.html', '🎓'],
-        ['chatbot', 'チャットボット/ナレッジ', 'partner-chatbot.html', '🤖'],
-        ['promo', '販促ツール', 'partner-promo.html', '📣'],
-        ['community', 'コミュニティ', 'partner-community.html', '👥']
+        ['notices', 'お知らせ', 'hq-notices.html', ''],
+        ['column', 'コラム', 'hq-column.html', ''],
+        ['academy', 'アカデミー管理', 'hq-academy.html', ''],
+        ['chatbot', 'チャットボット/ナレッジ', 'partner-chatbot.html', ''],
+        ['promo', '販促ツール', 'partner-promo.html', ''],
+        ['community', 'コミュニティ', 'partner-community.html', '']
       ]],
       ['使い方', [
-        ['manual', '本部の使い方', 'hq-manual.html', '🧭'],
-        ['report', '営業レポート', 'report.html', '📊']
+        ['manual', '本部の使い方', 'hq-manual.html', ''],
+        ['report', '営業レポート', 'report.html', '']
       ]]
     ];
     // お金の画面（'admin' の印）は、本部スタッフには出さない
     var admin = !(window.AUTH && AUTH.isAdmin) || AUTH.isAdmin() || r === 'partner';
     groups = groups.map(function (g) { return [g[0], g[1].filter(function (it) { return admin || it[4] !== 'admin'; })]; }).filter(function (g) { return g[1].length; });
     var flat = [];
-    var html = '<div class="side-search"><input type="search" id="navSearch" placeholder="🔍 案件ID・顧客名・加盟店名" autocomplete="off"><div class="side-results" id="navResults" hidden></div></div>';
+    var html = '<div class="side-search"><input type="search" id="navSearch" placeholder="案件ID・顧客名・加盟店名" autocomplete="off"><div class="side-results" id="navResults" hidden></div></div>';
     groups.forEach(function (grp) {
       html += '<div class="nav-group"><div class="nav-group-h">' + esc(grp[0]) + '</div>';
       html += grp[1].map(function (it) {
@@ -604,7 +604,7 @@ window.HQ = (function () {
       do: ['お客様に送る前の文を貼って、AI で添削する', '言い回し・敬語・抜けを直してから送る'],
       next: ['車買取LINE', 'hq-kaitori-line.html'] },
     { key: 'documents', title: '書類発行', href: 'hq-documents.html', group: '書類・お金',
-      do: ['案件を選ぶと、お名前・車の情報が書類に入る', '車検証・印鑑証明の写真を AI が読み取って転記できる（📷 AI で読み取る）', '中身を確かめて印刷・PDF にする'],
+      do: ['案件を選ぶと、お名前・車の情報が書類に入る', '車検証・印鑑証明の写真を AI が読み取って転記できる（AI で読み取る）', '中身を確かめて印刷・PDF にする'],
       next: ['オークション', 'hq-auctions.html'] },
     { key: 'auctions', title: 'オークション', href: 'hq-auctions.html', group: '書類・お金',
       do: ['どの車を、いつ、どの会場へ出すかを記録', '落札・流れの結果を入れる'],
@@ -622,7 +622,7 @@ window.HQ = (function () {
     { key: 'notices', title: 'お知らせ', href: 'hq-notices.html', group: '発信',
       do: ['加盟店の画面の上に出すお知らせを書く'], next: ['今日やること', 'hq-today.html'] }
   ];
-  // 本部の AI（右下の「🤖 AI」）を読み込む
+  // 本部の AI（右下の「AI」）を読み込む
   function mountAI(key) {
     if (window.HQAI) { HQAI.mount(key); return; }
     if (document.getElementById('hqAiJs')) return;
@@ -650,7 +650,7 @@ window.HQ = (function () {
     var closed = false; try { closed = localStorage.getItem('buymo_intro_' + key) === '0'; } catch (e) {}
     var box = document.createElement('details');
     box.id = 'pageIntro'; box.className = 'page-intro'; if (!closed) box.open = true;
-    box.innerHTML = '<summary>📌 この画面でやること</summary><ol>' + g.do.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>' +
+    box.innerHTML = '<summary>この画面でやること</summary><ol>' + g.do.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>' +
       (g.next ? '<p class="page-intro-next">次はここ → <a href="' + g.next[1] + '">' + esc(g.next[0]) + '</a>　｜　<a href="hq-manual.html">本部の使い方</a></p>' : '');
     box.addEventListener('toggle', function () { try { localStorage.setItem('buymo_intro_' + key, box.open ? '1' : '0'); } catch (e) {} });
     // 見出しが横並びの枠（イラストと並ぶ等）の中にあるときは、その枠の下に入れる
@@ -679,13 +679,13 @@ window.HQ = (function () {
       cases.forEach(function (c) {
         if (out.length >= 8) return;
         var hay = ((c.id || '') + ' ' + (c.name || '') + ' ' + (c.genre || '') + ' ' + (c.assignee || '')).toLowerCase();
-        if (hay.indexOf(q) >= 0) out.push({ t: '🗂️ ' + (c.id || '') + '　' + (c.name || ''), s: (c.assignee || '担当未定') + '・' + (c.stage || ''), href: boardHref + '&case=' + encodeURIComponent(c.id) });
+        if (hay.indexOf(q) >= 0) out.push({ t: '' + (c.id || '') + '　' + (c.name || ''), s: (c.assignee || '担当未定') + '・' + (c.stage || ''), href: boardHref + '&case=' + encodeURIComponent(c.id) });
       });
       var stores = getStores() || [];
       stores.forEach(function (s) {
         if (out.length >= 8) return;
         if (((s.name || '') + ' ' + (s.area || '')).toLowerCase().indexOf(q) >= 0)
-          out.push({ t: '🏪 ' + (s.name || ''), s: (s.area || ''), href: 'hq-stores.html?store=' + encodeURIComponent(s.name) });
+          out.push({ t: '' + (s.name || ''), s: (s.area || ''), href: 'hq-stores.html?store=' + encodeURIComponent(s.name) });
       });
       if (!out.length) { box.innerHTML = '<div class="side-res-none">該当なし</div>'; box.hidden = false; return; }
       box.innerHTML = out.map(function (o) {
@@ -698,7 +698,7 @@ window.HQ = (function () {
     document.addEventListener('click', function (e) { if (!e.target.closest('.side-search')) { box.hidden = true; } });
   }
 
-  // ========= 全画面 横断検索（ヘッダー🔍・全幅対応：案件／加盟店／メニュー） =========
+  // ========= 全画面 横断検索（ヘッダー・全幅対応：案件／加盟店／メニュー） =========
   function mountGlobalSearch(role, flat) {
     if (window.__gsMounted) { window.__gsMenu = flat || window.__gsMenu; window.__gsRole = role; return; }
     window.__gsMounted = true;
@@ -707,14 +707,14 @@ window.HQ = (function () {
     var isP = (role === 'partner');
     var portalUrl = 'portal-login.html';
 
-    // ヘッダーに 🔍 ボタンを差し込む（ログアウトの直前）
+    // ヘッダーに ボタンを差し込む（ログアウトの直前）
     var cont = document.querySelector('.portal-header .container');
     if (cont && !document.getElementById('gsBtn')) {
       var btn = document.createElement('button');
       btn.id = 'gsBtn'; btn.type = 'button'; btn.className = 'gs-btn';
       btn.setAttribute('aria-label', '検索');
       btn.title = '検索（ / または Ctrl+K）';
-      btn.innerHTML = '<span class="gs-ico" aria-hidden="true">🔍</span><span class="gs-btn-t">検索</span>';
+      btn.innerHTML = '<span class="gs-ico" aria-hidden="true"></span><span class="gs-btn-t">検索</span>';
       var logout = cont.querySelector('.portal-logout');
       if (logout) cont.insertBefore(btn, logout); else cont.appendChild(btn);
       btn.addEventListener('click', openGS);
@@ -726,9 +726,9 @@ window.HQ = (function () {
       ov.id = 'gsOverlay'; ov.className = 'gs-overlay'; ov.hidden = true;
       ov.innerHTML =
         '<div class="gs-modal" role="dialog" aria-modal="true" aria-label="横断検索">' +
-          '<div class="gs-bar"><span class="gs-bar-ico" aria-hidden="true">🔍</span>' +
+          '<div class="gs-bar"><span class="gs-bar-ico" aria-hidden="true"></span>' +
           '<input type="search" id="gsInput" autocomplete="off" placeholder="案件ID・顧客名・加盟店名・メニューで検索…" />' +
-          '<button type="button" class="gs-close" id="gsClose" aria-label="閉じる">✕</button></div>' +
+          '<button type="button" class="gs-close" id="gsClose" aria-label="閉じる"></button></div>' +
           '<div class="gs-results" id="gsResults"></div>' +
           '<div class="gs-foot"><span><b>Enter</b> 先頭を開く</span><span><b>Esc</b> 閉じる</span><span><b>/</b> または <b>Ctrl+K</b> で検索</span></div>' +
         '</div>';
@@ -782,7 +782,7 @@ window.HQ = (function () {
         if (!q) return true;
         return (it[1] || '').toLowerCase().indexOf(q) >= 0;
       }).slice(0, 8).map(function (it) {
-        return { t: (it[3] || '📄') + ' ' + it[1], s: 'メニューを開く', href: it[2] };
+        return { t: (it[3] || '') + ' ' + it[1], s: 'メニューを開く', href: it[2] };
       });
       if (menu.length) groups.push({ label: 'メニュー', items: menu });
 
@@ -792,7 +792,7 @@ window.HQ = (function () {
         (getCasesLS() || []).forEach(function (c) {
           if (caseItems.length >= 8) return;
           var hay = ((c.id || '') + ' ' + (c.name || '') + ' ' + (c.genre || '') + ' ' + (c.assignee || '') + ' ' + (c.stage || '')).toLowerCase();
-          if (hay.indexOf(q) >= 0) caseItems.push({ t: '🗂️ ' + (c.id || '') + '　' + (c.name || ''), s: (c.assignee || '担当未定') + '・' + (c.stage || '') + (c.genre ? '・' + c.genre : ''), href: boardHref + '&case=' + encodeURIComponent(c.id) });
+          if (hay.indexOf(q) >= 0) caseItems.push({ t: '' + (c.id || '') + '　' + (c.name || ''), s: (c.assignee || '担当未定') + '・' + (c.stage || '') + (c.genre ? '・' + c.genre : ''), href: boardHref + '&case=' + encodeURIComponent(c.id) });
         });
         if (caseItems.length) groups.push({ label: '案件', items: caseItems });
 
@@ -801,7 +801,7 @@ window.HQ = (function () {
         (getStores() || []).forEach(function (s) {
           if (storeItems.length >= 8) return;
           if (((s.name || '') + ' ' + (s.area || '')).toLowerCase().indexOf(q) >= 0)
-            storeItems.push({ t: '🏪 ' + (s.name || ''), s: (s.area || '') + (isP ? '' : '・加盟店管理を開く'), href: isP ? boardHref : 'hq-stores.html?store=' + encodeURIComponent(s.name) });
+            storeItems.push({ t: '' + (s.name || ''), s: (s.area || '') + (isP ? '' : '・加盟店管理を開く'), href: isP ? boardHref : 'hq-stores.html?store=' + encodeURIComponent(s.name) });
         });
         if (storeItems.length) groups.push({ label: '加盟店', items: storeItems });
       }
