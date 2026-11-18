@@ -35,29 +35,29 @@
     </div>
 
     <section class="rep-card" style="margin-bottom:18px">
-      <h2>📊 実績収支（月次）</h2>
+      <h2>実績収支（月次）</h2>
       <p class="portal-sub" style="margin:-4px 0 14px;">実データに基づく当月の収支です。収入は加盟店への当月請求の実額（請求書ページと連動）、経費は本部が入力します。営業利益・利益率を実数値で表示します。</p>
       <div id="pnl"></div>
     </section>
 
     <details class="rep-card" style="margin-bottom:18px">
-      <summary style="cursor:pointer;font-weight:900;font-size:16px;color:var(--navy);">💹 収益シミュレーション（試算・参考）</summary>
+      <summary style="cursor:pointer;font-weight:900;font-size:16px;color:var(--navy);">収益シミュレーション（試算・参考）</summary>
       <p class="portal-sub" style="margin:10px 0 14px;">将来計画用の試算です。加盟店数・紹介件数は実データから自動反映（数値は自由に変更可）。上の「実績収支」が実際の数字です。</p>
       <div id="revSim"></div>
     </details>
 
     <div class="hq-2col">
       <section class="rep-card">
-        <h2>🗒️ 今日やること</h2>
+        <h2>今日やること</h2>
         <div id="alerts" class="alert-list"></div>
       </section>
       <section class="rep-card">
         <h2>クイックリンク</h2>
         <div class="quick-links">
-          <a href="hq-leads.html">📋 リード一覧・割り当て</a>
-          <a href="hq.html?role=hq">🗂️ 案件ボード（看板）</a>
-          <a href="hq-stores.html">🏪 加盟店管理</a>
-          <a href="report.html">📊 営業レポート</a>
+          <a href="hq-leads.html">リード一覧・割り当て</a>
+          <a href="hq.html?role=hq">案件ボード（看板）</a>
+          <a href="hq-stores.html">加盟店管理</a>
+          <a href="report.html">営業レポート</a>
         </div>
       </section>
     </div>
@@ -73,7 +73,7 @@
     </section>
 
     <section class="rep-card" style="margin-top:18px">
-      <h2>📅 共有カレンダー（本部・加盟店）</h2>
+      <h2>共有カレンダー（本部・加盟店）</h2>
       <p class="portal-sub" style="margin:-4px 0 14px;">本部・加盟店で同じ予定（イベント・研修・オークション日程など）を共有できます。</p>
       <div id="sharedCal"></div>
     </section>
@@ -142,7 +142,7 @@
     var ae = document.getElementById('alerts');
     function renderAlerts() {
       ae.innerHTML = al.length ? al.map(function (a) {
-        return '<a class="alert ' + a.lv + '" href="' + a.href + '"><span class="alert-ico">' + (a.lv === 'warn' ? '⚠️' : 'ℹ️') + '</span>' + HQ.esc(a.t) + '</a>';
+        return '<a class="alert ' + a.lv + '" href="' + a.href + '"><span class="alert-ico">' + (a.lv === 'warn' ? '' : 'ℹ') + '</span>' + HQ.esc(a.t) + '</a>';
       }).join('') : '<p class="alert-none">対応が必要なアラートはありません。すべて対応済みです。</p>';
     }
     renderAlerts();

@@ -24,16 +24,16 @@
 
 <main class="portal-main">
   <div class="container">
-    <div class="report-head"><h1>🤖 加盟店チャットボット ＆ ナレッジ</h1></div>
+    <div class="report-head"><h1>加盟店チャットボット ＆ ナレッジ</h1></div>
     <p class="portal-sub">わからないことを質問すると、蓄積した<strong>ノウハウ</strong>から回答します。回答が無いものは<strong>ノウハウ構築</strong>に登録でき、使うほど賢くなります。<strong>相談履歴</strong>と<strong>改善提案</strong>も蓄積して本部と共有できます。</p>
 
     <div class="cb-stats" id="cbStats"></div>
 
     <div class="cb-tabs" id="cbTabs" role="tablist">
-      <button class="cb-tab active" data-tab="chat" type="button">💬 チャット</button>
-      <button class="cb-tab" data-tab="history" type="button">🕘 履歴</button>
-      <button class="cb-tab" data-tab="improve" type="button">💡 改善</button>
-      <button class="cb-tab" data-tab="knowhow" type="button">📚 ノウハウ構築</button>
+      <button class="cb-tab active" data-tab="chat" type="button">チャット</button>
+      <button class="cb-tab" data-tab="history" type="button">履歴</button>
+      <button class="cb-tab" data-tab="improve" type="button">改善</button>
+      <button class="cb-tab" data-tab="knowhow" type="button">ノウハウ構築</button>
     </div>
 
     <!-- チャット -->
@@ -49,14 +49,14 @@
 
     <!-- 履歴 -->
     <section class="cb-panel" id="panel-history" hidden>
-      <div class="cb-toolbar"><input type="search" id="cbHistSearch" placeholder="🔍 履歴を検索（質問・回答）" /></div>
+      <div class="cb-toolbar"><input type="search" id="cbHistSearch" placeholder="履歴を検索（質問・回答）" /></div>
       <div class="cb-list" id="cbHistList"></div>
     </section>
 
     <!-- 改善 -->
     <section class="cb-panel" id="panel-improve" hidden>
       <form class="cb-form" id="cbImprForm">
-        <h2 class="cb-form-h">💡 改善提案・要望を送る</h2>
+        <h2 class="cb-form-h">改善提案・要望を送る</h2>
         <p class="cb-form-sub">現場で気づいた不便・欲しい機能・マニュアルの改善点などを送ってください。蓄積され、本部が対応状況を更新します。</p>
         <div class="cb-form-row">
           <label class="cb-f">分類
@@ -68,14 +68,14 @@
         </label>
         <div class="cb-form-actions"><button class="btn btn-primary" type="submit">送信して蓄積</button></div>
       </form>
-      <div class="cb-toolbar"><input type="search" id="cbImprSearch" placeholder="🔍 改善提案を検索" /></div>
+      <div class="cb-toolbar"><input type="search" id="cbImprSearch" placeholder="改善提案を検索" /></div>
       <div class="cb-list" id="cbImprList"></div>
     </section>
 
     <!-- ノウハウ構築 -->
     <section class="cb-panel" id="panel-knowhow" hidden>
       <form class="cb-form" id="cbKnowForm">
-        <h2 class="cb-form-h">📚 ノウハウ（Q&amp;A）を追加</h2>
+        <h2 class="cb-form-h">ノウハウ（Q&amp;A）を追加</h2>
         <p class="cb-form-sub">よくある質問と回答を登録すると、チャットボットが自動で回答できるようになります。使うほど賢くなる仕組みです。</p>
         <input type="hidden" id="cbKnowId" />
         <div class="cb-form-row">
@@ -97,7 +97,7 @@
           <button class="btn btn-outline" id="cbKnowCancel" type="button" hidden>キャンセル</button>
         </div>
       </form>
-      <div class="cb-toolbar"><input type="search" id="cbKnowSearch" placeholder="🔍 ノウハウを検索" /></div>
+      <div class="cb-toolbar"><input type="search" id="cbKnowSearch" placeholder="ノウハウを検索" /></div>
       <div class="cb-list" id="cbKnowList"></div>
     </section>
   </div>

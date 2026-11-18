@@ -122,9 +122,9 @@
 
       <!-- タブ -->
       <div class="col-tabs" role="tablist">
-        <button class="col-tab active" role="tab" aria-selected="true"  aria-controls="panelWrite"   id="tabWrite">✏️ 新規投稿</button>
-        <button class="col-tab"        role="tab" aria-selected="false" aria-controls="panelPreview" id="tabPreview">👁 プレビュー</button>
-        <button class="col-tab"        role="tab" aria-selected="false" aria-controls="panelList"    id="tabList">📋 投稿一覧</button>
+        <button class="col-tab active" role="tab" aria-selected="true"  aria-controls="panelWrite"   id="tabWrite">新規投稿</button>
+        <button class="col-tab"        role="tab" aria-selected="false" aria-controls="panelPreview" id="tabPreview">プレビュー</button>
+        <button class="col-tab"        role="tab" aria-selected="false" aria-controls="panelList"    id="tabList">投稿一覧</button>
       </div>
 
       <!-- ─── 新規投稿パネル ─── -->
@@ -137,7 +137,7 @@
             <p class="cf-hint" id="titleHint" aria-live="polite"></p>
             <!-- 重複警告 -->
             <div class="dup-box" id="dupBox" role="alert" aria-live="assertive">
-              <div class="dup-title">⚠️ 類似タイトルが存在します</div>
+              <div class="dup-title">類似タイトルが存在します</div>
               <ul id="dupList"></ul>
               <div class="dup-force">
                 <input type="checkbox" id="forceSave" />
@@ -282,7 +282,7 @@
         } else {
           isDup = false;
           box.classList.remove('show');
-          hint.textContent = '✅ このタイトルは重複していません';
+          hint.textContent = 'このタイトルは重複していません';
           hint.style.color = 'var(--green)';
           setTimeout(function () { hint.textContent = ''; hint.style.color = ''; }, 3000);
         }
@@ -360,7 +360,7 @@
     .then(function () {
       btn.disabled = false;
       btn.textContent = '投稿する';
-      result.textContent = '✅ 投稿が完了しました！ しばらくすると公開ページに反映されます。';
+      result.textContent = '投稿が完了しました！ しばらくすると公開ページに反映されます。';
       result.className = 'col-result ok';
       document.getElementById('colForm').reset();
       document.getElementById('forceSave').checked = false;
@@ -371,7 +371,7 @@
     .catch(function (err) {
       btn.disabled = false;
       btn.textContent = '投稿する';
-      result.textContent = '❌ 投稿に失敗しました: ' + err.message;
+      result.textContent = '投稿に失敗しました: ' + err.message;
       result.className = 'col-result err';
     });
   });

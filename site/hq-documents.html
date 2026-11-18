@@ -69,15 +69,15 @@
       <label>車台番号<input id="docVin" placeholder="ABC-1234567" /></label>
       <label>登録番号（ナンバー）<input id="docPlate" placeholder="福島 300 あ 1234" /></label>
       <span class="fi-note">※入力内容は各書類に自動反映されます</span>
-      <button type="button" id="docSaveDraft" class="doc-btn outline" style="margin-left:auto;">💾 下書き保存</button>
+      <button type="button" id="docSaveDraft" class="doc-btn outline" style="margin-left:auto;">下書き保存</button>
     </div>
 
     <!-- AI で書類を読み取る（本部のみ・AI業務.gs） -->
     <section class="dai" id="docAi" hidden>
-      <div class="dai-head"><b>📷 書類を AI で読み取って転記</b><span>車検証・印鑑証明・免許証の写真や PDF を選ぶと、AI が項目を読み取ります。確かめてから書類に入れます。</span></div>
+      <div class="dai-head"><b>書類を AI で読み取って転記</b><span>車検証・印鑑証明・免許証の写真や PDF を選ぶと、AI が項目を読み取ります。確かめてから書類に入れます。</span></div>
       <div class="dai-row">
         <select id="docAiKind"><option value="auto">種類：自動で判断</option><option value="shaken">車検証</option><option value="inkan">印鑑登録証明書</option><option value="license">運転免許証</option><option value="other">そのほか</option></select>
-        <label class="doc-btn dai-pick">📷 写真・PDF を選ぶ<input type="file" id="docAiFile" accept="image/*,application/pdf" hidden></label>
+        <label class="doc-btn dai-pick">写真・PDF を選ぶ<input type="file" id="docAiFile" accept="image/*,application/pdf" hidden></label>
       </div>
       <div id="docAiOut"></div>
     </section>
@@ -85,63 +85,63 @@
     <!-- 発行書類 -->
     <div class="doc-grid">
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">📝</span><span class="doc-title">自動車売買契約書（約款付き）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">自動車売買契約書（約款付き）</span></div>
         <p class="doc-desc">全15条の約款付き・法的に詳細な買取契約書。下の入力フォームに記入すると各項目へ自動印字され、A4で印刷／PDF保存できます。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('contractSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">🧾</span><span class="doc-title">買取証明書（査定金額）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">買取証明書（査定金額）</span></div>
         <p class="doc-desc">査定した買取金額を証明する書面。査定日から5日以内の有効期限付きで、お客様にお渡し・送付できます。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('buybackSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">✅</span><span class="doc-title">必要書類のご案内（お客様用）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">必要書類のご案内（お客様用）</span></div>
         <p class="doc-desc">お客様にお渡しする、買取に必要な書類のチェックリスト。車種・お名義・手続きに応じて内容が変わります。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('checklistSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">✍️</span><span class="doc-title">委任状（書き込み可能）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">委任状（書き込み可能）</span></div>
         <p class="doc-desc">移転登録・抹消登録を代理で行うための委任状。下の「実PDF発行」で必要事項を入力し、実際の様式PDFに書き込んで発行します（空欄のまま発行して手書きも可）。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('pdfFillSection').scrollIntoView({behavior:'smooth'})">▼ 実PDFで発行</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">📋</span><span class="doc-title">譲渡証明書（書き込み可能）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">譲渡証明書（書き込み可能）</span></div>
         <p class="doc-desc">車両を譲渡したことを証明する書面。下の「実PDF発行」で必要事項を入力し、実際の様式PDFに書き込んで発行します（空欄のまま発行して手書きも可）。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('pdfFillSection').scrollIntoView({behavior:'smooth'})">▼ 実PDFで発行</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">💴</span><span class="doc-title">清算書（オークション/直販）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">清算書（オークション/直販）</span></div>
         <p class="doc-desc">本部への手数料計算を含む加盟店向け清算書。案件の売却情報から自動計算します。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="printDoc('settlement')">発行・印刷</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">🧾</span><span class="doc-title">領収書</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">領収書</span></div>
         <p class="doc-desc">金額・宛名・但し書きを入力して発行。本部・加盟店共通。お客様へお渡し／PDF保存できます。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('receiptSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">📝</span><span class="doc-title">車両査定表（記入用）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">車両査定表（記入用）</span></div>
         <p class="doc-desc">査定時の記入用シート。お客様・車両情報・状態チェック欄付き。印刷して手書き、PDF保存も可。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('appraisalSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
         </div>
       </div>
       <div class="doc-card">
-        <div class="doc-card-head"><span class="doc-icon">💌</span><span class="doc-title">お礼はがき（お客様用）</span></div>
+        <div class="doc-card-head"><span class="doc-icon"></span><span class="doc-title">お礼はがき（お客様用）</span></div>
         <p class="doc-desc">買取後にお送りするお礼状（郵便はがき100×148mm）。文面は編集でき、印字／PDF保存できます。</p>
         <div class="doc-btns">
           <button class="doc-btn" onclick="document.getElementById('thanksSection').scrollIntoView({behavior:'smooth'})">▼ 入力して作成</button>
@@ -152,21 +152,21 @@
     <!-- 発行履歴（下書き・発行の記録／種別・日付で管理） -->
     <div class="doc-history">
       <div class="dh-head">
-        <h2>🗂 発行履歴（下書き・発行の記録）</h2>
+        <h2>発行履歴（下書き・発行の記録）</h2>
         <span id="docHistCount" class="dh-count"></span>
       </div>
-      <p style="font-size:12.5px;color:#888;margin-bottom:10px;">書類を発行すると自動で記録されます。作成途中は上の「💾 下書き保存」で残せます。<strong>種別（フォルダー）・区分・日付</strong>で管理でき、「開く」で入力内容を復元できます。<span id="docHistMsg" class="dh-msg"></span></p>
+      <p style="font-size:12.5px;color:#888;margin-bottom:10px;">書類を発行すると自動で記録されます。作成途中は上の「下書き保存」で残せます。<strong>種別（フォルダー）・区分・日付</strong>で管理でき、「開く」で入力内容を復元できます。<span id="docHistMsg" class="dh-msg"></span></p>
       <div class="dh-tools">
         <select id="histType"></select>
         <select id="histKind"><option value="">下書き・発行すべて</option><option>発行</option><option>下書き</option></select>
-        <input type="search" id="histSearch" placeholder="🔍 お客様名・案件ID・種別で検索">
+        <input type="search" id="histSearch" placeholder="お客様名・案件ID・種別で検索">
       </div>
       <div id="docHistList" class="dh-list"></div>
     </div>
 
     <!-- 自動車売買契約書（約款付き） -->
     <div class="ref-section" id="contractSection">
-      <h2>📝 自動車売買契約書（約款付き）</h2>
+      <h2>自動車売買契約書（約款付き）</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">下記に入力して「約款付きで発行」を押すと、全15条の約款付き契約書に各項目が印字されます。上部の案件選択・お名前・住所・車台番号・登録番号も反映されます。空欄は空白のまま出力されます。</p>
       <div class="ct-grid">
         <label class="ct-f"><span>契約日</span><input id="ctDate" type="text" placeholder="例：2026年9月8日"></label>
@@ -193,14 +193,14 @@
         <label class="ct-f ct-wide"><span>特記事項</span><textarea id="ctNote" rows="2" placeholder="任意（受渡し条件・付属品・残債精算など）"></textarea></label>
       </div>
       <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printDoc('contract')">📄 約款付きで発行・印刷</button>
+        <button class="doc-btn" type="button" onclick="printDoc('contract')">約款付きで発行・印刷</button>
         <span style="font-size:12px;color:#999;">※ひな形です。内容は必要に応じてご確認・調整ください。</span>
       </div>
     </div>
 
     <!-- 買取証明書（査定金額・5日以内有効） -->
     <div class="ref-section" id="buybackSection">
-      <h2>🧾 買取証明書（査定金額・査定日から5日以内有効）</h2>
+      <h2>買取証明書（査定金額・査定日から5日以内有効）</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">査定した買取金額を証明する書面です。査定日を入力すると<strong>有効期限（査定日＋5日）</strong>を自動計算します。上部の案件・お名前・住所・車台番号・登録番号も反映されます。お客様へお渡し／送付できます。</p>
       <div class="ct-grid">
         <label class="ct-f"><span>査定日</span><input id="bbAssessDate" type="date"></label>
@@ -222,14 +222,14 @@
         <label class="ct-f ct-wide"><span>備考</span><input id="bbNote" type="text" placeholder="任意（受渡し条件・特記事項など）"></label>
       </div>
       <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printDoc('buyback')">🧾 買取証明書を発行・印刷</button>
+        <button class="doc-btn" type="button" onclick="printDoc('buyback')">買取証明書を発行・印刷</button>
         <span style="font-size:12px;color:#999;">※査定日から5日以内有効。お客様へお渡し／送付できます。</span>
       </div>
     </div>
 
     <!-- 必要書類のご案内（お客様用チェックリスト） -->
     <div class="ref-section" id="checklistSection">
-      <h2>✅ 必要書類のご案内（お客様用チェックリスト）</h2>
+      <h2>必要書類のご案内（お客様用チェックリスト）</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">車種・お名義・お手続きを選ぶと、お客様にお渡しする<strong>必要書類チェックリスト</strong>を作成します（内容が自動で切り替わります）。買取証明書と一緒にお渡しください。</p>
       <div class="ct-grid">
         <label class="ct-f"><span>車種</span><select id="clType"><option>普通車</option><option>軽自動車</option></select></label>
@@ -238,14 +238,14 @@
         <label class="ct-f"><span>お客様氏名（任意）</span><input id="clName" type="text" placeholder="山田 太郎"></label>
       </div>
       <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printDoc('checklist')">✅ チェックリストを発行・印刷</button>
+        <button class="doc-btn" type="button" onclick="printDoc('checklist')">チェックリストを発行・印刷</button>
         <span style="font-size:12px;color:#999;">※お客様へお渡し／送付できます。</span>
       </div>
     </div>
 
     <!-- 領収書 -->
     <div class="ref-section" id="receiptSection">
-      <h2>🧾 領収書</h2>
+      <h2>領収書</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">金額・宛名・但し書きを入力して発行します。<strong>宛名＝お支払元、発行者＝金額を受領した側</strong>です（例：買取代金の受領はお客様が受領者になります）。上部のお名前も反映されます。</p>
       <div class="ct-grid">
         <label class="ct-f"><span>領収No（任意）</span><input id="rcNo" type="text" placeholder="R-0001"></label>
@@ -259,14 +259,14 @@
         <label class="ct-f"><span>古物商許可</span><input id="rcKobutsu" type="text" placeholder="福島県公安委員会 第…号"></label>
       </div>
       <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printDoc('receipt')">🧾 領収書を発行・印刷</button>
+        <button class="doc-btn" type="button" onclick="printDoc('receipt')">領収書を発行・印刷</button>
         <span style="font-size:12px;color:#999;">※本部・加盟店共通。印刷／PDF保存できます。</span>
       </div>
     </div>
 
     <!-- 車両査定表 -->
     <div class="ref-section" id="appraisalSection">
-      <h2>📝 車両査定表（記入用）</h2>
+      <h2>車両査定表（記入用）</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">査定時にお使いいただく記入用シートです。入力した項目は印字され、空欄は手書きできます。上部の案件・お名前・住所・車台番号・登録番号も反映されます。</p>
       <div class="ct-grid">
         <label class="ct-f"><span>査定日</span><input id="apDate" type="text" placeholder="例：2026年9月10日"></label>
@@ -282,14 +282,14 @@
         <label class="ct-f"><span>査定金額（提示額・円）</span><input id="apPrice" type="text" inputmode="numeric" placeholder="1500000"></label>
       </div>
       <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printDoc('appraisal')">📝 査定表を発行・印刷</button>
+        <button class="doc-btn" type="button" onclick="printDoc('appraisal')">査定表を発行・印刷</button>
         <span style="font-size:12px;color:#999;">※空欄は印刷後に手書きできます。状態チェック欄付き。</span>
       </div>
     </div>
 
     <!-- お礼はがき -->
     <div class="ref-section" id="thanksSection">
-      <h2>💌 お礼はがき（お客様用）</h2>
+      <h2>お礼はがき（お客様用）</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">買取後にお送りするお礼状です（郵便はがき 100×148mm）。文面はそのまま／編集して使えます。印刷時はプリンタの用紙をはがきに設定してください。</p>
       <div class="ct-grid">
         <label class="ct-f"><span>お客様氏名</span><input id="tkName" type="text" placeholder="山田 太郎"></label>
@@ -307,30 +307,30 @@
         </div>
       </div>
       <div class="pf-actions" style="margin-top:12px;">
-        <button class="doc-btn" type="button" onclick="printDoc('thanks')">💌 お礼はがきを発行・印刷</button>
+        <button class="doc-btn" type="button" onclick="printDoc('thanks')">お礼はがきを発行・印刷</button>
         <span style="font-size:12px;color:#999;">※写真を添付すると、お礼はがきに思い出の一枚として印字されます。用紙はがき（100×148mm）／PDF保存も可。</span>
       </div>
     </div>
 
     <!-- 実PDF差込発行（アップロード様式） -->
     <div class="ref-section" id="pdfFillSection">
-      <h2>📄 実PDF発行（譲渡証明書・委任状／書き込み可能）</h2>
+      <h2>実PDF発行（譲渡証明書・委任状／書き込み可能）</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">下記に必要事項を<strong>まとめて一度だけ入力</strong>すると、<strong>譲渡証明書と委任状の実PDFへ一括で反映</strong>します（氏名・住所・車台番号などの共通項目は1回の入力でOK）。通常の発行は<strong>青い入力枠が表示されない「文字のみ」の完成版</strong>で出力されます。PDF上で直接入力・修正したい場合は下の<strong>「記入用フォーム付き」</strong>をご利用ください。上部の「案件選択・お名前・住所・車台番号・登録番号」も自動反映。初回はフォント読み込みに数秒かかります。</p>
       <div id="pfFields" class="pf-fields"></div>
       <div class="pf-actions">
-        <button id="pfGenBoth" class="doc-btn" type="button">📄 譲渡証明書＋委任状を一括発行（文字のみ）⬇</button>
-        <button id="pfGenJoto" class="doc-btn outline" type="button">譲渡証明書のみ ⬇</button>
-        <button id="pfGenInin" class="doc-btn outline" type="button">委任状のみ ⬇</button>
+        <button id="pfGenBoth" class="doc-btn" type="button">譲渡証明書＋委任状を一括発行（文字のみ）</button>
+        <button id="pfGenJoto" class="doc-btn outline" type="button">譲渡証明書のみ </button>
+        <button id="pfGenInin" class="doc-btn outline" type="button">委任状のみ </button>
         <span id="pfMsg" class="pf-msg"></span>
       </div>
       <div class="pf-actions" style="margin-top:8px;">
-        <button id="pfGenEdit" class="doc-btn outline" type="button">✎ PDF上で入力・修正したい方（記入用フォーム付き）⬇</button>
+        <button id="pfGenEdit" class="doc-btn outline" type="button">PDF上で入力・修正したい方（記入用フォーム付き）</button>
       </div>
     </div>
 
     <!-- 過誤納還付金：都道府県別 -->
     <div class="ref-section">
-      <h2>💰 過誤納還付金（自動車税）— 都道府県窓口一覧</h2>
+      <h2>過誤納還付金（自動車税）— 都道府県窓口一覧</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">廃車・移転後の月割還付。申請先は<strong>旧住所地の都道府県税事務所</strong>です。各都道府県の様式・申請方法リンクを掲載しています。</p>
       <div class="hq-table-wrap">
         <table class="ref-table" id="refundTable">
@@ -342,7 +342,7 @@
 
     <!-- 自賠責保険 -->
     <div class="ref-section">
-      <h2>🚗 自賠責保険 — 全国問い合わせ先</h2>
+      <h2>自賠責保険 — 全国問い合わせ先</h2>
       <p style="font-size:13px;color:#666;margin-bottom:14px;">廃車時の自賠責保険料還付（未経過分）は加入保険会社へ直接申請します。代表的な窓口を掲載しています。</p>
       <div class="hq-table-wrap">
         <table class="ref-table">
@@ -354,7 +354,7 @@
 
     <!-- 所有権解除 お問い合わせ先 -->
     <div class="ref-section">
-      <h2>🔓 所有権解除 お問い合わせ先</h2>
+      <h2>所有権解除 お問い合わせ先</h2>
       <p style="font-size:13px;color:#666;margin-bottom:10px;">車検証の<strong>「所有者」欄がディーラー・信販会社</strong>の場合、名義変更・廃車の前に所有権解除が必要です。<strong>車検証の所有者欄に記載の会社</strong>へ連絡し、ローン完済の確認後に必要書類（譲渡証明書・委任状・所有者の印鑑証明書）を取り寄せます。</p>
       <div class="alert-flow">① 車検証の「所有者」を確認 → ② 記載の会社へ連絡（残債があれば完済） → ③ 所有権解除書類を取り寄せ → ④ 移転登録／廃車手続き</div>
       <div class="hq-table-wrap">
