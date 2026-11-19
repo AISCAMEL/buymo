@@ -1,5 +1,5 @@
 /* ============================================================
-   BUYMO 車買取 — 公式LINE（https://lin.ee/yNz0Tl7）AI自動応答（GAS）
+   BUYMO 車買取 — 公式LINE（https://line.me/R/ti/p/@031ypoak）AI自動応答（GAS）
    ------------------------------------------------------------
    LINE（Messaging API の Webhook）→ この GAS → AI（OpenRouter 経由）→ LINE に返信。
    BUYMO の本番 GAS（サイト・案件ボード）とは別プロジェクトとして作る。

@@ -19,9 +19,9 @@ window.KAITORI_CONFIG = {
   // つなげる公式LINE（BUYMO 車買取）
   OA_NAME: 'BUYMO',
   // ベーシックID（例: '@123abcde'）。入れると「トークで相談」で、トーク画面を直接開ける
-  OA_BASIC_ID: '@964nkhyl',
+  OA_BASIC_ID: '@031ypoak',
   // 友だち追加URL（サイトの「LINEで相談」と同じ）
-  OA_URL: 'https://lin.ee/yNz0Tl7',
+  OA_URL: 'https://line.me/R/ti/p/@031ypoak',
 
   SITE_URL: 'https://buymo.me/',
   MEMBER_URL: 'https://buymo.me/member.html',

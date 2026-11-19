@@ -1,6 +1,6 @@
 # BUYMO 車買取 LINEミニアプリ セットアップ手順
 
-車を売りたいお客様向けの LINE ミニアプリ（LIFF）と、公式LINE（https://lin.ee/yNz0Tl7）の AI 自動応答の手順です。
+車を売りたいお客様向けの LINE ミニアプリ（LIFF）と、公式LINE（https://line.me/R/ti/p/@031ypoak）の AI 自動応答の手順です。
 ミニアプリはサイトに公開済みで、ブラウザでも開けます：https://buymo.me/kaitori/
 （LIFF ID を入れるまでは「プレビューモード」。査定の申込・AI相談は動き、LINE のプロフィール・トークへの投稿・シェアだけ無効）
 
@@ -36,7 +36,7 @@
 5. LIFF ID をこのチャットで教えてください。`site/kaitori/config.js` の `LIFF_ID` に入れて公開します
    （公式LINE の**ベーシックID**（`@` から始まる）も教えてもらえると、「トークで相談」でトーク画面を直接開けるようになります）
 
-**設定済み**：プロバイダー「BUYMO」の「BUYMOログイン」チャネルの LIFF、LIFF ID `2011748468-9v7ikPEB`、ベーシックID `@964nkhyl`。
+**設定済み**：プロバイダー「BUYMO」の「BUYMOログイン」チャネルの LIFF、LIFF ID `2011748468-9v7ikPEB`、ベーシックID `@031ypoak`。
 ミニアプリURL（以下「ミニアプリURL」）は `https://liff.line.me/2011748468-9v7ikPEB` です。
 
 ## 2. リッチメニュー（LINE Official Account Manager）

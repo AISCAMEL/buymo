@@ -10,7 +10,7 @@
 (function () {
   'use strict';
 
-  var LINE_URL = 'https://lin.ee/yNz0Tl7';
+  var LINE_URL = 'https://line.me/R/ti/p/@031ypoak';
 
   var type = window.BUYMO_POPUP_TYPE ||
     (/buymo-partner/i.test(location.pathname) ? 'partner' : 'kaitori');
