@@ -579,11 +579,36 @@ window.HQ = (function () {
     else pageIntro(active, PARTNER_GUIDE);
     wireNavSearch(r);
     mountGlobalSearch(r, flat);
+    mountMenuFab();
     // 加盟店がコンテンツページを開いたら閲覧履歴を記録（本部の進捗把握用）
     if (r === 'partner') {
       var cur = null; for (var q = 0; q < flat.length; q++) if (flat[q][0] === active) { cur = flat[q]; break; }
       logView(cur ? cur[1] : (document.title || active), 'page');
     }
+  }
+  // スマホで本部/加盟店メニューを開く「≡」ボタン（画面左下）＋ボトムシート
+  function mountMenuFab() {
+    if (document.getElementById('navFab')) return;
+    var fab = document.createElement('button');
+    fab.id = 'navFab'; fab.type = 'button'; fab.setAttribute('aria-label', 'メニューを開く');
+    fab.innerHTML = '<span></span><span></span><span></span>';
+    var sheet = document.createElement('div'); sheet.id = 'navSheet';
+    sheet.innerHTML = '<div class="ns-backdrop" data-nsclose></div>' +
+      '<div class="ns-panel"><div class="ns-head">メニュー<button class="ns-close" type="button" aria-label="閉じる" data-nsclose>×</button></div>' +
+      '<div class="ns-body" id="navSheetBody"></div></div>';
+    document.body.appendChild(fab); document.body.appendChild(sheet);
+    function open() {
+      var src = document.getElementById('hqNav');
+      var body = document.getElementById('navSheetBody');
+      body.innerHTML = src ? src.innerHTML : '';
+      var ss = body.querySelector('.side-search'); if (ss) ss.remove(); // 検索欄（id重複）はシートから除去
+      sheet.classList.add('open'); document.body.style.overflow = 'hidden';
+    }
+    function close() { sheet.classList.remove('open'); document.body.style.overflow = ''; }
+    fab.addEventListener('click', open);
+    sheet.addEventListener('click', function (e) {
+      if (e.target.hasAttribute('data-nsclose') || e.target.closest('a')) close();
+    });
   }
   /* ---------- 本部の各画面の「この画面でやること」と「次はここ」 ----------
      本部の使い方（hq-manual.html）もこの内容から作る。順番＝仕事の流れ */
