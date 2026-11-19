@@ -9,12 +9,61 @@ window.HQAI = (function () {
   var HIST_LS = 'buymo_ai_chat';
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   function key() { try { return localStorage.getItem(KEY_LS) || ''; } catch (e) { return ''; } }
-  function ensureKey() {
+  function setKey(v) { try { localStorage.setItem(KEY_LS, String(v || '').trim()); } catch (e) {} }
+
+  /* ---------- 本部ログイン（合言葉のプロンプトを廃止し、きれいなログイン画面に） ---------- */
+  var loginOpen = false;
+  function openLogin(onReady) {
+    if (loginOpen) return;
+    loginOpen = true;
+    if (!document.getElementById('hqLoginCss')) {
+      var st = document.createElement('style'); st.id = 'hqLoginCss';
+      st.textContent = '#hqLoginBd{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);padding:16px}'
+        + '#hqLoginCard{width:100%;max-width:380px;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(2,6,23,.35);padding:22px;font-family:inherit}'
+        + '#hqLoginCard h3{margin:0 0 6px;font-size:18px;font-weight:800;color:#0f172a}'
+        + '#hqLoginCard p{margin:0 0 14px;font-size:12.5px;line-height:1.6;color:#64748b}'
+        + '#hqLoginCard label{display:block;font-size:12px;font-weight:700;color:#334155;margin:0 0 6px}'
+        + '#hqLoginCard input{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:10px;padding:11px 12px;font-size:15px}'
+        + '#hqLoginCard input:focus{outline:2px solid #0F766E;border-color:#0F766E}'
+        + '#hqLoginErr{color:#e11d48;font-size:12px;margin:8px 0 0;min-height:14px}'
+        + '#hqLoginRow{display:flex;gap:8px;margin-top:14px}'
+        + '#hqLoginGo{flex:1;background:#0F766E;color:#fff;border:0;border-radius:10px;padding:11px;font-size:14px;font-weight:800;cursor:pointer}'
+        + '#hqLoginGo:hover{background:#0b5e58}'
+        + '#hqLoginNo{background:#f1f5f9;color:#475569;border:0;border-radius:10px;padding:11px 14px;font-size:14px;font-weight:700;cursor:pointer}';
+      document.head.appendChild(st);
+    }
+    var bd = document.createElement('div'); bd.id = 'hqLoginBd';
+    bd.innerHTML = '<div id="hqLoginCard" role="dialog" aria-modal="true" aria-label="本部ログイン">'
+      + '<h3>🔒 本部にログイン</h3>'
+      + '<p>本部の AI・LINE 機能を使うには、本部の合言葉を一度だけ入力してください。この端末に安全に保存され、次回から入力は不要です。</p>'
+      + '<label for="hqLoginInput">本部の合言葉</label>'
+      + '<input id="hqLoginInput" type="password" autocomplete="current-password" placeholder="合言葉を入力" />'
+      + '<p id="hqLoginErr"></p>'
+      + '<div id="hqLoginRow"><button id="hqLoginGo" type="button">ログイン</button><button id="hqLoginNo" type="button">あとで</button></div>'
+      + '</div>';
+    document.body.appendChild(bd);
+    var input = bd.querySelector('#hqLoginInput');
+    var err = bd.querySelector('#hqLoginErr');
+    setTimeout(function () { input.focus(); }, 30);
+    function close() { loginOpen = false; if (bd.parentNode) bd.parentNode.removeChild(bd); }
+    function submit() {
+      var v = (input.value || '').trim();
+      if (!v) { err.textContent = '合言葉を入力してください。'; input.focus(); return; }
+      setKey(v); close();
+      if (typeof onReady === 'function') { try { onReady(); } catch (e) {} }
+    }
+    bd.querySelector('#hqLoginGo').addEventListener('click', submit);
+    bd.querySelector('#hqLoginNo').addEventListener('click', close);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+    bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
+  }
+
+  // 合言葉があれば true。無ければ window.prompt ではなくログイン画面を開き、false を返す。
+  // onReady を渡すと、ログイン成功後にその処理を自動で続行する。
+  function ensureKey(onReady) {
     if (key()) return true;
-    var v = window.prompt('本部の AI を使うための合言葉を入れてください。\n（「BUYMO 車買取 LINE AI応答」の GAS で showAdminKey を実行するとログに出ます。「車買取LINE」の画面と同じものです）');
-    if (!v || !v.trim()) return false;
-    try { localStorage.setItem(KEY_LS, v.trim()); } catch (e) {}
-    return true;
+    openLogin(onReady);
+    return false;
   }
   function call(action, extra) {
     var body = { action: action, key: key() };
@@ -224,7 +273,7 @@ window.HQAI = (function () {
   function send(text) {
     text = String(text || '').trim();
     if (!text || state.busy) return;
-    if (!ensureKey()) return;
+    if (!ensureKey(function () { send(text); })) return;
     if (!state.open) toggle(true);
     state.msgs.push({ role: 'user', content: text });
     document.getElementById('aiText').value = '';
@@ -240,5 +289,5 @@ window.HQAI = (function () {
     });
   }
 
-  return { mount: mount, call: call, readDoc: readDoc, ensureKey: ensureKey, errText: errText, ask: function (t) { send(t); }, open: function () { toggle(true); } };
+  return { mount: mount, call: call, readDoc: readDoc, ensureKey: ensureKey, login: openLogin, hasKey: function () { return !!key(); }, errText: errText, ask: function (t) { send(t); }, open: function () { toggle(true); } };
 })();
