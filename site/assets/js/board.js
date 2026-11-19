@@ -651,7 +651,7 @@
   function aiFollowReply(c, items) {
     var out = document.getElementById('cpfAiOut'); if (!out) return;
     if (!window.HQAI) { out.innerHTML = '<div class="cpf-aierr">AIを利用できません（本部AIが読み込まれていません）。</div>'; return; }
-    if (!HQAI.ensureKey()) return; // 合言葉(ADMIN_KEY)の入力を促す
+    if (!HQAI.ensureKey(function () { aiFollowReply(c, items); })) return; // 未ログインなら本部ログイン画面を出し、ログイン後に自動続行
     var warnTxt = (items || []).filter(function (x) { return x[0] === 'warn'; }).map(function (x) { return x[1]; }).join(' / ') || 'なし';
     var msg = '次の中古車買取の案件について、担当者が使えるように日本語で作成してください。\n' +
       '出力は必ず次の2見出しで、簡潔に：\n【次の一手】担当者がすぐやる事を1〜2行。\n【返信文の下書き】お客様へLINEで送る丁寧で短いメッセージ（名前は「' + (c.name || 'お客様') + '様」）。\n\n' +
