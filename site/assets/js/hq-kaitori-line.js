@@ -167,8 +167,50 @@
         '<div class="kl-box"><div class="kl-h">🗂️ 案件</div>' + (caseHtml || '<p class="kl-hint">まだ案件と結びついていません。</p>') +
           '<label class="kl-field">案件IDで結びつける（サイト・電話の案件など）<span class="kl-row"><input type="text" data-role="caseid" placeholder="例：CS-7123"><button type="button" class="kl-btn kl-btn-o" data-role="link">結びつける</button></span></label>' +
         '</div>' +
+        '<div class="kl-box kl-ai"><div class="kl-h">🤖 AI道具箱</div>' +
+          '<div class="kl-actions">' +
+            '<button type="button" class="kl-btn kl-btn-o" data-role="aidraft">✍️ 返信文を下書き</button>' +
+            '<button type="button" class="kl-btn kl-btn-o" data-role="aianalyze">🔎 このお客様を分析</button>' +
+          '</div>' +
+          '<label class="kl-field">送る前の文章を添削<span class="kl-row"><input type="text" data-role="aipolishin" placeholder="下書きを貼ると、丁寧に整えます"><button type="button" class="kl-btn kl-btn-o" data-role="aipolish">添削</button></span></label>' +
+          '<div class="kl-aiout" data-role="aiout" hidden></div>' +
+        '</div>' +
       '</div>' +
     '</div>';
+  }
+
+  // タイムラインを、AIに渡せる短いテキストの会話履歴に
+  function tlText(list) {
+    return (list || []).slice(-40).map(function (e) {
+      var label = (KIND[e.kind] && KIND[e.kind][1]) || e.kind || '';
+      return '[' + md(e.at) + ' ' + hm(e.at) + '] ' + (label ? label + '：' : '') + (e.text || '');
+    }).join('\n') || '（やり取りの記録はまだありません）';
+  }
+  function custContext(p) {
+    var cs = (p.cases || []).map(function (c) { return c.id + '（' + c.stage + (c.amount ? '・査定額' + yen(c.amount) : '') + '）'; }).join('、') || 'なし';
+    return 'お客様: ' + nameOf(p) + '\n案件: ' + cs + '\n\n【これまでのやり取り（古い順）】\n' + tlText(p.timeline);
+  }
+  // AI道具箱：GASの aiAssist を、このページの api() 経由で呼ぶ（合言葉はこのページが管理）
+  function aiTool(p, box, prompt) {
+    var out = $('[data-role="aiout"]', box);
+    if (!out) return;
+    out.hidden = false;
+    out.innerHTML = '<span class="kl-aiload">AIが作成しています…</span>';
+    if (demo) { out.textContent = '（見本モードではAIは動きません。合言葉を入れると使えます）'; return; }
+    api('aiAssist', { messages: [{ role: 'user', content: prompt }], context: { page: 'line-inbox', customer: nameOf(p) } })
+      .then(function (d) {
+        if (d && d.ok && d.reply) {
+          out.innerHTML = '<div class="kl-aitxt"></div><button type="button" class="kl-btn kl-btn-o kl-aicopy">コピー</button>';
+          $('.kl-aitxt', out).textContent = d.reply;
+          $('.kl-aicopy', out).addEventListener('click', function () {
+            try { navigator.clipboard.writeText(d.reply); this.textContent = 'コピーしました'; } catch (e) {}
+          });
+        } else {
+          out.textContent = '⚠ ' + (d && d.error === 'key' ? '合言葉を入れ直してください。' : 'AIが返事できませんでした。少しおいてお試しください。');
+          if (d && d.error === 'key') { keySet(''); $('#klKey').hidden = false; $('#klMain').hidden = true; }
+        }
+      })
+      .catch(function () { out.textContent = '⚠ 通信できませんでした。'; });
   }
 
   function say(box, text) { var m = $('[data-role="msg"]', box); if (m) m.textContent = text; }
@@ -211,6 +253,22 @@
         p.cases = (p.cases || []).filter(function (c) { return c.id !== kc.id; }).concat([kc]);
         p.staffAt = Date.now(); render();
       });
+    });
+    var aiDraft = $('[data-role="aidraft"]', box);
+    if (aiDraft) aiDraft.addEventListener('click', function () {
+      aiTool(p, box,
+        '次のLINEのお客様に送る「返信文の下書き」を作ってください。丁寧で短く、相手の状況に寄り添い、次の一歩（査定・来店・引取り日程など）を自然にうながす内容。宛名は「' + nameOf(p) + '様」。本文のみを出力。\n\n' + custContext(p));
+    });
+    var aiAna = $('[data-role="aianalyze"]', box);
+    if (aiAna) aiAna.addEventListener('click', function () {
+      aiTool(p, box,
+        '次のお客様のこれまでのやり取りから、(1)今の温度感・検討状況、(2)関心・不安ポイント、(3)成約に向けた最適な次の一手、を担当者向けに簡潔な箇条書きで分析してください。装飾記号は使わない。\n\n' + custContext(p));
+    });
+    var aiPol = $('[data-role="aipolish"]', box);
+    if (aiPol) aiPol.addEventListener('click', function () {
+      var t = ($('[data-role="aipolishin"]', box).value || '').trim();
+      if (!t) { var o = $('[data-role="aiout"]', box); if (o) { o.hidden = false; o.textContent = '添削したい文章を入力してください。'; } return; }
+      aiTool(p, box, 'LINEでお客様に送る前提で、次の文章を添削してください。意味は変えず、言い回しだけ丁寧で分かりやすく整え、本文のみを出力。\n\n元の文章：\n' + t);
     });
     box.querySelectorAll('[data-unlink]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -276,6 +334,53 @@
     }).catch(function () { $('#klReload').textContent = '↻ 読み込み直す'; if (!state.people.length) $('#klList').innerHTML = '<p class="kl-empty">通信できませんでした。少しおいて開き直してください。</p>'; });
   }
 
+  // 📣 配信文（キャンペーン）を作る：テーマを入れるとAIが一斉配信用の文面を作る。
+  function mountCampaign() {
+    var reset = $('#klKeyReset');
+    if (!reset || $('#klCampBtn')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.id = 'klCampBtn'; btn.className = 'kl-btn kl-btn-o';
+    btn.textContent = '📣 配信文を作る';
+    reset.parentNode.insertBefore(btn, reset);
+    btn.addEventListener('click', openCampaign);
+  }
+  function openCampaign() {
+    if ($('#klCampBd')) return;
+    var bd = document.createElement('div'); bd.id = 'klCampBd'; bd.className = 'kl-modal-bd';
+    bd.innerHTML = '<div class="kl-modal"><div class="kl-h">📣 LINE配信文を作る</div>' +
+      '<p class="kl-hint">テーマや伝えたいことを入れると、一斉配信用の文面をAIが作ります。文面はコピーして、LINE公式の「配信」から送ってください。</p>' +
+      '<label class="kl-field">テーマ・伝えたいこと<input type="text" id="klCampTheme" placeholder="例：決算セール・高価買取強化・今月末まで査定額アップ"></label>' +
+      '<div class="kl-row kl-camp-opt"><label><input type="radio" name="klCampTone" value="親しみ" checked>親しみやすく</label><label><input type="radio" name="klCampTone" value="丁寧">丁寧に</label><label><input type="radio" name="klCampTone" value="お得感">お得感重視</label></div>' +
+      '<div class="kl-row"><button type="button" class="kl-btn" id="klCampGo">文面を作る</button><button type="button" class="kl-btn kl-btn-o" id="klCampClose">閉じる</button></div>' +
+      '<div class="kl-aiout" id="klCampOut" hidden></div></div>';
+    document.body.appendChild(bd);
+    function close() { if (bd.parentNode) bd.parentNode.removeChild(bd); }
+    $('#klCampClose', bd).addEventListener('click', close);
+    bd.addEventListener('click', function (e) { if (e.target === bd) close(); });
+    $('#klCampGo', bd).addEventListener('click', function () {
+      var theme = ($('#klCampTheme', bd).value || '').trim();
+      var tone = (bd.querySelector('input[name="klCampTone"]:checked') || {}).value || '親しみ';
+      var out = $('#klCampOut', bd);
+      if (!theme) { out.hidden = false; out.textContent = 'テーマを入力してください。'; return; }
+      out.hidden = false; out.innerHTML = '<span class="kl-aiload">AIが作成しています…</span>';
+      if (demo) { out.textContent = '（見本モードではAIは動きません。合言葉を入れると使えます）'; return; }
+      api('aiAssist', { messages: [{ role: 'user', content:
+        'BUYMO車買取のLINE公式アカウントで送る「一斉配信メッセージ」を作ってください。トーンは「' + tone + '」。テーマ：' + theme + '\n' +
+        '・冒頭で目を引き、短く読みやすく（LINE向けに改行を入れる）。\n・絵文字は控えめに。最後に行動（査定・相談）をうながす一言。\n・本文のみを出力（説明や見出しは不要）。' }],
+        context: { page: 'line-campaign' } })
+        .then(function (d) {
+          if (d && d.ok && d.reply) {
+            out.innerHTML = '<div class="kl-aitxt"></div><button type="button" class="kl-btn kl-btn-o kl-aicopy">コピー</button>';
+            $('.kl-aitxt', out).textContent = d.reply;
+            $('.kl-aicopy', out).addEventListener('click', function () { try { navigator.clipboard.writeText(d.reply); this.textContent = 'コピーしました'; } catch (e) {} });
+          } else {
+            out.textContent = '⚠ ' + (d && d.error === 'key' ? '合言葉を入れ直してください。' : 'AIが返事できませんでした。');
+          }
+        })
+        .catch(function () { out.textContent = '⚠ 通信できませんでした。'; });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     $('#klKeySave').addEventListener('click', function () {
       var v = $('#klKeyIn').value.trim();
@@ -288,6 +393,7 @@
     });
     $('#klSearch').addEventListener('input', function () { state.q = this.value; render(); });
     $('#klReload').addEventListener('click', load);
+    mountCampaign();
     $('#klKeyReset').addEventListener('click', function () { if (window.confirm('この端末に保存した合言葉を消して、入れ直しますか？')) { keySet(''); location.reload(); } });
     load();
   });
